@@ -46,5 +46,5 @@ the timings are mostly off for some unknown reason.
 
 # Authors
 
-Authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
-Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
+* Authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
+* Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
