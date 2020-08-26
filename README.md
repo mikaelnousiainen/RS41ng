@@ -10,19 +10,19 @@ The motivation to develop this firmware is to provide cleaner, customizable and
 more modular codebase for developing RS41 radiosonde-based experiments.
 
 The main features this firmware aims to implement are:
-* DMA/Timer-based modulation of APRS and some other digital modes via JTEncode library
+* DMA/Timer-based modulation for APRS and many digital modes via JTEncode library
 * Support for HF/VHF transmissions via an external Si5351 chip connected to the external I²C bus
 * Support for custom sensors via the external I²C bus
 
 ## Features (work in progress)
 
 * APRS on 70cm amateur radio band via Si4032 radio chip
-** Bell 202 timing is done via DMA transfers to achieve greater accuracy, but I have not been able to get the timings working correctly
+  * Bell 202 timing is done via DMA transfers to achieve greater accuracy, but I have not been able to get the timings working correctly
 * Digital mode beacons on HF frequencies via a Si5351 radio chip connected to the external I²C bus of the RS41 radiosonde
-** The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
+  * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
    The implementation is missing correct scheduling of transmissions via GPS clock.
 * Support for additional sensors via the external I²C bus
-** There is a driver for Bosch BMP280 barometric pressure / temperature / humidity sensor included 
+  * There is a driver for Bosch BMP280 barometric pressure / temperature / humidity sensor included 
 
 ### Bell FSK modulation hack for APRS
 
@@ -46,4 +46,5 @@ the timings are mostly off for some unknown reason.
 
 # Authors
 
+Authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
