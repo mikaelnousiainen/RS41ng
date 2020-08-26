@@ -1,0 +1,20 @@
+#ifndef __GPS_H
+#define __GPS_H
+
+#include <stdint.h>
+
+typedef struct _gps_data {
+    int32_t lat_raw;
+    int32_t lon_raw;
+    int32_t alt_raw;
+    int32_t speed_raw;
+    uint8_t sats_raw;
+    uint8_t seconds;
+    uint8_t minutes;
+    uint8_t hours;
+    uint8_t fix;
+    uint16_t ok_packets;
+    uint16_t bad_packets;
+} gps_data;
+
+#endif

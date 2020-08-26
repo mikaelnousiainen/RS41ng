@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rm -f CMakeCache.txt
+rm -f RS41HUP.bin
+rm -f RS41HUP.hex
+rm -f RS41HUP.map
+rm -f cmake_install.cmake
+rm -f Makefile
+rm -rf CMakeFiles/*

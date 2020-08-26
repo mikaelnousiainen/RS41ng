@@ -1,0 +1,82 @@
+DF8OEs investigations about sensor access
+------------------------------------------
+
+
+
+Temperature and humidity sensor directly goes to STM. There is no interface
+chip to handle them - all is done by software.
+
+
+
+Pinout of sensor boom:
+----------------------
+1 - GND
+2 - temperature sensor (1)
+3 - GND
+4 - humidity sensor1 (1)
+5 - GND
+6 - humidity sensor1 (2)
+7 - GND
+8 - heater humidity sensor
+9 - heater humidity sensor
+10 - GND
+11 - humidity sensor2 (1)
+12 - GND
+13 - temperature sensor (2) and humidity sensor2 (2)
+14 - GND
+15 - GND
+16 - GND
+17 - GND
+18 - GND
+19 - GND
+20 - GND
+
+Counted from left to right if you position flexsensor in front of you, pins near
+to you, sensor away from you, copper upside
+
+
+
+All connections leading to sensor boom do have corresponding test points on PCB:
+--------------------------------------------------------------------------------
+Position PCB in front of you, flatconnector upside, sensor boom showing away from
+you, TX antenna leading to you. I draw connector as a row of "+++". Testpoints are
+small round copper isles (numbers correspond to sensor boom, G == GND, ? == unknown):
+
+
+
+
+                 11
+          +++++++++++++++++++++++
+
+                  G           4
+                    
+                    
+                    8    6    2
+                    
+                    
+                13        ?          9
+
+
+Investigations about temperature sensor:
+----------------------------------------
+Temperature sensor is resistance-based. If you insert a resistor between
+pin2 and pin13 of flatconnector, the following telemetry is transmitted:
+
+330R --> -168°
+560R --> -113°
+820R --> -52°
+1K --> -4.1°
+1.5K --> 121°
+2.2K --> 319°
+
+
+Pressure sensor module:
+-----------------------
+
+This module is connected to SPI2 of STM. It uses SPI_NSS and only data output
+from module - SPI output from STM is not connected to module. So I think it is
+a kind of polling.
+
+
+
+2 be continued
