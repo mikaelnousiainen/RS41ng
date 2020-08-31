@@ -36,13 +36,36 @@
 #define FSQ_CALLSIGN_TO "N0CALL"
 #define FSQ_COMMAND ' '
 
+/**
+ * APRS SSID:
+ *
+ * 0 Your primary station usually fixed and message capable
+ * 1 generic additional station, digi, mobile, wx, etc
+ * 2 generic additional station, digi, mobile, wx, etc
+ * 3 generic additional station, digi, mobile, wx, etc
+ * 4 generic additional station, digi, mobile, wx, etc
+ * 5 Other networks (Dstar, Iphones, Androids, Blackberry's etc)
+ * 6 Special activity, Satellite ops, camping or 6 meters, etc
+ * 7 walkie talkies, HT's or other human portable
+ * 8 boats, sailboats, RV's or second main mobile
+ * 9 Primary Mobile (usually message capable)
+ * A internet, Igates, echolink, winlink, AVRS, APRN, etc
+ * B balloons, aircraft, spacecraft, etc
+ * C APRStt, DTMF, RFID, devices, one-way trackers*, etc
+ * D Weather stations
+ * E Truckers or generally full time drivers
+ * F generic additional station, digi, mobile, wx, etc
+ */
+
 #define APRS_CALLSIGN "OH3BHX"
-#define APRS_SSID 13
-#define APRS_SYMBOL 'O'
-#define APRS_COMMENT "Testing 123"
+#define APRS_SSID 'B'
+// See APRS symbol table documentation in: http://www.aprs.org/symbols/symbolsX.txt
+#define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
+#define APRS_SYMBOL '['
+#define APRS_COMMENT " RS41ng custom radiosonde firmware testing"
 #define APRS_RELAYS "WIDE1-1,WIDE2-1"
 #define APRS_DESTINATION "APZ41N"
-#define APRS_DESTINATION_SSID 0
+#define APRS_DESTINATION_SSID '0'
 
 #define PAIR_COUNT 4 // max. 6 (12 characters WWL)
 #define RTTY_7BIT   1 // if 0 --> 5 bits

@@ -18,7 +18,7 @@ void delay_init()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB1PeriphResetCmd(RCC_APB1Periph_TIM3, DISABLE);
 
-    tim_init.TIM_Prescaler = 192 - 1;
+    tim_init.TIM_Prescaler = 24 - 1;
     tim_init.TIM_CounterMode = TIM_CounterMode_Up;
     tim_init.TIM_Period = 0;
     tim_init.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -30,8 +30,8 @@ void delay_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM3_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
-    nvic_init.NVIC_IRQChannelSubPriority = 2;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
+    nvic_init.NVIC_IRQChannelSubPriority = 1;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 
@@ -41,7 +41,7 @@ void delay_init()
 void delay_us(uint16_t us)
 {
     TIM_Cmd(TIM3, DISABLE);
-    TIM_SetAutoreload(TIM3, us / 8);
+    TIM_SetAutoreload(TIM3, us);
     TIM_SetCounter(TIM3, 0);
     TIM_Cmd(TIM3, ENABLE);
     done = false;

@@ -14,7 +14,6 @@ static inline uint16_t ax25_calculate_crc_for_bit(uint16_t crc, bool bit)
 
     // If XOR result from above has lsb set
     if (temp & 0x0001U) {
-        // Shift 16-bit CRC one bit to the right
         result ^= 0x8408U;
     }
 
@@ -24,7 +23,7 @@ static inline uint16_t ax25_calculate_crc_for_bit(uint16_t crc, bool bit)
 static inline uint16_t ax25_calculate_crc_for_byte(uint16_t crc, uint8_t byte)
 {
     uint8_t temp = byte;
-    for (int i = 0; i < 8; i++, byte >>= 1U) {
+    for (int i = 0; i < 8; i++, temp >>= 1U) {
         bool bit = ((temp & 1U) == 1U) ? true : false;
         crc = ax25_calculate_crc_for_bit(crc, bit);
     }
@@ -109,7 +108,8 @@ size_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destinat
     size_t info_length = strlen(information_field);
     strcpy(header_end->information_field, information_field);
 
-    uint16_t crc = ax25_calculate_crc(14 + digipeater_addresses_length + 2 + info_length, actual_data_start);
+    size_t crc_length = 14 + digipeater_addresses_length + 2 + info_length;
+    uint16_t crc = ax25_calculate_crc(crc_length, actual_data_start);
 
     ax25_packet_footer *footer = (ax25_packet_footer *) (((uint8_t *) header_end->information_field) + info_length);
 

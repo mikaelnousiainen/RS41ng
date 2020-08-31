@@ -32,9 +32,8 @@ static void convert_degrees_to_dmh(long x, int8_t *degrees, uint8_t *minutes, ui
     }
 }
 
-#include <stdio.h>
-
-size_t aprs_generate_position_without_timestamp(uint8_t *payload, size_t length, telemetry_data *data, char symbol, char *comment)
+size_t aprs_generate_position_without_timestamp(uint8_t *payload, size_t length, telemetry_data *data,
+        char symbol_table, char symbol, char *comment)
 {
     int8_t la_degrees, lo_degrees;
     uint8_t la_minutes, la_h_minutes, lo_minutes, lo_h_minutes;
@@ -48,9 +47,10 @@ size_t aprs_generate_position_without_timestamp(uint8_t *payload, size_t length,
 
     return snprintf((char *) payload,
             length,
-            ("!%02d%02d.%02u%c/%03d%02u.%02u%c%c/A=%06ld/P%dS%dT%dV%d%s"),
+            ("!%02d%02d.%02u%c%c%03d%02u.%02u%c%c/A=%06ld/P%dS%dT%dV%d%s"),
             abs(la_degrees), la_minutes, la_h_minutes,
             la_degrees > 0 ? 'N' : 'S',
+            symbol_table,
             abs(lo_degrees), lo_minutes, lo_h_minutes,
             lo_degrees > 0 ? 'E' : 'W',
             symbol,

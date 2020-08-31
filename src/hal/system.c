@@ -50,6 +50,8 @@ static void rcc_init()
     FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
     FLASH_SetLatency(FLASH_Latency_0);
 
+    // TODO: Check what the delay timer TIM3 settings really should be and WTF the clock tick really is!?!?!?
+
     RCC_HCLKConfig(RCC_SYSCLK_Div1); // Was: RCC_SYSCLK_Div4
     RCC_PCLK2Config(RCC_HCLK_Div1); // Was: 4
     RCC_PCLK1Config(RCC_HCLK_Div1); // Was: 2
@@ -218,6 +220,22 @@ void system_scheduler_timer_init()
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 
+    TIM_Cmd(TIM4, ENABLE);
+}
+
+void system_disable_tick()
+{
+    TIM_Cmd(TIM4, DISABLE);
+    NVIC_DisableIRQ(TIM4_IRQn);
+    TIM_ITConfig(TIM4, TIM_IT_Update, DISABLE);
+    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+}
+
+void system_enable_tick()
+{
+    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+    NVIC_EnableIRQ(TIM4_IRQn);
     TIM_Cmd(TIM4, ENABLE);
 }
 

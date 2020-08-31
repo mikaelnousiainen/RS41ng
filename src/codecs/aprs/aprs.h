@@ -7,6 +7,7 @@
 #include "gps.h"
 #include "telemetry.h"
 
-size_t aprs_generate_position_without_timestamp(uint8_t *payload, size_t length, telemetry_data *data, char symbol, char *comment);
+size_t aprs_generate_position_without_timestamp(uint8_t *payload, size_t length, telemetry_data *data,
+        char symbol_table, char symbol, char *comment);
 
 #endif

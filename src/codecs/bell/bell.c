@@ -131,23 +131,18 @@ int8_t bell_encoder_next_tone(fsk_encoder *encoder)
     }
 
     bool bit = (bell->current_byte >> bell->current_bit_index) & 1U;
-    bool stuff_bit = false;
 
     if (bit) {
+        bell->bit_stuffing_counter++;
         if (bell->bit_stuffing_counter == 5) {
+            int8_t previous_tone_index = bell->current_tone_index;
             bell_encoder_toggle_tone(encoder);
             bell->bit_stuffing_counter = 0;
-            stuff_bit = true;
-        } else {
-            bell->bit_stuffing_counter++;
+            return previous_tone_index;
         }
     } else {
         bell_encoder_toggle_tone(encoder);
         bell->bit_stuffing_counter = 0;
-    }
-
-    if (stuff_bit) {
-        return bell->current_tone_index;
     }
 
     bell->current_bit_index = (bell->current_bit_index + 1) % 8;

@@ -5,6 +5,7 @@
 #include "telemetry.h"
 #include "log.h"
 #include "hal/system.h"
+#include "hal/delay.h"
 #include "hal/spi.h"
 #include "hal/pwm.h"
 #include "hal/usart_gps.h"
@@ -47,10 +48,12 @@ typedef struct _radio_transmit_entry {
     payload_encoder *payload_encoder;
     fsk_encoder_api *fsk_encoder_api;
 
-    jtencode_mode_type  jtencode_mode_type;
+    jtencode_mode_type jtencode_mode_type;
 
     fsk_encoder fsk_encoder;
 } radio_transmit_entry;
+
+static bool si4032_use_dma = false;
 
 static volatile bool radio_transmission_active = false;
 static volatile bool radio_transmission_finished = false;
@@ -75,6 +78,8 @@ static volatile uint32_t radio_symbol_count_loop = 0;
 static volatile bool radio_dma_transfer_active = false;
 static volatile int8_t radio_dma_transfer_stop_after_counter = -1;
 
+static volatile bool radio_manual_transmit_active = false;
+
 uint8_t radio_current_payload[RADIO_PAYLOAD_MAX_LENGTH];
 size_t radio_current_payload_length = 0;
 
@@ -90,14 +95,13 @@ telemetry_data current_telemetry_data;
 uint8_t aprs_packet[RADIO_PAYLOAD_MAX_LENGTH];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
-static volatile bool freq_state = false;
 
 static size_t radio_fill_pwm_buffer(size_t offset, size_t length, uint16_t *buffer);
 
 size_t radio_aprs_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
 {
     aprs_generate_position_without_timestamp(
-            aprs_packet, sizeof(aprs_packet), telemetry_data, APRS_SYMBOL, APRS_COMMENT);
+            aprs_packet, sizeof(aprs_packet), telemetry_data, APRS_SYMBOL_TABLE, APRS_SYMBOL, APRS_COMMENT);
 
     log_debug("aprs: %s\n", aprs_packet);
 
@@ -111,6 +115,7 @@ payload_encoder radio_aprs_payload_encoder = {
 
 size_t radio_ft8_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
 {
+    // TODO: Encode locator for FT8
     return snprintf((char *) payload, length, "%s %s", FT8_CALLSIGN, FT8_LOCATOR);
 }
 
@@ -120,6 +125,7 @@ payload_encoder radio_ft8_payload_encoder = {
 
 size_t radio_wspr_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
 {
+    // TODO: Encode locator for WSPR
     return snprintf((char *) payload, length, "");
 }
 
@@ -127,7 +133,7 @@ payload_encoder radio_wspr_payload_encoder = {
         .encode = radio_wspr_encode,
 };
 
-#define RADIO_TRANSMIT_ENTRY_COUNT 3
+#define RADIO_TRANSMIT_ENTRY_COUNT 1
 
 static radio_transmit_entry radio_transmit_schedule[] = {
         {
@@ -139,7 +145,7 @@ static radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_aprs_payload_encoder,
                 .fsk_encoder_api = &bell_fsk_encoder_api,
         },
-        {
+/*        {
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_FT8,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_FT8,
@@ -156,7 +162,7 @@ static radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_wspr_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
                 .jtencode_mode_type = JTENCODE_MODE_WSPR,
-        },
+        },*/
 };
 
 static bool radio_start_transmit_si4032(radio_transmit_entry *entry)
@@ -180,7 +186,9 @@ static bool radio_start_transmit_si4032(radio_transmit_entry *entry)
             frequency_offset = 0;
             modulation_type = SI4032_MODULATION_TYPE_FSK;
             use_direct_mode = true;
-            radio_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
+            if (si4032_use_dma) {
+                radio_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
+            }
             break;
         default:
             return false;
@@ -203,10 +211,17 @@ static bool radio_start_transmit_si4032(radio_transmit_entry *entry)
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_APRS:
-            // TODO: Set up DMA for APRS
-            radio_dma_transfer_active = true;
-            radio_dma_transfer_stop_after_counter = -1;
-            pwm_dma_start();
+            if (si4032_use_dma) {
+                radio_dma_transfer_active = true;
+                radio_dma_transfer_stop_after_counter = -1;
+                system_disable_tick();
+                pwm_dma_start();
+            } else {
+                log_info("Si4032 manual TX\n");
+                radio_manual_transmit_active = true;
+            }
+            break;
+        default:
             break;
     }
 
@@ -269,7 +284,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             break;
         case RADIO_DATA_MODE_APRS:
             // TODO: make bell tones and flag field count configurable
-            bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, 20, bell202_tones);
+            bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, BELL_FLAG_FIELD_COUNT_1200, bell202_tones);
             radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_current_fsk_tone_count,
                     &radio_current_fsk_tones);
@@ -284,6 +299,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_FSQ_3:
         case RADIO_DATA_MODE_FSQ_4_5:
         case RADIO_DATA_MODE_FSQ_6:
+            // TODO: Encode WSPR locator
             jtencode_encoder_new(&entry->fsk_encoder, entry->jtencode_mode_type, WSPR_CALLSIGN, WSPR_LOCATOR, WSPR_DBM,
                     FSQ_CALLSIGN_FROM, FSQ_CALLSIGN_TO, FSQ_COMMAND);
             radio_current_symbol_delay_ms_100 = entry->fsk_encoder_api->get_symbol_delay(&entry->fsk_encoder);
@@ -294,27 +310,27 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             return false;
     }
 
+    // USART interrupts may interfere with transmission timing
+    usart_gps_enable(false);
+
     switch (entry->radio_type) {
         case RADIO_TYPE_SI4032:
             success = radio_start_transmit_si4032(entry);
-            if (!success) {
-                return false;
-            }
             break;
         case RADIO_TYPE_SI5351:
             success = radio_start_transmit_si5351(entry);
-            if (!success) {
-                return false;
-            }
             break;
         default:
             return false;
     }
 
-    log_info("TX enabled\n");
+    if (!success) {
+        usart_gps_enable(true);
+        // TODO: stop transmit here
+        return false;
+    }
 
-    // USART interrupts may interfere with transmission timing
-    usart_gps_enable(false);
+    log_info("TX enabled\n");
 
     system_set_red_led(true);
 
@@ -336,9 +352,12 @@ static bool radio_stop_transmit_si4032(radio_transmit_entry *entry)
             break;
         case RADIO_DATA_MODE_APRS:
             use_direct_mode = true;
+            if (si4032_use_dma) {
+                system_enable_tick();
+            }
             break;
         default:
-            return false;
+            break;
     }
 
     if (use_direct_mode) {
@@ -352,6 +371,16 @@ static bool radio_stop_transmit_si4032(radio_transmit_entry *entry)
     }
 
     si4032_inhibit_tx();
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_APRS:
+            if (si4032_use_dma) {
+                system_enable_tick();
+            }
+            break;
+        default:
+            break;
+    }
 
     return true;
 }
@@ -384,20 +413,17 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
     switch (entry->radio_type) {
         case RADIO_TYPE_SI4032:
             success = radio_stop_transmit_si4032(entry);
-            if (!success) {
-                return false;
-            }
             break;
         case RADIO_TYPE_SI5351:
             success = radio_stop_transmit_si5351(entry);
-            if (!success) {
-                return false;
-            }
             break;
         default:
             return false;
     }
 
+    radio_reset_transmit_state();
+
+    radio_manual_transmit_active = false;
     radio_dma_transfer_active = false;
 
     switch (entry->data_mode) {
@@ -423,12 +449,10 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
             return false;
     }
 
-    radio_reset_transmit_state();
-
     usart_gps_enable(true);
     system_set_red_led(false);
 
-    return true;
+    return success;
 }
 
 static uint32_t radio_next_symbol_si4032(radio_transmit_entry *entry)
@@ -444,8 +468,7 @@ static uint32_t radio_next_symbol_si4032(radio_transmit_entry *entry)
                 return 0;
             }
 
-            fsk_tone *tone = &radio_current_fsk_tones[next_tone_index];
-            return tone->frequency_hz_100;
+            return radio_current_fsk_tones[next_tone_index].frequency_hz_100;
         }
         default:
             return 0;
@@ -479,7 +502,8 @@ static bool radio_transmit_symbol_si5351(radio_transmit_entry *entry)
 
             log_trace("Tone: %d\n", next_tone_index);
 
-            uint64_t frequency = ((uint64_t) entry->frequency) * 100UL + (next_tone_index * radio_current_tone_spacing_hz_100);
+            uint64_t frequency =
+                    ((uint64_t) entry->frequency) * 100UL + (next_tone_index * radio_current_tone_spacing_hz_100);
             radio_si5351_freq = frequency;
             radio_si5351_state_change = true;
             break;
@@ -520,7 +544,7 @@ static void radio_next_transmit_entry()
 
 void radio_handle_timer_tick()
 {
-    if (radio_dma_transfer_active) {
+    if (radio_dma_transfer_active || radio_manual_transmit_active) {
         return;
     }
 
@@ -541,6 +565,8 @@ void radio_handle_timer_tick()
     // TODO: implement time sync
 }
 
+uint16_t symbol_delay = 823; // -> good around ~823 for a tight loop
+
 void radio_handle_main_loop()
 {
     if (radio_post_transmit_delay_counter == 0) {
@@ -548,21 +574,54 @@ void radio_handle_main_loop()
         log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
         log_info("Internal temperature: %ld C*100\n", current_telemetry_data.internal_temperature_celsius_100);
         log_info("Time: %02d:%02d:%02d\n",
-                current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes, current_telemetry_data.gps.seconds);
+                current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
+                current_telemetry_data.gps.seconds);
         log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
-                current_telemetry_data.gps.fix, current_telemetry_data.gps.sats_raw, current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
+                current_telemetry_data.gps.fix, current_telemetry_data.gps.sats_raw,
+                current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
         log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
-                current_telemetry_data.gps.lat_raw / 10, current_telemetry_data.gps.lon_raw / 10, (current_telemetry_data.gps.alt_raw / 1000) * 3280 / 1000);
+                current_telemetry_data.gps.lat_raw / 10, current_telemetry_data.gps.lon_raw / 10,
+                (current_telemetry_data.gps.alt_raw / 1000) * 3280 / 1000);
 
         radio_post_transmit_delay_counter = RADIO_POST_TRANSMIT_DELAY * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 1000;
         radio_start_transmit_entry = radio_current_transmit_entry;
     }
 
     if (radio_si4032_state_change) {
-        radio_si4032_state_change = false;
-        pwm_timer_set_frequency(radio_si4032_freq);
-        radio_symbol_count_loop++;
-        freq_state = !freq_state;
+        if (radio_manual_transmit_active) {
+            // TODO: Refactor this code for proper handling of APRS
+            fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
+            fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
+            log_info("Si4032 manual TX start: %d\n", symbol_delay);
+            system_disable_tick();
+            int8_t tone_index = 0;
+            uint32_t pwm_periods[2];
+            pwm_periods[0] = pwm_calculate_period(radio_current_fsk_tones[0].frequency_hz_100);
+            pwm_periods[1] = pwm_calculate_period(radio_current_fsk_tones[1].frequency_hz_100);
+            switch (radio_current_transmit_entry->data_mode) {
+                case RADIO_DATA_MODE_APRS:
+                    do {
+                        // radio_si4032_state_change = false;
+                        pwm_timer_set_frequency(pwm_periods[tone_index]);
+                        // radio_symbol_count_loop++;
+                        delay_us(symbol_delay);
+                        tone_index = fsk_encoder_api->next_tone(fsk_enc);
+                    } while (tone_index >= 0);
+                    //} while (radio_transmit_symbol(radio_current_transmit_entry));
+
+                    radio_si4032_state_change = false;
+                    radio_transmission_finished = true;
+                    break;
+                default:
+                    break;
+            }
+            system_enable_tick();
+            //symbol_delay += 1;
+        } else {
+            radio_si4032_state_change = false;
+            pwm_timer_set_frequency(radio_si4032_freq);
+            radio_symbol_count_loop++;
+        }
         return;
     }
 
@@ -696,7 +755,10 @@ void radio_init()
 
     radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
 
-    pwm_data_timer_init();
     pwm_timer_init(100 * 100);
-    pwm_dma_init();
+
+    if (si4032_use_dma) {
+        pwm_data_timer_init();
+        pwm_dma_init();
+    }
 }

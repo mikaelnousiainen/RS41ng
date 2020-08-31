@@ -3,11 +3,11 @@
 ## Direwolf
 
 ```bash
-rx_fm -f 434250000 -M fm -s 250000 -r 32000 -g 22 -d driver=rtlsdr - | direwolf -n 1 -D 1 -r 32000 -b 16 -
+rx_fm -f 434250000 -M fm -s 250000 -r 48000 -g 22 -d driver=rtlsdr - | direwolf -n 1 -D 1 -r 48000 -b 16 -
 ```
 
 ```bash
-rtl_fm -f 434250000 -M fm -s 250k -r 32000 -g 22 - | direwolf -n 1 -D 1 -r 32000 -b 16 -
+rtl_fm -f 434250000 -M fm -s 250k -r 48000 -g 22 - | direwolf -n 1 -D 1 -r 48000 -b 16 -
 ```
 
 ## SigPlay
@@ -19,5 +19,5 @@ rx_fm -f 434250000 -M fm -s 250000 -r 48000 -g 22 -d driver=rtlsdr - | ./aprs -
 ```
 
 ```bash
-rtl_fm -f 434250000 -M fm -s 250k -r 32000 -g 22 - | ./aprs -
+rtl_fm -f 434250000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 ```

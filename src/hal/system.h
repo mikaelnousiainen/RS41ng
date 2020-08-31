@@ -10,6 +10,8 @@
 
 void system_init();
 uint32_t system_get_tick();
+void system_disable_tick();
+void system_enable_tick();
 void system_disable_irq();
 void system_enable_irq();
 void system_set_green_led(bool enabled);
