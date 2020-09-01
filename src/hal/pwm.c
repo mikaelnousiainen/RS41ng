@@ -9,8 +9,8 @@
 
 uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 
-size_t (*pwm_handle_dma_transfer_half)(size_t buffer_size, uint16_t *buffer) = NULL;
-size_t (*pwm_handle_dma_transfer_full)(size_t buffer_size, uint16_t *buffer) = NULL;
+uint16_t (*pwm_handle_dma_transfer_half)(uint16_t buffer_size, uint16_t *buffer) = NULL;
+uint16_t (*pwm_handle_dma_transfer_full)(uint16_t buffer_size, uint16_t *buffer) = NULL;
 
 DMA_Channel_TypeDef *pwm_dma_channel = DMA1_Channel2;
 

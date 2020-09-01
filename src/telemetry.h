@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "config.h"
 #include "gps.h"
 
 typedef struct _telemetry_data {
@@ -15,6 +16,8 @@ typedef struct _telemetry_data {
     uint32_t humidity_percentage_100;
 
     gps_data gps;
+
+    char locator[LOCATOR_PAIR_COUNT_FULL * 2 + 1];
 } telemetry_data;
 
 void telemetry_collect();

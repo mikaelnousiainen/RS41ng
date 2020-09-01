@@ -27,7 +27,7 @@ typedef struct _ax25_packet_footer {
     uint8_t flag;
 } ax25_packet_footer;
 
-size_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destination, uint8_t destination_ssid,
-        char *digipeater_addresses, char *information_field, size_t length, uint8_t *packet_data);
+uint16_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destination, uint8_t destination_ssid,
+        char *digipeater_addresses, char *information_field, uint16_t length, uint8_t *packet_data);
 
 #endif

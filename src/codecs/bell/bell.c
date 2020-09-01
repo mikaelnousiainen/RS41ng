@@ -17,7 +17,7 @@ typedef struct _bell_encoder {
     uint16_t data_length;
     uint8_t *data;
 
-    size_t current_byte_index;
+    uint16_t current_byte_index;
     uint8_t current_bit_index;
     uint8_t current_byte;
     uint8_t bit_stuffing_counter;

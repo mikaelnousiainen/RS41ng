@@ -94,8 +94,19 @@ typedef struct {
     uint8_t min;        //Minute of Hour, range 0..59 (UTC) [- min]
     uint8_t sec;        //Seconds of Minute, range 0..59 (UTC) [- s]
     uint8_t valid;        //Validity Flags (see graphic below) [- -]
-
 } uBloxNAVTIMEUTCPayload;
+
+typedef struct {
+    uint32_t iTOW;        //GPS Millisecond Time of Week [- ms]
+    int32_t velN;          //NED north velocity [- cm/s]
+    int32_t velE;          //NED east velocity [- cm/s]
+    int32_t velD;          //NED down velocity [- cm/s]
+    uint32_t speed;        //Speed (3-D) [- cm/s]
+    uint32_t gSpeed;        //Ground Speed (2-D) [- cm/s]
+    int32_t headMot;    //Heading of motion (2-D) [1e-5 deg]
+    uint32_t sAcc;        //Speed accuracy estimate [- cm/s]
+    uint32_t headAcc;    //Heading accuracy estimate (both motion and vehicle) [1e-5 deg]
+} uBloxNAVVELNEDPayload;
 
 typedef struct {
     uint8_t portID;        //Port Identifier Number (see Serial [- -]
@@ -107,7 +118,6 @@ typedef struct {
     uint16_t outProtoMask;        //A mask describing which output protocols are active. [- -]
     uint16_t flags;        //Flags bit mask (see graphic below) [- -]
     uint8_t reserved2[2];        //Reserved [- -]
-
 } uBloxCFGPRTPayload;
 
 typedef struct {
@@ -173,6 +183,7 @@ typedef union {
     uBloxNAVPOSLLHPayload navposllh;
     uBloxNAVSOLPayload navsol;
     uBloxNAVTIMEUTCPayload navtimeutc;
+    uBloxNAVVELNEDPayload navvelned;
     uBloxACKACKayload ackack;
     uBloxCFGRSTPayload cfgrst;
     uBloxCFGRXMPayload cfgrxm;
@@ -183,7 +194,7 @@ typedef struct __attribute__((packed)) {
     ubloxPacketData data;
 } uBloxPacket;
 
-void ubxg6010_init();
+bool ubxg6010_init();
 
 void ubxg6010_get_current_gps_data(gps_data *data);
 

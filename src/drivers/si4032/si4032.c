@@ -111,10 +111,20 @@ void si4032_set_modulation_type(si4032_modulation_type type)
 
 int32_t si4032_read_temperature_celsius_100()
 {
+    // Set the input for ADC to the temperature sensor, "Register 0Fh. ADC Configuration"—adcsel[2:0] = 000
+    // Set the reference for ADC, "Register 0Fh. ADC Configuration"—adcref[1:0] = 00
+    si4032_write(0x0f, 0b00000000);
+    // Set the temperature range for ADC, "Register 12h. Temperature Sensor Calibration"—tsrange[1:0]
+    // Range: –64 ... 64 °C, Slope 8 mV/°C, ADC8 LSB 0.5 °C
+    si4032_write(0x12, 0b00100000);
+    // Set entsoffs = 1, "Register 12h. Temperature Sensor Calibration"
+    // Trigger ADC reading, "Register 0Fh. ADC Configuration"—adcstart = 1
+    si4032_write(0x0f, 0b10000000);
+    // Read temperature value—Read contents of "Register 11h. ADC Value"
     int32_t raw_value = (int32_t) si4032_read(0x11);
-    int32_t temperature = (int32_t) (-64 + (raw_value * 5 / 10) - 16);
-    // TODO: correct unit/scale
-    si4032_write(0x0f, 0x80);
+
+    int32_t temperature = (int32_t) (-6400 + (raw_value * 100 * 500 / 1000));
+
     return temperature;
 }
 

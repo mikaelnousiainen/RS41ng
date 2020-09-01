@@ -21,8 +21,8 @@ void pwm_dma_interrupt_enable(bool enabled);
 void pwm_dma_start();
 void pwm_dma_stop();
 
-extern size_t (*pwm_handle_dma_transfer_half)(size_t buffer_size, uint16_t *buffer);
-extern size_t (*pwm_handle_dma_transfer_full)(size_t buffer_size, uint16_t *buffer);
+extern uint16_t (*pwm_handle_dma_transfer_half)(uint16_t buffer_size, uint16_t *buffer);
+extern uint16_t (*pwm_handle_dma_transfer_full)(uint16_t buffer_size, uint16_t *buffer);
 
 extern uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 

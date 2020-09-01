@@ -7,7 +7,7 @@
 #include "telemetry.h"
 
 typedef struct _payload_encoder {
-    size_t (*encode)(uint8_t *payload, size_t length, telemetry_data *data);
+    uint16_t (*encode)(uint8_t *payload, uint16_t length, telemetry_data *data);
 } payload_encoder;
 
 #endif

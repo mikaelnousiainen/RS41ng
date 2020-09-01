@@ -53,12 +53,17 @@ typedef struct _radio_transmit_entry {
     fsk_encoder fsk_encoder;
 } radio_transmit_entry;
 
+#ifdef SEMIHOSTING_ENABLE
+char logged_payload[512];
+#endif
+
 static bool si4032_use_dma = false;
+
+static radio_transmit_entry *radio_current_transmit_entry = NULL;
+static uint8_t radio_current_transmit_entry_index = 0;
 
 static volatile bool radio_transmission_active = false;
 static volatile bool radio_transmission_finished = false;
-static volatile radio_transmit_entry *radio_current_transmit_entry = NULL;
-static volatile int radio_current_transmit_entry_index = 0;
 static volatile uint32_t radio_post_transmit_delay_counter = 0;
 static volatile uint32_t radio_next_symbol_counter = 0;
 
@@ -68,8 +73,8 @@ static volatile uint64_t radio_si5351_freq = 0;
 static volatile bool radio_si4032_state_change = false;
 static volatile uint32_t radio_si4032_freq = 0;
 
-static volatile radio_transmit_entry *radio_start_transmit_entry = NULL;
-static volatile radio_transmit_entry *radio_stop_transmit_entry = NULL;
+static radio_transmit_entry *radio_start_transmit_entry = NULL;
+static radio_transmit_entry *radio_stop_transmit_entry = NULL;
 static volatile bool radio_transmit_next_symbol_flag = false;
 
 static volatile uint32_t radio_symbol_count_interrupt = 0;
@@ -81,7 +86,7 @@ static volatile int8_t radio_dma_transfer_stop_after_counter = -1;
 static volatile bool radio_manual_transmit_active = false;
 
 uint8_t radio_current_payload[RADIO_PAYLOAD_MAX_LENGTH];
-size_t radio_current_payload_length = 0;
+uint16_t radio_current_payload_length = 0;
 
 fsk_tone *radio_current_fsk_tones = NULL;
 int8_t radio_current_fsk_tone_count = 0;
@@ -93,17 +98,25 @@ uint32_t radio_current_symbol_delay_ms_100 = 0;
 telemetry_data current_telemetry_data;
 
 uint8_t aprs_packet[RADIO_PAYLOAD_MAX_LENGTH];
+char aprs_comment[APRS_COMMENT_MAX_LENGTH];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
 
-static size_t radio_fill_pwm_buffer(size_t offset, size_t length, uint16_t *buffer);
+static uint16_t radio_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer);
 
-size_t radio_aprs_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
+uint16_t radio_aprs_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data)
 {
-    aprs_generate_position_without_timestamp(
-            aprs_packet, sizeof(aprs_packet), telemetry_data, APRS_SYMBOL_TABLE, APRS_SYMBOL, APRS_COMMENT);
 
-    log_debug("aprs: %s\n", aprs_packet);
+    gps_data *gps = &telemetry_data->gps;
+
+    snprintf(aprs_comment, sizeof(aprs_comment), " RS41ng test, time is %02d:%02d:%02d, locator %s, TOW %lu ms, gs %lu, hd %ld",
+            gps->hours, gps->minutes, gps->seconds, telemetry_data->locator, gps->time_of_week_millis,
+            gps->speed_raw, gps->heading_raw);
+
+    aprs_generate_position_without_timestamp(
+            aprs_packet, sizeof(aprs_packet), telemetry_data, APRS_SYMBOL_TABLE, APRS_SYMBOL, aprs_comment);
+
+    log_debug("APRS packet: %s\n", aprs_packet);
 
     return ax25_encode_packet_aprs(APRS_CALLSIGN, APRS_SSID, APRS_DESTINATION, APRS_DESTINATION_SSID, APRS_RELAYS,
             (char *) aprs_packet, length, payload);
@@ -113,20 +126,27 @@ payload_encoder radio_aprs_payload_encoder = {
         .encode = radio_aprs_encode,
 };
 
-size_t radio_ft8_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
+uint16_t radio_ft8_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data)
 {
-    // TODO: Encode locator for FT8
-    return snprintf((char *) payload, length, "%s %s", FT8_CALLSIGN, FT8_LOCATOR);
+    char locator[5];
+
+#ifdef FT8_LOCATOR_FIXED
+    locator = FT8_LOCATOR_FIXED;
+#else
+    strlcpy(locator, telemetry_data->locator, 4);
+#endif
+
+    return snprintf((char *) payload, length, "%s %s", FT8_CALLSIGN, locator);
 }
 
 payload_encoder radio_ft8_payload_encoder = {
         .encode = radio_ft8_encode,
 };
 
-size_t radio_wspr_encode(uint8_t *payload, size_t length, telemetry_data *telemetry_data)
+uint16_t radio_wspr_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data)
 {
-    // TODO: Encode locator for WSPR
-    return snprintf((char *) payload, length, "");
+    // Not used for WSPR
+    return 0;
 }
 
 payload_encoder radio_wspr_payload_encoder = {
@@ -266,16 +286,20 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     log_info("Full payload length: %d\n", radio_current_payload_length);
 
-    for (int i = 0; i < radio_current_payload_length; i++) {
+#ifdef SEMIHOSTING_ENABLE
+    int16_t len = 0;
+
+    for (uint16_t i = 0; i < radio_current_payload_length; i++) {
         char c = radio_current_payload[i];
         if (c >= 0x20 && c <= 0x7e) {
-            log_info("%c", c);
+            len += sprintf(logged_payload + len, "%c", c);
         } else {
-            log_info(" [%02X] ", c);
+            len += sprintf(logged_payload + len, " [%02X] ", c);
         }
     }
 
-    log_info("\n");
+    log_info("%s\n", logged_payload);
+#endif
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
@@ -298,14 +322,20 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_FSQ_2:
         case RADIO_DATA_MODE_FSQ_3:
         case RADIO_DATA_MODE_FSQ_4_5:
-        case RADIO_DATA_MODE_FSQ_6:
-            // TODO: Encode WSPR locator
-            jtencode_encoder_new(&entry->fsk_encoder, entry->jtencode_mode_type, WSPR_CALLSIGN, WSPR_LOCATOR, WSPR_DBM,
-                    FSQ_CALLSIGN_FROM, FSQ_CALLSIGN_TO, FSQ_COMMAND);
+        case RADIO_DATA_MODE_FSQ_6: {
+            char locator[5];
+#ifdef WSPR_LOCATOR_FIXED
+            locator = WSPR_LOCATOR_FIXED;
+#else
+            strlcpy(locator, current_telemetry_data.locator, 4);
+#endif
+            jtencode_encoder_new(&entry->fsk_encoder, entry->jtencode_mode_type, WSPR_CALLSIGN, locator,
+                    WSPR_DBM, FSQ_CALLSIGN_FROM, FSQ_CALLSIGN_TO, FSQ_COMMAND);
             radio_current_symbol_delay_ms_100 = entry->fsk_encoder_api->get_symbol_delay(&entry->fsk_encoder);
             radio_current_tone_spacing_hz_100 = entry->fsk_encoder_api->get_tone_spacing(&entry->fsk_encoder);
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
+        }
         default:
             return false;
     }
@@ -341,7 +371,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
 static bool radio_stop_transmit_si4032(radio_transmit_entry *entry)
 {
-    bool use_direct_mode;
+    bool use_direct_mode = false;
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
@@ -572,7 +602,7 @@ void radio_handle_main_loop()
     if (radio_post_transmit_delay_counter == 0) {
         telemetry_collect(&current_telemetry_data);
         log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
-        log_info("Internal temperature: %ld C*100\n", current_telemetry_data.internal_temperature_celsius_100);
+        log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
         log_info("Time: %02d:%02d:%02d\n",
                 current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
                 current_telemetry_data.gps.seconds);
@@ -683,10 +713,10 @@ void radio_handle_main_loop()
     }
 }
 
-static size_t radio_fill_pwm_buffer(size_t offset, size_t length, uint16_t *buffer)
+static uint16_t radio_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer)
 {
-    size_t count = 0;
-    for (size_t i = offset; i < (offset + length); i++, count++) {
+    uint16_t count = 0;
+    for (uint16_t i = offset; i < (offset + length); i++, count++) {
         uint32_t frequency = radio_next_symbol_si4032(radio_current_transmit_entry);
         if (frequency == 0) {
             // TODO: fill the other side of the buffer with zeroes too?
@@ -714,7 +744,7 @@ static bool radio_stop_dma_transfer_if_requested()
     return false;
 }
 
-size_t radio_handle_pwm_transfer_half(size_t buffer_size, uint16_t *buffer)
+uint16_t radio_handle_pwm_transfer_half(uint16_t buffer_size, uint16_t *buffer)
 {
     if (radio_stop_dma_transfer_if_requested()) {
         return 0;
@@ -723,7 +753,7 @@ size_t radio_handle_pwm_transfer_half(size_t buffer_size, uint16_t *buffer)
         log_info("Should not be here, half-transfer!\n");
     }
 
-    size_t length = radio_fill_pwm_buffer(0, buffer_size / 2, buffer);
+    uint16_t length = radio_fill_pwm_buffer(0, buffer_size / 2, buffer);
     if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
         radio_dma_transfer_stop_after_counter = 2;
     }
@@ -731,7 +761,7 @@ size_t radio_handle_pwm_transfer_half(size_t buffer_size, uint16_t *buffer)
     return length;
 }
 
-size_t radio_handle_pwm_transfer_full(size_t buffer_size, uint16_t *buffer)
+uint16_t radio_handle_pwm_transfer_full(uint16_t buffer_size, uint16_t *buffer)
 {
     if (radio_stop_dma_transfer_if_requested()) {
         return 0;
@@ -740,7 +770,7 @@ size_t radio_handle_pwm_transfer_full(size_t buffer_size, uint16_t *buffer)
         log_info("Should not be here, transfer complete!\n");
     }
 
-    size_t length = radio_fill_pwm_buffer(buffer_size / 2, buffer_size / 2, buffer);
+    uint16_t length = radio_fill_pwm_buffer(buffer_size / 2, buffer_size / 2, buffer);
     if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
         radio_dma_transfer_stop_after_counter = 2;
     }
@@ -750,6 +780,8 @@ size_t radio_handle_pwm_transfer_full(size_t buffer_size, uint16_t *buffer)
 
 void radio_init()
 {
+    memset(&current_telemetry_data, 0, sizeof(current_telemetry_data));
+
     pwm_handle_dma_transfer_half = radio_handle_pwm_transfer_half;
     pwm_handle_dma_transfer_full = radio_handle_pwm_transfer_full;
 

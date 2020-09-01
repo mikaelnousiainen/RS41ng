@@ -14,6 +14,8 @@
 uint32_t counter = 0;
 bool led_state = true;
 
+gps_data current_gps_data;
+
 void handle_timer_tick()
 {
     if (!system_initialized) {
@@ -22,15 +24,28 @@ void handle_timer_tick()
 
     radio_handle_timer_tick();
 
-    counter = (counter + 1) % 10000;
+    counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
-        led_state = !led_state;
-        system_set_green_led(led_state);
+        ubxg6010_get_current_gps_data(&current_gps_data);
+    }
+
+    // Blink fast until GPS fix is acquired
+    if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
+        if (current_gps_data.fix >= 3) {
+            if (counter == 0) {
+                led_state = !led_state;
+                system_set_green_led(led_state);
+            }
+        } else {
+            led_state = !led_state;
+            system_set_green_led(led_state);
+        }
     }
 }
 
 int main(void)
 {
+    bool success;
     system_handle_timer_tick = handle_timer_tick;
     usart_gps_handle_incoming_byte = ubxg6010_handle_incoming_byte;
 
@@ -45,8 +60,14 @@ int main(void)
     log_info("SPI init\n");
     spi_init();
 
+gps_init:
     log_info("GPS init\n");
-    ubxg6010_init();
+    success = ubxg6010_init();
+    if (!success) {
+        log_error("GPS initialization failed, retrying...\n")
+        goto gps_init;
+    }
+
     log_info("Si4032 init\n");
     si4032_init();
 
