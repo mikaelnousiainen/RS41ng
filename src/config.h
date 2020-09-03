@@ -2,6 +2,7 @@
 #define __CONFIG_H
 
 // Enable semihosting to receive debug logs during development
+// NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to the STM32 programmer dongle, otherwise the firmware will not run.
 //#define SEMIHOSTING_ENABLE
 //#define LOGGING_ENABLE
 

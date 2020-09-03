@@ -119,7 +119,8 @@ and install GDB from [ARM GNU GCC toolchain](https://developer.arm.com/tools-and
 Semihosting allows the firmware to send log messages via special system calls to OpenOCD, so that you
 can get real-time feedback and debug output from the application.
 
-*Semihosting needs to be disabled when not connec
+**Semihosting has to be disabled when the RS41 radiosonde is not connected to the STM32 programmer dongle,
+otherwise the firmware will not run.**
 
 ### Steps to start firmware debugging and semihosting
 
