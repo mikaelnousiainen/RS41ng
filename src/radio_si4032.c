@@ -1,0 +1,290 @@
+#include <stdint.h>
+#include <string.h>
+
+#include "hal/system.h"
+#include "hal/spi.h"
+#include "hal/pwm.h"
+#include "hal/delay.h"
+#include "drivers/si4032/si4032.h"
+#include "log.h"
+
+#include "radio_si4032.h"
+
+static bool si4032_use_dma = false;
+
+// TODO: Add support for multiple APRS baud rates
+uint16_t symbol_delay_bell_202_1200bps_us = 823;
+
+static volatile bool radio_si4032_state_change = false;
+static volatile uint32_t radio_si4032_freq = 0;
+static volatile int8_t radio_dma_transfer_stop_after_counter = -1;
+
+uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
+
+uint16_t radio_si4032_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer);
+
+bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    uint16_t frequency_offset;
+    si4032_modulation_type modulation_type;
+    bool use_direct_mode;
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_CW:
+            frequency_offset = 1;
+            modulation_type = SI4032_MODULATION_TYPE_OOK;
+            use_direct_mode = true;
+            break;
+        case RADIO_DATA_MODE_RTTY:
+            frequency_offset = 0;
+            modulation_type = SI4032_MODULATION_TYPE_NONE;
+            use_direct_mode = false;
+            break;
+        case RADIO_DATA_MODE_APRS:
+            frequency_offset = 0;
+            modulation_type = SI4032_MODULATION_TYPE_FSK;
+            use_direct_mode = true;
+            if (si4032_use_dma) {
+                radio_si4032_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
+            }
+            break;
+        default:
+            return false;
+    }
+
+    si4032_set_tx_frequency(((float) entry->frequency) / 1000000.0f);
+    si4032_set_tx_power(entry->tx_power * 7 / 100);
+    si4032_set_frequency_offset(frequency_offset);
+    si4032_set_modulation_type(modulation_type);
+
+    si4032_enable_tx();
+
+    if (use_direct_mode) {
+        spi_uninit();
+        pwm_timer_use(true);
+        pwm_timer_pwm_enable(true);
+        si4032_use_direct_mode(true);
+    }
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_APRS:
+            if (si4032_use_dma) {
+                shared_state->radio_dma_transfer_active = true;
+                radio_dma_transfer_stop_after_counter = -1;
+                system_disable_tick();
+                pwm_dma_start();
+            } else {
+                shared_state->radio_manual_transmit_active = true;
+            }
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+static uint32_t radio_next_symbol_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_CW:
+            return 0;
+        case RADIO_DATA_MODE_RTTY:
+            return 0;
+        case RADIO_DATA_MODE_APRS: {
+            int8_t next_tone_index = entry->fsk_encoder_api->next_tone(&entry->fsk_encoder);
+            if (next_tone_index < 0) {
+                return 0;
+            }
+
+            return shared_state->radio_current_fsk_tones[next_tone_index].frequency_hz_100;
+        }
+        default:
+            return 0;
+    }
+}
+
+bool radio_transmit_symbol_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    uint32_t frequency = radio_next_symbol_si4032(entry, shared_state);
+
+    if (frequency == 0) {
+        return false;
+    }
+
+    radio_si4032_freq = frequency;
+    radio_si4032_state_change = true;
+
+    return true;
+}
+
+static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
+    fsk_encoder *fsk_enc = &entry->fsk_encoder;
+
+    for (uint8_t i = 0; i < shared_state->radio_current_fsk_tone_count; i++) {
+        precalculated_pwm_periods[i] = pwm_calculate_period(shared_state->radio_current_fsk_tones[i].frequency_hz_100);
+    }
+
+    system_disable_tick();
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_APRS: {
+            int8_t tone_index;
+
+            while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
+                pwm_timer_set_frequency(precalculated_pwm_periods[tone_index]);
+                shared_state->radio_symbol_count_loop++;
+                delay_us(symbol_delay_bell_202_1200bps_us);
+            };
+
+            radio_si4032_state_change = false;
+            shared_state->radio_transmission_finished = true;
+            break;
+        }
+        default:
+            break;
+    }
+
+    system_enable_tick();
+}
+
+void radio_handle_main_loop_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    if (entry->radio_type != RADIO_TYPE_SI4032) {
+        return;
+    }
+
+    if (shared_state->radio_manual_transmit_active) {
+        radio_handle_main_loop_manual_si4032(entry, shared_state);
+        return;
+    }
+
+    if (radio_si4032_state_change) {
+        radio_si4032_state_change = false;
+        pwm_timer_set_frequency(radio_si4032_freq);
+        shared_state->radio_symbol_count_loop++;
+    }
+}
+
+bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
+{
+    bool use_direct_mode = false;
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_CW:
+            use_direct_mode = true;
+            break;
+        case RADIO_DATA_MODE_RTTY:
+            use_direct_mode = false;
+            break;
+        case RADIO_DATA_MODE_APRS:
+            use_direct_mode = true;
+            if (si4032_use_dma) {
+                system_enable_tick();
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (use_direct_mode) {
+        si4032_use_direct_mode(false);
+        pwm_timer_pwm_enable(false);
+        pwm_timer_use(false);
+        spi_init();
+    }
+
+    si4032_inhibit_tx();
+
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_APRS:
+            if (si4032_use_dma) {
+                system_enable_tick();
+            }
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+uint16_t radio_si4032_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer)
+{
+    uint16_t count = 0;
+    for (uint16_t i = offset; i < (offset + length); i++, count++) {
+        uint32_t frequency = radio_next_symbol_si4032(radio_current_transmit_entry, &radio_shared_state);
+        if (frequency == 0) {
+            // TODO: fill the other side of the buffer with zeroes too?
+            memset(buffer + offset, 0, (length - i) * sizeof(uint16_t));
+            break;
+        }
+        buffer[i] = pwm_calculate_period(frequency);
+    }
+
+    return count;
+}
+
+bool radio_si4032_stop_dma_transfer_if_requested(radio_module_state *shared_state)
+{
+    if (radio_dma_transfer_stop_after_counter > 0) {
+        radio_dma_transfer_stop_after_counter--;
+    } else if (radio_dma_transfer_stop_after_counter == 0) {
+        pwm_dma_stop();
+        radio_dma_transfer_stop_after_counter = -1;
+        shared_state->radio_transmission_finished = true;
+        shared_state->radio_dma_transfer_active = false;
+        return true;
+    }
+
+    return false;
+}
+
+uint16_t radio_si4032_handle_pwm_transfer_half(uint16_t buffer_size, uint16_t *buffer)
+{
+    if (radio_si4032_stop_dma_transfer_if_requested(&radio_shared_state)) {
+        return 0;
+    }
+    if (radio_shared_state.radio_transmission_finished) {
+        log_info("Should not be here, half-transfer!\n");
+    }
+
+    uint16_t length = radio_si4032_fill_pwm_buffer(0, buffer_size / 2, buffer);
+    if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
+        radio_dma_transfer_stop_after_counter = 2;
+    }
+
+    return length;
+}
+
+uint16_t radio_si4032_handle_pwm_transfer_full(uint16_t buffer_size, uint16_t *buffer)
+{
+    if (radio_si4032_stop_dma_transfer_if_requested(&radio_shared_state)) {
+        return 0;
+    }
+    if (radio_shared_state.radio_transmission_finished) {
+        log_info("Should not be here, transfer complete!\n");
+    }
+
+    uint16_t length = radio_si4032_fill_pwm_buffer(buffer_size / 2, buffer_size / 2, buffer);
+    if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
+        radio_dma_transfer_stop_after_counter = 2;
+    }
+
+    return length;
+}
+
+void radio_init_si4032()
+{
+    pwm_handle_dma_transfer_half = radio_si4032_handle_pwm_transfer_half;
+    pwm_handle_dma_transfer_full = radio_si4032_handle_pwm_transfer_full;
+
+    pwm_timer_init(100 * 100);
+
+    if (si4032_use_dma) {
+        pwm_data_timer_init();
+        pwm_dma_init();
+    }
+}

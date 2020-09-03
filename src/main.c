@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "hal/system.h"
 #include "hal/i2c.h"
 #include "hal/spi.h"
@@ -64,7 +65,8 @@ gps_init:
     log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {
-        log_error("GPS initialization failed, retrying...\n")
+        log_error("GPS initialization failed, retrying...\n");
+        delay_ms(1000);
         goto gps_init;
     }
 

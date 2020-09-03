@@ -1,6 +1,8 @@
 #ifndef __JTENCODE_H
 #define __JTENCODE_H
 
+#include "codecs/fsk/fsk.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +19,8 @@ typedef enum _jtencode_mode_type {
     JTENCODE_MODE_FSQ_6,
 } jtencode_mode_type;
 
-void jtencode_encoder_new(fsk_encoder *encoder, jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
+bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8_t *symbol_data,
+        jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
         char *fsq_callsign_from, char *fsq_callsign_to, char fsq_command);
 void jtencode_encoder_destroy(fsk_encoder *encoder);
 

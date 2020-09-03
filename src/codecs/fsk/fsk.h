@@ -1,6 +1,8 @@
 #ifndef __FSK_H
 #define __FSK_H
 
+#define FSK_TONE_COUNT_MAX 20
+
 typedef struct _fsk_tone {
     int8_t index;
     uint32_t frequency_hz_100;

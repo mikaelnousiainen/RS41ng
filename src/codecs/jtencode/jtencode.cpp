@@ -63,8 +63,6 @@
 #define JTENCODE_TONE_DELAY_FSQ_4_5           222 * 100          // Delay value for 4.5 baud FSQ
 #define JTENCODE_TONE_DELAY_FSQ_6             167 * 100          // Delay value for 6 baud FSQ
 
-#define JTENCODE_SYMBOL_BUFFER_LENGTH 512
-
 typedef struct _jtencode_mode {
     uint16_t symbol_count;
     uint32_t tone_delay_ms_100;
@@ -135,19 +133,30 @@ typedef struct _jtencode_encoder {
     uint32_t tone_spacing;
     uint32_t tone_delay;
 
-    uint8_t symbol_data[JTENCODE_SYMBOL_BUFFER_LENGTH];
+    size_t symbol_data_length;
+    uint8_t *symbol_data;
+
     size_t current_byte_index;
 } jtencode_encoder;
 
-void jtencode_encoder_new(fsk_encoder *encoder, jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
+bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8_t *symbol_data,
+        jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
         char *fsq_callsign_from, char *fsq_callsign_to, char fsq_command)
 {
+    jtencode_mode_descriptor *mode_descriptor = &jtencode_modes[mode_type];
+    if (mode_descriptor->symbol_count > 0) {
+        if (mode_descriptor->symbol_count > symbol_data_length) {
+            return false;
+        }
+    }
+
     encoder->priv = malloc(sizeof(jtencode_encoder));
     memset(encoder->priv, 0, sizeof(jtencode_encoder));
 
-    jtencode_mode_descriptor *mode_descriptor = &jtencode_modes[mode_type];
-
     auto *jte = (jtencode_encoder *) encoder->priv;
+    jte->symbol_data_length = symbol_data_length;
+    jte->symbol_data = symbol_data;
+
     jte->mode_type = mode_type;
     jte->symbol_count = mode_descriptor->symbol_count;
     jte->tone_spacing = mode_descriptor->tone_spacing_hz_100;
@@ -160,6 +169,8 @@ void jtencode_encoder_new(fsk_encoder *encoder, jtencode_mode_type mode_type, ch
     jte->fsq_callsign_from = fsq_callsign_from;
     jte->fsq_callsign_to = fsq_callsign_to;
     jte->fsq_command = fsq_command;
+
+    return true;
 }
 
 void jtencode_encoder_destroy(fsk_encoder *encoder)
@@ -200,7 +211,7 @@ void jtencode_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8
     uint8_t *symbol_data = jte->symbol_data;
     jtencode_mode_type mode_type = jte->mode_type;
 
-    memset(symbol_data, 0, JTENCODE_SYMBOL_BUFFER_LENGTH);
+    memset(symbol_data, 0, jte->symbol_data_length);
 
     switch (mode_type) {
         case JTENCODE_MODE_JT9:
@@ -240,7 +251,6 @@ int8_t jtencode_encoder_next_tone(fsk_encoder *encoder)
 
     size_t current_byte_index = jte->current_byte_index;
     if (current_byte_index >= jte->symbol_count) {
-        log_info("last tone: %d\n", current_byte_index);
         return -1;
     }
 

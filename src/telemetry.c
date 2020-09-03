@@ -16,5 +16,6 @@ void telemetry_collect(telemetry_data *data)
     }
 
     ubxg6010_get_current_gps_data(&data->gps);
-    locator_from_lonlat(data->gps.lon_raw, data->gps.lat_raw, LOCATOR_PAIR_COUNT_FULL, data->locator);
+    locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
+            LOCATOR_PAIR_COUNT_FULL, data->locator);
 }

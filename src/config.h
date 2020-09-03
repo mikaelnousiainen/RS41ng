@@ -3,17 +3,20 @@
 
 // Enable semihosting to receive debug logs during development
 //#define SEMIHOSTING_ENABLE
+//#define LOGGING_ENABLE
 
 #include <stdbool.h>
 
-#define RADIO_PAYLOAD_MAX_LENGTH 384
+#define RADIO_PAYLOAD_MAX_LENGTH 256
+#define RADIO_SYMBOL_DATA_MAX_LENGTH 512
 #define APRS_COMMENT_MAX_LENGTH 128
 
 #define SENSOR_BMP280_ENABLE false
 
 #define RADIO_SI5351_ENABLE true
 
-#define RADIO_POST_TRANSMIT_DELAY 5000
+#define RADIO_POST_TRANSMIT_DELAY_MS 5000
+#define RADIO_TIME_SYNC_THRESHOLD_MS 1500
 
 // Si4032 transmit power: 0..100%
 #define RADIO_SI4032_TX_POWER 100
@@ -32,11 +35,13 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 #define WSPR_CALLSIGN "OH3BHX"
-//#define WSPR_LOCATOR_FIXED "AA00"
+#define WSPR_LOCATOR_FIXED_ENABLED false
+#define WSPR_LOCATOR_FIXED "AA00"
 #define WSPR_DBM 10
 
 #define FT8_CALLSIGN "OH3BHX"
-//#define FT8_LOCATOR_FIXED "AA00"
+#define FT8_LOCATOR_FIXED_ENABLED false
+#define FT8_LOCATOR_FIXED "AA00"
 
 #define FSQ_CALLSIGN_FROM "OH3BHX"
 #define FSQ_CALLSIGN_TO "N0CALL"

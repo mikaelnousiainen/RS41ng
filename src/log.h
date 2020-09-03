@@ -3,12 +3,12 @@
 
 #include "config.h"
 
-#ifdef SEMIHOSTING_ENABLE
+#if defined(SEMIHOSTING_ENABLE) && defined(LOGGING_ENABLE)
 
 #include <stdio.h>
 
-#define log_error(...)
-#define log_warn(...)
+#define log_error printf
+#define log_warn printf
 #define log_info printf
 #define log_debug(...)
 #define log_trace(...)

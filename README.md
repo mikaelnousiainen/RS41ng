@@ -10,21 +10,149 @@ The motivation to develop this firmware is to provide cleaner, customizable and
 more modular codebase for developing RS41 radiosonde-based experiments.
 
 The main features this firmware aims to implement are:
-* DMA/Timer-based modulation for APRS and many digital modes via JTEncode library
-* Support for HF/VHF transmissions via an external Si5351 chip connected to the external I²C bus
+* Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
+* Support for additional digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for custom sensors via the external I²C bus
+* Extensibility to allow easy addition of new digital modes
 
-## Features (work in progress)
+## Features currently working
 
-* APRS on 70cm amateur radio band via Si4032 radio chip
-  * Bell 202 timing is done via DMA transfers to achieve greater accuracy, but I have not been able to get the timings working correctly
-* Digital mode beacons on HF frequencies via a Si5351 radio chip connected to the external I²C bus of the RS41 radiosonde
+* APRS on 70cm amateur radio band using the internal Si4032 radio transmitter
+  * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
+  * There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
+* Digital mode beacons on HF/VHF frequencies using a Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde
   * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
-   The implementation is missing correct scheduling of transmissions via GPS clock.
-* Support for additional sensors via the external I²C bus
-  * There is a driver for Bosch BMP280 barometric pressure / temperature / humidity sensor included 
+  * GPS-based scheduling is available for modes that require specific timing for transmissions
+  * *NOTE:* It is most likely not possible to implement 1200 bps Bell 202 modulation for APRS using Si5351,
+    because the Si5351 chip is too slow to change the generated frequency
+* External I²C bus sensor drivers
+  * Bosch BMP280 barometric pressure / temperature / humidity sensor
 
-### Bell FSK modulation hack for APRS
+### Planned features
+
+* CW (on-off keying) on both Si4032 (70cm) and Si5351 (HF + 2m)
+* RTTY on both Si4032 (70cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
+* Support for more I²C sensors
+* Configurable transmission frequencies and schedules based on location / altitude
+
+## Building the firmware
+
+Software requirements:
+
+* [GNU GCC toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/9-2-2019-12)
+  version 8.3.0 or higher for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
+* [CMake](https://cmake.org/) version 3.6 or higher for building the firmware
+* [OpenOCD](http://openocd.org/) version 0.10.0 or higher for flashing the firmware
+
+On a Red Hat/Fedora Linux installation, the following packages can be installed:
+```bash
+dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils-cs arm-none-eabi-newlib cmake openocd
+```
+
+### Steps to build the firmware
+
+1. Install the required software dependencies listed above
+2. Configure your amateur radio call sign, transmit frequencies and transmission mode parameters in `config.h`
+3. Configure scheduling of transmissions in `radio.c` by editing array `radio_transmit_schedule`
+4. Build the firmware using the following commands
+    ```
+    mkdir build
+    cd build
+    cmake ..
+    make
+    ```
+3. The firmware will be stored in file `build/src/RS41ng.elf`
+
+## Flashing the firmware
+
+Hardware requirements:
+
+* A working Vaisala RS41 radiosonde :)
+* A programmer for the STM32 microcontroller present in the RS41 radiosonde. ST-LINK v2 USB-dongles work well.
+
+The pinout of the RS41 connector (by DF8OE) is the following:
+
+```
+______________________|           |______________________
+|                                                       |
+|   1           2           3           4           5   |
+|                                                       |
+|   6           7           8           9          10   |
+|_______________________________________________________|
+
+(View from the bottom of the sonde, pay attention to the gap in the connector)
+```
+
+* 1 - SWDIO (PA13)
+* 2 - RST
+* 3 - MCU switched 3.3V out to external device / Vcc (Boost out) 5.0V
+  -- This pin powers the device via 3.3V from an ST-LINK programmer dongle
+* 4 - I2C2_SCL (PB10) / UART3 TX -- This is the external I²C port clock pin for Si5351 and sensors
+* 5 - GND
+* 6 - GND
+* 7 - SWCLK (PA14)
+* 8 - +U_Battery / VBAT 3.3V
+* 9 - +VDD_MCU / PB1 * (10k + cap + 10k)
+* 10 - I2C2_SDA (PB11) / UART3 RX -- This is the external I²C port data pin for Si5351 and sensors
+
+### Steps to flash the firmware
+
+1. Remove batteries from the sonde
+2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
+  * SWDIO -> Pin 1
+  * SWCLK -> Pin 7
+  * GND -> Pin 5
+  * 3.3V -> Pin 3
+3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
+  * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 64 off; exit"`
+4. Flash the firmware
+  * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+5. Power cycle the sonde to start running the new firmware
+
+## Developing / debugging the firmware
+
+It is possible to receive log messages from the firmware program and to perform debugging of the firmware using GNU GDB.
+
+Also, please note that Red Hat/Fedora do not provide GDB for ARM architectures, so you will need to manually download
+and install GDB from [ARM GNU GCC toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/9-2-2019-12).
+
+Semihosting allows the firmware to send log messages via special system calls to OpenOCD, so that you
+can get real-time feedback and debug output from the application.
+
+*Semihosting needs to be disabled when not connec
+
+### Steps to start firmware debugging and semihosting
+
+1. Connect the RS41 radiosonde to a computer via the STM32 ST-LINK programmer dongle
+2. Enable semihosting and logging in `config.h` by uncommenting the following lines
+    ```
+    #define SEMIHOSTING_ENABLE
+    #define LOGGING_ENABLE
+    ```
+3. Start OpenOCD and leave it running in the background
+    ```
+    openocd -f ./openocd_rs41.cfg
+    ```
+4. Start ARM GDB
+    ```
+    arm-none-eabi-gdb
+    ```
+5. Connect GDB to OpenOCD for flashing and debugging (assumes you are in the `build` directory with Makefiles from CMake ready for build)
+    ```
+    target remote localhost:3333
+    monitor arm semihosting enable
+    make
+    load src/RS41ng.elf
+    monitor reset halt
+    continue # this command runs the firmware
+    ```
+6. OpenOCD will output log messages from the firmware and GDB can be used to interrupt
+   and inspect the firmware program.
+
+To load debugging symbols for settings breakpoints and to perform more detailed inspection,
+use command `file src/RS41ng.elf`.
+
+## Si4032 Bell FSK modulation hack for APRS
 
 The idea behind the APRS / Bell 202 modulation implementation is based on RS41HUP project and its "ancestors"
 and I'm describing it here, since it has not been documented elsewhere.
@@ -39,10 +167,13 @@ a rate of 1200 and 2200 Hz, which produces the two Bell 202 tones even though th
 Additionally, the timing of 1200/2200 Hz was done in RS41HUP by using experimentally determined delays
 and by disabling all interrupts, so they won't interfere with the timings.
 
-I have attempted to implement Bell 202 frequency generation using DMA / Timers, but have failed to generate correct
-frequencies that other APRS equipment are able to decode. I have tried to decode the DMA-based modulation with
+I have attempted to implement Bell 202 frequency generation using hardware DMA and PWM, but have failed to generate
+correct symbol rate that other APRS equipment are able to decode. I have tried to decode the DMA-based modulation with
 some tools intended for debugging APRS and while some bytes are decoded correctly every once in a while,
 the timings are mostly off for some unknown reason.
+
+Currently, the Bell 202 modulation implementation uses hardware PWM to generate the individual tone frequencies,
+but the symbol timing is created in a loop with delay that was chosen carefully via experiments.
 
 # Authors
 

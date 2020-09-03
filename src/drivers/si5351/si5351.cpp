@@ -444,7 +444,7 @@ void Si5351::set_pll(uint64_t pll_freq, enum si5351_pll target_pll)
     // Derive the register values to write
 
     // Prepare an array for parameters to be written to
-    uint8_t *params = new uint8_t[20];
+    uint8_t params[20];
     uint8_t i = 0;
     uint8_t temp;
 
@@ -486,8 +486,6 @@ void Si5351::set_pll(uint64_t pll_freq, enum si5351_pll target_pll)
         si5351_write_bulk(SI5351_PLLB_PARAMETERS, i, params);
         pllb_freq = pll_freq;
     }
-
-    delete params;
 }
 
 /*
@@ -506,7 +504,7 @@ void Si5351::set_pll(uint64_t pll_freq, enum si5351_pll target_pll)
 void
 Si5351::set_ms(enum si5351_clock clk, struct Si5351RegSet ms_reg, uint8_t int_mode, uint8_t r_div, uint8_t div_by_4)
 {
-    uint8_t *params = new uint8_t[20];
+    uint8_t params[20];
     uint8_t i = 0;
     uint8_t temp;
     uint8_t reg_val;
@@ -590,8 +588,6 @@ Si5351::set_ms(enum si5351_clock clk, struct Si5351RegSet ms_reg, uint8_t int_mo
             ms_div(clk, r_div, div_by_4);
             break;
     }
-
-    delete params;
 }
 
 /*
@@ -1075,7 +1071,7 @@ void Si5351::set_vcxo(uint64_t pll_freq, uint8_t ppm)
     // Derive the register values to write
 
     // Prepare an array for parameters to be written to
-    uint8_t *params = new uint8_t[20];
+    uint8_t params[20];
     uint8_t i = 0;
     uint8_t temp;
 
@@ -1111,8 +1107,6 @@ void Si5351::set_vcxo(uint64_t pll_freq, uint8_t ppm)
 
     // Write the parameters
     si5351_write_bulk(SI5351_PLLB_PARAMETERS, i, params);
-
-    delete params;
 
     // Write the VCXO parameters
     vcxo_param = ((vcxo_param * ppm * SI5351_VCXO_MARGIN) / 100ULL) / 1000000ULL;

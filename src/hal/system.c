@@ -294,10 +294,6 @@ uint32_t system_get_tick()
     return systick_counter;
 }
 
-// TODO: create RTTY / FSK encoder for Si5351
-// TODO: create RTTY / FSK encoder for Si4032
-// TODO: create CW / OOK encoder -- the same one should work for both Si5351 and Si4032
-
 void SysTick_Handler()
 {
     systick_counter++;

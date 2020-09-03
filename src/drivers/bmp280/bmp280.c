@@ -130,8 +130,6 @@ static int write_register8(bmp280 *dev, uint8_t reg, uint8_t value)
     return true;
 }
 
-#include <stdio.h>
-
 bool bmp280_init(bmp280 *dev, bmp280_params_t *params)
 {
     if (dev->addr != BMP280_I2C_ADDRESS_0
@@ -140,26 +138,18 @@ bool bmp280_init(bmp280 *dev, bmp280_params_t *params)
         return false;
     }
 
-    printf("bmp280 0\n");
-
     if (!read_data(dev, BMP280_REG_ID, &dev->id, 1)) {
         return false;
     }
-
-    printf("bmp280 1\n");
 
     if (dev->id != BMP280_CHIP_ID && dev->id != BME280_CHIP_ID) {
         return false;
     }
 
-    printf("bmp280 1.5\n");
-
     // Soft reset.
     if (!write_register8(dev, BMP280_REG_RESET, BMP280_RESET_VALUE)) {
         return false;
     }
-
-    printf("bmp280 2\n");
 
     // Wait until finished copying over the NVP data.
     while (1) {

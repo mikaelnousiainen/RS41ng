@@ -17,14 +17,14 @@ int main(void)
     memset(&telemetry, 0, sizeof(telemetry_data));
 
     uint8_t aprs_packet[256];
-    size_t aprs_length = aprs_generate_position_without_timestamp(
-                aprs_packet, sizeof(aprs_packet), &telemetry, APRS_SYMBOL_TABLE, APRS_SYMBOL, APRS_COMMENT);
+    size_t aprs_length = aprs_generate_position(
+                aprs_packet, sizeof(aprs_packet), &telemetry, APRS_SYMBOL_TABLE, APRS_SYMBOL, false, APRS_COMMENT);
 
     uint8_t payload[256];
     size_t payload_length = ax25_encode_packet_aprs(APRS_CALLSIGN, APRS_SSID, APRS_DESTINATION, APRS_DESTINATION_SSID, APRS_RELAYS,
                (char *) aprs_packet, aprs_length, payload);
 
-    printf("Full payload length: %d\n", payload_length);
+    printf("Full payload length: %ld\n", payload_length);
 
     for (int i = 0; i < payload_length; i++) {
         uint8_t c = payload[i];
@@ -36,19 +36,6 @@ int main(void)
     }
 
     printf("\n");
-
-    //uint8_t payload[] = { 0x7e, 0x82, 0xa0, 0xb4, 'h', 'b', 0x9c, 0x00, 0x7e};
-    // 0x7e: 0 1 1 1 1 1 1 0
-    // 0x82: 0 1 0 0 0 0 0 1
-    // 0xa0: 0 0 0 0 0 1 0 1
-    // 0xb4: 0 0 1 0 1 1 0 1
-
-    //uint8_t payload[] = { 0x7e, 0x3f, 0x7f };
-    // 1 1 1 1 1   1 0 0
-    // N N N N N S N C C
-
-    // 1 1 1 1 1   1 1 0
-    // N N N N N S N N C
 
     bell_encoder_set_data(&fsk_encoder, sizeof(payload), payload);
 
