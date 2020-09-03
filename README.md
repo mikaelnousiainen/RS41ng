@@ -1,9 +1,9 @@
-# RS41ng
+# RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
 
-**NOTE:** This is a work in progress and most features do not work correctly yet!
+**NOTE:** This is a work in progress and some features do not work correctly yet!
 
-This is a custom firmware for Vaisala RS41 radiosondes. Some of the code is based
-on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
+This is a custom, amateur radio-oriented firmware for Vaisala RS41 radiosondes.
+Some of the code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
 but most of it has been rewritten from scratch.
 
 The motivation to develop this firmware is to provide cleaner, customizable and
