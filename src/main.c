@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "hal/system.h"
 #include "hal/i2c.h"
 #include "hal/spi.h"
@@ -30,16 +29,18 @@ void handle_timer_tick()
         ubxg6010_get_current_gps_data(&current_gps_data);
     }
 
-    // Blink fast until GPS fix is acquired
-    if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
-        if (current_gps_data.fix >= 3) {
-            if (counter == 0) {
+    if (leds_enabled) {
+        // Blink fast until GPS fix is acquired
+        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
+            if (current_gps_data.fix >= 3) {
+                if (counter == 0) {
+                    led_state = !led_state;
+                    system_set_green_led(led_state);
+                }
+            } else {
                 led_state = !led_state;
                 system_set_green_led(led_state);
             }
-        } else {
-            led_state = !led_state;
-            system_set_green_led(led_state);
         }
     }
 }
@@ -90,8 +91,13 @@ gps_init:
 
     log_info("System initialized!\n");
 
-    system_set_green_led(true);
-    system_set_red_led(false);
+    if (leds_enabled) {
+        system_set_green_led(true);
+        system_set_red_led(false);
+    } else {
+        system_set_green_led(false);
+        system_set_red_led(false);
+    }
 
     system_initialized = true;
 

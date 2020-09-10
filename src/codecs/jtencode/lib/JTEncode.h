@@ -211,6 +211,7 @@ class JTEncode
 {
 public:
   JTEncode(void);
+  ~JTEncode();
   void jt65_encode(const char *, uint8_t *);
   void jt9_encode(const char *, uint8_t *);
   void jt4_encode(const char *, uint8_t *);

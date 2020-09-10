@@ -21,7 +21,7 @@ typedef enum _jtencode_mode_type {
 
 bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8_t *symbol_data,
         jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
-        char *fsq_callsign_from, char *fsq_callsign_to, char fsq_command);
+        char *fsq_callsign_from);
 void jtencode_encoder_destroy(fsk_encoder *encoder);
 
 extern fsk_encoder_api jtencode_fsk_encoder_api;

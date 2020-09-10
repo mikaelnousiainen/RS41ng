@@ -15,7 +15,7 @@ The main features this firmware aims to implement are:
 * Support for custom sensors via the external I²C bus
 * Extensibility to allow easy addition of new digital modes
 
-## Features currently working
+## Features
 
 * APRS on 70cm amateur radio band using the internal Si4032 radio transmitter
   * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
@@ -23,13 +23,15 @@ The main features this firmware aims to implement are:
 * Digital mode beacons on HF/VHF frequencies using a Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde
   * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
-  * *NOTE:* It is most likely not possible to implement 1200 bps Bell 202 modulation for APRS using Si5351,
-    because the Si5351 chip is too slow to change the generated frequency
 * External I²C bus sensor drivers
   * Bosch BMP280 barometric pressure / temperature / humidity sensor
 
 ### Planned features
 
+* Investigate possibility to implement 1200 bps Bell 202 modulation (and
+  possibly also 300 bps Bell 103 modulation) for APRS using Si5351,
+  this requires special handling to make Si5351 change frequency quickly
+  * See: https://github.com/etherkit/Si5351Arduino/issues/22
 * CW (on-off keying) on both Si4032 (70cm) and Si5351 (HF + 2m)
 * RTTY on both Si4032 (70cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
 * Support for more I²C sensors
@@ -176,7 +178,51 @@ the timings are mostly off for some unknown reason.
 Currently, the Bell 202 modulation implementation uses hardware PWM to generate the individual tone frequencies,
 but the symbol timing is created in a loop with delay that was chosen carefully via experiments.
 
+## Debugging APRS
+
+Here are some tools and command-line examples to receive and debug APRS messages using an
+SDR receiver. There are examples for using both [rx_tools](https://github.com/rxseger/rx_tools)
+and [rtl-sdr](https://github.com/osmocom/rtl-sdr) tools to interface with the SDR receiver.
+The example commands assume you are using an RTL-SDR dongle, but `rx_fm` (from `rx_tools`)
+supports other types of devices too, as it's based on SoapySDR.
+
+### Dire Wolf
+
+[Dire Wolf](https://github.com/wb2osz/direwolf) can decode APRS (and lots of other digital modes)
+from audio streams.
+
+rx_tools:
+
+```bash
+rx_fm -f 432500000 -M fm -s 250000 -r 48000 -g 22 -d driver=rtlsdr - | direwolf -n 1 -D 1 -r 48000 -b 16 -
+```
+
+rtl-sdr:
+
+```bash
+rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | direwolf -n 1 -D 1 -r 48000 -b 16 -
+```
+
+### SigPlay
+
+[SigPlay](https://bk.gnarf.org/creativity/sigplay/) is a set of tools for DSP and signal processing.
+SigPlay also includes a command-line tool to decode and print out raw data from Bell 202 encoding,
+which is really useful, as it allows you to see the bytes that actually get transmitted --
+even if the packet is not a valid APRS packet!
+
+rx_tools:
+
+```bash
+rx_fm -f 432500000 -M fm -s 250000 -r 48000 -g 22 -d driver=rtlsdr - | ./aprs -
+```
+
+rtl-sdr:
+
+```bash
+rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
+```
+
 # Authors
 
-* Authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
+* Original codebase: DF8OE and other authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 * Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>

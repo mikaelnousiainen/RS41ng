@@ -10,6 +10,16 @@
 
 #include "radio_si4032.h"
 
+/**
+ * I have attempted to implement Bell 202 frequency generation using hardware DMA and PWM, but have failed to generate
+ * correct symbol rate that other APRS equipment are able to decode. I have tried to decode the DMA-based modulation with
+ * some tools intended for debugging APRS and while some bytes are decoded correctly every once in a while,
+ * the timings are mostly off for some unknown reason.
+ *
+ * The Bell 202 modulation implementation uses hardware PWM to generate the individual tone frequencies,
+ * but when si4032_use_dma is false, the symbol timing is created in a loop with delay that was chosen
+ * carefully via experiments.
+ */
 static bool si4032_use_dma = false;
 
 // TODO: Add support for multiple APRS baud rates
@@ -40,7 +50,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             modulation_type = SI4032_MODULATION_TYPE_NONE;
             use_direct_mode = false;
             break;
-        case RADIO_DATA_MODE_APRS:
+        case RADIO_DATA_MODE_APRS_1200:
             frequency_offset = 0;
             modulation_type = SI4032_MODULATION_TYPE_FSK;
             use_direct_mode = true;
@@ -53,7 +63,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
     }
 
     si4032_set_tx_frequency(((float) entry->frequency) / 1000000.0f);
-    si4032_set_tx_power(entry->tx_power * 7 / 100);
+    si4032_set_tx_power(entry->tx_power);
     si4032_set_frequency_offset(frequency_offset);
     si4032_set_modulation_type(modulation_type);
 
@@ -67,7 +77,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
     }
 
     switch (entry->data_mode) {
-        case RADIO_DATA_MODE_APRS:
+        case RADIO_DATA_MODE_APRS_1200:
             if (si4032_use_dma) {
                 shared_state->radio_dma_transfer_active = true;
                 radio_dma_transfer_stop_after_counter = -1;
@@ -91,7 +101,7 @@ static uint32_t radio_next_symbol_si4032(radio_transmit_entry *entry, radio_modu
             return 0;
         case RADIO_DATA_MODE_RTTY:
             return 0;
-        case RADIO_DATA_MODE_APRS: {
+        case RADIO_DATA_MODE_APRS_1200: {
             int8_t next_tone_index = entry->fsk_encoder_api->next_tone(&entry->fsk_encoder);
             if (next_tone_index < 0) {
                 return 0;
@@ -130,7 +140,7 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
     system_disable_tick();
 
     switch (entry->data_mode) {
-        case RADIO_DATA_MODE_APRS: {
+        case RADIO_DATA_MODE_APRS_1200: {
             int8_t tone_index;
 
             while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
@@ -179,11 +189,8 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
         case RADIO_DATA_MODE_RTTY:
             use_direct_mode = false;
             break;
-        case RADIO_DATA_MODE_APRS:
+        case RADIO_DATA_MODE_APRS_1200:
             use_direct_mode = true;
-            if (si4032_use_dma) {
-                system_enable_tick();
-            }
             break;
         default:
             break;
@@ -199,7 +206,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
     si4032_inhibit_tx();
 
     switch (entry->data_mode) {
-        case RADIO_DATA_MODE_APRS:
+        case RADIO_DATA_MODE_APRS_1200:
             if (si4032_use_dma) {
                 system_enable_tick();
             }

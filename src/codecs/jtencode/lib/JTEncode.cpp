@@ -41,7 +41,12 @@
 JTEncode::JTEncode(void)
 {
   // Initialize the Reed-Solomon encoder
-  rs_inst = (struct rs *)(intptr_t)init_rs_int(6, 0x43, 3, 1, 51, 0);
+  rs_inst = (struct rs *) init_rs_int(6, 0x43, 3, 1, 51, 0);
+}
+
+JTEncode::~JTEncode()
+{
+    free_rs_int(rs_inst);
 }
 
 /*

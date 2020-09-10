@@ -2,7 +2,7 @@
 #include "telemetry.h"
 #include "radio_payload_wspr.h"
 
-uint16_t radio_wspr_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data)
+uint16_t radio_wspr_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data, char *message)
 {
     // Not used for WSPR
     return 0;

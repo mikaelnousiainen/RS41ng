@@ -9,6 +9,7 @@
 
 typedef struct _telemetry_data {
     uint16_t battery_voltage_millivolts;
+    uint16_t button_adc_value;
     int32_t internal_temperature_celsius_100;
 
     int32_t temperature_celsius_100;

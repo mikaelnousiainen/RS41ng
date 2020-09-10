@@ -54,7 +54,7 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
 
     return snprintf((char *) payload,
             length,
-            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06ld/P%dS%dT%02ldV%04dC%02d%s"),
+            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06d/P%dS%dT%02dV%04dC%02d%s"),
             timestamp,
             abs(la_degrees), la_minutes, la_h_minutes,
             la_degrees > 0 ? 'N' : 'S',

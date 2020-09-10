@@ -78,13 +78,15 @@ static void gpio_init()
     GPIO_Init(GPIOA, &gpio_init);
 
     // Battery voltage (analog)
-    gpio_init.GPIO_Mode = GPIO_Mode_AIN;
     gpio_init.GPIO_Pin = GPIO_Pin_5;
+    gpio_init.GPIO_Mode = GPIO_Mode_AIN;
+    gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOA, &gpio_init);
 
     // Button state (analog)
-    gpio_init.GPIO_Mode = GPIO_Mode_AIN;
     gpio_init.GPIO_Pin = GPIO_Pin_6;
+    gpio_init.GPIO_Mode = GPIO_Mode_AIN;
+    gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOA, &gpio_init);
 
     // LEDs
@@ -156,6 +158,11 @@ uint16_t system_get_battery_voltage_millivolts()
     return (uint16_t) (((float) dma_buffer_adc[0]) * 10.0f * 600.0f / 4096.0f);
 }
 
+uint16_t system_get_button_adc_value()
+{
+    return (uint16_t) dma_buffer_adc[1];
+}
+
 void system_shutdown()
 {
     GPIO_SetBits(GPIOA, GPIO_Pin_12);
@@ -163,10 +170,13 @@ void system_shutdown()
 
 void system_handle_button()
 {
-    static uint16_t button_pressed_threshold = 0;
+    static uint16_t button_pressed_threshold = 2000;
     static bool shutdown = false;
 
-    uint16_t current_value = dma_buffer_adc[1];
+    // ~1450-1600 - button up
+    // ~1780-1850 - button down
+
+    uint16_t current_value = system_get_button_adc_value();
 
     if (current_value > button_pressed_threshold) {
         button_pressed++;
@@ -306,6 +316,6 @@ void TIM4_IRQHandler(void)
 
         system_handle_timer_tick();
 
-        // TODO: system_handle_button();
+        // TODO: fix detection of button state and enable: system_handle_button();
     }
 }

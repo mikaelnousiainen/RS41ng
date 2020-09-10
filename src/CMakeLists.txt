@@ -21,8 +21,8 @@ add_definitions(-D__ASSEMBLY__)
 SET(LINKER_SCRIPT arm-gcc-link.ld)
 SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -g -O3 -nostartfiles")
 SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
-SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99 -Dprintf=iprintf")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -Dprintf=iprintf -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=nano.specs -T ${LINKER_SCRIPT}")
+SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=nano.specs -T ${LINKER_SCRIPT}")
 # -u _printf_float
 #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
 

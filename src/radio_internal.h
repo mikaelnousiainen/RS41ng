@@ -15,7 +15,7 @@ typedef enum _radio_type {
 typedef enum _radio_data_mode {
     RADIO_DATA_MODE_CW = 1,
     RADIO_DATA_MODE_RTTY,
-    RADIO_DATA_MODE_APRS,
+    RADIO_DATA_MODE_APRS_1200,
     RADIO_DATA_MODE_WSPR,
     RADIO_DATA_MODE_FT8,
     RADIO_DATA_MODE_JT65,
@@ -40,6 +40,10 @@ typedef struct _radio_transmit_entry {
     uint32_t frequency;
     uint8_t tx_power;
     uint32_t symbol_rate;
+
+    char **messages;
+    uint8_t current_message_index;
+    uint8_t message_count;
 
     payload_encoder *payload_encoder;
     fsk_encoder_api *fsk_encoder_api;

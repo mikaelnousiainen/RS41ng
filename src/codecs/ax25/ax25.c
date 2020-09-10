@@ -83,7 +83,7 @@ uint16_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destin
 
     memset(header->source, ' ', sizeof(header->source));
     memcpy(header->source, source, 6);
-    header->source_ssid = (uint8_t) (source_ssid > '@' ? source_ssid - 6 : source_ssid);;
+    header->source_ssid = (uint8_t) (source_ssid >= 'A' ? source_ssid - 7 : source_ssid);;
 
     memset(header->destination, ' ', sizeof(header->destination));
     memcpy(header->destination, destination, 6);

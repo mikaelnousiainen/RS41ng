@@ -8,6 +8,7 @@
 
 void telemetry_collect(telemetry_data *data)
 {
+    data->button_adc_value = system_get_button_adc_value();
     data->battery_voltage_millivolts = system_get_battery_voltage_millivolts();
     data->internal_temperature_celsius_100 = si4032_read_temperature_celsius_100();
 

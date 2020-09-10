@@ -125,10 +125,8 @@ typedef struct _jtencode_encoder {
     uint8_t wspr_dbm;
 
     char *fsq_callsign_from;
-    char *fsq_callsign_to;
-    char fsq_command;
 
-    JTEncode jtencode;
+    JTEncode *jtencode;
     uint16_t symbol_count;
     uint32_t tone_spacing;
     uint32_t tone_delay;
@@ -141,7 +139,7 @@ typedef struct _jtencode_encoder {
 
 bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8_t *symbol_data,
         jtencode_mode_type mode_type, char *wspr_callsign, char *wspr_locator, uint8_t wspr_dbm,
-        char *fsq_callsign_from, char *fsq_callsign_to, char fsq_command)
+        char *fsq_callsign_from)
 {
     jtencode_mode_descriptor *mode_descriptor = &jtencode_modes[mode_type];
     if (mode_descriptor->symbol_count > 0) {
@@ -167,8 +165,8 @@ bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8
     jte->wspr_dbm = wspr_dbm;
 
     jte->fsq_callsign_from = fsq_callsign_from;
-    jte->fsq_callsign_to = fsq_callsign_to;
-    jte->fsq_command = fsq_command;
+
+    jte->jtencode = new JTEncode();
 
     return true;
 }
@@ -176,6 +174,8 @@ bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8
 void jtencode_encoder_destroy(fsk_encoder *encoder)
 {
     if (encoder->priv != nullptr) {
+        auto *jte = (jtencode_encoder *) encoder->priv;
+        delete jte->jtencode;
         free(encoder->priv);
         encoder->priv = nullptr;
     }
@@ -207,7 +207,7 @@ uint32_t jtencode_encoder_get_symbol_delay(fsk_encoder *encoder)
 void jtencode_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8_t *data)
 {
     auto *jte = (jtencode_encoder *) encoder->priv;
-    JTEncode *jtencode = &jte->jtencode;
+    JTEncode *jtencode = jte->jtencode;
     uint8_t *symbol_data = jte->symbol_data;
     jtencode_mode_type mode_type = jte->mode_type;
 
@@ -233,8 +233,7 @@ void jtencode_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8
         case JTENCODE_MODE_FSQ_3:
         case JTENCODE_MODE_FSQ_4_5:
         case JTENCODE_MODE_FSQ_6:
-            jtencode->fsq_dir_encode(jte->fsq_callsign_from, jte->fsq_callsign_to,
-                    jte->fsq_command, (const char *) data, symbol_data);
+            jtencode->fsq_encode(jte->fsq_callsign_from, (const char *) data, symbol_data);
 
             uint8_t j = 0;
             while (symbol_data[j++] != 0xff);
