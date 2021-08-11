@@ -8,6 +8,7 @@
 
 void pwm_data_timer_init();
 void pwm_data_timer_dma_request_enable(bool enabled);
+void pwm_data_timer_uninit();
 
 void pwm_timer_init(uint32_t frequency_hz_100);
 void pwm_timer_pwm_enable(bool enabled);

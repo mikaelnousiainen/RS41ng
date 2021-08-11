@@ -75,8 +75,13 @@ void si4032_set_tx_power(uint8_t power)
  */
 void si4032_set_frequency_offset(uint16_t offset)
 {
-    si4032_write(0x73, 0);
+    si4032_write(0x73, offset);
     si4032_write(0x74, 0);
+}
+
+inline void si4032_set_frequency_offset_small(uint8_t offset)
+{
+    si4032_write(0x73, offset);
 }
 
 void si4032_set_frequency_deviation(uint8_t deviation)

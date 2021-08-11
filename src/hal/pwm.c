@@ -57,6 +57,11 @@ void pwm_data_timer_dma_request_enable(bool enabled)
     TIM_DMACmd(TIM2, TIM_DMA_Update, enabled ? ENABLE : DISABLE);
 }
 
+void pwm_data_timer_uninit()
+{
+    TIM_Cmd(TIM2, DISABLE);
+}
+
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_DeInit(TIM15);

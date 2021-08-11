@@ -119,6 +119,16 @@ typedef struct {
 } uBloxNAVVELNEDPayload;
 
 typedef struct {
+    uint32_t iTOW;        //GPS Millisecond Time of Week [- ms]
+    uint8_t gpsFix;        //GPS Fix State
+    uint8_t flags;  // LSB = gpsFixOK - the only valid way of determining if a fix is actually OK.
+    uint8_t fixStat;
+    uint8_t flags2; // Power Save Mode State
+    uint32_t ttff;
+    uint32_t msss;
+} uBloxNAVSTATUSPayload;
+
+typedef struct {
     uint8_t portID;        //Port Identifier Number (see Serial [- -]
     uint8_t reserved1;        //Reserved [- -]
     uint16_t txReady;        //TX ready PIN configuration [- -]
@@ -205,6 +215,7 @@ typedef union {
     uBloxNAVTIMEGPSPayload navtimegps;
     uBloxNAVTIMEUTCPayload navtimeutc;
     uBloxNAVVELNEDPayload navvelned;
+    uBloxNAVSTATUSPayload navstatus;
     uBloxACKACKayload ackack;
     uBloxCFGRSTPayload cfgrst;
     uBloxCFGRXMPayload cfgrxm;
@@ -216,7 +227,7 @@ typedef struct __attribute__((packed)) {
     ubloxPacketData data;
 } uBloxPacket;
 
-gps_data current_gps_data;
+gps_data ubxg6010_current_gps_data;
 
 volatile bool gps_initialized = false;
 volatile bool ack_received = false;
@@ -305,8 +316,8 @@ bool ubxg6010_send_packet_and_wait_for_ack(uBloxPacket *packet)
 bool ubxg6010_get_current_gps_data(gps_data *data)
 {
     system_disable_irq();
-    memcpy(data, &current_gps_data, sizeof(gps_data));
-    current_gps_data.updated = false;
+    memcpy(data, &ubxg6010_current_gps_data, sizeof(gps_data));
+    ubxg6010_current_gps_data.updated = false;
     system_enable_irq();
 
     return data->updated;
@@ -425,16 +436,18 @@ uBloxPacket msgcfgnav5 = {
                 .messageId=0x24,
                 .payloadSize=sizeof(uBloxCFGNAV5Payload)
         },
+        // NOTE: Dynamic model needs to be set to one of the Airborne modes to support high altitudes!
+        // Notes from darksidelemm RS41HUP fork: Tweaked the PDOP limits a bit, to make it a bit more likely to report a position.
         .data.cfgnav5={
                 .mask=0b0000001111111111, // Configure all settings
-                .dynModel=4, // Dynamic model: Airborne with <2g Acceleration -- TODO: 7
-                .fixMode=3, // Fix mode: 3D only -- TODO: 2
+                .dynModel=6, // Dynamic model: Airborne with <1g Acceleration
+                .fixMode=2, // Fix mode: 3D only
                 .fixedAlt=0, // Fixed altitude (mean sea level) for 2D fix mode.
                 .fixedAltVar=10000, // Fixed altitude variance for 2D mode.
                 .minElev=5, // Minimum Elevation for a GNSS satellite to be used in NAV (degrees)
                 .drLimit=0, // Maximum time to perform dead reckoning (linear extrapolation) in case of GPS signal loss (seconds)
-                .pDop=25, // Position DOP Mask to use
-                .tDop=25, // Time DOP Mask to use
+                .pDop=100, // Position DOP Mask to use (was 25)
+                .tDop=100, // Time DOP Mask to use (was 25)
                 .pAcc=100, // Position Accuracy Mask (m)
                 .tAcc=300, // Time Accuracy Mask (m)
                 .staticHoldThresh=0, // Static hold threshold (cm/s)
@@ -449,7 +462,7 @@ bool ubxg6010_init()
 {
     bool success;
 
-    memset(&current_gps_data, 0, sizeof(gps_data));
+    memset(&ubxg6010_current_gps_data, 0, sizeof(gps_data));
 
     gps_initialized = false;
 
@@ -483,6 +496,9 @@ bool ubxg6010_init()
         return false;
     }
 
+    // Rate of 1 for message: 0x01 0x02 Geodetic Position Solution
+    msgcfgmsg.data.cfgmsg.msgID = 0x02;
+    msgcfgmsg.data.cfgmsg.rate = 1;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
@@ -496,7 +512,7 @@ bool ubxg6010_init()
     }
 
     // Rate of 1 for message: 0x01 0x06 Navigation Solution Information
-    msgcfgmsg.data.cfgmsg.msgID = 0x6;
+    msgcfgmsg.data.cfgmsg.msgID = 0x06;
     msgcfgmsg.data.cfgmsg.rate = 1;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
@@ -525,6 +541,15 @@ bool ubxg6010_init()
     // Configure rate of 2 for message: 0x01 0x12 Velocity Solution in NED
     msgcfgmsg.data.cfgmsg.msgID = 0x12;
     msgcfgmsg.data.cfgmsg.rate = 2;
+    log_info("GPS: Requesting update messages from GPS chip\n");
+    success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
+    if (!success) {
+        return false;
+    }
+
+    // Configure rate of 2 for message: 0x01 0x03 Receiver Navigation Status
+    msgcfgmsg.data.cfgmsg.msgID = 0x03;
+    msgcfgmsg.data.cfgmsg.rate = 1;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
@@ -587,7 +612,7 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
     uBloxChecksum *checksum = (uBloxChecksum *) (((uint8_t *) &pkt->data) + pkt->header.payloadSize);
 
     if (cksum.ck_a != checksum->ck_a || cksum.ck_b != checksum->ck_b) {
-        current_gps_data.bad_packets += 1;
+        ubxg6010_current_gps_data.bad_packets += 1;
         return;
     }
 
@@ -595,62 +620,69 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
         // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this
-        current_gps_data.ok_packets += 1;
-        current_gps_data.time_of_week_millis = pkt->data.navpvt.iTOW;
-        current_gps_data.year = pkt->data.navpvt.year;
-        current_gps_data.month = pkt->data.navpvt.month;
-        current_gps_data.day = pkt->data.navpvt.day;
-        current_gps_data.hours = pkt->data.navpvt.hour;
-        current_gps_data.minutes = pkt->data.navpvt.min;
-        current_gps_data.seconds = pkt->data.navpvt.sec;
+        ubxg6010_current_gps_data.ok_packets += 1;
+        ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navpvt.iTOW;
+        ubxg6010_current_gps_data.year = pkt->data.navpvt.year;
+        ubxg6010_current_gps_data.month = pkt->data.navpvt.month;
+        ubxg6010_current_gps_data.day = pkt->data.navpvt.day;
+        ubxg6010_current_gps_data.hours = pkt->data.navpvt.hour;
+        ubxg6010_current_gps_data.minutes = pkt->data.navpvt.min;
+        ubxg6010_current_gps_data.seconds = pkt->data.navpvt.sec;
 
-        current_gps_data.fix = pkt->data.navpvt.fixType;
-        current_gps_data.latitude_degrees_1000000 = pkt->data.navpvt.lat;
-        current_gps_data.longitude_degrees_1000000 = pkt->data.navpvt.lon;
-        current_gps_data.altitude_mm = pkt->data.navpvt.hMSL;
-        current_gps_data.satellites_visible = pkt->data.navpvt.numSV;
-        current_gps_data.ground_speed_cm_per_second = pkt->data.navpvt.gSpeed;
-        current_gps_data.heading_degrees_100000 = pkt->data.navpvt.headMot;
-        current_gps_data.climb_cm_per_second = -pkt->data.navpvt.velD;
+        ubxg6010_current_gps_data.fix = pkt->data.navpvt.fixType;
+        ubxg6010_current_gps_data.latitude_degrees_1000000 = pkt->data.navpvt.lat;
+        ubxg6010_current_gps_data.longitude_degrees_1000000 = pkt->data.navpvt.lon;
+        ubxg6010_current_gps_data.altitude_mm = pkt->data.navpvt.hMSL;
+        ubxg6010_current_gps_data.satellites_visible = pkt->data.navpvt.numSV;
+        ubxg6010_current_gps_data.ground_speed_cm_per_second = pkt->data.navpvt.gSpeed;
+        ubxg6010_current_gps_data.heading_degrees_100000 = pkt->data.navpvt.headMot;
+        ubxg6010_current_gps_data.climb_cm_per_second = -pkt->data.navpvt.velD;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x12) {
-        current_gps_data.ok_packets += 1;
-        current_gps_data.time_of_week_millis = pkt->data.navvelned.iTOW;
-        current_gps_data.ground_speed_cm_per_second = pkt->data.navvelned.gSpeed;
-        current_gps_data.heading_degrees_100000 = pkt->data.navvelned.headMot;
-        current_gps_data.climb_cm_per_second = -pkt->data.navvelned.velD;
+        ubxg6010_current_gps_data.ok_packets += 1;
+        ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navvelned.iTOW;
+        ubxg6010_current_gps_data.ground_speed_cm_per_second = pkt->data.navvelned.gSpeed;
+        ubxg6010_current_gps_data.heading_degrees_100000 = pkt->data.navvelned.headMot;
+        ubxg6010_current_gps_data.climb_cm_per_second = -pkt->data.navvelned.velD;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x02) {
-        current_gps_data.ok_packets += 1;
-        current_gps_data.time_of_week_millis = pkt->data.navposllh.iTOW;
-        current_gps_data.latitude_degrees_1000000 = pkt->data.navposllh.lat;
-        current_gps_data.longitude_degrees_1000000 = pkt->data.navposllh.lon;
-        current_gps_data.altitude_mm = pkt->data.navposllh.hMSL;
+        ubxg6010_current_gps_data.ok_packets += 1;
+        ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navposllh.iTOW;
+        ubxg6010_current_gps_data.latitude_degrees_1000000 = pkt->data.navposllh.lat;
+        ubxg6010_current_gps_data.longitude_degrees_1000000 = pkt->data.navposllh.lon;
+        ubxg6010_current_gps_data.altitude_mm = pkt->data.navposllh.hMSL;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
+    } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x03) {
+        ubxg6010_current_gps_data.ok_packets += 1;
+        ubxg6010_current_gps_data.fix_ok = pkt->data.navstatus.flags & 0x01;
+        ubxg6010_current_gps_data.power_safe_mode_state = pkt->data.navstatus.flags2 & 0x03;
+
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x06) {
-        current_gps_data.time_of_week_millis = pkt->data.navsol.iTOW;
-        current_gps_data.week = pkt->data.navsol.week;
-        current_gps_data.fix = pkt->data.navsol.gpsFix;
-        current_gps_data.satellites_visible = pkt->data.navsol.numSV;
+        ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navsol.iTOW;
+        ubxg6010_current_gps_data.week = pkt->data.navsol.week;
+        ubxg6010_current_gps_data.fix = pkt->data.navsol.gpsFix;
+        ubxg6010_current_gps_data.satellites_visible = pkt->data.navsol.numSV;
+        ubxg6010_current_gps_data.position_dilution_of_precision = pkt->data.navsol.pDOP;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x20) {
-        current_gps_data.time_of_week_millis = pkt->data.navtimegps.iTOW;
-        current_gps_data.week = pkt->data.navtimegps.week;
+        ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navtimegps.iTOW;
+        ubxg6010_current_gps_data.week = pkt->data.navtimegps.week;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x21) {
-        current_gps_data.year = pkt->data.navtimeutc.year;
-        current_gps_data.month = pkt->data.navtimeutc.month;
-        current_gps_data.day = pkt->data.navtimeutc.day;
-        current_gps_data.hours = pkt->data.navtimeutc.hour;
-        current_gps_data.minutes = pkt->data.navtimeutc.min;
-        current_gps_data.seconds = pkt->data.navtimeutc.sec;
+        ubxg6010_current_gps_data.year = pkt->data.navtimeutc.year;
+        ubxg6010_current_gps_data.month = pkt->data.navtimeutc.month;
+        ubxg6010_current_gps_data.day = pkt->data.navtimeutc.day;
+        ubxg6010_current_gps_data.hours = pkt->data.navtimeutc.hour;
+        ubxg6010_current_gps_data.minutes = pkt->data.navtimeutc.min;
+        ubxg6010_current_gps_data.seconds = pkt->data.navtimeutc.sec;
 
-        current_gps_data.updated = true;
+        ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x05 && pkt->header.messageId == 0x01) {
         ack_received = true;
     } else if (pkt->header.messageClass == 0x05 && pkt->header.messageId == 0x00) {

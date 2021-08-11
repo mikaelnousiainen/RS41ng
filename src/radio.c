@@ -7,22 +7,24 @@
 #include "hal/delay.h"
 #include "hal/usart_gps.h"
 #include "codecs/bell/bell.h"
+#include "codecs/mfsk/mfsk.h"
 #include "codecs/jtencode/jtencode.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "radio_internal.h"
 #include "radio_si4032.h"
 #include "radio_si5351.h"
 #include "radio_payload_aprs.h"
+#include "radio_payload_horus_v1.h"
 #include "radio_payload_wspr.h"
 #include "radio_payload_jtencode.h"
 #include "radio_payload_fsq.h"
 
 radio_transmit_entry radio_transmit_schedule[] = {
         {
-                .enabled = true,
+                .enabled = RADIO_SI4032_TX_APRS,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_APRS_1200,
-                .time_sync_seconds = 0,
+                .time_sync_seconds = 1,
                 .time_sync_seconds_offset = 0,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_APRS_1200,
                 .tx_power = RADIO_SI4032_TX_POWER,
@@ -31,7 +33,31 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &bell_fsk_encoder_api,
         },
         {
-                .enabled = false,
+                .enabled = RADIO_SI4032_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = 1,
+                .time_sync_seconds_offset = 0,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE,
+                .payload_encoder = &radio_horus_v1_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI5351_TX_WSPR,
+                .radio_type = RADIO_TYPE_SI5351,
+                .time_sync_seconds = 120,
+                .time_sync_seconds_offset = 1,
+                .data_mode = RADIO_DATA_MODE_WSPR,
+                .frequency = RADIO_SI5351_TX_FREQUENCY_WSPR,
+                .tx_power = RADIO_SI5351_TX_POWER,
+                .payload_encoder = &radio_wspr_payload_encoder,
+                .fsk_encoder_api = &jtencode_fsk_encoder_api,
+                .jtencode_mode_type = JTENCODE_MODE_WSPR,
+        },
+        {
+                .enabled = RADIO_SI5351_TX_FT8,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_FT8,
                 .time_sync_seconds = 15,
@@ -43,7 +69,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .jtencode_mode_type = JTENCODE_MODE_FT8,
         },
         {
-                .enabled = false,
+                .enabled = RADIO_SI5351_TX_JT9,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT9,
                 .time_sync_seconds = 60,
@@ -55,7 +81,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .jtencode_mode_type = JTENCODE_MODE_JT9,
         },
         {
-                .enabled = false,
+                .enabled = RADIO_SI5351_TX_JT4,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT4,
                 .time_sync_seconds = 60,
@@ -67,7 +93,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .jtencode_mode_type = JTENCODE_MODE_JT4,
         },
         {
-                .enabled = false,
+                .enabled = RADIO_SI5351_TX_JT65,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT65,
                 .time_sync_seconds = 60,
@@ -79,7 +105,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .jtencode_mode_type = JTENCODE_MODE_JT65,
         },
         {
-                .enabled = true,
+                .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_FSQ_6,
                 .time_sync_seconds = 0,
@@ -89,18 +115,6 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_fsq_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
                 .jtencode_mode_type = JTENCODE_MODE_FSQ_6,
-        },
-        {
-                .enabled = false,
-                .radio_type = RADIO_TYPE_SI5351,
-                .time_sync_seconds = 120,
-                .time_sync_seconds_offset = 1,
-                .data_mode = RADIO_DATA_MODE_WSPR,
-                .frequency = RADIO_SI5351_TX_FREQUENCY_WSPR,
-                .tx_power = RADIO_SI5351_TX_POWER,
-                .payload_encoder = &radio_wspr_payload_encoder,
-                .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_WSPR,
         },
         {
                 .end = true,
@@ -141,6 +155,7 @@ radio_module_state radio_shared_state = {
         .radio_symbol_count_loop = 0,
         .radio_dma_transfer_active = false,
         .radio_manual_transmit_active = false,
+        .radio_interrupt_transmit_active = false,
 
         .radio_current_fsk_tones = NULL,
         .radio_current_fsk_tone_count = 0,
@@ -190,14 +205,9 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
 #ifdef SEMIHOSTING_ENABLE
     log_info("Payload: ");
-    for (uint16_t i = 0; i < radio_current_payload_length; i++) {
-        char c = radio_current_payload[i];
-        if (c >= 0x20 && c <= 0x7e) {
-            log_info("%c", c);
-        } else {
-            log_info(" [%02X] ", c);
-        }
-    }
+    log_bytes_hex(radio_current_payload_length, (char *) radio_current_payload);
+    log_info("\n    ");
+    log_bytes(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n");
 #endif
 
@@ -209,6 +219,13 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_APRS_1200:
             // TODO: make bell tones and flag field count configurable
             bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, BELL_FLAG_FIELD_COUNT_1200, bell202_tones);
+            radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
+            entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
+                    &radio_shared_state.radio_current_fsk_tones);
+            entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
+            break;
+        case RADIO_DATA_MODE_HORUS_V1:
+            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
                     &radio_shared_state.radio_current_fsk_tones);
@@ -231,7 +248,8 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
                 strlcpy(locator, current_telemetry_data.locator, 4 + 1);
             }
 
-            success = jtencode_encoder_new(&entry->fsk_encoder, sizeof(radio_current_symbol_data), radio_current_symbol_data,
+            success = jtencode_encoder_new(&entry->fsk_encoder, sizeof(radio_current_symbol_data),
+                    radio_current_symbol_data,
                     entry->jtencode_mode_type, WSPR_CALLSIGN, locator, WSPR_DBM, FSQ_CALLSIGN_FROM);
             if (!success) {
                 return false;
@@ -311,6 +329,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
     radio_reset_transmit_state();
 
     radio_shared_state.radio_manual_transmit_active = false;
+    radio_shared_state.radio_interrupt_transmit_active = false;
     radio_shared_state.radio_dma_transfer_active = false;
 
     switch (entry->data_mode) {
@@ -320,6 +339,9 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
             break;
         case RADIO_DATA_MODE_APRS_1200:
             bell_encoder_destroy(&entry->fsk_encoder);
+            break;
+        case RADIO_DATA_MODE_HORUS_V1:
+            mfsk_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_WSPR:
         case RADIO_DATA_MODE_FT8:
@@ -386,7 +408,8 @@ static void radio_next_transmit_entry()
 
 void radio_handle_timer_tick()
 {
-    if (!radio_module_initialized || radio_shared_state.radio_dma_transfer_active || radio_shared_state.radio_manual_transmit_active) {
+    if (!radio_module_initialized || radio_shared_state.radio_dma_transfer_active
+        || radio_shared_state.radio_manual_transmit_active || radio_shared_state.radio_interrupt_transmit_active) {
         return;
     }
 
@@ -405,6 +428,11 @@ void radio_handle_timer_tick()
             radio_post_transmit_delay_counter--;
         }
     }
+}
+
+void radio_handle_data_timer_tick()
+{
+    radio_handle_data_timer_si4032();
 }
 
 bool radio_handle_time_sync()
@@ -447,7 +475,7 @@ bool radio_handle_time_sync()
 
     bool is_scheduled_time = time_sync_period_millis < RADIO_TIME_SYNC_THRESHOLD_MS;
 
-    //log_info("time with offset: %lu, sync period: %lu, scheduled: %d\n", time_with_offset_millis, time_sync_period_millis, is_scheduled_time);
+    log_debug("Time with offset: %lu, sync period: %lu, scheduled: %d\n", time_with_offset_millis, time_sync_period_millis, is_scheduled_time);
 
     if (!is_scheduled_time) {
         log_info("Time: %lu, GPS fix: %d - Waiting for time sync at every %d seconds with offset of %d\n", time_millis,
@@ -527,7 +555,7 @@ void radio_handle_main_loop()
     if (radio_shared_state.radio_transmission_active && radio_shared_state.radio_transmit_next_symbol_flag) {
         radio_shared_state.radio_transmit_next_symbol_flag = false;
 
-        if (!radio_shared_state.radio_manual_transmit_active) {
+        if (!radio_shared_state.radio_manual_transmit_active && !radio_shared_state.radio_interrupt_transmit_active) {
             bool success = radio_transmit_symbol(radio_current_transmit_entry);
             if (success) {
                 if (first_symbol) {
@@ -571,6 +599,9 @@ void radio_init()
             case RADIO_DATA_MODE_APRS_1200:
                 entry->messages = aprs_comment_templates;
                 break;
+            case RADIO_DATA_MODE_HORUS_V1:
+                // No messages
+                break;
             case RADIO_DATA_MODE_FT8:
             case RADIO_DATA_MODE_JT65:
             case RADIO_DATA_MODE_JT9:
@@ -589,7 +620,7 @@ void radio_init()
             default:
                 break;
         }
-        if (entry-> messages != NULL) {
+        if (entry->messages != NULL) {
             for (entry->message_count = 0; entry->messages[entry->message_count] != NULL; entry->message_count++);
         }
     }

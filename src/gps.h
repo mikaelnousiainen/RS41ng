@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define POWER_SAFE_MODE_STATE_ACQUISITION 0
+#define POWER_SAFE_MODE_STATE_TRACKING 1
+#define POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING 2
+#define POWER_SAFE_MODE_STATE_INACTIVE 3
+
 typedef struct _gps_data {
     bool updated;
 
@@ -24,8 +29,12 @@ typedef struct _gps_data {
     int32_t climb_cm_per_second;
     uint8_t satellites_visible;
     uint8_t fix;
+    bool fix_ok;
     uint16_t ok_packets;
     uint16_t bad_packets;
+
+    uint8_t power_safe_mode_state;
+    uint16_t position_dilution_of_precision; // pDOP
 } gps_data;
 
 #endif

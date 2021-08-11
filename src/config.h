@@ -8,35 +8,50 @@
 
 #include <stdbool.h>
 
-#define CALLSIGN "OH3BHX"
-
-#define RADIO_PAYLOAD_MAX_LENGTH 256
-#define RADIO_SYMBOL_DATA_MAX_LENGTH 512
-#define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 128
+// Set the tracker amateur radio call sign here
+#define CALLSIGN "MYCALL"
 
 #define LEDS_ENABLE true
-
 #define SENSOR_BMP280_ENABLE false
-
-#define RADIO_SI5351_ENABLE true
+#define RADIO_SI5351_ENABLE false
 
 #define RADIO_POST_TRANSMIT_DELAY_MS 5000
-#define RADIO_TIME_SYNC_THRESHOLD_MS 1500
+#define RADIO_TIME_SYNC_THRESHOLD_MS 2000
 
 /**
  * Si4032 transmit power: 0..7
  * 0 = -1dBm, 1 = 2dBm, 2 = 5dBm, 3 = 8dBm, 4 = 11dBm, 5 = 14dBm, 6 = 17dBm, 7 = 20dBm
  */
 #define RADIO_SI4032_TX_POWER 7
+
+// Which modes to transmit using the built-in Si4032 transmitter chip
+#define RADIO_SI4032_TX_CW false
+#define RADIO_SI4032_TX_RTTY false
+#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_HORUS_V1 true
+
+// Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW   432060000
 #define RADIO_SI4032_TX_FREQUENCY_RTTY 432060000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
+// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
 
 /**
  * Si5351 transmit power: 0..3
  * Si5351 drive strength: 0 = 2mA, 1 = 4mA, 2 = 6mA, 3 = 8mA
  */
 #define RADIO_SI5351_TX_POWER 3
+
+// Which modes to transmit using an externally connected Si5351 chip in the I²C bus
+#define RADIO_SI5351_TX_JT9 false
+#define RADIO_SI5351_TX_JT65 false
+#define RADIO_SI5351_TX_JT4 false
+#define RADIO_SI5351_TX_WSPR false
+#define RADIO_SI5351_TX_FSQ false
+#define RADIO_SI5351_TX_FT8 false
+
+// Transmit frequencies for the Si5351 transmitter modes
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
 #define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
 #define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
@@ -46,12 +61,15 @@
 
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
+// WSPR settings
 #define WSPR_CALLSIGN CALLSIGN
 #define WSPR_LOCATOR_FIXED_ENABLED false
 #define WSPR_LOCATOR_FIXED "AA00"
 #define WSPR_DBM 10
 
+// FSQ settings
 #define FSQ_CALLSIGN_FROM CALLSIGN
+#define FSQ_COMMENT "RS41ng radiosonde firmware test"
 
 /**
  * APRS SSID:
@@ -79,10 +97,16 @@
 // See APRS symbol table documentation in: http://www.aprs.org/symbols/symbolsX.txt
 #define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
 #define APRS_SYMBOL 'O'
-#define APRS_COMMENT " RS41ng radiosonde firmware test"
+#define APRS_COMMENT "RS41ng radiosonde firmware test"
 #define APRS_RELAYS "WIDE1-1,WIDE2-1"
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
+
+// Use Horus payload ID 0 for tests (4FSKTEST)
+#define HORUS_V1_PAYLOAD_ID 0
+#define HORUS_V1_BAUD_RATE 100
+#define HORUS_V1_FREQUENCY_OFFSET 0
+#define HORUS_V1_PREAMBLE_LENGTH 16
 
 // TODO: RTTY and CW settings (once modes are implemented)
 
@@ -90,6 +114,10 @@
 #define RTTY_7BIT   1 // if 0 --> 5 bits
 
 #define CW_LOCATOR_PAIR_COUNT 4 // max. 6 (12 characters WWL)
+
+#define RADIO_PAYLOAD_MAX_LENGTH 256
+#define RADIO_SYMBOL_DATA_MAX_LENGTH 512
+#define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 128
 
 extern bool leds_enabled;
 extern bool bmp280_enabled;

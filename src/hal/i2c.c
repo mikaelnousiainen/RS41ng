@@ -41,6 +41,8 @@ void i2c_init()
     // NOTE: I2C chip reset is necessary here!
     I2C_DeInit(I2C_PORT);
 
+    delay_ms(2);
+
     I2C_InitTypeDef i2c_init;
     I2C_StructInit(&i2c_init);
 
@@ -52,7 +54,11 @@ void i2c_init()
 
     I2C_Init(I2C_PORT, &i2c_init);
 
-    while (I2C_GetFlagStatus(I2C_PORT, I2C_FLAG_BUSY));
+    // This loop may get stuck if there is nothing connected in the I²C port pins
+    int count = 1000;
+    while (I2C_GetFlagStatus(I2C_PORT, I2C_FLAG_BUSY) && count--) {
+        delay_ms(1);
+    }
 
     I2C_Cmd(I2C_PORT, ENABLE);
 }

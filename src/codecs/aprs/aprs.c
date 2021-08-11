@@ -64,10 +64,10 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
             symbol,
             heading_degrees,
             ground_speed_knots,
-            altitude_feet,
+            (int) altitude_feet,
             aprs_packet_counter,
             data->gps.satellites_visible,
-            data->internal_temperature_celsius_100 / 100,
+            (int) data->internal_temperature_celsius_100 / 100,
             data->battery_voltage_millivolts,
             (int16_t) ((float) data->gps.climb_cm_per_second / 100.0f),
             comment

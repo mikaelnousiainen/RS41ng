@@ -1,3 +1,8 @@
+/**
+ * The tracker firmware will transmit each of the message templates
+ * defined here one by one, starting again from the beginning once the last message is transmitted.
+ */
+
 #include <stdlib.h>
 #include "config.h"
 
@@ -45,18 +50,33 @@ volatile bool system_initialized = false;
  * $he - Heading in degrees (up to 3 chars)
  */
 
+/**
+ * APRS mode comment messages.
+ * Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
+ * Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
+ */
 char *aprs_comment_templates[] = {
-        " B$bu $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - RS41ng radiosonde firmware test",
-        " $loc12 - RS41ng radiosonde firmware test",
+//        " B$bu $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " APRS_COMMENT,
+//        " B$bu $teC $hu% $prmb - " APRS_COMMENT,
+//        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
+        " $loc12 - " APRS_COMMENT,
         NULL
 };
 
+/**
+ * FSQ mode comment message templates.
+ * Maximum length: 130 characters.
+ */
 char *fsq_comment_templates[] = {
-        " $lat $lon, $alt m, $cl m/s, $gs km/h, $he deg - RS41ng radiosonde firmware test",
-        " $loc12, $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - RS41ng radiosonde firmware test",
+        " $lat $lon, $alt m, $cl m/s, $gs km/h, $he deg - " FSQ_COMMENT,
+        " $loc12, $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " FSQ_COMMENT,
         NULL
 };
 
+/**
+ * FTx/JTxx mode message templates.
+ * Maximum length: 13 characters allowed by the protocols.
+ */
 char *ftjt_message_templates[] = {
         "$cs $loc4",
         "$loc12",

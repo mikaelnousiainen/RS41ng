@@ -23,4 +23,7 @@
 
 #endif
 
+void log_bytes(int length, char *data);
+void log_bytes_hex(int length, char *data);
+
 #endif

@@ -6,7 +6,7 @@
 
 #include "codecs/fsk/fsk.h"
 
-#define BELL_FLAG_FIELD_COUNT_1200 25
+#define BELL_FLAG_FIELD_COUNT_1200 45
 #define BELL_FLAG_FIELD_COUNT_300 45
 
 void bell_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate, uint16_t flag_field_count, fsk_tone *tones);

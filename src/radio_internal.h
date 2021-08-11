@@ -16,6 +16,7 @@ typedef enum _radio_data_mode {
     RADIO_DATA_MODE_CW = 1,
     RADIO_DATA_MODE_RTTY,
     RADIO_DATA_MODE_APRS_1200,
+    RADIO_DATA_MODE_HORUS_V1,
     RADIO_DATA_MODE_WSPR,
     RADIO_DATA_MODE_FT8,
     RADIO_DATA_MODE_JT65,
@@ -64,6 +65,7 @@ typedef struct _radio_module_state {
 
     volatile bool radio_dma_transfer_active;
     volatile bool radio_manual_transmit_active;
+    volatile bool radio_interrupt_transmit_active;
 
     fsk_tone *radio_current_fsk_tones;
     int8_t radio_current_fsk_tone_count;

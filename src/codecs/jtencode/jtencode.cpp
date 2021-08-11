@@ -6,7 +6,6 @@
 #include "lib/JTEncode.h"
 
 #include "jtencode.h"
-#include "log.h"
 
 // Some of the code is based on JTEncode examples:
 //

@@ -3,6 +3,7 @@
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
 #include "hal/delay.h"
+#include "hal/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/si4032/si4032.h"
 #include "bmp280_handler.h"
@@ -48,7 +49,10 @@ void handle_timer_tick()
 int main(void)
 {
     bool success;
+
+    // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
+    system_handle_data_timer_tick = radio_handle_data_timer_tick;
     usart_gps_handle_incoming_byte = ubxg6010_handle_incoming_byte;
 
     log_info("System init\n");

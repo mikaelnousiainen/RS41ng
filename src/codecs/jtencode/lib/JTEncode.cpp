@@ -245,7 +245,7 @@ void JTEncode::fsq_encode(const char * from_call, const char * message, uint8_t 
 {
   char * tx_message;
   uint16_t symbol_pos = 0;
-  uint8_t i, fch, vcode1, vcode2, tone;
+  uint8_t i, fch, vcode1, vcode2;
   uint8_t cur_tone = 0;
 
   // Clear out the transmit buffer
@@ -332,7 +332,7 @@ void JTEncode::fsq_dir_encode(const char * from_call, const char * to_call, cons
 {
   char * tx_message;
   uint16_t symbol_pos = 0;
-  uint8_t i, fch, vcode1, vcode2, tone, from_call_crc;
+  uint8_t i, fch, vcode1, vcode2, from_call_crc;
   uint8_t cur_tone = 0;
 
   // Generate a CRC on from_call
@@ -421,8 +421,6 @@ void JTEncode::fsq_dir_encode(const char * from_call, const char * to_call, cons
 uint8_t ft8_buffer_s[FT8_BIT_COUNT];
 void JTEncode::ft8_encode(const char * msg, uint8_t * symbols)
 {
-  uint8_t i;
-
   char message[19];
   memset(message, 0, 19);
   strcpy(message, msg);
@@ -845,7 +843,7 @@ void JTEncode::ft8_bit_packing(char* message, uint8_t* codeword)
 	memset(qa, 0, 10);
 	memset(qb, 0, 10);
 
-	uint8_t i, j, x, i0;
+	uint8_t i, j, x, i0 = 0;
 	uint32_t ireg = 0;
 
 	// See if this is a telemetry message
@@ -1011,7 +1009,7 @@ void JTEncode::jt65_interleave(uint8_t * s)
 uint8_t jt9_buffer_d[JT9_BIT_COUNT];
 void JTEncode::jt9_interleave(uint8_t * s)
 {
-  uint8_t i, j;
+  uint8_t i;
 
   // Do the interleave
   for(i = 0; i < JT9_BIT_COUNT; i++)
@@ -1020,8 +1018,9 @@ void JTEncode::jt9_interleave(uint8_t * s)
     #if defined(__arm__)
       jt9_buffer_d[jt9i[i]] = s[i];
     #else
-    j = pgm_read_byte(&jt9i[i]);
-    jt9_buffer_d[j] = s[i];
+      uint8_t j;
+      j = pgm_read_byte(&jt9i[i]);
+      jt9_buffer_d[j] = s[i];
     #endif
   }
 
@@ -1372,9 +1371,10 @@ uint8_t JTEncode::crc8(const char * text)
 {
   uint8_t crc = '\0';
   uint8_t ch;
+  uint8_t len = (uint8_t) strlen(text);
 
   int i;
-  for(i = 0; i < strlen(text); i++)
+  for(i = 0; i < len; i++)
   {
     ch = text[i];
     //#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega16U4__)

@@ -18,6 +18,7 @@ void si4032_use_direct_mode(bool use);
 void si4032_set_tx_frequency(float frequency_mhz);
 void si4032_set_tx_power(uint8_t power);
 void si4032_set_frequency_offset(uint16_t offset);
+void si4032_set_frequency_offset_small(uint8_t offset);
 void si4032_set_frequency_deviation(uint8_t deviation);
 void si4032_set_modulation_type(si4032_modulation_type type);
 int32_t si4032_read_temperature_celsius_100();

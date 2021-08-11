@@ -21,6 +21,6 @@ typedef struct _telemetry_data {
     char locator[LOCATOR_PAIR_COUNT_FULL * 2 + 1];
 } telemetry_data;
 
-void telemetry_collect();
+void telemetry_collect(telemetry_data *data);
 
 #endif
