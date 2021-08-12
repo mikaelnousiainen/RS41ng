@@ -46,6 +46,12 @@ The main features this firmware aims to implement are:
 * Support for more I²C sensors
 * Configurable transmission frequencies and schedules based on location / altitude
 
+## Configuring the firmware
+
+1. Configure your amateur radio call sign, transmission schedule (time sync),
+   transmit frequencies and transmission mode parameters in `config.h`
+2. Set up transmitted message templates in `config.c`, depending on the modes you use
+
 ## Building the firmware
 
 Software requirements:
@@ -63,9 +69,7 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
 ### Steps to build the firmware
 
 1. Install the required software dependencies listed above
-2. Configure your amateur radio call sign, transmit frequencies and transmission mode parameters in `config.h`
-3. Configure scheduling of transmissions in `radio.c` by editing array `radio_transmit_schedule`
-4. Build the firmware using the following commands
+2. Build the firmware using the following commands
     ```
     mkdir build
     cd build

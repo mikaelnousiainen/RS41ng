@@ -1,30 +1,7 @@
 /**
- * The tracker firmware will transmit each of the message templates
- * defined here one by one, starting again from the beginning once the last message is transmitted.
- */
-
-#include <stdlib.h>
-#include "config.h"
-
-bool leds_enabled = LEDS_ENABLE;
-bool bmp280_enabled = SENSOR_BMP280_ENABLE;
-bool si5351_enabled = RADIO_SI5351_ENABLE;
-
-volatile bool system_initialized = false;
-
-/**
- * Allowed message lengths:
+ * The tracker firmware will transmit each of the message templates defined here in rotation, one by one,
+ * starting again from the beginning once the last message for a particular mode is transmitted.
  *
- * APRS comment - Free text up to 127 chars
- * FT8 - Free text up to 13 chars (Type 0.0 free text message, Type 0.5 telemetry message)
- * JT65 - Free text up to 13 chars (Plaintext Type 6 message)
- * JT9 - Free text up to 13 chars (Plaintext Type 6 message)
- * JT4 - Free text up to 13 chars (Plaintext Type 6 message)
- * FSQ - Call sign up to 20 chars, free text up to 130 chars
- * WSPR - Call sign up to 6 chars, locator 4 chars, output power in dBm
- */
-
-/**
  * Supported variable references in templates:
  *
  * $cs - Call sign
@@ -48,7 +25,26 @@ volatile bool system_initialized = false;
  * $gs - Ground speed in km/h (up to 3 chars)
  * $cl - Climb in m/s (up to 2 chars)
  * $he - Heading in degrees (up to 3 chars)
+ *
+ * Allowed message lengths:
+ *
+ * APRS comment - Free text up to 127 chars
+ * FT8 - Free text up to 13 chars (Type 0.0 free text message, Type 0.5 telemetry message)
+ * JT65 - Free text up to 13 chars (Plaintext Type 6 message)
+ * JT9 - Free text up to 13 chars (Plaintext Type 6 message)
+ * JT4 - Free text up to 13 chars (Plaintext Type 6 message)
+ * FSQ - Call sign up to 20 chars, free text up to 130 chars
+ * WSPR - Call sign up to 6 chars, locator 4 chars, output power in dBm
  */
+
+#include <stdlib.h>
+#include "config.h"
+
+bool leds_enabled = LEDS_ENABLE;
+bool bmp280_enabled = SENSOR_BMP280_ENABLE;
+bool si5351_enabled = RADIO_SI5351_ENABLE;
+
+volatile bool system_initialized = false;
 
 /**
  * APRS mode comment messages.

@@ -49,8 +49,6 @@ typedef struct _radio_transmit_entry {
     payload_encoder *payload_encoder;
     fsk_encoder_api *fsk_encoder_api;
 
-    jtencode_mode_type jtencode_mode_type;
-
     fsk_encoder fsk_encoder;
 } radio_transmit_entry;
 

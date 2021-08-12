@@ -10,6 +10,11 @@
 #define GPIO_SI_4032_CS GPIOC
 #define GPIO_PIN_SI4032_CS GPIO_Pin_13
 
+// TODO: For CW support:
+// TODO: static const uint16_t radioSDIpin = GPIO_Pin_15; // @ GPIOB!
+// TODO: Add methods to init SDI pin GPIO and to set SDI pin state -> Verify it can be used for OOK (CW), NSEL (CS) must be high
+// TODO: Call uninitialization of PWM timer after use so that SDI pin is free to use
+
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
     return spi_send_and_receive(GPIO_SI_4032_CS, GPIO_PIN_SI4032_CS, ((reg | SPI_WRITE_FLAG) << 8U) | value);

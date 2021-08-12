@@ -24,8 +24,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_APRS,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_APRS_1200,
-                .time_sync_seconds = 1,
-                .time_sync_seconds_offset = 0,
+                .time_sync_seconds = APRS_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = APRS_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_APRS_1200,
                 .tx_power = RADIO_SI4032_TX_POWER,
                 .symbol_rate = 1200,
@@ -36,8 +36,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_HORUS_V1,
-                .time_sync_seconds = 1,
-                .time_sync_seconds_offset = 0,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
                 .tx_power = RADIO_SI4032_TX_POWER,
                 .symbol_rate = HORUS_V1_BAUD_RATE,
@@ -47,74 +47,68 @@ radio_transmit_entry radio_transmit_schedule[] = {
         {
                 .enabled = RADIO_SI5351_TX_WSPR,
                 .radio_type = RADIO_TYPE_SI5351,
-                .time_sync_seconds = 120,
-                .time_sync_seconds_offset = 1,
+                .time_sync_seconds = WSPR_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = WSPR_TIME_SYNC_OFFSET_SECONDS,
                 .data_mode = RADIO_DATA_MODE_WSPR,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_WSPR,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_wspr_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_WSPR,
         },
         {
                 .enabled = RADIO_SI5351_TX_FT8,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_FT8,
-                .time_sync_seconds = 15,
-                .time_sync_seconds_offset = 0,
+                .time_sync_seconds = FT8_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = FT8_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_FT8,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_ft8_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_FT8,
         },
         {
                 .enabled = RADIO_SI5351_TX_JT9,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT9,
-                .time_sync_seconds = 60,
-                .time_sync_seconds_offset = 1,
+                .time_sync_seconds = JT9_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = JT9_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT9,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_jt9_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_JT9,
         },
         {
                 .enabled = RADIO_SI5351_TX_JT4,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT4,
-                .time_sync_seconds = 60,
-                .time_sync_seconds_offset = 1,
+                .time_sync_seconds = JT4_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = JT4_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT4,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_jt4_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_JT4,
         },
         {
                 .enabled = RADIO_SI5351_TX_JT65,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT65,
-                .time_sync_seconds = 60,
-                .time_sync_seconds_offset = 1,
+                .time_sync_seconds = JT65_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = JT65_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT65,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_jt65_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_JT65,
         },
         {
                 .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
-                .data_mode = RADIO_DATA_MODE_FSQ_6,
-                .time_sync_seconds = 0,
-                .time_sync_seconds_offset = 0,
+                .data_mode = FSQ_SUBMODE,
+                .time_sync_seconds = FSQ_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = FSQ_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_FSQ,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_fsq_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
-                .jtencode_mode_type = JTENCODE_MODE_FSQ_6,
         },
         {
                 .end = true,
@@ -164,6 +158,32 @@ radio_module_state radio_shared_state = {
         .radio_current_symbol_rate = 0,
         .radio_current_symbol_delay_ms_100 = 0
 };
+
+static jtencode_mode_type radio_jtencode_mode_type_for(radio_data_mode mode)
+{
+    switch (mode) {
+        case RADIO_DATA_MODE_WSPR:
+            return JTENCODE_MODE_WSPR;
+        case RADIO_DATA_MODE_FT8:
+            return JTENCODE_MODE_FT8;
+        case RADIO_DATA_MODE_JT9:
+            return JTENCODE_MODE_JT9;
+        case RADIO_DATA_MODE_JT65:
+            return JTENCODE_MODE_JT65;
+        case RADIO_DATA_MODE_JT4:
+            return JTENCODE_MODE_JT4;
+        case RADIO_DATA_MODE_FSQ_6:
+            return JTENCODE_MODE_FSQ_6;
+        case RADIO_DATA_MODE_FSQ_4_5:
+            return JTENCODE_MODE_FSQ_4_5;
+        case RADIO_DATA_MODE_FSQ_3:
+            return JTENCODE_MODE_FSQ_3;
+        case RADIO_DATA_MODE_FSQ_2:
+            return JTENCODE_MODE_FSQ_2;
+        default:
+            return 0;
+    }
+}
 
 static inline void radio_reset_next_symbol_counter()
 {
@@ -241,6 +261,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_FSQ_4_5:
         case RADIO_DATA_MODE_FSQ_6: {
             char locator[5];
+            jtencode_mode_type jtencode_mode = radio_jtencode_mode_type_for(entry->data_mode);
 
             if (wspr_locator_fixed_enabled) {
                 strlcpy(locator, WSPR_LOCATOR_FIXED, 4 + 1);
@@ -249,8 +270,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             }
 
             success = jtencode_encoder_new(&entry->fsk_encoder, sizeof(radio_current_symbol_data),
-                    radio_current_symbol_data,
-                    entry->jtencode_mode_type, WSPR_CALLSIGN, locator, WSPR_DBM, FSQ_CALLSIGN_FROM);
+                    radio_current_symbol_data, jtencode_mode, WSPR_CALLSIGN, locator, WSPR_DBM, FSQ_CALLSIGN_FROM);
             if (!success) {
                 return false;
             }
