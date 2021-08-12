@@ -14,6 +14,7 @@ The main features this firmware aims to implement are:
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages
 * Support for standard 1200-baud APRS
 * Support for [Horus 4FSK mode](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+* Support for morse code (CW)
 * Support for additional digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for custom sensors via the external I²C bus
 * Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
@@ -29,6 +30,7 @@ The main features this firmware aims to implement are:
   * Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform
     * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX))
     * Based on [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal
+* Morse code (CW) on on 70cm amateur radio band using the internal Si4032 radio transmitter
 * Digital mode beacons on HF/VHF frequencies using a Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde
   * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
@@ -37,14 +39,14 @@ The main features this firmware aims to implement are:
 
 ### Planned features
 
+* Support for more I²C sensors
+* Configurable transmission frequencies and schedules based on location / altitude
+* Morse code (CW) on Si5351 (HF + 2m)
+* RTTY on both Si4032 (70cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
 * Investigate possibility to implement 1200 bps Bell 202 modulation (and
   possibly also 300 bps Bell 103 modulation) for APRS using Si5351,
   this requires special handling to make Si5351 change frequency quickly
-  * See: https://github.com/etherkit/Si5351Arduino/issues/22
-* CW (on-off keying) on both Si4032 (70cm) and Si5351 (HF + 2m)
-* RTTY on both Si4032 (70cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
-* Support for more I²C sensors
-* Configurable transmission frequencies and schedules based on location / altitude
+    * See: https://github.com/etherkit/Si5351Arduino/issues/22
 
 ## Configuring the firmware
 
