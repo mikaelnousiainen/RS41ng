@@ -47,6 +47,16 @@ bool si5351_enabled = RADIO_SI5351_ENABLE;
 volatile bool system_initialized = false;
 
 /**
+ * CW mode messages.
+ * Maximum length: 64 characters.
+ */
+char *cw_message_templates[] = {
+        "$cs",
+        "$loc6",
+        NULL
+};
+
+/**
  * APRS mode comment messages.
  * Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
  * Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
@@ -64,8 +74,8 @@ char *aprs_comment_templates[] = {
  * Maximum length: 130 characters.
  */
 char *fsq_comment_templates[] = {
-        " $lat $lon, $alt m, $cl m/s, $gs km/h, $he deg - " FSQ_COMMENT,
-        " $loc12, $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " FSQ_COMMENT,
+//        " $lat $lon, $alt m, $cl m/s, $gs km/h, $he deg - " FSQ_COMMENT,
+//        " $loc12, $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " FSQ_COMMENT,
         NULL
 };
 
@@ -74,10 +84,10 @@ char *fsq_comment_templates[] = {
  * Maximum length: 13 characters allowed by the protocols.
  */
 char *ftjt_message_templates[] = {
-        "$cs $loc4",
-        "$loc12",
-        "$altm $cl",
-        "$bvmV $tiC",
-        "$hu% $prmb",
+//        "$cs $loc4",
+//        "$loc12",
+//        "$altm $cl",
+//        "$bvmV $tiC",
+//        "$hu% $prmb",
         NULL
 };

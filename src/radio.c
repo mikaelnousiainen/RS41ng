@@ -6,6 +6,7 @@
 #include "hal/system.h"
 #include "hal/delay.h"
 #include "hal/usart_gps.h"
+#include "codecs/morse/morse.h"
 #include "codecs/bell/bell.h"
 #include "codecs/mfsk/mfsk.h"
 #include "codecs/jtencode/jtencode.h"
@@ -13,6 +14,7 @@
 #include "radio_internal.h"
 #include "radio_si4032.h"
 #include "radio_si5351.h"
+#include "radio_payload_cw.h"
 #include "radio_payload_aprs.h"
 #include "radio_payload_horus_v1.h"
 #include "radio_payload_wspr.h"
@@ -20,6 +22,18 @@
 #include "radio_payload_fsq.h"
 
 radio_transmit_entry radio_transmit_schedule[] = {
+        {
+                .enabled = RADIO_SI4032_TX_CW,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_CW,
+                .time_sync_seconds = CW_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = CW_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_CW,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(CW_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
         {
                 .enabled = RADIO_SI4032_TX_APRS,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -233,6 +247,11 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+            morse_encoder_new(&entry->fsk_encoder, entry->symbol_rate);
+            radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
+            entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
+                    &radio_shared_state.radio_current_fsk_tones);
+            entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_RTTY:
             break;
@@ -354,6 +373,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+            morse_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_RTTY:
             break;
@@ -616,6 +636,9 @@ void radio_init()
     for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
         radio_transmit_entry *entry = &radio_transmit_schedule[i];
         switch (entry->data_mode) {
+            case RADIO_DATA_MODE_CW:
+                entry->messages = cw_message_templates;
+                break;
             case RADIO_DATA_MODE_APRS_1200:
                 entry->messages = aprs_comment_templates;
                 break;

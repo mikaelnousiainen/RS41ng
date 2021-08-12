@@ -3,7 +3,7 @@
 #include <bsd/string.h>
 #include "template.h"
 
-int main(void)
+int main3(void)
 {
     char *source = "DE $cs: $bv $loc6, $hh:$mm:$ss, $tow, Ti$ti Te$te $hu $pr";
     char dest[512];

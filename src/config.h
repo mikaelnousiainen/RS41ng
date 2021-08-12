@@ -42,14 +42,12 @@
 #define RADIO_SI4032_TX_POWER 7
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
-#define RADIO_SI4032_TX_CW false
-#define RADIO_SI4032_TX_RTTY false
+#define RADIO_SI4032_TX_CW true
 #define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_HORUS_V1 true
 
 // Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW   432060000
-#define RADIO_SI4032_TX_FREQUENCY_RTTY 432060000
+#define RADIO_SI4032_TX_FREQUENCY_CW   432500000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
@@ -132,10 +130,16 @@
 #define HORUS_V1_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
- * TODO: CW settings (once implemented)
+ * CW settings
  */
 
-#define CW_LOCATOR_PAIR_COUNT 4 // max. 6 (12 characters WWL)
+// CW speed in WPM, range 5 - 40
+#define CW_SPEED_WPM 20
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+#define CW_TIME_SYNC_SECONDS 1
+// Delay transmission for an N second offset after the scheduled time.
+#define CW_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * WSPR settings

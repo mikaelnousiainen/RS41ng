@@ -12,6 +12,8 @@
 #include "radio_si4032.h"
 #include "codecs/mfsk/mfsk.h"
 
+#define CW_SYMBOL_RATE_MULTIPLIER 4
+
 /**
  * I have attempted to implement Bell 202 frequency generation using hardware DMA and PWM, but have failed to generate
  * correct symbol rate that other APRS equipment are able to decode. I have tried to decode the DMA-based modulation with
@@ -46,6 +48,8 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             frequency_offset = 1;
             modulation_type = SI4032_MODULATION_TYPE_OOK;
             use_direct_mode = false;
+
+            data_timer_init(entry->symbol_rate * CW_SYMBOL_RATE_MULTIPLIER);
             break;
         case RADIO_DATA_MODE_RTTY:
             frequency_offset = 0;
@@ -83,12 +87,19 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
 
     if (use_direct_mode) {
         spi_uninit();
+        pwm_timer_init(100 * 100); // TODO: Idle tone
         pwm_timer_use(true);
         pwm_timer_pwm_enable(true);
         si4032_use_direct_mode(true);
     }
 
     switch (entry->data_mode) {
+        case RADIO_DATA_MODE_CW:
+            spi_uninit();
+            system_disable_tick();
+            si4032_use_sdi_pin(true);
+            shared_state->radio_interrupt_transmit_active = true;
+            break;
         case RADIO_DATA_MODE_APRS_1200:
             if (si4032_use_dma) {
                 shared_state->radio_dma_transfer_active = true;
@@ -196,11 +207,40 @@ void radio_handle_main_loop_si4032(radio_transmit_entry *entry, radio_module_sta
 
 inline void radio_handle_data_timer_si4032()
 {
+    static int cw_symbol_rate_multiplier = CW_SYMBOL_RATE_MULTIPLIER;
+
     if (radio_current_transmit_entry->radio_type != RADIO_TYPE_SI4032 || !radio_shared_state.radio_interrupt_transmit_active) {
         return;
     }
 
     switch (radio_current_transmit_entry->data_mode) {
+        case RADIO_DATA_MODE_CW: {
+            cw_symbol_rate_multiplier--;
+            if (cw_symbol_rate_multiplier > 0) {
+                break;
+            }
+
+            cw_symbol_rate_multiplier = CW_SYMBOL_RATE_MULTIPLIER;
+
+            fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
+            fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
+            int8_t tone_index;
+
+            tone_index = fsk_encoder_api->next_tone(fsk_enc);
+            if (tone_index < 0) {
+                si4032_set_sdi_pin(false);
+                log_info("CW TX finished\n");
+                radio_shared_state.radio_interrupt_transmit_active = false;
+                radio_shared_state.radio_transmission_finished = true;
+                system_enable_tick();
+                break;
+            }
+
+            si4032_set_sdi_pin(tone_index == 0 ? false : true);
+
+            radio_shared_state.radio_symbol_count_interrupt++;
+            break;
+        }
         case RADIO_DATA_MODE_HORUS_V1: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
             fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
@@ -216,6 +256,7 @@ inline void radio_handle_data_timer_si4032()
             }
 
             si4032_set_frequency_offset_small(tone_index + HORUS_V1_FREQUENCY_OFFSET);
+
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
         }
@@ -230,9 +271,13 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+            si4032_use_sdi_pin(false);
+            data_timer_uninit();
+            spi_init();
+            break;
         case RADIO_DATA_MODE_RTTY:
         case RADIO_DATA_MODE_HORUS_V1:
-            use_direct_mode = false;
+            data_timer_uninit();
             break;
         case RADIO_DATA_MODE_APRS_1200:
             use_direct_mode = true;
@@ -245,12 +290,16 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
         si4032_use_direct_mode(false);
         pwm_timer_pwm_enable(false);
         pwm_timer_use(false);
+        pwm_timer_uninit();
         spi_init();
     }
 
     si4032_inhibit_tx();
 
     switch (entry->data_mode) {
+        case RADIO_DATA_MODE_CW:
+            system_enable_tick();
+            break;
         case RADIO_DATA_MODE_APRS_1200:
             if (si4032_use_dma) {
                 pwm_data_timer_uninit();
@@ -258,7 +307,6 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
             }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
-            data_timer_uninit();
             system_enable_tick();
             break;
         default:
@@ -337,8 +385,6 @@ void radio_init_si4032()
 {
     pwm_handle_dma_transfer_half = radio_si4032_handle_pwm_transfer_half;
     pwm_handle_dma_transfer_full = radio_si4032_handle_pwm_transfer_full;
-
-    pwm_timer_init(100 * 100);
 
     if (si4032_use_dma) {
         pwm_data_timer_init();

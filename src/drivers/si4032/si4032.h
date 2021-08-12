@@ -22,6 +22,8 @@ void si4032_set_frequency_offset_small(uint8_t offset);
 void si4032_set_frequency_deviation(uint8_t deviation);
 void si4032_set_modulation_type(si4032_modulation_type type);
 int32_t si4032_read_temperature_celsius_100();
+void si4032_set_sdi_pin(bool high);
+void si4032_use_sdi_pin(bool use);
 void si4032_init();
 
 #endif
