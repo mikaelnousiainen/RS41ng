@@ -173,8 +173,8 @@ void system_handle_button()
     static uint16_t button_pressed_threshold = 2000;
     static bool shutdown = false;
 
-    // ~1450-1600 - button up
-    // ~1780-1850 - button down
+    // ~1650-1850 - button up
+    // ~2000-2200 - button down
 
     uint16_t current_value = system_get_button_adc_value();
 
@@ -316,6 +316,8 @@ void TIM4_IRQHandler(void)
 
         system_handle_timer_tick();
 
-        // TODO: fix detection of button state and enable: system_handle_button();
+#if ALLOW_POWER_OFF
+        system_handle_button();
+#endif
     }
 }

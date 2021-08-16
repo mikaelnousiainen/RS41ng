@@ -18,6 +18,9 @@
 // Green LED: Blinking fast when there is no GPS fix. Blinking slowly when the GPS has a fix.
 #define LEDS_ENABLE true
 
+// Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
+#define ALLOW_POWER_OFF false
+
 // Enable use of an externally connected I²C BMP280 atmospheric sensor
 #define SENSOR_BMP280_ENABLE false
 

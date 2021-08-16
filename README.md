@@ -1,11 +1,44 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
 
-**NOTE:** This is a work in progress and some features do not work correctly yet!
+**NOTE:** This firmware is a work in progress and some features might not work as expected yet!
 
-This is a custom, amateur radio-oriented firmware for Vaisala RS41 radiosondes.
+This is a custom, amateur radio-oriented firmware for [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41).
 Some of the code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
 the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
+
+## What are the Vaisala RS41 radiosondes and how can I get one?
+
+The RS41 radiosondes are used extensively for atmospheric sounding by the meteorological institutes in various countries and thus easily
+available to be collected once they land, an activity called radiosonde hunting: see YouTube presentation about
+[Tracking and Chasing Weather Balloons by Andreas Spiess](https://www.youtube.com/watch?v=vQfztG60umI) or
+[Chasing Radiosonde Weather Balloons used in Meteorology for Fun by Mark VK5QI](https://www.youtube.com/watch?v=fb9gNomWrAY)
+for more details!
+
+You can track radiosondes without any additional equipment either via [SondeHub](https://tracker.sondehub.org/) or [radiosondy.info](https://radiosondy.info/)
+that both use an existing network of receiver stations. Alternatively, you can set up your own radiosonde receiver station.
+
+For your own receiver station, you will need:
+
+1. A cheap software-defined radio USB dongle, such as an [RTL-SDR](https://www.rtl-sdr.com/about-rtl-sdr/)
+2. An antenna suitable for receiving the 400 MHz radiosonde band transmissions. Antennas for the 70 cm amateur radio band usually work fine!
+3. Radiosonde tracker software: common choices are [RS41 Tracker](http://escursioni.altervista.org/Radiosonde/) for Windows
+   and [radiosonde_auto_rx](https://github.com/projecthorus/radiosonde_auto_rx) for Linux / Raspberry Pi.
+
+### What can I do with an RS41 radiosonde?
+
+The [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
+uses an off-the-shelf [STM32F100C8](https://www.st.com/en/microcontrollers-microprocessors/stm32f100c8.html)
+32-bit microcontroller, which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
+or a smaller [ST-LINK v2 USB dongle]((https://www.adafruit.com/product/2548).
+
+The RS41 hardware can be programmed to transmit different kinds of RF modulations (morse code, APRS and different FSK modulations)
+on the 70 cm (~433 MHz) amateur radio band. The radiosonde contains a [UBX-G6010](https://www.u-blox.com/en/product/ubx-g6010-st-chip)
+GPS chip, so it can be used as a tracker device, e.g. for high-altitude balloons.
+
+The RS41ng firmware is just one example of what can be achieved with the RS41 hardware!
+
+## Why does the RS41ng firmware exist?
 
 The motivation to develop this firmware is to provide cleaner, customizable and
 more modular codebase for developing RS41 radiosonde-based experiments.
@@ -22,15 +55,15 @@ The main features this firmware aims to implement are:
 
 ## Features
 
-* APRS on 70cm amateur radio band using the internal Si4032 radio transmitter
+* APRS on 70 cm amateur radio band using the internal Si4032 radio transmitter
   * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
   * There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
-* Horus 4FSK on 70cm amateur radio band using the internal Si4032 radio transmitter
+* Horus 4FSK on 70 cm amateur radio band using the internal Si4032 radio transmitter
   * The Horus 4FSK mode has significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki)
   * Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform
     * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX))
     * Based on [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal
-* Morse code (CW) on on 70cm amateur radio band using the internal Si4032 radio transmitter
+* Morse code (CW) on on 70 cm amateur radio band using the internal Si4032 radio transmitter
 * Digital mode beacons on HF/VHF frequencies using a Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde
   * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
@@ -42,7 +75,7 @@ The main features this firmware aims to implement are:
 * Support for more I²C sensors
 * Configurable transmission frequencies and schedules based on location / altitude
 * Morse code (CW) on Si5351 (HF + 2m)
-* RTTY on both Si4032 (70cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
+* RTTY on both Si4032 (70 cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
 * Investigate possibility to implement 1200 bps Bell 202 modulation (and
   possibly also 300 bps Bell 103 modulation) for APRS using Si5351,
   this requires special handling to make Si5351 change frequency quickly
@@ -84,8 +117,10 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
 
 Hardware requirements:
 
-* A working Vaisala RS41 radiosonde :)
-* A programmer for the STM32 microcontroller present in the RS41 radiosonde. ST-LINK v2 USB-dongles work well.
+* A working [Vaisala RS41 radiosonde](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41) :)
+* An [ST-LINK v2 programmer for the STM32 microcontroller](https://www.st.com/en/development-tools/st-link-v2.html) in the RS41 radiosonde. 
+  * These smaller [ST-LINK v2 USB dongles](https://www.adafruit.com/product/2548) also work well.
+  * [Partco sells the ST-LINK v2 USB dongles in Finland](https://www.partco.fi/en/measurement/debugging/20140-stlinkv2.html)
 
 The pinout of the RS41 connector (by DF8OE) is the following:
 
@@ -121,7 +156,7 @@ ______________________|           |______________________
   * GND -> Pin 5
   * 3.3V -> Pin 3
 3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
-  * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 64 off; exit"`
+  * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
 4. Flash the firmware
   * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 5. Power cycle the sonde to start running the new firmware
@@ -239,6 +274,23 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 
 # Authors
 
+* Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
 * Original codebase: DF8OE and other authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 * Horus 4FSK code adapted from [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP) project
-* Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
+
+# Additional documentation
+
+## Vaisala RS41 hardware documentation
+
+* https://github.com/bazjo/RS41_Hardware - Reverse-engineered documentation on the RS41 hardware
+* https://github.com/bazjo/RS41_Decoding - Information about decoding the RS41 data transmission
+* http://happysat.nl/RS-41/RS41.html - Vaisala RS-41 SGP Modification and info about the original firmware settings
+* https://destevez.net/2018/06/flashing-a-vaisala-rs41-radiosonde/
+* https://destevez.net/2017/11/tracking-an-rs41-sgp-radiosonde-and-reporting-to-aprs/
+
+## Alternative firmware projects
+
+* https://github.com/df8oe/RS41HUP - The original amateur radio firmware for RS41
+* https://github.com/darksidelemm/RS41HUP - A fork of the original firmware that includes support for Horus 4FSK (but omits APRS)
+* https://github.com/darksidelemm/RS41FOX - RS41-FOX - RS41 Amateur Radio Direction Finding (Foxhunting) Beacon
+* http://www.om3bc.com/docs/rs41/rs41_en.html
