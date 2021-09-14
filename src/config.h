@@ -31,7 +31,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization
-#define RADIO_POST_TRANSMIT_DELAY_MS 5000
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -48,12 +48,14 @@
 #define RADIO_SI4032_TX_CW true
 #define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_HORUS_V1 true
+#define RADIO_SI4032_TX_HORUS_V2 true
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW   432500000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
 
 /**
  * External Si5351 radio chip transmission configuration
@@ -64,19 +66,25 @@
 #define RADIO_SI5351_TX_POWER 3
 
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
+#define RADIO_SI5351_TX_CW true
+#define RADIO_SI5351_TX_HORUS_V1 true
+#define RADIO_SI5351_TX_HORUS_V2 true
 #define RADIO_SI5351_TX_JT9 false
 #define RADIO_SI5351_TX_JT65 false
 #define RADIO_SI5351_TX_JT4 false
 #define RADIO_SI5351_TX_WSPR false
-#define RADIO_SI5351_TX_FSQ false
+#define RADIO_SI5351_TX_FSQ true
 #define RADIO_SI5351_TX_FT8 false
 
 // Transmit frequencies for the Si5351 transmitter modes
+#define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
 #define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
 #define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
 #define RADIO_SI5351_TX_FREQUENCY_WSPR       14085000UL    // Was: 14097200UL
-#define RADIO_SI5351_TX_FREQUENCY_FSQ        14085000UL    // Was: 7105350UL     // Base freq is 1350 Hz higher than dial freq in USB
+#define RADIO_SI5351_TX_FREQUENCY_FSQ        3608350UL    // Was: 7105350UL     // Base freq is 1350 Hz higher than dial freq in USB
 #define RADIO_SI5351_TX_FREQUENCY_FT8        14085000UL    // Was: 14075000UL
 
 /**
@@ -113,7 +121,7 @@
 #define APRS_DESTINATION_SSID '0'
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
-#define APRS_TIME_SYNC_SECONDS 1
+#define APRS_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset after the scheduled time.
 #define APRS_TIME_SYNC_OFFSET_SECONDS 0
 
@@ -121,16 +129,35 @@
  * Horus V1 4FSK mode settings
  */
 
-// Use Horus payload ID 0 for tests (4FSKTEST)
+// Use Horus payload ID 0 for Horus V1 tests (4FSKTEST)
 #define HORUS_V1_PAYLOAD_ID 0
-#define HORUS_V1_BAUD_RATE 100
-#define HORUS_V1_FREQUENCY_OFFSET 0
+#define HORUS_V1_BAUD_RATE_SI4032 100
+#define HORUS_V1_BAUD_RATE_SI5351 50
 #define HORUS_V1_PREAMBLE_LENGTH 16
+#define HORUS_V1_FREQUENCY_OFFSET_SI4032 0
+#define HORUS_V1_TONE_SPACING_HZ 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
-#define HORUS_V1_TIME_SYNC_SECONDS 1
+#define HORUS_V1_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset after the scheduled time.
 #define HORUS_V1_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * Horus V2 4FSK mode settings
+ */
+
+// Use Horus payload ID 256 for Horus V2 tests (4FSKTEST-V2)
+#define HORUS_V2_PAYLOAD_ID 256
+#define HORUS_V2_BAUD_RATE_SI4032 100
+#define HORUS_V2_BAUD_RATE_SI5351 50
+#define HORUS_V2_PREAMBLE_LENGTH 16
+#define HORUS_V2_FREQUENCY_OFFSET_SI4032 0
+#define HORUS_V2_TONE_SPACING_HZ 270
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+#define HORUS_V2_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset after the scheduled time.
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * CW settings
@@ -140,7 +167,7 @@
 #define CW_SPEED_WPM 20
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
-#define CW_TIME_SYNC_SECONDS 1
+#define CW_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset after the scheduled time.
 #define CW_TIME_SYNC_OFFSET_SECONDS 0
 
@@ -159,9 +186,8 @@
  * FSQ settings
  */
 #define FSQ_CALLSIGN_FROM CALLSIGN
-#define FSQ_COMMENT "RS41ng radiosonde firmware test"
 
-#define FSQ_SUBMODE RADIO_DATA_MODE_FSQ_6
+#define FSQ_SUBMODE RADIO_DATA_MODE_FSQ_3
 
 #define FSQ_TIME_SYNC_SECONDS 0
 #define FSQ_TIME_SYNC_OFFSET_SECONDS 0

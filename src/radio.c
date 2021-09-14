@@ -17,6 +17,7 @@
 #include "radio_payload_cw.h"
 #include "radio_payload_aprs.h"
 #include "radio_payload_horus_v1.h"
+#include "radio_payload_horus_v2.h"
 #include "radio_payload_wspr.h"
 #include "radio_payload_jtencode.h"
 #include "radio_payload_fsq.h"
@@ -54,10 +55,59 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
                 .tx_power = RADIO_SI4032_TX_POWER,
-                .symbol_rate = HORUS_V1_BAUD_RATE,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4032,
                 .payload_encoder = &radio_horus_v1_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+        {
+                .enabled = RADIO_SI4032_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4032,
+                .payload_encoder = &radio_horus_v2_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI5351_TX_CW,
+                .radio_type = RADIO_TYPE_SI5351,
+                .data_mode = RADIO_DATA_MODE_CW,
+                .time_sync_seconds = CW_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = CW_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI5351_TX_FREQUENCY_CW,
+                .tx_power = RADIO_SI5351_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(CW_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI5351_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI5351,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI5351_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI5351_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI5351,
+                .payload_encoder = &radio_horus_v1_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI5351_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI5351,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI5351_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI5351_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI5351,
+                .payload_encoder = &radio_horus_v2_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+/*
         {
                 .enabled = RADIO_SI5351_TX_WSPR,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -113,6 +163,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_jt65_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+*/
         {
                 .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -264,10 +315,21 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_HORUS_V1:
-            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, 100);
+            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V1_TONE_SPACING_HZ * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
                     &radio_shared_state.radio_current_fsk_tones);
+            radio_shared_state.radio_current_tone_spacing_hz_100 = entry->fsk_encoder_api->get_tone_spacing(
+                    &entry->fsk_encoder);
+            entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
+            break;
+        case RADIO_DATA_MODE_HORUS_V2:
+            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V2_TONE_SPACING_HZ * 100);
+            radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
+            entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
+                    &radio_shared_state.radio_current_fsk_tones);
+            radio_shared_state.radio_current_tone_spacing_hz_100 = entry->fsk_encoder_api->get_tone_spacing(
+                    &entry->fsk_encoder);
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_WSPR:
@@ -381,6 +443,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
             bell_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2:
             mfsk_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_WSPR:
@@ -473,6 +536,8 @@ void radio_handle_timer_tick()
 void radio_handle_data_timer_tick()
 {
     radio_handle_data_timer_si4032();
+
+    radio_handle_data_timer_si5351();
 }
 
 bool radio_handle_time_sync()
@@ -643,6 +708,7 @@ void radio_init()
                 entry->messages = aprs_comment_templates;
                 break;
             case RADIO_DATA_MODE_HORUS_V1:
+            case RADIO_DATA_MODE_HORUS_V2:
                 // No messages
                 break;
             case RADIO_DATA_MODE_FT8:

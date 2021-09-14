@@ -65,9 +65,10 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
                 radio_si4032_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
             }
             break;
-        case RADIO_DATA_MODE_HORUS_V1: {
+        case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
-            frequency_offset = (uint16_t) idle_tone->index + HORUS_V1_FREQUENCY_OFFSET;
+            frequency_offset = (uint16_t) idle_tone->index + HORUS_V1_FREQUENCY_OFFSET_SI4032;
             modulation_type = SI4032_MODULATION_TYPE_OOK;
             use_direct_mode = false;
 
@@ -111,6 +112,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             break;
@@ -241,7 +243,8 @@ inline void radio_handle_data_timer_si4032()
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
         }
-        case RADIO_DATA_MODE_HORUS_V1: {
+        case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
             fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
             int8_t tone_index;
@@ -255,7 +258,7 @@ inline void radio_handle_data_timer_si4032()
                 break;
             }
 
-            si4032_set_frequency_offset_small(tone_index + HORUS_V1_FREQUENCY_OFFSET);
+            si4032_set_frequency_offset_small(tone_index + HORUS_V1_FREQUENCY_OFFSET_SI4032);
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
@@ -277,6 +280,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_RTTY:
         case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2:
             data_timer_uninit();
             break;
         case RADIO_DATA_MODE_APRS_1200:
@@ -307,6 +311,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
             }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
+        case RADIO_DATA_MODE_HORUS_V2:
             system_enable_tick();
             break;
         default:

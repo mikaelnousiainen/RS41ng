@@ -40,41 +40,67 @@ The RS41ng firmware is just one example of what can be achieved with the RS41 ha
 
 ## Why does the RS41ng firmware exist?
 
-The motivation to develop this firmware is to provide cleaner, customizable and
-more modular codebase for developing RS41 radiosonde-based experiments.
+The motivation to develop this firmware is to provide a clean, customizable and
+modular codebase for developing RS41 radiosonde-based experiments.
 
-The main features this firmware aims to implement are:
-* Support for transmitting multiple modes consecutively with custom, rotating comment messages
-* Support for standard 1200-baud APRS
-* Support for [Horus 4FSK mode](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
-* Support for morse code (CW)
-* Support for additional digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
-* Support for custom sensors via the external I²C bus
-* Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
-* Extensibility to allow easy addition of new digital modes
+See the feature list below.
 
 ## Features
 
-* APRS on 70 cm amateur radio band using the internal Si4032 radio transmitter
-  * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
-  * There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
-* Horus 4FSK on 70 cm amateur radio band using the internal Si4032 radio transmitter
-  * The Horus 4FSK mode has significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki)
-  * Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform
-    * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX))
-    * Based on [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal
-* Morse code (CW) on on 70 cm amateur radio band using the internal Si4032 radio transmitter
-* Digital mode beacons on HF/VHF frequencies using a Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde
-  * The JTEncode library provides JT65/JT9/JT4/FT8/WSPR/FSQ beacon transmissions. I've decoded FT8 and WSPR successfully.
+The main features the RS41ng firmware are:
+
+* Support for multiple transmission modes:
+  * Standard 1200-baud APRS
+  * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+  * Morse code (CW)
+  * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
+* Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
+* Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
+* Support for custom sensors via the external I²C bus
+* Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
+* Extensibility to allow easy addition of new transmission modes and new sensors
+
+### Transmission modes
+
+On the internal Si4032 transmitter:
+
+* APRS (1200 baud)
+* Horus 4FSK v1 and v2 (100 baud)
+* Morse code (CW)
+
+On an external Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde:
+
+* Horus 4FSK v1 and v2 (50 baud, because the Si5351 frequency changes are slow)
+* JT65/JT9/JT4/FT8/WSPR/FSQ mode beacon transmissions using the JTEncode library. I've decoded FT8, WSPR and FSQ modes successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
-* External I²C bus sensor drivers
-  * Bosch BMP280 barometric pressure / temperature / humidity sensor
+* Morse code (CW)
+
+#### Notes about APRS
+
+* Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
+* There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
+
+#### Notes about Horus 4FSK
+
+* The Horus 4FSK v1 and v2 modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki).
+* Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform.
+* See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
+
+### External sensors
+
+It is possible to connect external sensors to the I²C bus of the RS41 radiosonde.
+
+The following sensors are currently supported:
+
+* Bosch BMP280 barometric pressure / temperature / humidity sensor
+
+Sensor driver code contributions are welcome!
 
 ### Planned features
 
-* Support for more I²C sensors
+* Continuous transmission mode for Horus 4FSK
 * Configurable transmission frequencies and schedules based on location / altitude
-* Morse code (CW) on Si5351 (HF + 2m)
+* Support for more I²C sensors
 * RTTY on both Si4032 (70 cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
 * Investigate possibility to implement 1200 bps Bell 202 modulation (and
   possibly also 300 bps Bell 103 modulation) for APRS using Si5351,

@@ -2,6 +2,7 @@
 #define __SI5351_HANDLER_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,6 +23,9 @@ bool si5351_handler_init();
 bool si5351_set_frequency(si5351_clock_id clock, uint64_t frequency_hz_100);
 void si5351_output_enable(si5351_clock_id clock, bool enabled);
 void si5351_set_drive_strength(si5351_clock_id clock, uint8_t drive);
+bool si5351_set_frequency_fast(si5351_clock_id clock, uint64_t frequency_hz_100);
+void si5351_output_enable_fast(si5351_clock_id clock, bool enabled);
+void si5351_set_drive_strength_fast(si5351_clock_id clock, uint8_t drive);
 
 #ifdef __cplusplus
 }
