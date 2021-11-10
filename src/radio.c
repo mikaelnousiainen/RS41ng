@@ -74,7 +74,6 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #else
-#endif
         {
                 .enabled = RADIO_SI4032_TX_CW,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -243,6 +242,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_fsq_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
 #endif
 #endif
         {
