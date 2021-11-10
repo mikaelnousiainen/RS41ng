@@ -68,7 +68,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
-            frequency_offset = (uint16_t) idle_tone->index + HORUS_V1_FREQUENCY_OFFSET_SI4032;
+            frequency_offset = (uint16_t) idle_tone->index + HORUS_FREQUENCY_OFFSET_SI4032;
             modulation_type = SI4032_MODULATION_TYPE_OOK;
             use_direct_mode = false;
 
@@ -258,7 +258,7 @@ inline void radio_handle_data_timer_si4032()
                 break;
             }
 
-            si4032_set_frequency_offset_small(tone_index + HORUS_V1_FREQUENCY_OFFSET_SI4032);
+            si4032_set_frequency_offset_small(tone_index + HORUS_FREQUENCY_OFFSET_SI4032);
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;

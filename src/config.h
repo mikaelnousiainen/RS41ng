@@ -30,8 +30,8 @@
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
-// Delay after transmission for modes that do not use time synchronization
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+// Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
+#define RADIO_POST_TRANSMIT_DELAY_MS 0
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -50,8 +50,12 @@
 #define RADIO_SI4032_TX_HORUS_V1 true
 #define RADIO_SI4032_TX_HORUS_V2 true
 
+// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+#define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
+#define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
+
 // Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW   432500000
+#define RADIO_SI4032_TX_FREQUENCY_CW        432500000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
@@ -126,6 +130,12 @@
 #define APRS_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
+ * Common Horus 4FSK mode settings
+ */
+
+#define HORUS_FREQUENCY_OFFSET_SI4032 0
+
+/**
  * Horus V1 4FSK mode settings
  */
 
@@ -134,8 +144,8 @@
 #define HORUS_V1_BAUD_RATE_SI4032 100
 #define HORUS_V1_BAUD_RATE_SI5351 50
 #define HORUS_V1_PREAMBLE_LENGTH 16
-#define HORUS_V1_FREQUENCY_OFFSET_SI4032 0
-#define HORUS_V1_TONE_SPACING_HZ 270
+#define HORUS_V1_IDLE_PREAMBLE_LENGTH 32
+#define HORUS_V1_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 #define HORUS_V1_TIME_SYNC_SECONDS 0
@@ -151,8 +161,8 @@
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
 #define HORUS_V2_PREAMBLE_LENGTH 16
-#define HORUS_V2_FREQUENCY_OFFSET_SI4032 0
-#define HORUS_V2_TONE_SPACING_HZ 270
+#define HORUS_V2_IDLE_PREAMBLE_LENGTH 32
+#define HORUS_V2_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 #define HORUS_V2_TIME_SYNC_SECONDS 0

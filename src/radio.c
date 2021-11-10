@@ -23,6 +23,58 @@
 #include "radio_payload_fsq.h"
 
 radio_transmit_entry radio_transmit_schedule[] = {
+#if RADIO_SI4032_TX_HORUS_V1_CONTINUOUS == true
+        {
+                .enabled = RADIO_SI4032_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4032,
+                .payload_encoder = &radio_horus_v1_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI4032_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4032,
+                .payload_encoder = &radio_horus_v1_idle_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#elif RADIO_SI4032_TX_HORUS_V2_CONTINUOUS == true
+        {
+                .enabled = RADIO_SI4032_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4032,
+                .payload_encoder = &radio_horus_v2_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI4032_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4032,
+                .payload_encoder = &radio_horus_v2_idle_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#else
+#endif
         {
                 .enabled = RADIO_SI4032_TX_CW,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -71,6 +123,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+#if RADIO_SI5351_ENABLE == true
+#if RADIO_SI5351_TX_CW == true
         {
                 .enabled = RADIO_SI5351_TX_CW,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -83,6 +137,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_cw_payload_encoder,
                 .fsk_encoder_api = &morse_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_HORUS_V1 == true
         {
                 .enabled = RADIO_SI5351_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -95,6 +151,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v1_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_HORUS_V2 == true
         {
                 .enabled = RADIO_SI5351_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -107,7 +165,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
-/*
+#endif
+#if RADIO_SI5351_TX_WSPR == true
         {
                 .enabled = RADIO_SI5351_TX_WSPR,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -119,6 +178,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_wspr_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_FT8 == true
         {
                 .enabled = RADIO_SI5351_TX_FT8,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -130,6 +191,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_ft8_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_JT9 == true
         {
                 .enabled = RADIO_SI5351_TX_JT9,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -141,6 +204,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_jt9_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_JT4 == true
         {
                 .enabled = RADIO_SI5351_TX_JT4,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -152,6 +217,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_jt4_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI5351_TX_JT65 == true
         {
                 .enabled = RADIO_SI5351_TX_JT65,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -163,7 +230,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_jt65_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
-*/
+#endif
+#if RADIO_SI5351_TX_FSQ == true
         {
                 .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -175,6 +243,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_fsq_payload_encoder,
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
+#endif
+#endif
         {
                 .end = true,
         }
@@ -315,7 +385,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_HORUS_V1:
-            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V1_TONE_SPACING_HZ * 100);
+            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V1_TONE_SPACING_HZ_SI5351 * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
                     &radio_shared_state.radio_current_fsk_tones);
@@ -324,7 +394,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_HORUS_V2:
-            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V2_TONE_SPACING_HZ * 100);
+            mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V2_TONE_SPACING_HZ_SI5351 * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
                     &radio_shared_state.radio_current_fsk_tones);
