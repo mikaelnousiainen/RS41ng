@@ -52,6 +52,7 @@ The main features the RS41ng firmware are:
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
   * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+    * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
   * Morse code (CW)
   * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)

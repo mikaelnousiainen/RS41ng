@@ -51,6 +51,8 @@
 #define RADIO_SI4032_TX_HORUS_V2 true
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+// The continuous mode transmits Horus 4FSK preamble between transmissions
+// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
 
