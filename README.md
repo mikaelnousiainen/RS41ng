@@ -7,6 +7,13 @@ Some of the code is based on an earlier RS41 firmware project called [RS41HUP](h
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
 the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
 
+## Asking questions, filing feature requests and issues
+
+* Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your RS41-based projects
+  * For example, questions about firmware configuration and connecting of external chips to the sonde belong here
+* Please use [GitHub issues](../../issues) to file new feature requests or issues that you have already identified with the firmware
+  * Please remember to post questions about usage to [GitHub discussions](../../discussions)
+
 ## What are the Vaisala RS41 radiosondes and how can I get one?
 
 The RS41 radiosondes are used extensively for atmospheric sounding by the meteorological institutes in various countries and thus easily
