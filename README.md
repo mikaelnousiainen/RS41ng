@@ -7,12 +7,12 @@ Some of the code is based on an earlier RS41 firmware project called [RS41HUP](h
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
 the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
 
-## Asking questions, filing feature requests and issues
+## Asking questions, filing feature requests and reporting issues
 
 * Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your RS41-based projects
   * For example, questions about firmware configuration and connecting of external chips to the sonde belong here
 * Please use [GitHub issues](../../issues) to file new feature requests or issues that you have already identified with the firmware
-  * Please remember to post questions about usage to [GitHub discussions](../../discussions)
+  * However, please remember to post questions about usage to [GitHub discussions](../../discussions)
 
 ## What are the Vaisala RS41 radiosondes and how can I get one?
 
@@ -37,7 +37,7 @@ For your own receiver station, you will need:
 The [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
 uses an off-the-shelf [STM32F100C8](https://www.st.com/en/microcontrollers-microprocessors/stm32f100c8.html)
 32-bit microcontroller, which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
-or a smaller [ST-LINK v2 USB dongle]((https://www.adafruit.com/product/2548).
+or a smaller [ST-LINK v2 USB dongle](https://www.adafruit.com/product/2548).
 
 The RS41 hardware can be programmed to transmit different kinds of RF modulations (morse code, APRS and different FSK modulations)
 on the 70 cm (~433 MHz) amateur radio band. The radiosonde contains a [UBX-G6010](https://www.u-blox.com/en/product/ubx-g6010-st-chip)

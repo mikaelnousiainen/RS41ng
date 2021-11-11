@@ -23,7 +23,7 @@
 #include "radio_payload_fsq.h"
 
 radio_transmit_entry radio_transmit_schedule[] = {
-#if RADIO_SI4032_TX_HORUS_V1_CONTINUOUS == true
+#if RADIO_SI4032_TX_HORUS_V1_CONTINUOUS
         {
                 .enabled = RADIO_SI4032_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -48,7 +48,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v1_idle_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
-#elif RADIO_SI4032_TX_HORUS_V2_CONTINUOUS == true
+#elif RADIO_SI4032_TX_HORUS_V2_CONTINUOUS
         {
                 .enabled = RADIO_SI4032_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -122,8 +122,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
-#if RADIO_SI5351_ENABLE == true
-#if RADIO_SI5351_TX_CW == true
+#if RADIO_SI5351_ENABLE
+#if RADIO_SI5351_TX_CW
         {
                 .enabled = RADIO_SI5351_TX_CW,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -137,7 +137,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &morse_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_HORUS_V1 == true
+#if RADIO_SI5351_TX_HORUS_V1
         {
                 .enabled = RADIO_SI5351_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -151,7 +151,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_HORUS_V2 == true
+#if RADIO_SI5351_TX_HORUS_V2
         {
                 .enabled = RADIO_SI5351_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -165,7 +165,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_WSPR == true
+#if RADIO_SI5351_TX_WSPR
         {
                 .enabled = RADIO_SI5351_TX_WSPR,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -178,7 +178,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_FT8 == true
+#if RADIO_SI5351_TX_FT8
         {
                 .enabled = RADIO_SI5351_TX_FT8,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -191,7 +191,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_JT9 == true
+#if RADIO_SI5351_TX_JT9
         {
                 .enabled = RADIO_SI5351_TX_JT9,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -204,7 +204,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_JT4 == true
+#if RADIO_SI5351_TX_JT4
         {
                 .enabled = RADIO_SI5351_TX_JT4,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -217,7 +217,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_JT65 == true
+#if RADIO_SI5351_TX_JT65
         {
                 .enabled = RADIO_SI5351_TX_JT65,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -230,7 +230,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &jtencode_fsk_encoder_api,
         },
 #endif
-#if RADIO_SI5351_TX_FSQ == true
+#if RADIO_SI5351_TX_FSQ
         {
                 .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
@@ -366,8 +366,14 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     log_info("\n");
 #endif
 
+    // USART interrupts may interfere with transmission timing
+    bool enable_gps_during_transmit = false;
+
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+            // CW timing is not as critical
+            enable_gps_during_transmit = true;
+
             morse_encoder_new(&entry->fsk_encoder, entry->symbol_rate);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
@@ -385,6 +391,9 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_HORUS_V1:
+            // GPS should not disturb the timing of Horus modes
+            enable_gps_during_transmit = true;
+
             mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V1_TONE_SPACING_HZ_SI5351 * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
@@ -394,6 +403,9 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_HORUS_V2:
+            // GPS should not disturb the timing of Horus modes
+            enable_gps_during_transmit = true;
+
             mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V2_TONE_SPACING_HZ_SI5351 * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
             entry->fsk_encoder_api->get_tones(&entry->fsk_encoder, &radio_shared_state.radio_current_fsk_tone_count,
@@ -411,6 +423,9 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_FSQ_3:
         case RADIO_DATA_MODE_FSQ_4_5:
         case RADIO_DATA_MODE_FSQ_6: {
+            // Timing of these slow modes is not as critical
+            enable_gps_during_transmit = true;
+
             char locator[5];
             jtencode_mode_type jtencode_mode = radio_jtencode_mode_type_for(entry->data_mode);
 
@@ -436,8 +451,10 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             return false;
     }
 
-    // USART interrupts may interfere with transmission timing
-    usart_gps_enable(false);
+    usart_gps_enable(enable_gps_during_transmit);
+    if (!enable_gps_during_transmit) {
+        ubxg6010_reset_parser();
+    }
 
     switch (entry->radio_type) {
         case RADIO_TYPE_SI4032:

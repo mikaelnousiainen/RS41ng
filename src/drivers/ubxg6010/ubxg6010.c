@@ -2,10 +2,13 @@
 
 #include "hal/system.h"
 #include "hal/usart_gps.h"
+#include "hal/usart_ext.h"
 #include "hal/delay.h"
 
 #include "ubxg6010.h"
 #include "log.h"
+
+#define GPS_INITIAL_BAUD_RATE 9600
 
 typedef struct __attribute__((packed)) {
     uint8_t sc1; // 0xB5
@@ -204,6 +207,13 @@ typedef struct {
     uint16_t timeRef;        //Alignment to reference time: 0 = UTC time, 1 = GPS time [- -]
 } uBloxCFGRATEPayload;
 
+typedef struct {
+    uint8_t filter;    // Filter flags
+    uint8_t version;   // 0x23 = NMEA version 2.3, 0x21 = NMEA version 2.1
+    uint8_t numSV;     // Maximum Number of SVs to report in NMEA protocol.
+    uint8_t flags;     // Flags: 0x01 = enable compatibility mode, 0x02 = enable considering mode
+} uBloxCFGNMEA;
+
 typedef union {
     uBloxNAVPVTPayload navpvt;
     uBloxCFGPRTPayload cfgprt;
@@ -220,6 +230,7 @@ typedef union {
     uBloxCFGRSTPayload cfgrst;
     uBloxCFGRXMPayload cfgrxm;
     uBloxCFGRATEPayload cfgrate;
+    uBloxCFGNMEA cfgnmea;
 } ubloxPacketData;
 
 typedef struct __attribute__((packed)) {
@@ -232,6 +243,9 @@ gps_data ubxg6010_current_gps_data;
 volatile bool gps_initialized = false;
 volatile bool ack_received = false;
 volatile bool nack_received = false;
+
+volatile static uint8_t sync_ubx = 0;
+volatile static uint8_t sync_nmea = 0;
 
 static uBloxChecksum
 ubxg6010_calculate_checksum(const uint8_t msgClass, const uint8_t msgId, const uint8_t *message, uint16_t size)
@@ -458,6 +472,23 @@ uBloxPacket msgcfgnav5 = {
         },
 };
 
+// Configure NMEA protocol version 2.3
+uBloxPacket msgcfgnmea = {
+        .header = {
+                0xb5,
+                0x62,
+                .messageClass=0x06,
+                .messageId=0x17,
+                .payloadSize=sizeof(uBloxCFGNMEA)
+        },
+        .data.cfgnmea = {
+                .filter = 0x00,
+                .version = 0x23,
+                .numSV = 24,
+                .flags = 0x00,
+        }
+};
+
 bool ubxg6010_init()
 {
     bool success;
@@ -466,28 +497,38 @@ bool ubxg6010_init()
 
     gps_initialized = false;
 
-    log_info("GPS: Initializing USART with baud rate 38400\n");
-    usart_gps_init(38400, true);
+    log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
+    usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
     delay_ms(100);
 
     log_info("GPS: Resetting GPS chip\n");
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
-    log_info("GPS: Initializing USART with baud rate 9600\n");
-    usart_gps_init(9600, true);
+    log_info("GPS: Initializing USART with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
+    usart_gps_init(GPS_INITIAL_BAUD_RATE, true);
     delay_ms(100);
 
     log_info("GPS: Resetting GPS chip\n");
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
-    log_info("GPS: Configuring GPS chip serial port for baud rate 38400\n");
+    if (gps_nmea_output_enabled) {
+        log_info("GPS: Configuring GPS NMEA output settings\n");
+        ubxg6010_send_packet(&msgcfgnmea);
+        delay_ms(100);
+    }
+
+    log_info("GPS: Configuring GPS chip I/O port settings\n");
+    if (gps_nmea_output_enabled) {
+        // Enable both UBX and NMEA protocols
+        msgcfgprt.data.cfgprt.outProtoMask = 0x03;
+    }
     ubxg6010_send_packet(&msgcfgprt);
     delay_ms(100);
 
-    log_info("GPS: Initializing USART with baud rate 38400\n");
-    usart_gps_init(38400, true);
+    log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
+    usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
     delay_ms(100);
 
     log_info("GPS: Setting GPS chip power mode\n");
@@ -690,36 +731,78 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
     }
 }
 
+void ubxg6010_reset_parser()
+{
+    sync_ubx = 0;
+    sync_nmea = 0;
+}
+
+static void ubxg6010_handle_nmea_sentence_start(uint8_t data)
+{
+    if (sync_nmea == 0 && data == '$') {
+        sync_nmea = 1;
+    } else if (sync_nmea == 1) {
+        if (data == 'G') {
+            sync_nmea = 2;
+        } else {
+            sync_nmea = 0;
+        }
+    } else if (sync_nmea == 2) {
+        if (data >= 'A' && data <= 'Z') {
+            usart_ext_send_byte('$');
+            usart_ext_send_byte('G');
+            usart_ext_send_byte(data);
+            sync_nmea = 3;
+        } else {
+            sync_nmea = 0;
+        }
+    }
+}
+
+static void ubxg6010_handle_nmea_output(uint8_t data)
+{
+    usart_ext_send_byte(data);
+    if (data == '\r') {
+        sync_nmea = 3;
+    } else if (sync_nmea == 3 && data == '\n') {
+        sync_nmea = 0;
+    }
+}
+
 void ubxg6010_handle_incoming_byte(uint8_t data)
 {
-    static uint8_t sync = 0;
     static uint8_t buffer_pos = 0;
     static uint8_t incoming_packet_buffer[sizeof(uBloxPacket) + sizeof(uBloxChecksum)];
     static uBloxPacket *incoming_packet = (uBloxPacket *) incoming_packet_buffer;
 
-    if (!sync) {
+    if (!sync_ubx && (sync_nmea < 3)) {
         if (!buffer_pos && data == 0xB5) {
             buffer_pos = 1;
             incoming_packet->header.sc1 = data;
         } else if (buffer_pos == 1 && data == 0x62) {
-            sync = 1;
+            sync_ubx = 1;
             buffer_pos = 2;
             incoming_packet->header.sc2 = data;
         } else {
+            if (gps_nmea_output_enabled) {
+                ubxg6010_handle_nmea_sentence_start(data);
+            }
             buffer_pos = 0;
         }
+    } else if (gps_nmea_output_enabled && sync_nmea >= 3) {
+        ubxg6010_handle_nmea_output(data);
     } else {
         ((uint8_t *) incoming_packet)[buffer_pos] = data;
         if ((buffer_pos >= sizeof(uBloxHeader) - 1) &&
             (buffer_pos - 1 == (incoming_packet->header.payloadSize + sizeof(uBloxHeader) + sizeof(uBloxChecksum)))) {
             ubxg6010_handle_packet((uBloxPacket *) incoming_packet);
             buffer_pos = 0;
-            sync = 0;
+            sync_ubx = 0;
         } else {
             buffer_pos++;
             if (buffer_pos >= sizeof(uBloxPacket) + sizeof(uBloxChecksum)) {
                 buffer_pos = 0;
-                sync = 0;
+                sync_ubx = 0;
             }
         }
     }

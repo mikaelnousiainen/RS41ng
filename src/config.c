@@ -43,6 +43,7 @@
 bool leds_enabled = LEDS_ENABLE;
 bool bmp280_enabled = SENSOR_BMP280_ENABLE;
 bool si5351_enabled = RADIO_SI5351_ENABLE;
+bool gps_nmea_output_enabled = GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE;
 
 volatile bool system_initialized = false;
 

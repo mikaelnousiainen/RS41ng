@@ -2,6 +2,7 @@
 #include "hal/i2c.h"
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
+#include "hal/usart_ext.h"
 #include "hal/delay.h"
 #include "hal/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
@@ -61,8 +62,13 @@ int main(void)
     system_set_green_led(false);
     system_set_red_led(true);
 
-    log_info("I2C init\n");
-    i2c_init();
+    if (gps_nmea_output_enabled) {
+        log_info("External USART init\n");
+        usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
+    } else {
+        log_info("I2C init\n");
+        i2c_init();
+    }
     log_info("SPI init\n");
     spi_init();
 

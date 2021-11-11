@@ -36,6 +36,13 @@
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
 
+// Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
+#define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
+
+#if (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
+#endif
+
 /**
  * Built-in Si4032 radio chip transmission configuration
  */

@@ -1,6 +1,11 @@
 #ifndef __CONFIG_INTERNAL_H
 #define __CONFIG_INTERNAL_H
 
+#define GPS_SERIAL_PORT_BAUD_RATE 38400
+
+// The external serial port baud rate must be higher than the GPS serial port baud rate (38400)
+#define EXTERNAL_SERIAL_PORT_BAUD_RATE 115200
+
 #define RADIO_PAYLOAD_MAX_LENGTH 256
 #define RADIO_SYMBOL_DATA_MAX_LENGTH 512
 #define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 128
@@ -11,6 +16,7 @@
 #include <stdbool.h>
 
 extern bool leds_enabled;
+extern bool gps_nmea_output_enabled;
 extern bool bmp280_enabled;
 extern bool si5351_enabled;
 
