@@ -15,7 +15,8 @@
 #include "radio_si4032.h"
 #include "radio_si5351.h"
 #include "radio_payload_cw.h"
-#include "radio_payload_aprs.h"
+#include "radio_payload_aprs_position.h"
+#include "radio_payload_aprs_weather.h"
 #include "radio_payload_horus_v1.h"
 #include "radio_payload_horus_v2.h"
 #include "radio_payload_wspr.h"
@@ -95,7 +96,11 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .frequency = RADIO_SI4032_TX_FREQUENCY_APRS_1200,
                 .tx_power = RADIO_SI4032_TX_POWER,
                 .symbol_rate = 1200,
-                .payload_encoder = &radio_aprs_payload_encoder,
+#if APRS_WEATHER_REPORT_ENABLE
+                .payload_encoder = &radio_aprs_weather_report_payload_encoder,
+#else
+                .payload_encoder = &radio_aprs_position_payload_encoder,
+#endif
                 .fsk_encoder_api = &bell_fsk_encoder_api,
         },
         {

@@ -40,7 +40,8 @@ bool bmp280_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
         *temperature_celsius_100 = temperature_raw;
     }
     if (pressure_mbar_100) {
-        *pressure_mbar_100 = (uint32_t) (((float) pressure_raw) * 100.0f / 256.0f);
+        // Pressure unit is Pascal (= mbar * 100) * 256
+        *pressure_mbar_100 = (uint32_t) (((float) pressure_raw) / 256.0f);
     }
     if (humidity_percentage_100) {
         *humidity_percentage_100 = (uint32_t) (((float) humidity_raw) * 100.0f / 1024.0f);

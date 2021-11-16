@@ -2,7 +2,7 @@
 #include <stdbool.h>
 
 #include "codecs/bell/bell.h"
-#include "codecs/aprs/aprs.h"
+#include "codecs/aprs/aprs_position.h"
 #include "codecs/ax25/ax25.h"
 #include "telemetry.h"
 #include "config.h"

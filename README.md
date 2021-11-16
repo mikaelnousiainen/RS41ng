@@ -58,6 +58,7 @@ The main features the RS41ng firmware are:
 
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
+    * Option to transmit APRS weather reports using readings from an external BMP280 sensor
   * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
   * Morse code (CW)

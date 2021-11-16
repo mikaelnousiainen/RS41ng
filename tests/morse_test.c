@@ -4,7 +4,7 @@
 #include "codecs/morse/morse.h"
 #include "config.h"
 
-int main(void)
+int main4(void)
 {
     fsk_encoder morse;
 

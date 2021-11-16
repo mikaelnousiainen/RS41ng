@@ -31,7 +31,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 0
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -54,7 +54,7 @@
 // Which modes to transmit using the built-in Si4032 transmitter chip
 #define RADIO_SI4032_TX_CW true
 #define RADIO_SI4032_TX_APRS true
-#define RADIO_SI4032_TX_HORUS_V1 true
+#define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V2 true
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -80,13 +80,13 @@
 
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
 #define RADIO_SI5351_TX_CW true
-#define RADIO_SI5351_TX_HORUS_V1 true
+#define RADIO_SI5351_TX_HORUS_V1 false
 #define RADIO_SI5351_TX_HORUS_V2 true
 #define RADIO_SI5351_TX_JT9 false
 #define RADIO_SI5351_TX_JT65 false
 #define RADIO_SI5351_TX_JT4 false
 #define RADIO_SI5351_TX_WSPR false
-#define RADIO_SI5351_TX_FSQ true
+#define RADIO_SI5351_TX_FSQ false
 #define RADIO_SI5351_TX_FT8 false
 
 // Transmit frequencies for the Si5351 transmitter modes
@@ -132,6 +132,8 @@
 #define APRS_RELAYS "WIDE1-1,WIDE2-1"
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
+// Generate an APRS weather report instead of a position report. This will override the APRS symbol with the weather station symbol.
+#define APRS_WEATHER_REPORT_ENABLE false
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 #define APRS_TIME_SYNC_SECONDS 0
