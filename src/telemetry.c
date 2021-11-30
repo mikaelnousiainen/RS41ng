@@ -17,6 +17,18 @@ void telemetry_collect(telemetry_data *data)
     }
 
     ubxg6010_get_current_gps_data(&data->gps);
+
+    // Zero out position data if we don't have a valid GPS fix.
+    // This is done to avoid transmitting invalid position information.
+    if (!(data->gps.fix_ok) || data->gps.fix == 0) {
+        data->gps.latitude_degrees_1000000 = 0;
+        data->gps.longitude_degrees_1000000 = 0;
+        data->gps.altitude_mm = 0;
+        data->gps.ground_speed_cm_per_second = 0;
+        data->gps.heading_degrees_100000 = 0;
+        data->gps.climb_cm_per_second = 0;
+    }
+
     locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
 }

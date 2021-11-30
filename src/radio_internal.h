@@ -47,6 +47,9 @@ typedef struct _radio_transmit_entry {
     uint8_t current_message_index;
     uint8_t message_count;
 
+    uint8_t current_transmit_index;
+    uint8_t transmit_count;
+
     payload_encoder *payload_encoder;
     fsk_encoder_api *fsk_encoder_api;
 

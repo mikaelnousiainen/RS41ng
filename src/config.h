@@ -53,9 +53,13 @@
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
 #define RADIO_SI4032_TX_CW true
+#define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
+#define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -80,14 +84,23 @@
 
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
 #define RADIO_SI5351_TX_CW true
+#define RADIO_SI5351_TX_CW_COUNT 1
 #define RADIO_SI5351_TX_HORUS_V1 false
+#define RADIO_SI5351_TX_HORUS_V1_COUNT 1
 #define RADIO_SI5351_TX_HORUS_V2 true
+#define RADIO_SI5351_TX_HORUS_V2_COUNT 4
 #define RADIO_SI5351_TX_JT9 false
+#define RADIO_SI5351_TX_JT9_COUNT 1
 #define RADIO_SI5351_TX_JT65 false
+#define RADIO_SI5351_TX_JT65_COUNT 1
 #define RADIO_SI5351_TX_JT4 false
+#define RADIO_SI5351_TX_JT4_COUNT 1
 #define RADIO_SI5351_TX_WSPR false
+#define RADIO_SI5351_TX_WSPR_COUNT 1
 #define RADIO_SI5351_TX_FSQ false
+#define RADIO_SI5351_TX_FSQ_COUNT 1
 #define RADIO_SI5351_TX_FT8 false
+#define RADIO_SI5351_TX_FT8_COUNT 1
 
 // Transmit frequencies for the Si5351 transmitter modes
 #define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL

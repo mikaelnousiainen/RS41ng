@@ -79,6 +79,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_CW,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_CW,
+                .transmit_count = RADIO_SI4032_TX_CW_COUNT,
                 .time_sync_seconds = CW_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = CW_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_CW,
@@ -91,6 +92,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_APRS,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_APRS_1200,
+                .transmit_count = RADIO_SI4032_TX_APRS_COUNT,
                 .time_sync_seconds = APRS_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = APRS_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_APRS_1200,
@@ -107,6 +109,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .transmit_count = RADIO_SI4032_TX_HORUS_V1_COUNT,
                 .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1,
@@ -119,6 +122,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI4032_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .transmit_count = RADIO_SI4032_TX_HORUS_V2_COUNT,
                 .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2,
@@ -133,6 +137,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_CW,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_CW,
+                .transmit_count = RADIO_SI5351_TX_CW_COUNT,
                 .time_sync_seconds = CW_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = CW_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_CW,
@@ -147,6 +152,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .transmit_count = RADIO_SI5351_TX_HORUS_V1_COUNT,
                 .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_HORUS_V1,
@@ -161,6 +167,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .transmit_count = RADIO_SI5351_TX_HORUS_V2_COUNT,
                 .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_HORUS_V2,
@@ -174,9 +181,10 @@ radio_transmit_entry radio_transmit_schedule[] = {
         {
                 .enabled = RADIO_SI5351_TX_WSPR,
                 .radio_type = RADIO_TYPE_SI5351,
+                .data_mode = RADIO_DATA_MODE_WSPR,
+                .transmit_count = RADIO_SI5351_TX_WSPR_COUNT,
                 .time_sync_seconds = WSPR_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = WSPR_TIME_SYNC_OFFSET_SECONDS,
-                .data_mode = RADIO_DATA_MODE_WSPR,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_WSPR,
                 .tx_power = RADIO_SI5351_TX_POWER,
                 .payload_encoder = &radio_wspr_payload_encoder,
@@ -188,6 +196,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_FT8,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_FT8,
+                .transmit_count = RADIO_SI5351_TX_FT8_COUNT,
                 .time_sync_seconds = FT8_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = FT8_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_FT8,
@@ -201,6 +210,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_JT9,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT9,
+                .transmit_count = RADIO_SI5351_TX_JT9_COUNT,
                 .time_sync_seconds = JT9_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = JT9_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT9,
@@ -214,6 +224,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_JT4,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT4,
+                .transmit_count = RADIO_SI5351_TX_JT4_COUNT,
                 .time_sync_seconds = JT4_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = JT4_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT4,
@@ -227,6 +238,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_JT65,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = RADIO_DATA_MODE_JT65,
+                .transmit_count = RADIO_SI5351_TX_JT65_COUNT,
                 .time_sync_seconds = JT65_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = JT65_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_JT65,
@@ -240,6 +252,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .enabled = RADIO_SI5351_TX_FSQ,
                 .radio_type = RADIO_TYPE_SI5351,
                 .data_mode = FSQ_SUBMODE,
+                .transmit_count = RADIO_SI5351_TX_FSQ_COUNT,
                 .time_sync_seconds = FSQ_TIME_SYNC_SECONDS,
                 .time_sync_seconds_offset = FSQ_TIME_SYNC_OFFSET_SECONDS,
                 .frequency = RADIO_SI5351_TX_FREQUENCY_FSQ,
@@ -593,10 +606,16 @@ static void radio_next_transmit_entry()
     radio_current_transmit_entry->current_message_index =
             (radio_current_transmit_entry->current_message_index + 1) % radio_current_transmit_entry->message_count;
 
-    do {
-        radio_current_transmit_entry_index = (radio_current_transmit_entry_index + 1) % radio_transmit_entry_count;
-        radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
-    } while (!radio_current_transmit_entry->enabled);
+    radio_current_transmit_entry->current_transmit_index =
+            (radio_current_transmit_entry->current_transmit_index + 1) % radio_current_transmit_entry->transmit_count;
+
+    // Proceed to next transmit entry when transmit counter wraps
+    if (radio_current_transmit_entry->current_transmit_index == 0) {
+        do {
+            radio_current_transmit_entry_index = (radio_current_transmit_entry_index + 1) % radio_transmit_entry_count;
+            radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
+        } while (!radio_current_transmit_entry->enabled);
+    }
 
     radio_reset_transmit_delay_counter();
 }
@@ -823,6 +842,9 @@ void radio_init()
         }
         if (entry->messages != NULL) {
             for (entry->message_count = 0; entry->messages[entry->message_count] != NULL; entry->message_count++);
+        }
+        if (entry->transmit_count == 0) {
+            entry->transmit_count = 1;
         }
     }
 
