@@ -135,8 +135,11 @@ Software requirements:
 
 On a Red Hat/Fedora Linux installation, the following packages can be installed:
 ```bash
-dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils-cs arm-none-eabi-newlib cmake openocd
+dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils-cs arm-none-eabi-newlib libbsd-devel cmake openocd
 ```
+
+Note that the code uses `strlcpy()` also in the test code, which requires `libbsd-dev` (Debian/Ubuntu) or
+`libbsd-devel` (Red Hat/Fedora) to be installed for compilation to succeed.
 
 ### Steps to build the firmware
 

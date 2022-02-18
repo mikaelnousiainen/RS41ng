@@ -46,27 +46,28 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
 
     uint8_t *custom_data_pointer = horus_packet.CustomData;
 
-    uint16_t cus_packet_counter = horus_v2_packet_counter;
-    memcpy(custom_data_pointer, &cus_packet_counter, sizeof(cus_packet_counter));
-    custom_data_pointer += sizeof(cus_packet_counter);
+    // Unit: cm/s
+    int16_t gps_climb_cm_per_second = (int16_t) gps_data->climb_cm_per_second;
+    memcpy(custom_data_pointer, &gps_climb_cm_per_second, sizeof(gps_climb_cm_per_second));
+    custom_data_pointer += sizeof(gps_climb_cm_per_second);
 
-    int16_t cus_temp_celsius_10 = (int16_t) (data->internal_temperature_celsius_100 / 10.0f);
-    memcpy(custom_data_pointer, &cus_temp_celsius_10, sizeof(cus_temp_celsius_10));
-    custom_data_pointer += sizeof(cus_temp_celsius_10);
-
+    // Unit: Celsius * 10
     int16_t ext_temp_celsius_10 = (int16_t) (data->temperature_celsius_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_temp_celsius_10, sizeof(ext_temp_celsius_10));
     custom_data_pointer += sizeof(ext_temp_celsius_10);
 
+    // Unit: %
     uint8_t ext_humidity_percentage = (uint8_t) (data->humidity_percentage_100 / 100.0f);
     memcpy(custom_data_pointer, &ext_humidity_percentage, sizeof(ext_humidity_percentage));
     custom_data_pointer += sizeof(ext_humidity_percentage);
 
-    uint16_t ext_pressure_mbar = (uint8_t) (data->pressure_mbar_100 / 100.0f);
+    // Unit: mbar * 10
+    uint16_t ext_pressure_mbar = (uint8_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
     // custom_data_pointer += sizeof(ext_pressure_mbar);
 
-    horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet, sizeof(horus_packet) - 2);
+    horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet,
+            sizeof(horus_packet) - sizeof(horus_packet.Checksum));
 
     memcpy(payload, &horus_packet, sizeof(horus_packet));
 
