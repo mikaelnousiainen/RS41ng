@@ -11,7 +11,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+#define CALLSIGN "OH3VHH"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -141,7 +141,7 @@
 // See APRS symbol table documentation in: http://www.aprs.org/symbols/symbolsX.txt
 #define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
 #define APRS_SYMBOL 'O'
-#define APRS_COMMENT "RS41ng radiosonde firmware test"
+#define APRS_COMMENT "OH3AA flight @ 432.500MHz CW/APRS/Horus - RS41ng radiosonde firmware"
 #define APRS_RELAYS "WIDE1-1,WIDE2-1"
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
@@ -164,7 +164,7 @@
  */
 
 // Use Horus payload ID 0 for Horus V1 tests (4FSKTEST)
-#define HORUS_V1_PAYLOAD_ID 0
+#define HORUS_V1_PAYLOAD_ID 66
 #define HORUS_V1_BAUD_RATE_SI4032 100
 #define HORUS_V1_BAUD_RATE_SI5351 50
 #define HORUS_V1_PREAMBLE_LENGTH 16
@@ -181,7 +181,7 @@
  */
 
 // Use Horus payload ID 256 for Horus V2 tests (4FSKTEST-V2)
-#define HORUS_V2_PAYLOAD_ID 256
+#define HORUS_V2_PAYLOAD_ID 257
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
 #define HORUS_V2_PREAMBLE_LENGTH 16

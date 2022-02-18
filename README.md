@@ -201,6 +201,8 @@ ______________________|           |______________________
   * 3.3V -> Pin 3
 3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
   * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+  * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `31` with `63`:
+    * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
 4. Flash the firmware
   * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 5. Power cycle the sonde to start running the new firmware
