@@ -34,7 +34,7 @@ void handle_timer_tick()
     if (leds_enabled) {
         // Blink fast until GPS fix is acquired
         if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
-            if (current_gps_data.fix >= 3) {
+            if (current_gps_data.fix_ok) {
                 if (counter == 0) {
                     led_state = !led_state;
                     system_set_green_led(led_state);
