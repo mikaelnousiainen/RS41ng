@@ -29,7 +29,7 @@ size_t horus_packet_v1_create(uint8_t *payload, size_t length, telemetry_data *d
     horus_packet.Seconds = gps_data->seconds;
     horus_packet.Latitude = float_lat;
     horus_packet.Longitude = float_lon;
-    horus_packet.Altitude = (uint16_t)(gps_data->altitude_mm / 1000);
+    horus_packet.Altitude = (uint16_t)((gps_data->altitude_mm > 0 ? gps_data->altitude_mm : 0) / 1000);
     horus_packet.Speed = (uint8_t)((float) gps_data->ground_speed_cm_per_second * 0.036);
 
     // Temporary pDOP info, to determine suitable pDOP limits.

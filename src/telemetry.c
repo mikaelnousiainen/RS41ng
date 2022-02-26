@@ -20,7 +20,7 @@ void telemetry_collect(telemetry_data *data)
 
     // Zero out position data if we don't have a valid GPS fix.
     // This is done to avoid transmitting invalid position information.
-    if (!(data->gps.fix_ok) || data->gps.fix == 0) {
+    if (!data->gps.fix_ok) {
         data->gps.latitude_degrees_1000000 = 0;
         data->gps.longitude_degrees_1000000 = 0;
         data->gps.altitude_mm = 0;

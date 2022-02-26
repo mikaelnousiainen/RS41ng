@@ -29,7 +29,7 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     horus_packet.Seconds = gps_data->seconds;
     horus_packet.Latitude = float_lat;
     horus_packet.Longitude = float_lon;
-    horus_packet.Altitude = (uint16_t)(gps_data->altitude_mm / 1000);
+    horus_packet.Altitude = (uint16_t)((gps_data->altitude_mm > 0 ? gps_data->altitude_mm : 0) / 1000);
     horus_packet.Speed = (uint8_t)((float) gps_data->ground_speed_cm_per_second * 0.036);
 
     horus_packet.BattVoltage = volts_scaled;
@@ -62,7 +62,7 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     custom_data_pointer += sizeof(ext_humidity_percentage);
 
     // Unit: mbar * 10
-    uint16_t ext_pressure_mbar = (uint8_t) (data->pressure_mbar_100 / 10.0f);
+    uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
     // custom_data_pointer += sizeof(ext_pressure_mbar);
 
