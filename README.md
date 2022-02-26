@@ -58,7 +58,7 @@ The main features the RS41ng firmware are:
 
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
-    * Option to transmit APRS weather reports using readings from an external BMP280 sensor
+    * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor
   * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
   * Morse code (CW)
@@ -66,7 +66,7 @@ The main features the RS41ng firmware are:
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
 * Support for custom sensors via the external I²C bus
-* GPS NMEA data output via the external serial port pin 4 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
+* GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 * Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
 * Extensibility to allow easy addition of new transmission modes and new sensors
@@ -103,7 +103,8 @@ It is possible to connect external sensors to the I²C bus of the RS41 radiosond
 
 The following sensors are currently supported:
 
-* Bosch BMP280 barometric pressure / temperature / humidity sensor
+* Bosch BMP280/BME280 barometric pressure / temperature / humidity sensor
+  * Note that only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
 
 Sensor driver code contributions are welcome!
 
@@ -162,43 +163,43 @@ Hardware requirements:
   * These smaller [ST-LINK v2 USB dongles](https://www.adafruit.com/product/2548) also work well.
   * [Partco sells the ST-LINK v2 USB dongles in Finland](https://www.partco.fi/en/measurement/debugging/20140-stlinkv2.html)
 
-The pinout of the RS41 connector (by DF8OE) is the following:
+The pinout of the RS41 connector (by DF8OE and VK5QI) is the following:
 
 ```
 ______________________|           |______________________
 |                                                       |
-|   1           2           3           4           5   |
+|   9           7           5           3           1   |
 |                                                       |
-|   6           7           8           9          10   |
+|   10          8           6           4           2   |
 |_______________________________________________________|
 
 (View from the bottom of the sonde, pay attention to the gap in the connector)
 ```
 
-* 1 - SWDIO (PA13)
-* 2 - RST
-* 3 - MCU switched 3.3V out to external device / Vcc (Boost out) 5.0V
-  * This pin powers the device via 3.3V voltage from an ST-LINK programmer dongle
-  * This pin can be used to supply power to external devices, e.g. Si5351, BMP280 or other sensors
-* 4 - I2C2_SCL (PB10) / UART3 TX
-  * This is the external I²C port clock pin for Si5351 and sensors
-  * This pin can alternatively be used to output GPS NMEA data to external tracker hardware (e.g. Raspberry Pi or other microcontrollers)
-* 5 - GND
-* 6 - GND
-* 7 - SWCLK (PA14)
-* 8 - +U_Battery / VBAT 3.3V
-* 9 - +VDD_MCU / PB1 * (10k + cap + 10k)
-* 10 - I2C2_SDA (PB11) / UART3 RX
-  * This is the external I²C port data pin for Si5351 and sensors
+* 1 - GND
+* 2 - I2C2_SDA (PB11) / UART3 RX
+    * This is the external I²C port data pin for Si5351 and sensors
+* 3 - I2C2_SCL (PB10) / UART3 TX
+    * This is the external I²C port clock pin for Si5351 and sensors
+    * This pin can alternatively be used to output GPS NMEA data to external tracker hardware (e.g. Raspberry Pi or other microcontrollers)
+* 4 - +VDD_MCU / PB1 * (10k + cap + 10k)
+* 5 - MCU switched 3.3V out to external device / Vcc (Boost out) 5.0V
+    * This pin powers the device via 3.3V voltage from an ST-LINK programmer dongle
+    * This pin can be used to supply power to external devices, e.g. Si5351, BMP280 or other sensors
+* 6 - +U_Battery / VBAT 3.3V
+* 7 - RST
+* 8 - SWCLK (PA14)
+* 9 - SWDIO (PA13)
+* 10 - GND
 
 ### Steps to flash the firmware
 
 1. Remove batteries from the sonde
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
-  * SWDIO -> Pin 1
-  * SWCLK -> Pin 7
-  * GND -> Pin 5
-  * 3.3V -> Pin 3
+  * SWDIO -> Pin 9 (SWDIO)
+  * SWCLK -> Pin 8 (SWCLK)
+  * GND -> Pin 1 (GND)
+  * 3.3V -> Pin 5 (MCU switch 3.3V)
 3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
   * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
   * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `31` with `63`:
