@@ -1,7 +1,10 @@
 #include "drivers/bmp280/bmp280.h"
 #include "bmp280_handler.h"
+#include "log.h"
 
 bmp280 bmp280_dev;
+
+static bool bmp280_initialization_required = true;
 
 bool bmp280_handler_init()
 {
@@ -17,12 +20,9 @@ bool bmp280_handler_init()
             .standby = BMP280_STANDBY_250,
     };
 
-    bool bmp280_init_success = bmp280_init(&bmp280_dev, &bmp280_params);
-    if (!bmp280_init_success) {
-        // TODO
-    }
-
-    return bmp280_init_success;
+    bool success = bmp280_init(&bmp280_dev, &bmp280_params);
+    bmp280_initialization_required = !success;
+    return success;
 }
 
 bool bmp280_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, uint32_t *humidity_percentage_100)
@@ -33,6 +33,7 @@ bool bmp280_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
 
     bool success = bmp280_read_fixed(&bmp280_dev, &temperature_raw, &pressure_raw, &humidity_raw);
     if (!success) {
+        log_error("BMP280 read failed\n");
         return false;
     }
 
@@ -43,6 +44,7 @@ bool bmp280_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
         // Pressure unit is Pascal (= mbar * 100) * 256
         *pressure_mbar_100 = (uint32_t) (((float) pressure_raw) / 256.0f);
     }
+    // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
     if (humidity_percentage_100) {
         *humidity_percentage_100 = (uint32_t) (((float) humidity_raw) * 100.0f / 1024.0f);
     }
@@ -52,5 +54,39 @@ bool bmp280_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
 
 bool bmp280_read_telemetry(telemetry_data *data)
 {
-    return bmp280_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100);
+    bool success;
+
+    if (bmp280_initialization_required) {
+        log_info("BMP280 re-init\n");
+        success = bmp280_handler_init();
+        log_info("BMP280 re-init: %d\n", success);
+        if (!success) {
+            data->temperature_celsius_100 = 0;
+            data->pressure_mbar_100 = 0;
+            data->humidity_percentage_100 = 0;
+            return false;
+        }
+    }
+
+    success = bmp280_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100);
+
+    if (!success) {
+        log_info("BMP280 re-init\n");
+        success = bmp280_handler_init();
+        log_info("BMP280 re-init: %d\n", success);
+
+        if (success) {
+            success = bmp280_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100);
+        }
+
+        if (!success) {
+            data->temperature_celsius_100 = 0;
+            data->pressure_mbar_100 = 0;
+            data->humidity_percentage_100 = 0;
+        }
+    }
+
+    bmp280_initialization_required = !success;
+
+    return success;
 }

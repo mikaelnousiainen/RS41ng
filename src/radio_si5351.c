@@ -33,6 +33,7 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
             break;
     }
 
+    // TODO: handle Si5351 errors
     if (use_fast_si5351) {
         si5351_set_drive_strength_fast(SI5351_CLOCK_CLK0, entry->tx_power);
         if (set_frequency_early) {
@@ -97,6 +98,7 @@ void radio_handle_main_loop_si5351(radio_transmit_entry *entry, radio_module_sta
         return;
     }
 
+    // TODO: handle Si5351 errors
     if (radio_si5351_state_change) {
         radio_si5351_state_change = false;
         si5351_set_frequency(SI5351_CLOCK_CLK0, radio_si5351_freq);
@@ -111,6 +113,7 @@ inline void radio_handle_data_timer_si5351()
         return;
     }
 
+    // TODO: handle Si5351 errors
     switch (radio_current_transmit_entry->data_mode) {
         case RADIO_DATA_MODE_CW: {
             cw_symbol_rate_multiplier--;

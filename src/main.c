@@ -34,17 +34,35 @@ void handle_timer_tick()
     if (leds_enabled) {
         // Blink fast until GPS fix is acquired
         if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
-            if (current_gps_data.fix_ok) {
+            if (GPS_HAS_FIX(current_gps_data)) {
                 if (counter == 0) {
                     led_state = !led_state;
-                    system_set_green_led(led_state);
+                    set_green_led(led_state);
                 }
             } else {
                 led_state = !led_state;
-                system_set_green_led(led_state);
+                set_green_led(led_state);
             }
         }
     }
+}
+
+void set_green_led(bool enabled)
+{
+    if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
+        enabled = false;
+    }
+
+    system_set_green_led(enabled);
+}
+
+void set_red_led(bool enabled)
+{
+    if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
+        enabled = false;
+    }
+
+    system_set_red_led(enabled);
 }
 
 int main(void)
@@ -59,8 +77,8 @@ int main(void)
     log_info("System init\n");
     system_init();
 
-    system_set_green_led(false);
-    system_set_red_led(true);
+    set_green_led(false);
+    set_red_led(true);
 
     if (gps_nmea_output_enabled) {
         log_info("External USART init\n");
@@ -85,13 +103,25 @@ gps_init:
     si4032_init();
 
     if (bmp280_enabled) {
-        log_info("BMP280 init\n");
-        bmp280_enabled = bmp280_handler_init();
+        for (int i = 0; i < 3; i++) {
+            log_info("BMP280 init\n");
+            success = bmp280_handler_init();
+            if (success) {
+                break;
+            }
+            log_error("BMP280 init failed, retrying...");
+        }
     }
 
     if (si5351_enabled) {
-        log_info("Si5351 init\n");
-        si5351_enabled = si5351_handler_init();
+        for (int i = 0; i < 3; i++) {
+            log_info("Si5351 init\n");
+            success = si5351_handler_init();
+            if (success) {
+                break;
+            }
+            log_error("Si5351 init failed, retrying...");
+        }
     }
 
     log_info("Radio module init\n");
@@ -102,11 +132,11 @@ gps_init:
     log_info("System initialized!\n");
 
     if (leds_enabled) {
-        system_set_green_led(true);
-        system_set_red_led(false);
+        set_green_led(true);
+        set_red_led(false);
     } else {
-        system_set_green_led(false);
-        system_set_red_led(false);
+        set_green_led(false);
+        set_red_led(false);
     }
 
     system_initialized = true;

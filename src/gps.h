@@ -3,11 +3,25 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "config.h"
 
 #define POWER_SAFE_MODE_STATE_ACQUISITION 0
 #define POWER_SAFE_MODE_STATE_TRACKING 1
 #define POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING 2
 #define POWER_SAFE_MODE_STATE_INACTIVE 3
+
+#define GPS_FIX_NO_FIX 0
+#define GPS_FIX_DEAD_RECKONING_ONLY 1
+#define GPS_FIX_2D 2
+#define GPS_FIX_3D 3
+#define GPS_FIX_GPS_AND_DEAD_RECKONING 4
+#define GPS_FIX_TIME_ONLY 5
+
+#if GPS_REQUIRE_3D_FIX
+#define GPS_HAS_FIX(gps_data) (gps_data.fix_ok && (gps_data.fix == GPS_FIX_3D))
+#else
+#define GPS_HAS_FIX(gps_data) (gps_data.fix_ok && (gps_data.fix == GPS_FIX_2D || gps_data.fix == GPS_FIX_3D))
+#endif
 
 typedef struct _gps_data {
     bool updated;

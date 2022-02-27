@@ -494,7 +494,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     log_info("TX start\n");
 
     if (leds_enabled) {
-        system_set_red_led(true);
+        set_red_led(true);
     }
 
     radio_shared_state.radio_transmission_active = true;
@@ -568,7 +568,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
 
     usart_gps_enable(true);
     if (leds_enabled) {
-        system_set_red_led(false);
+        set_red_led(false);
     }
 
     return success;

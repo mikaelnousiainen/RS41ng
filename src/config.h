@@ -11,17 +11,21 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+#define CALLSIGN "OH3VHH"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
 // Green LED: Blinking fast when there is no GPS fix. Blinking slowly when the GPS has a fix.
 #define LEDS_ENABLE true
 
+// Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
+#define LEDS_DISABLE_ALTITUDE_METERS 1000
+
 // Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
 #define ALLOW_POWER_OFF false
 
-// Enable use of an externally connected I²C BMP280 atmospheric sensor
+// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
+// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
 #define SENSOR_BMP280_ENABLE false
 
 // Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
@@ -35,6 +39,9 @@
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
+
+// Enable this setting to require 3D fix (altitude required, enable for airborne use), otherwise 2D fix is enough
+#define GPS_REQUIRE_3D_FIX true
 
 // Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false

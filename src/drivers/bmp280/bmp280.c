@@ -48,6 +48,8 @@
 
 #define BMP280_RESET_VALUE     0xB6
 
+#define BMP280_TIMEOUT_COUNTER 0xFFFFF
+
 void bmp280_init_default_params(bmp280_params_t *params)
 {
     params->mode = BMP280_MODE_NORMAL;
@@ -132,6 +134,8 @@ static int write_register8(bmp280 *dev, uint8_t reg, uint8_t value)
 
 bool bmp280_init(bmp280 *dev, bmp280_params_t *params)
 {
+    uint32_t timeout;
+
     if (dev->addr != BMP280_I2C_ADDRESS_0
         && dev->addr != BMP280_I2C_ADDRESS_1) {
 
@@ -152,11 +156,15 @@ bool bmp280_init(bmp280 *dev, bmp280_params_t *params)
     }
 
     // Wait until finished copying over the NVP data.
-    while (1) {
+    timeout = BMP280_TIMEOUT_COUNTER;
+    while (timeout-- > 0) {
         uint8_t status;
         if (read_data(dev, BMP280_REG_STATUS, &status, 1) && (status & 1) == 0) {
             break;
         }
+    }
+    if (timeout == 0) {
+        return false;
     }
 
     if (!read_calibration_data(dev)) {

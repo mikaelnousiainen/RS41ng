@@ -27,4 +27,7 @@ extern char *aprs_comment_templates[];
 extern char *fsq_comment_templates[];
 extern char *ftjt_message_templates[];
 
+void set_green_led(bool enabled);
+void set_red_led(bool enabled);
+
 #endif

@@ -7,6 +7,8 @@
 #include "delay.h"
 #include "log.h"
 
+#define I2C_TIMEOUT_COUNTER 0x4FFFF
+
 struct _i2c_port {
     I2C_TypeDef *i2c;
 };
@@ -61,7 +63,7 @@ void i2c_init()
         delay_ms(1);
     }
     if (count == 0) {
-        log_error("ERROR: I²C bus busy during initialization");
+        log_error("ERROR: I²C bus busy during initialization\n");
     }
 
     I2C_Cmd(I2C_PORT, ENABLE);
@@ -97,11 +99,11 @@ static void i2c_reset_bus(i2c_port *port)
 
 static int i2c_wait_until_not_busy(i2c_port *port)
 {
-    __IO uint32_t timeout = 0xFFFFFF;
+    __IO uint32_t timeout = I2C_TIMEOUT_COUNTER;
 
     while (I2C_GetFlagStatus(I2C_PORT, I2C_FLAG_BUSY)) {
         if (--timeout == 0) {
-            log_error("ERROR: Timeout - I2C bus busy");
+            log_error("ERROR: Timeout - I2C bus busy\n");
             i2c_reset_bus(port);
             return HAL_ERROR_TIMEOUT;
         }
@@ -112,11 +114,11 @@ static int i2c_wait_until_not_busy(i2c_port *port)
 
 static bool i2c_wait_event(i2c_port *port, uint32_t flag)
 {
-    __IO uint32_t timeout = 0xFFFFFF;
+    __IO uint32_t timeout = I2C_TIMEOUT_COUNTER;
 
     while (I2C_CheckEvent(port->i2c, flag) != SUCCESS) {
         if (--timeout == 0) {
-            log_error("ERROR: WE event timeout: 0x%08lx", flag);
+            log_error("ERROR: WE event timeout: 0x%08lx\n", flag);
             i2c_reset_bus(port);
             return false;
         }
@@ -131,13 +133,13 @@ static int i2c_prepare_op(i2c_port *port, uint8_t address)
     I2C_GenerateSTART(port->i2c, ENABLE);
 
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_MODE_SELECT)) {
-        log_error("ERROR: PO MMS timeout: 0x%02x", address);
+        log_error("ERROR: PO MMS timeout: 0x%02x\n", address);
         return HAL_ERROR_TIMEOUT;
     }
     I2C_Send7bitAddress(port->i2c, address, I2C_Direction_Transmitter);
 
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
-        log_error("ERROR: PO MTMS timeout: 0x%02x", address);
+        log_error("ERROR: PO MTMS timeout: 0x%02x\n", address);
         return HAL_ERROR_TIMEOUT;
     }
 
@@ -153,7 +155,7 @@ static int i2c_prepare_op_with_register(i2c_port *port, uint8_t address, uint8_t
 
     I2C_SendData(port->i2c, reg);
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
-        log_error("ERROR: POWR MBT timeout: 0x%02x 0x%02x", address, reg);
+        log_error("ERROR: POWR MBT timeout: 0x%02x 0x%02x\n", address, reg);
         return HAL_ERROR_TIMEOUT;
     }
 
@@ -169,13 +171,13 @@ static int i2c_prepare_read(i2c_port *port, uint8_t address, uint8_t reg)
 
     I2C_GenerateSTART(port->i2c, ENABLE);
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_MODE_SELECT)) {
-        log_error("ERROR: PR MMS timeout: 0x%02x 0x%02x", address, reg);
+        log_error("ERROR: PR MMS timeout: 0x%02x 0x%02x\n", address, reg);
         return HAL_ERROR_TIMEOUT;
     }
 
     I2C_Send7bitAddress(port->i2c, address, I2C_Direction_Receiver);
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {
-        log_error("ERROR: PR MRMS timeout: 0x%02x 0x%02x", address, reg);
+        log_error("ERROR: PR MRMS timeout: 0x%02x 0x%02x\n", address, reg);
         return HAL_ERROR_TIMEOUT;
     }
 
@@ -188,7 +190,7 @@ static int i2c_finish_read(i2c_port *port)
     I2C_AcknowledgeConfig(port->i2c, DISABLE);
 
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_BYTE_RECEIVED)) {
-        log_error("ERROR: FR MBR timeout");
+        log_error("ERROR: FR MBR timeout\n");
         return HAL_ERROR_TIMEOUT;
     }
     I2C_ReceiveData(port->i2c);
@@ -206,7 +208,7 @@ static int i2c_finish_write(i2c_port *port)
     I2C_GenerateSTOP(port->i2c, ENABLE);
 
     if (!i2c_wait_event(port, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
-        log_error("ERROR: FW MBT timeout");
+        log_error("ERROR: FW MBT timeout\n");
         return HAL_ERROR_TIMEOUT;
     }
 
@@ -227,7 +229,7 @@ int i2c_read_bytes(i2c_port *port, uint8_t address, uint8_t reg, uint8_t size, u
 
     for (uint8_t i = 0; i < size; i++) {
         if (!i2c_wait_event(port, I2C_EVENT_MASTER_BYTE_RECEIVED)) {
-            log_error("ERROR: MBR timeout: 0x%02x 0x%02x", address, reg);
+            log_error("ERROR: MBR timeout: 0x%02x 0x%02x\n", address, reg);
             return HAL_ERROR_TIMEOUT;
         }
         data[i] = I2C_ReceiveData(port->i2c);
@@ -258,7 +260,7 @@ int i2c_write_bytes(i2c_port *port, uint8_t address, uint8_t reg, uint8_t size, 
     for (uint8_t i = 0; i < size; i++) {
         I2C_SendData(port->i2c, data[i]);
         if (!i2c_wait_event(port, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) {
-            log_error("ERROR: MBF timeout: 0x%02x 0x%02x", address, reg);
+            log_error("ERROR: MBF timeout: 0x%02x 0x%02x\n", address, reg);
             return HAL_ERROR_TIMEOUT;
         }
     }

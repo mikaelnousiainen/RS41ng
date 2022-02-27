@@ -44,6 +44,8 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
         horus_packet.Sats += 200;
     }
 
+    memset(horus_packet.CustomData, 0, sizeof(horus_packet.CustomData));
+
     uint8_t *custom_data_pointer = horus_packet.CustomData;
 
     // Unit: cm/s

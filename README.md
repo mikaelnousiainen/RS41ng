@@ -110,7 +110,6 @@ Sensor driver code contributions are welcome!
 
 ### Planned features
 
-* Continuous transmission mode for Horus 4FSK
 * Configurable transmission frequencies and schedules based on location / altitude
 * Support for more I²C sensors
 * RTTY on both Si4032 (70 cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift

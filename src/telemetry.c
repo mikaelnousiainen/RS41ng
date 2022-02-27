@@ -5,9 +5,12 @@
 #include "bmp280_handler.h"
 #include "locator.h"
 #include "config.h"
+#include "log.h"
 
 void telemetry_collect(telemetry_data *data)
 {
+    log_info("Collecting telemetry...\n");
+
     data->button_adc_value = system_get_button_adc_value();
     data->battery_voltage_millivolts = system_get_battery_voltage_millivolts();
     data->internal_temperature_celsius_100 = si4032_read_temperature_celsius_100();
@@ -20,7 +23,7 @@ void telemetry_collect(telemetry_data *data)
 
     // Zero out position data if we don't have a valid GPS fix.
     // This is done to avoid transmitting invalid position information.
-    if (!data->gps.fix_ok) {
+    if (!GPS_HAS_FIX(data->gps)) {
         data->gps.latitude_degrees_1000000 = 0;
         data->gps.longitude_degrees_1000000 = 0;
         data->gps.altitude_mm = 0;
@@ -31,4 +34,6 @@ void telemetry_collect(telemetry_data *data)
 
     locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
+
+    log_info("Telemetry collected!\n");
 }
