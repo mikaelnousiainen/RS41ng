@@ -11,7 +11,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "OH3VHH"
+#define CALLSIGN "MYCALL"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
