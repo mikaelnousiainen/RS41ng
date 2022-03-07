@@ -6,7 +6,7 @@ set -e # Exit if failed
 if [ ! -d "/usr/src/rs41ng" ]
 then
     echo "Build directory does not exist, please run the command given in README to mount the source directory"
-    exit 1 # die with error code 9999
+    exit 1
 fi
 
 # Build RS41ng
