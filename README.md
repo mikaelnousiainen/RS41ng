@@ -153,6 +153,18 @@ Note that the code uses `strlcpy()` also in the test code, which requires `libbs
     ```
 3. The firmware will be stored in file `build/src/RS41ng.elf`
 
+### Building the firmware with Docker
+
+Building with Docker can help address issues with the build process on some platforms, including the `strlcpy()` errors observed on certain Linux distributions.
+
+1. Install Docker if not already installed
+2. Build the firmware using the following commands
+    ```
+    docker build -t rs41ng_compiler .
+    docker run --rm -it -v $(pwd):/usr/src/rs41ng rs41ng_compiler
+    ```
+3. The firmware will be stored in this directory.
+
 ## Flashing the firmware
 
 Hardware requirements:
