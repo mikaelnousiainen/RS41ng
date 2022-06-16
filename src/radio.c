@@ -76,6 +76,19 @@ radio_transmit_entry radio_transmit_schedule[] = {
         },
 #else
         {
+                .enabled = RADIO_SI4032_TX_PIP,
+                .radio_type = RADIO_TYPE_SI4032,
+                .data_mode = RADIO_DATA_MODE_PIP,
+                .transmit_count = RADIO_SI4032_TX_PIP_COUNT,
+                .time_sync_seconds = PIP_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = PIP_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4032_TX_FREQUENCY_PIP,
+                .tx_power = RADIO_SI4032_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
+        {
                 .enabled = RADIO_SI4032_TX_CW,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_CW,
@@ -132,6 +145,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #if RADIO_SI5351_ENABLE
+#if RADIO_SI5351_TX_PIP
+        {
+                .enabled = RADIO_SI5351_TX_PIP,
+                .radio_type = RADIO_TYPE_SI5351,
+                .data_mode = RADIO_DATA_MODE_PIP,
+                .transmit_count = RADIO_SI5351_TX_PIP_COUNT,
+                .time_sync_seconds = PIP_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = PIP_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI5351_TX_FREQUENCY_PIP,
+                .tx_power = RADIO_SI5351_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
+#endif
 #if RADIO_SI5351_TX_CW
         {
                 .enabled = RADIO_SI5351_TX_CW,
@@ -389,6 +417,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             // CW timing is not as critical
             enable_gps_during_transmit = true;
 
@@ -540,6 +569,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             morse_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_RTTY:
@@ -814,6 +844,9 @@ void radio_init()
         switch (entry->data_mode) {
             case RADIO_DATA_MODE_CW:
                 entry->messages = cw_message_templates;
+                break;
+            case RADIO_DATA_MODE_PIP:
+                entry->messages = pip_message_templates;
                 break;
             case RADIO_DATA_MODE_APRS_1200:
                 entry->messages = aprs_comment_templates;

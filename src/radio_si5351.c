@@ -22,6 +22,7 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             data_timer_init(entry->symbol_rate * CW_SYMBOL_RATE_MULTIPLIER);
             set_frequency_early = false;
             break;
@@ -50,6 +51,7 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             // Setting the frequency turns on the output
@@ -70,6 +72,7 @@ bool radio_transmit_symbol_si5351(radio_transmit_entry *entry, radio_module_stat
 {
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             return false;
         case RADIO_DATA_MODE_HORUS_V1:
             return false;
@@ -115,7 +118,8 @@ inline void radio_handle_data_timer_si5351()
 
     // TODO: handle Si5351 errors
     switch (radio_current_transmit_entry->data_mode) {
-        case RADIO_DATA_MODE_CW: {
+        case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP: {
             cw_symbol_rate_multiplier--;
             if (cw_symbol_rate_multiplier > 0) {
                 break;
@@ -179,6 +183,7 @@ bool radio_stop_transmit_si5351(radio_transmit_entry *entry, radio_module_state 
 {
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             break;
         case RADIO_DATA_MODE_HORUS_V1:
             // use_fast_si5351 = true;
@@ -195,6 +200,7 @@ bool radio_stop_transmit_si5351(radio_transmit_entry *entry, radio_module_state 
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             data_timer_uninit();
             system_enable_tick();
             break;

@@ -63,6 +63,7 @@ The main features the RS41ng firmware are:
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
   * Morse code (CW)
   * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
+  * "Pip" mode, which transmits a short beep generated using CW to indicate presence of the transmitter
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
 * Support for custom sensors via the external I²C bus
@@ -78,6 +79,7 @@ On the internal Si4032 transmitter:
 * APRS (1200 baud)
 * Horus 4FSK v1 and v2 (100 baud)
 * Morse code (CW)
+* "Pip" - a short beep to indicate presence of the transmitter
 
 On an external Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde:
 
@@ -85,6 +87,7 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 * JT65/JT9/JT4/FT8/WSPR/FSQ mode beacon transmissions using the JTEncode library. I've decoded FT8, WSPR and FSQ modes successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
 * Morse code (CW)
+* "Pip"
 
 #### Notes about APRS
 

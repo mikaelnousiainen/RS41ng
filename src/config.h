@@ -59,8 +59,10 @@
 #define RADIO_SI4032_TX_POWER 7
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
-#define RADIO_SI4032_TX_CW true
+#define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
+#define RADIO_SI4032_TX_PIP false
+#define RADIO_SI4032_TX_PIP_COUNT 6
 #define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
@@ -76,6 +78,7 @@
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432500000
+#define RADIO_SI4032_TX_FREQUENCY_PIP       432500000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
@@ -92,6 +95,8 @@
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
 #define RADIO_SI5351_TX_CW true
 #define RADIO_SI5351_TX_CW_COUNT 1
+#define RADIO_SI5351_TX_PIP false
+#define RADIO_SI5351_TX_PIP_COUNT 6
 #define RADIO_SI5351_TX_HORUS_V1 false
 #define RADIO_SI5351_TX_HORUS_V1_COUNT 1
 #define RADIO_SI5351_TX_HORUS_V2 true
@@ -111,6 +116,7 @@
 
 // Transmit frequencies for the Si5351 transmitter modes
 #define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
+#define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
@@ -211,6 +217,18 @@
 #define CW_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset after the scheduled time.
 #define CW_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * Pip settings (short beep generated using CW to indicate presence of the transmitter)
+ */
+
+// Pip speed is defined as CW WPM, range 5 - 40
+#define PIP_SPEED_WPM 18
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+#define PIP_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset after the scheduled time.
+#define PIP_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * WSPR settings

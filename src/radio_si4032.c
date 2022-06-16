@@ -45,6 +45,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             frequency_offset = 1;
             modulation_type = SI4032_MODULATION_TYPE_OOK;
             use_direct_mode = false;
@@ -96,6 +97,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             spi_uninit();
             system_disable_tick();
             si4032_use_sdi_pin(true);
@@ -127,6 +129,7 @@ static uint32_t radio_next_symbol_si4032(radio_transmit_entry *entry, radio_modu
 {
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             return 0;
         case RADIO_DATA_MODE_RTTY:
             return 0;
@@ -216,7 +219,8 @@ inline void radio_handle_data_timer_si4032()
     }
 
     switch (radio_current_transmit_entry->data_mode) {
-        case RADIO_DATA_MODE_CW: {
+        case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP: {
             cw_symbol_rate_multiplier--;
             if (cw_symbol_rate_multiplier > 0) {
                 break;
@@ -274,6 +278,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             si4032_use_sdi_pin(false);
             data_timer_uninit();
             spi_init();
@@ -302,6 +307,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
+        case RADIO_DATA_MODE_PIP:
             system_enable_tick();
             break;
         case RADIO_DATA_MODE_APRS_1200:

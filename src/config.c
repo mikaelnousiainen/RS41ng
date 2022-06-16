@@ -52,7 +52,16 @@ volatile bool system_initialized = false;
  * Maximum length: 64 characters.
  */
 char *cw_message_templates[] = {
-        "$cs TEST $loc6 $altm $tiC",
+        "$cs $loc6 $altm $gs km/h $tiC",
+        NULL
+};
+
+/**
+ * "Pip" mode messages. Transmitted as CW, because a single "pip" can be represented as the 'E' character.
+ * Maximum length: 64 characters.
+ */
+char *pip_message_templates[] = {
+        "E", // An 'E' character in CW represents a single "pip".
         NULL
 };
 
