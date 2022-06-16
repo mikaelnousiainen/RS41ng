@@ -17,7 +17,7 @@ i2c_port DEFAULT_I2C_PORT = {
         .i2c = I2C_PORT,
 };
 
-void i2c_init()
+void i2c_init(uint32_t clock_speed)
 {
     GPIO_InitTypeDef gpio_init;
 
@@ -49,7 +49,7 @@ void i2c_init()
     I2C_InitTypeDef i2c_init;
     I2C_StructInit(&i2c_init);
 
-    i2c_init.I2C_ClockSpeed = 100000;
+    i2c_init.I2C_ClockSpeed = clock_speed;
     i2c_init.I2C_Mode = I2C_Mode_I2C;
     i2c_init.I2C_DutyCycle = I2C_DutyCycle_2;
     i2c_init.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;

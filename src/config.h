@@ -24,6 +24,11 @@
 // Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
 #define ALLOW_POWER_OFF false
 
+// Define the I²C bus clock speed in Hz.
+// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
+// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
+#define I2C_BUS_CLOCK_SPEED 100000
+
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
 #define SENSOR_BMP280_ENABLE false

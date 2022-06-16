@@ -20,7 +20,7 @@ extern i2c_port DEFAULT_I2C_PORT;
 extern "C" {
 #endif
 
-void i2c_init();
+void i2c_init(uint32_t clock_speed);
 void i2c_uninit();
 int i2c_read_bytes(struct _i2c_port *port, uint8_t address, uint8_t reg, uint8_t size, uint8_t *data);
 int i2c_read_byte(struct _i2c_port *port, uint8_t address, uint8_t reg, uint8_t *data);

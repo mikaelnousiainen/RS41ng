@@ -84,8 +84,8 @@ int main(void)
         log_info("External USART init\n");
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
     } else {
-        log_info("I2C init\n");
-        i2c_init();
+        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+        i2c_init(I2C_BUS_CLOCK_SPEED);
     }
     log_info("SPI init\n");
     spi_init();
