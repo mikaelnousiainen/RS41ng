@@ -1,6 +1,7 @@
 #include <string.h>
 #include "horus_packet_v2.h"
 #include "horus_common.h"
+#include "config.h"
 
 volatile uint16_t horus_v2_packet_counter = 0;
 
@@ -67,6 +68,13 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
     // custom_data_pointer += sizeof(ext_pressure_mbar);
+	
+	
+	if (pulse_counter_enabled) {
+	// Unit: total counts
+		uint16_t ext_total_counts = (uint16_t) data->pulse_counts;
+		memcpy(custom_data_pointer, &ext_total_counts, sizeof(ext_total_counts));
+	}
 
     horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet,
             sizeof(horus_packet) - sizeof(horus_packet.Checksum));

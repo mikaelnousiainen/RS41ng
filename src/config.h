@@ -55,6 +55,10 @@
 #error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
 #endif
 
+// Enable pulse counter (e.g. geiger counter) via external port header. This disables the use of I²C and Serial port as we use PB11-pin22 (expansion header, XDATA_RX).
+// Also changes the HorusV2 data format and adds an additional field for total counts.
+#define PULSE_COUNTER_ENABLE false
+
 /**
  * Built-in Si4032 radio chip transmission configuration
  */
