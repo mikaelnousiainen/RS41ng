@@ -20,39 +20,39 @@ uint16_t pulse_counter_get_counts(){
 
 void CounterPin_Init(void) {
 	
+	//Initialize GPIO typedef
 	GPIO_InitTypeDef GPIO_InitStructure; 
-	//Set pin 22 as input
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_22;
+	//Set pin 11 as input
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
 	//Enable internal pullup
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
 	
-	
+	//Initialize EXTI typedef
 	EXTI_InitTypeDef EXTI_InitStruct;
-	/* PD0 is connected to EXTI_Line0 */
+	//PB11 is connected to interrupt line 11
 	EXTI_InitStruct.EXTI_Line = EXTI_Line11;
-	/* Interrupt mode */
+	//Interrupt mode
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	/* Triggers on rising and falling edge */
+	//Triggers on falling edge
 	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
-	/* Enable interrupt */
+	//Enable interrupt
 	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	/* Add to EXTI */
+	//Add to EXTI
 	EXTI_Init(&EXTI_InitStruct);
 	
-	
-	
-	/* Add IRQ vector to NVIC */
-	/* PB11 is connected to EXTI_Line11, which has EXTI11_IRQn vector */
-	NVIC_InitStruct.NVIC_IRQChannel = EXTI11_IRQn;
-	/* Set priority */
+	//Initialize NVIC typedef
+	NVIC_InitTypeDef NVIC_InitStruct;
+	//PB11 is connected to EXTI_Line11, which has EXTI4_IRQn vector */
+	NVIC_InitStruct.NVIC_IRQChannel = EXTI4_IRQn;
+	//Priority
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0x00;
-	/* Set sub priority */
+	//Sub-priority
 	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
-	/* Enable interrupt */
+	//Enable interrupt
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-	/* Add to NVIC */
+	//Add to NVIC
 	NVIC_Init(&NVIC_InitStruct);
 }
 
