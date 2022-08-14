@@ -1,6 +1,6 @@
 #include "pulse_counter.h"
-#include "stm32f1xx.h"
-#include "stm32f1xx_exti.h"
+#include "stm32f10x_exti.h"
+#include "stm32f10x.h"
 #include "misc.h"
 
 
