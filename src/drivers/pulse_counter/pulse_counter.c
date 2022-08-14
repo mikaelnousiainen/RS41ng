@@ -1,4 +1,7 @@
 #include "pulse_counter.h"
+#include "stm32f1xx.h"
+#include "stm32f1xx_exti.h"
+#include "misc.h"
 
 
 bool pulse_counter_init()
