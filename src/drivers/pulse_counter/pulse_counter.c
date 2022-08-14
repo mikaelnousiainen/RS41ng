@@ -56,7 +56,7 @@ void CounterPin_Init(void) {
 	NVIC_Init(&NVIC_InitStruct);
 }
 
-void EXTI11_IRQHandler(void)
+void EXTI4_IRQHandler(void)
 {
 	counts = counts+1;
 	EXTI_ClearITPendingBit(EXTI_Line11); //Clear the interrupt flag bit on LINE11
