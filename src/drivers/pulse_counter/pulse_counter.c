@@ -37,7 +37,6 @@ void TIM2init_counter(void) { // counting from ETR
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up; // 7
 	TIM_TimeBaseInitStructure.TIM_Period = 100000; // 8
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1; // 9
-	Timer – counting pulses 4
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure); // 10
 	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0x00); // 12
 	TIM_Cmd(TIM2, ENABLE); // 14
