@@ -22,7 +22,7 @@ uint16_t pulse_counter_get_counts(){
 
 void GPIOBinit_TIM2(void) {
 	GPIO_InitTypeDef GPIO_InitStructure; // 2
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE); // 4
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // 4
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_TIM2); // PB11:TIM2_Ch4/ETR // 6
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11; // 8
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF; // 9
