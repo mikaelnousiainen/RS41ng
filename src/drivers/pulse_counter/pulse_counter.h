@@ -3,4 +3,4 @@
 
 bool pulse_counter_init();
 uint16_t pulse_counter_get_counts();
-void GPIO_Init();
+void CounterPin_Init();

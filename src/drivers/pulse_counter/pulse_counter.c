@@ -9,7 +9,7 @@ uint16_t counts=1666;
 bool pulse_counter_init()
 {
 	//TODO: start counter.
-	GPIO_Init();
+	CounterPin_Init();
     return true;
 }
 
@@ -18,7 +18,7 @@ uint16_t pulse_counter_get_counts(){
 	return counts;
 }
 
-void GPIO_Init(void) {
+void CounterPin_Init(void) {
 	
 	GPIO_InitTypeDef GPIO_InitStructure; 
 	//Set pin 22 as input
