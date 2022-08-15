@@ -81,10 +81,10 @@ int main(void)
     set_green_led(false);
     set_red_led(true);
 	
-	if (pulse_counter_enabled){
-		log_info("Pulse Counter Init");
-		pulse_counter_init();
-	}
+	if (pulse_counter_enabled) {
+        log_info("Pulse Counter Init");
+        pulse_counter_init();
+    }
 
     if (gps_nmea_output_enabled && !pulse_counter_enabled) {
         log_info("External USART init\n");

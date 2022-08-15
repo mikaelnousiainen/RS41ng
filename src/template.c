@@ -101,7 +101,7 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     size_t len = str_replace(dest, dest_len, temp, "$he", replacement);
 	
-	snprintf(replacement, sizeof(replacement), "%d", (int) data->pulse_counts);
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->pulse_count);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$pc", replacement);
 

@@ -68,13 +68,11 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
     
-	
-	
 	if (pulse_counter_enabled) {
 	// Unit: total counts
-		custom_data_pointer += sizeof(ext_pressure_mbar);
-		uint16_t ext_total_counts = (uint16_t) data->pulse_counts;
-		memcpy(custom_data_pointer, &ext_total_counts, sizeof(ext_total_counts));
+	    custom_data_pointer += sizeof(ext_pressure_mbar);
+	    uint16_t ext_total_count = (uint16_t) data->pulse_count;
+	    memcpy(custom_data_pointer, &ext_total_count, sizeof(ext_total_count));
 	}
 
     horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet,
