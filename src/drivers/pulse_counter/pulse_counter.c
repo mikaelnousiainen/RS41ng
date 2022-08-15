@@ -4,23 +4,18 @@
 #include "stm32f10x.h"
 #include "misc.h"
 
-uint16_t counts=0;
+uint16_t count=0;
 
-bool pulse_counter_init()
-{
-	//TODO: start counter.
-	CounterPin_Init();
+bool pulse_counter_init() {
+    counter_pin_init();
     return true;
 }
 
-uint16_t pulse_counter_get_counts(){
-	//TODO: Retrieve total counts and return it.
-	return counts;
+uint16_t pulse_counter_get_count() {
+    return count;
 }
 
-void CounterPin_Init(void) {
-	
-	
+void counter_pin_init(void) {
     //Initialize GPIO typedef
     GPIO_InitTypeDef gpio_init;
     //Set pin PB11, with internal pullup, 10MHz speed
@@ -51,7 +46,7 @@ void CounterPin_Init(void) {
     NVIC_Init(&NVIC_InitStruct);
 }
 
-void EXTI15_10_IRQHandler(void){
-	counts = counts+1;
-	EXTI_ClearITPendingBit(EXTI_Line11); //Clear the interrupt flag bit on LINE11
+void EXTI15_10_IRQHandler(void) {
+    count = count+1;
+    EXTI_ClearITPendingBit(EXTI_Line11); //Clear the interrupt flag bit on LINE11
 }
