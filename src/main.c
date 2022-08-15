@@ -86,12 +86,17 @@ int main(void)
 		pulse_counter_init();
 	}
 
-    if (gps_nmea_output_enabled) {
+    if (gps_nmea_output_enabled && !pulse_counter_enabled) {
         log_info("External USART init\n");
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
     } else {
-        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
-        i2c_init(I2C_BUS_CLOCK_SPEED);
+        if (!pulse_counter_enabled){
+			log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+			i2c_init(I2C_BUS_CLOCK_SPEED);
+		}
+		else{
+			log_info("I2C/UART init locked: pulse counter is active!");
+		}
     }
     log_info("SPI init\n");
     spi_init();
