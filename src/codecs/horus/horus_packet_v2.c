@@ -67,11 +67,12 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     // Unit: mbar * 10
     uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
-    // custom_data_pointer += sizeof(ext_pressure_mbar);
+    
 	
 	
 	if (pulse_counter_enabled) {
 	// Unit: total counts
+		custom_data_pointer += sizeof(ext_pressure_mbar);
 		uint16_t ext_total_counts = (uint16_t) data->pulse_counts;
 		memcpy(custom_data_pointer, &ext_total_counts, sizeof(ext_total_counts));
 	}
