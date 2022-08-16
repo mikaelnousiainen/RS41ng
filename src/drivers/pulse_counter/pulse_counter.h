@@ -3,4 +3,3 @@
 
 bool pulse_counter_init();
 uint16_t pulse_counter_get_count();
-void counter_pin_init();

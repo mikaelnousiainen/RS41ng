@@ -19,10 +19,10 @@ void telemetry_collect(telemetry_data *data)
     if (bmp280_enabled) {
         bmp280_read_telemetry(data);
     }
-	
+
     if (pulse_counter_enabled) {
-        data->pulse_count=pulse_counter_get_count();
-    }	
+        data->pulse_count = pulse_counter_get_count();
+    }
 
     ubxg6010_get_current_gps_data(&data->gps);
 

@@ -34,7 +34,7 @@ void handle_timer_tick()
 
     if (leds_enabled) {
         // Blink fast until GPS fix is acquired
-        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
+        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
             if (GPS_HAS_FIX(current_gps_data)) {
                 if (counter == 0) {
                     led_state = !led_state;
@@ -80,28 +80,22 @@ int main(void)
 
     set_green_led(false);
     set_red_led(true);
-	
-	if (pulse_counter_enabled) {
-        log_info("Pulse Counter Init");
-        pulse_counter_init();
-    }
 
-    if (gps_nmea_output_enabled && !pulse_counter_enabled) {
+    if (gps_nmea_output_enabled) {
         log_info("External USART init\n");
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
+    } else if (pulse_counter_enabled) {
+        log_info("Pulse counter init\n");
+        pulse_counter_init();
     } else {
-        if (!pulse_counter_enabled){
-			log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
-			i2c_init(I2C_BUS_CLOCK_SPEED);
-		}
-		else{
-			log_info("I2C/UART init locked: pulse counter is active!");
-		}
+        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+        i2c_init(I2C_BUS_CLOCK_SPEED);
     }
+
     log_info("SPI init\n");
     spi_init();
 
-gps_init:
+    gps_init:
     log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {

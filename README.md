@@ -67,6 +67,7 @@ The main features the RS41ng firmware are:
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
 * Support for custom sensors via the external I²C bus
+* Support for counting pulses on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
 * GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 * Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
@@ -181,6 +182,7 @@ ______________________|           |______________________
 * 1 - GND
 * 2 - I2C2_SDA (PB11) / UART3 RX
     * This is the external I²C port data pin for Si5351 and sensors
+    * This pin can be used as input for the pulse counter.
 * 3 - I2C2_SCL (PB10) / UART3 TX
     * This is the external I²C port clock pin for Si5351 and sensors
     * This pin can alternatively be used to output GPS NMEA data to external tracker hardware (e.g. Raspberry Pi or other microcontrollers)
