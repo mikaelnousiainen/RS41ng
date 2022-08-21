@@ -3,23 +3,30 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x.h"
 #include "misc.h"
+#include "config.h"
 
 uint16_t pulse_count = 0;
 
-bool pulse_counter_init()
+void pulse_counter_init(int pin_mode, int edge)
 {
-    // Set pin PB11, with internal pullup, 10MHz speed
+    // Initialize pin PB11 with optional internal pull-up resistor
     GPIO_InitTypeDef gpio_init;
     gpio_init.GPIO_Pin = GPIO_Pin_11;
-    gpio_init.GPIO_Mode = GPIO_Mode_IPU;
+    gpio_init.GPIO_Mode = (pin_mode == PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP)
+                          ? GPIO_Mode_IPU :
+                          ((pin_mode == PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_DOWN)
+                           ? GPIO_Mode_IPD
+                           : GPIO_Mode_IN_FLOATING);
     gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(GPIOB, &gpio_init);
 
-    // PB11 is connected to interrupt line 11, trigger interrupt on a falling edge and enable it.
+    // PB11 is connected to interrupt line 11, set trigger on the configured edge and enable the interrupt
     EXTI_InitTypeDef exti_init;
     exti_init.EXTI_Line = EXTI_Line11;
     exti_init.EXTI_Mode = EXTI_Mode_Interrupt;
-    exti_init.EXTI_Trigger = EXTI_Trigger_Falling;
+    exti_init.EXTI_Trigger = (edge == PULSE_COUNTER_INTERRUPT_EDGE_FALLING)
+                             ? EXTI_Trigger_Falling
+                             : EXTI_Trigger_Rising;
     exti_init.EXTI_LineCmd = ENABLE;
     EXTI_Init(&exti_init);
 
@@ -33,8 +40,6 @@ bool pulse_counter_init()
     NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0x00;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
-
-    return true;
 }
 
 uint16_t pulse_counter_get_count()

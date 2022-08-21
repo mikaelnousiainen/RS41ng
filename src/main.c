@@ -86,7 +86,7 @@ int main(void)
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
     } else if (pulse_counter_enabled) {
         log_info("Pulse counter init\n");
-        pulse_counter_init();
+        pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
         log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
         i2c_init(I2C_BUS_CLOCK_SPEED);

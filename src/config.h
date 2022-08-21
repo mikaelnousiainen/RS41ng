@@ -57,8 +57,25 @@
 
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
-// Also changes the Horus 4FSK V2 data format and adds an additional custom data field for pulse count.
+// Also changes the Horus 4FSK V2 data format and adds a custom data field for pulse count.
 #define PULSE_COUNTER_ENABLE false
+
+// Pulse counter pin modes
+#define PULSE_COUNTER_PIN_MODE_FLOATING 0
+#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP 1
+#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_DOWN 2
+
+// Enable the internal pull-up or pull-down resistor on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX)
+// This is necessary if the pulse counter needs to count pulses where the pin is pulled low (ground) or high (VCC) during the pulse.
+// Set to "floating" if the circuit that generates the pulses already has a pull-up or a pull-down resistor.
+#define PULSE_COUNTER_PIN_MODE PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP
+
+// Pulse counter interrupt edges
+#define PULSE_COUNTER_INTERRUPT_EDGE_FALLING 1
+#define PULSE_COUNTER_INTERRUPT_EDGE_RISING 2
+
+// Set the edge of the pulse where the interrupt is triggered: falling or rising.
+#define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
 
 #if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
 #error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
