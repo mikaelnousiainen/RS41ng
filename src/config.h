@@ -58,6 +58,7 @@
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
 // Also changes the Horus 4FSK V2 data format and adds a custom data field for pulse count.
+// The pulse count will wrap to zero at 65535 as it is stored as a 16-bit unsigned integer value.
 #define PULSE_COUNTER_ENABLE false
 
 // Pulse counter pin modes

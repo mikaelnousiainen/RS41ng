@@ -25,7 +25,7 @@
  * $gs - Ground speed in km/h (up to 3 chars)
  * $cl - Climb in m/s (up to 2 chars)
  * $he - Heading in degrees (up to 3 chars)
- * $pc - Pulse Counts
+ * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
  *
  * Allowed message lengths:
  *

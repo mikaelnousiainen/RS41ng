@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "config.h"
 
+// The pulse count will wrap to zero at 65535 as it is stored as a 16-bit unsigned integer value
 uint16_t pulse_count = 0;
 
 void pulse_counter_init(int pin_mode, int edge)
