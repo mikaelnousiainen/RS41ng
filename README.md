@@ -155,15 +155,22 @@ Note that the code uses `strlcpy()` also in the test code, which requires `libbs
 
 ### Building the firmware with Docker
 
-Building with Docker can help address issues with the build process on some platforms, including the `strlcpy()` errors observed on certain Linux distributions.
+Using Docker to build the firmware is usually the easiest option, because it provides a stable Fedora Linux-based
+build environment on any platform. It should work on Windows and Mac operating systems too.
+
+The Docker environment can also help address issues with the build process, including the `strlcpy()` errors observed on certain Linux distributions.
 
 1. Install Docker if not already installed
-2. Build the firmware using the following commands
+2. Set the current directory to the RS41ng source directory
+3. Build the RS41ng compiler Docker image using the following command. It is necessary to build the Docker image only once.
     ```
     docker build -t rs41ng_compiler .
-    docker run --rm -it -v $(pwd):/usr/src/rs41ng rs41ng_compiler
     ```
-3. The firmware will be stored in this directory.
+4. Build the firmware using the following command. If you need to rebuild the firmware, simply run the command again.
+    ```
+    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler
+    ```
+5. The firmware will be stored in file `build/src/RS41ng.elf`
 
 ## Flashing the firmware
 
