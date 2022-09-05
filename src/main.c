@@ -7,6 +7,7 @@
 #include "hal/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/si4032/si4032.h"
+#include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
 #include "si5351_handler.h"
 #include "radio.h"
@@ -33,7 +34,7 @@ void handle_timer_tick()
 
     if (leds_enabled) {
         // Blink fast until GPS fix is acquired
-        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0)  {
+        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
             if (GPS_HAS_FIX(current_gps_data)) {
                 if (counter == 0) {
                     led_state = !led_state;
@@ -83,14 +84,18 @@ int main(void)
     if (gps_nmea_output_enabled) {
         log_info("External USART init\n");
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
+    } else if (pulse_counter_enabled) {
+        log_info("Pulse counter init\n");
+        pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
         log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
         i2c_init(I2C_BUS_CLOCK_SPEED);
     }
+
     log_info("SPI init\n");
     spi_init();
 
-gps_init:
+    gps_init:
     log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {

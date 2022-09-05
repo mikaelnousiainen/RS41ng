@@ -15,6 +15,7 @@ typedef struct _telemetry_data {
     int32_t temperature_celsius_100;
     uint32_t pressure_mbar_100;
     uint32_t humidity_percentage_100;
+    uint16_t pulse_count;
 
     gps_data gps;
 

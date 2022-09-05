@@ -1,6 +1,7 @@
 #include <string.h>
 #include "horus_packet_v2.h"
 #include "horus_common.h"
+#include "config.h"
 
 volatile uint16_t horus_v2_packet_counter = 0;
 
@@ -15,7 +16,7 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     float float_lat = (float) gps_data->latitude_degrees_1000000 / 10000000.0f;
     float float_lon = (float) gps_data->longitude_degrees_1000000 / 10000000.0f;
 
-    uint8_t volts_scaled = (uint8_t)(255 * (float) data->battery_voltage_millivolts / 5000.0f);
+    uint8_t volts_scaled = (uint8_t) (255 * (float) data->battery_voltage_millivolts / 5000.0f);
 
     horus_v2_packet_counter++;
 
@@ -29,8 +30,8 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     horus_packet.Seconds = gps_data->seconds;
     horus_packet.Latitude = float_lat;
     horus_packet.Longitude = float_lon;
-    horus_packet.Altitude = (uint16_t)((gps_data->altitude_mm > 0 ? gps_data->altitude_mm : 0) / 1000);
-    horus_packet.Speed = (uint8_t)((float) gps_data->ground_speed_cm_per_second * 0.036);
+    horus_packet.Altitude = (uint16_t) ((gps_data->altitude_mm > 0 ? gps_data->altitude_mm : 0) / 1000);
+    horus_packet.Speed = (uint8_t) ((float) gps_data->ground_speed_cm_per_second * 0.036);
 
     horus_packet.BattVoltage = volts_scaled;
     horus_packet.Sats = gps_data->satellites_visible;
@@ -66,7 +67,13 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     // Unit: mbar * 10
     uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
-    // custom_data_pointer += sizeof(ext_pressure_mbar);
+
+    if (pulse_counter_enabled) {
+        // Unit: pulse count
+        custom_data_pointer += sizeof(ext_pressure_mbar);
+        uint16_t ext_pulse_count = (uint16_t) data->pulse_count;
+        memcpy(custom_data_pointer, &ext_pulse_count, sizeof(ext_pulse_count));
+    }
 
     horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet,
             sizeof(horus_packet) - sizeof(horus_packet.Checksum));

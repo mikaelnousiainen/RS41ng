@@ -7,7 +7,7 @@ project(RS41ng_test C CXX)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
-file(GLOB_RECURSE USER_SOURCES "../src/codecs/*.c" "../src/template.c" "../src/utils.c")
+file(GLOB_RECURSE USER_SOURCES "../src/config.c" "../src/codecs/*.c" "../src/template.c" "../src/utils.c")
 file(GLOB_RECURSE USER_SOURCES_CXX "../src/codecs/*.cpp")
 file(GLOB_RECURSE USER_HEADERS "../src/codecs/*.h" "../src/template.h" "../src/utils.h" "../src/config.h")
 

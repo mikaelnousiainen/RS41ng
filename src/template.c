@@ -89,7 +89,8 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$alt", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%d", (int) ((float) data->gps.ground_speed_cm_per_second * 3.6f / 100.0f));
+    snprintf(replacement, sizeof(replacement), "%d",
+            (int) ((float) data->gps.ground_speed_cm_per_second * 3.6f / 100.0f));
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$gs", replacement);
 
@@ -100,6 +101,10 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     snprintf(replacement, sizeof(replacement), "%03d", (int) data->gps.heading_degrees_100000 / 100000);
     strlcpy(temp, dest, dest_len);
     size_t len = str_replace(dest, dest_len, temp, "$he", replacement);
+
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->pulse_count);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$pc", replacement);
 
     free(temp);
 

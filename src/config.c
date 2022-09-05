@@ -25,6 +25,7 @@
  * $gs - Ground speed in km/h (up to 3 chars)
  * $cl - Climb in m/s (up to 2 chars)
  * $he - Heading in degrees (up to 3 chars)
+ * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
  *
  * Allowed message lengths:
  *
@@ -44,6 +45,7 @@ bool leds_enabled = LEDS_ENABLE;
 bool bmp280_enabled = SENSOR_BMP280_ENABLE;
 bool si5351_enabled = RADIO_SI5351_ENABLE;
 bool gps_nmea_output_enabled = GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE;
+bool pulse_counter_enabled = PULSE_COUNTER_ENABLE;
 
 volatile bool system_initialized = false;
 
