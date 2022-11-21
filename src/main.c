@@ -152,3 +152,5 @@ int main(void)
         //__WFI();
     }
 }
+
+void* __dso_handle;
