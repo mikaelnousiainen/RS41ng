@@ -153,4 +153,6 @@ int main(void)
     }
 }
 
+// The following definition is a workaround to allow compilation and linking to succeed after some recent changes in GCC (at least in Fedora Linux).
+// See discussion in: https://github.com/mikaelnousiainen/RS41ng/issues/23
 void* __dso_handle;
