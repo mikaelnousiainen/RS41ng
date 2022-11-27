@@ -75,6 +75,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #else
+#if RADIO_SI4032_TX_PIP
         {
                 .enabled = RADIO_SI4032_TX_PIP,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -88,6 +89,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_cw_payload_encoder,
                 .fsk_encoder_api = &morse_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI4032_TX_CW
         {
                 .enabled = RADIO_SI4032_TX_CW,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -101,6 +104,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_cw_payload_encoder,
                 .fsk_encoder_api = &morse_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI4032_TX_APRS
         {
                 .enabled = RADIO_SI4032_TX_APRS,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -118,6 +123,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
 #endif
                 .fsk_encoder_api = &bell_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI4032_TX_HORUS_V1
         {
                 .enabled = RADIO_SI4032_TX_HORUS_V1,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -131,6 +138,8 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v1_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+#endif
+#if RADIO_SI4032_TX_HORUS_V2
         {
                 .enabled = RADIO_SI4032_TX_HORUS_V2,
                 .radio_type = RADIO_TYPE_SI4032,
@@ -144,6 +153,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+#endif
 #if RADIO_SI5351_ENABLE
 #if RADIO_SI5351_TX_PIP
         {
