@@ -205,10 +205,12 @@
 #define HORUS_FREQUENCY_OFFSET_SI4032 0
 
 /**
- * Horus V1 4FSK mode settings
+ * Horus V1 4FSK mode settings (deprecated, please use Horus V2 mode)
  */
 
-// Use Horus payload ID 0 for Horus V1 tests (4FSKTEST)
+// NOTE: Horus 4FSK V1 mode is deprecated in favor of Horus 4FSK V2 mode. All new Horus 4FSK payload IDs are allocated for V2 mode.
+// NOTE: Payload ID 0 (4FSKTEST) is for testing purposes only, and should not be used on an actual flight.
+// Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V1_PAYLOAD_ID 0
 #define HORUS_V1_BAUD_RATE_SI4032 100
 #define HORUS_V1_BAUD_RATE_SI5351 50
@@ -225,7 +227,8 @@
  * Horus V2 4FSK mode settings
  */
 
-// Use Horus payload ID 256 for Horus V2 tests (4FSKTEST-V2)
+// NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
+// Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V2_PAYLOAD_ID 256
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
