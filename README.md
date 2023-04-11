@@ -3,7 +3,7 @@
 **NOTE:** This firmware is a work in progress and some features might not work as expected yet!
 
 This is a custom, amateur radio-oriented firmware for [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41).
-Some of the code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
+Some code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
 the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
 
@@ -109,6 +109,9 @@ The following sensors are currently supported:
 
 * Bosch BMP280/BME280 barometric pressure / temperature / humidity sensor
   * Note that only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
+* RadSens universal dosimeter-radiometer module for measuring radiation
+  * https://www.tindie.com/stores/climateguard/
+  * https://github.com/climateguard/RadSens
 
 Sensor driver code contributions are welcome!
 

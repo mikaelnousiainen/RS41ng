@@ -9,6 +9,7 @@
 #include "drivers/si4032/si4032.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "radsens_handler.h"
 #include "si5351_handler.h"
 #include "radio.h"
 #include "config.h"
@@ -115,6 +116,17 @@ int main(void)
                 break;
             }
             log_error("BMP280 init failed, retrying...");
+        }
+    }
+
+    if (radsens_enabled) {
+        for (int i = 0; i < 3; i++) {
+            log_info("RadSens init\n");
+            success = radsens_handler_init();
+            if (success) {
+                break;
+            }
+            log_error("RadSens init failed, retrying...");
         }
     }
 

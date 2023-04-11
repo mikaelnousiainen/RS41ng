@@ -26,6 +26,7 @@
  * $cl - Climb in m/s (up to 2 chars)
  * $he - Heading in degrees (up to 3 chars)
  * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
+ * $ri - Radiation intensity in µR/h (up to 5 chars)
  *
  * Allowed message lengths:
  *
@@ -43,6 +44,7 @@
 
 bool leds_enabled = LEDS_ENABLE;
 bool bmp280_enabled = SENSOR_BMP280_ENABLE;
+bool radsens_enabled = SENSOR_RADSENS_ENABLE;
 bool si5351_enabled = RADIO_SI5351_ENABLE;
 bool gps_nmea_output_enabled = GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE;
 bool pulse_counter_enabled = PULSE_COUNTER_ENABLE;
@@ -54,7 +56,10 @@ volatile bool system_initialized = false;
  * Maximum length: 64 characters.
  */
 char *cw_message_templates[] = {
-        "$cs $loc6 $altm $gs km/h $tiC",
+//        "$cs $loc6 $altm $gs km/h $tiC",
+//        "$cs $loc6",
+//        "$alt m",
+//        "$gs km/h $ti C",
         NULL
 };
 
@@ -76,7 +81,8 @@ char *aprs_comment_templates[] = {
 //        " B$bu $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " APRS_COMMENT,
 //        " B$bu $teC $hu% $prmb - " APRS_COMMENT,
 //        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
-        " $loc12 - " APRS_COMMENT,
+//        " $loc12 - " APRS_COMMENT,
+//        " $teC $hu% $prmb PC $pc RI $ri uR/h - " APRS_COMMENT,
 //        " " APRS_COMMENT,
         NULL
 };
@@ -86,7 +92,7 @@ char *aprs_comment_templates[] = {
  * Maximum length: 130 characters.
  */
 char *fsq_comment_templates[] = {
-        "TEST $loc6 $altm $tiC",
+//        "TEST $loc6 $altm $tiC",
 //        " $lat $lon, $alt m, $cl m/s, $gs km/h, $he deg - " FSQ_COMMENT,
 //        " $loc12, $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " FSQ_COMMENT,
         NULL

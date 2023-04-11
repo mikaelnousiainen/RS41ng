@@ -1,5 +1,5 @@
 #ifndef __SI4032_H
-#define __SI4032_h
+#define __SI4032_H
 
 #include <stdint.h>
 #include <stdbool.h>

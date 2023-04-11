@@ -49,10 +49,17 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
 
     uint8_t *custom_data_pointer = horus_packet.CustomData;
 
-    // Unit: cm/s
-    int16_t gps_climb_cm_per_second = (int16_t) gps_data->climb_cm_per_second;
-    memcpy(custom_data_pointer, &gps_climb_cm_per_second, sizeof(gps_climb_cm_per_second));
-    custom_data_pointer += sizeof(gps_climb_cm_per_second);
+    if (radsens_enabled) {
+        // Unit: µR/h
+        uint16_t ext_radiation_intensity_uR_h = (uint16_t) data->radiation_intensity_uR_h;
+        memcpy(custom_data_pointer, &ext_radiation_intensity_uR_h, sizeof(ext_radiation_intensity_uR_h));
+        custom_data_pointer += sizeof(ext_radiation_intensity_uR_h);
+    } else {
+        // Unit: cm/s
+        int16_t gps_climb_cm_per_second = (int16_t) gps_data->climb_cm_per_second;
+        memcpy(custom_data_pointer, &gps_climb_cm_per_second, sizeof(gps_climb_cm_per_second));
+        custom_data_pointer += sizeof(gps_climb_cm_per_second);
+    }
 
     // Unit: Celsius * 10
     int16_t ext_temp_celsius_10 = (int16_t) (data->temperature_celsius_100 / 10.0f);
@@ -68,7 +75,7 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     uint16_t ext_pressure_mbar = (uint16_t) (data->pressure_mbar_100 / 10.0f);
     memcpy(custom_data_pointer, &ext_pressure_mbar, sizeof(ext_pressure_mbar));
 
-    if (pulse_counter_enabled) {
+    if (pulse_counter_enabled || radsens_enabled) {
         // Unit: pulse count
         custom_data_pointer += sizeof(ext_pressure_mbar);
         uint16_t ext_pulse_count = (uint16_t) data->pulse_count;

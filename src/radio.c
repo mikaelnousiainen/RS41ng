@@ -849,6 +849,8 @@ void radio_init()
 
     memset(&current_telemetry_data, 0, sizeof(current_telemetry_data));
 
+    telemetry_collect(&current_telemetry_data);
+
     for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
         radio_transmit_entry *entry = &radio_transmit_schedule[i];
         switch (entry->data_mode) {

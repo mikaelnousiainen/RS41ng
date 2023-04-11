@@ -1,5 +1,14 @@
 project(RS41ng C CXX)
 
+set(CMAKE_FIND_ROOT_PATH /usr/arm-none-eabi)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+set(COLLECT_GCC ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
+
 if (UNIX)
   set(TOOLCHAIN_PATH /usr/bin)
   set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
@@ -19,7 +28,7 @@ add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
 SET(LINKER_SCRIPT arm-gcc-link.ld)
-SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -g -O3 -nostartfiles")
+SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3 -nostartfiles")
 SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
 SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=nano.specs -T ${LINKER_SCRIPT}")

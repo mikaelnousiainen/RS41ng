@@ -106,6 +106,10 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$pc", replacement);
 
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->radiation_intensity_uR_h);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$ri", replacement);
+
     free(temp);
 
     return len;

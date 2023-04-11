@@ -32,6 +32,18 @@
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
 #define SENSOR_BMP280_ENABLE false
+// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BMP280_I2C_ADDRESS 0x77
+
+// Enable use of an externally connected I²C RadSens radiation sensor
+#define SENSOR_RADSENS_ENABLE false
+// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
+#define SENSOR_RADSENS_CHIP_ID 0x7D
+// RadSens I²C device address, default is 0x66.
+#define SENSOR_RADSENS_I2C_ADDRESS 0x66
+// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
+// The value is stored in the non-volatile memory of the microcontroller.
+#define SENSOR_RADSENS_SENSITIVITY 105
 
 // Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
 #define RADIO_SI5351_ENABLE false
