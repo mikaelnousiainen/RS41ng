@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <bsd/string.h>
+#include "strlcpy.h"
 #include "template.h"
 
 int main(void)

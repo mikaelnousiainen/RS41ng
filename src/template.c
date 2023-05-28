@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "config.h"
+#include "strlcpy.h"
 #include "template.h"
 
 size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *data)

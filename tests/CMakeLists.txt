@@ -7,17 +7,15 @@ project(RS41ng_test C CXX)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
-file(GLOB_RECURSE USER_SOURCES "../src/config.c" "../src/codecs/*.c" "../src/template.c" "../src/utils.c")
+file(GLOB_RECURSE USER_SOURCES "../src/config.c" "../src/codecs/*.c" "../src/template.c" "../src/utils.c" "../src/strlcpy.c")
 file(GLOB_RECURSE USER_SOURCES_CXX "../src/codecs/*.cpp")
-file(GLOB_RECURSE USER_HEADERS "../src/codecs/*.h" "../src/template.h" "../src/utils.h" "../src/config.h")
+file(GLOB_RECURSE USER_HEADERS "../src/codecs/*.h" "../src/template.h" "../src/utils.h" "../src/config.h" "../src/strlcpy.h")
 
 file(GLOB_RECURSE TEST_SOURCES "*.c")
 file(GLOB_RECURSE TEST_SOURCES_CXX "*.cpp")
 file(GLOB_RECURSE TEST_HEADERS "*.h")
 
 set(SOURCES ${TEST_SOURCES})
-
-set(CMAKE_EXE_LINKER_FLAGS "-lbsd")
 
 add_executable(${BINARY} ${TEST_SOURCES} ${USER_SOURCES})
 

@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "strlcpy.h"
 #include "template.h"
 #include "hal/system.h"
 #include "hal/delay.h"
