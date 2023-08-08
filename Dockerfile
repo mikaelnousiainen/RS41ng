@@ -6,7 +6,6 @@ RUN dnf install -y  \
     arm-none-eabi-gcc-cs-c++ \
     arm-none-eabi-binutils-cs \
     arm-none-eabi-newlib \
-    libbsd-devel \
     cmake
 
 COPY docker_build.sh /build.sh
