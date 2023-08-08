@@ -222,12 +222,12 @@ ______________________|           |______________________
 
 ### Steps to flash the firmware
 
-1. Remove batteries from the sonde
+1. If your ST-LINK v2 programmer is capable of providing power (as some third-party clones are), remove the batteries from the sonde. Otherwise, leave the battiers in and power on the sonde.
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
   * SWDIO -> Pin 9 (SWDIO)
   * SWCLK -> Pin 8 (SWCLK)
   * GND -> Pin 1 (GND)
-  * 3.3V -> Pin 5 (MCU switch 3.3V)
+  * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
 3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
   * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
   * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `63` with `31`:
