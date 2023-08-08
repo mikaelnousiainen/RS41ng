@@ -712,7 +712,7 @@ bool radio_handle_time_sync()
         return false;
     }
 
-    uint32_t time_millis = gps.time_of_week_millis;
+    uint32_t time_millis = gps.time_of_week_millis + (GPS_TIME_LEAP_SECONDS * 1000);
 
     if (time_millis == radio_previous_time_sync_scheduled) {
         // The GPS chip has not provided an updated time yet for some reason

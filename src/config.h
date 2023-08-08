@@ -57,6 +57,9 @@
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
 
+// Number of leap seconds to add to the raw GPS time reported by the GPS chip (see https://timetoolsltd.com/gps/what-is-gps-time/ for more info)
+#define GPS_TIME_LEAP_SECONDS 18
+
 // Enable this setting to require 3D fix (altitude required, enable for airborne use), otherwise 2D fix is enough
 #define GPS_REQUIRE_3D_FIX true
 
