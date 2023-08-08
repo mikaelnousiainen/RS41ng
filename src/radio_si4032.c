@@ -70,7 +70,10 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_HORUS_V2: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
             frequency_offset = (uint16_t) idle_tone->index + HORUS_FREQUENCY_OFFSET_SI4032;
-            modulation_type = SI4032_MODULATION_TYPE_OOK;
+            // Report from Mark VK5QI: https://github.com/mikaelnousiainen/RS41ng/issues/49
+            // The use of OOK mode for sending 4FSK seems to be producing more transmitter sidebands than should be the case.
+            // -> The modulation type NONE produces significantly weaker sidebands, resulting in cleaner signal.
+            modulation_type = SI4032_MODULATION_TYPE_NONE;
             use_direct_mode = false;
 
             data_timer_init(entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder));
