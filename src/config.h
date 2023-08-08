@@ -99,8 +99,10 @@
  */
 
 // Si4032 transmit power: 0..7
-// 0 = -1dBm, 1 = 2dBm, 2 = 5dBm, 3 = 8dBm, 4 = 11dBm, 5 = 14dBm, 6 = 17dBm, 7 = 20dBm
-#define RADIO_SI4032_TX_POWER 7
+// 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
+// This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
+// For APRS usage, you might want to use maximum power setting of 7 (20 dBm, 100 mW). Note that this setting reduces battery life.
+#define RADIO_SI4032_TX_POWER 5
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
 #define RADIO_SI4032_TX_CW false
