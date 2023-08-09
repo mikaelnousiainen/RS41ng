@@ -10,7 +10,7 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
 {
     char timestamp[12];
 
-    int8_t la_degrees, lo_degrees;
+    int16_t la_degrees, lo_degrees;
     uint8_t la_minutes, la_h_minutes, lo_minutes, lo_h_minutes;
 
     convert_degrees_to_dmh(data->gps.latitude_degrees_1000000 / 10, &la_degrees, &la_minutes, &la_h_minutes);
