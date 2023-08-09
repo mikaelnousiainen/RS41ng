@@ -1,6 +1,8 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
 
-**NOTE:** This firmware is a work in progress and some features might not work as expected yet!
+**NOTE:** While this firmware has been tested with great success on a number of high-altitude balloon
+flights, it is still a work in progress and some features might not work as expected yet!
+In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
 
 This is a custom, amateur radio-oriented firmware for [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41).
 Some code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
@@ -133,6 +135,15 @@ Sensor driver code contributions are welcome!
    transmit frequencies and transmission mode parameters in `config.h`
 2. Set up transmitted message templates in `config.c`, depending on the modes you use
 
+### Power consumption and power-saving features
+
+Power consumption notes (at 3V supply voltage) by Mark VK5QI:
+
+- GPS in default (max performance) mode, transmitting with Si4032 @ 13 dBm = ~150 mA
+- GPS in default (max performance) mode, not transmitting = 70-90 mA
+- GPS in power-saving mode, transmitting with Si4032 @ 13 dBm = ~120 mA
+- GPS in power-saving mode, not transmitting = 30-50 mA, depending on GPS state.
+
 ### Time sync settings
 
 The time sync feature is a simple way to activate the transmissions every N seconds, delayed by the `TIME_SYNC_OFFSET_SECONDS` setting.
@@ -242,6 +253,39 @@ Payload 3:
 
 ## Building the firmware
 
+The easiest and the recommended method to build the firmware is using Docker.
+
+If you have a Linux environment -- Windows Subsystem for Linux (WSL) or macOS might work too -- and
+you feel adventurous, you can try to build using the Linux-based instructions.
+
+### Building the firmware with Docker
+
+Using Docker to build the firmware is usually the easiest option, because it provides a stable Fedora Linux-based
+build environment on any platform. It should work on Windows and Mac operating systems too.
+
+The Docker environment can also help address issues with the build process.
+
+1. Install Docker if not already installed
+2. Set the current directory to the RS41ng source directory
+3. Build the RS41ng compiler Docker image using the following command. It is necessary to build the Docker image only once.
+    ```
+    docker build -t rs41ng_compiler .
+    ```
+4. Build the firmware using the following command. If you need to rebuild the firmware, simply run the command again.
+   On Linux/macOS, run:
+    ```
+    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler
+    ```
+    On Windows, run:
+    ```
+    docker run --rm -it -v %cd%:/usr/local/src/RS41ng rs41ng_compiler
+    ```
+5. The firmware will be stored in file `build/src/RS41ng.elf`
+
+Now you can flash the firmware using instructions below (skip the build instructions for Linux).
+
+### Building the firmware in a Linux environment
+
 Software requirements:
 
 * [GNU GCC toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/9-2-2019-12)
@@ -254,7 +298,7 @@ On a Red Hat/Fedora Linux installation, the following packages can be installed:
 dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils-cs arm-none-eabi-newlib cmake openocd
 ```
 
-### Steps to build the firmware
+#### Steps to build the firmware on Linux
 
 1. Install the required software dependencies listed above
 2. Build the firmware using the following commands
@@ -265,25 +309,6 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
     make
     ```
 3. The firmware will be stored in file `build/src/RS41ng.elf`
-
-### Building the firmware with Docker
-
-Using Docker to build the firmware is usually the easiest option, because it provides a stable Fedora Linux-based
-build environment on any platform. It should work on Windows and Mac operating systems too.
-
-The Docker environment can also help address issues with the build process, including the `strlcpy()` errors observed on certain Linux distributions.
-
-1. Install Docker if not already installed
-2. Set the current directory to the RS41ng source directory
-3. Build the RS41ng compiler Docker image using the following command. It is necessary to build the Docker image only once.
-    ```
-    docker build -t rs41ng_compiler .
-    ```
-4. Build the firmware using the following command. If you need to rebuild the firmware, simply run the command again.
-    ```
-    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler
-    ```
-5. The firmware will be stored in file `build/src/RS41ng.elf`
 
 ## Flashing the firmware
 
@@ -326,7 +351,8 @@ ______________________|           |______________________
 
 ### Steps to flash the firmware
 
-1. If your ST-LINK v2 programmer is capable of providing power (as some third-party clones are), remove the batteries from the sonde. Otherwise, leave the battiers in and power on the sonde.
+1. If your ST-LINK v2 programmer is capable of providing power (as some third-party clones are),
+   remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
   * SWDIO -> Pin 9 (SWDIO)
   * SWCLK -> Pin 8 (SWCLK)

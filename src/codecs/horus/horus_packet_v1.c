@@ -48,6 +48,8 @@ size_t horus_packet_v1_create(uint8_t *payload, size_t length, telemetry_data *d
         horus_packet.Sats += 100;
     } else if (gps_data->power_safe_mode_state == POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING) {
         horus_packet.Sats += 200;
+    } else if (gps_data->power_safe_mode_state == POWER_SAFE_MODE_STATE_INACTIVE) {
+        horus_packet.Sats += 300;
     }
 
     horus_packet.Checksum = (uint16_t) calculate_crc16_checksum((char *) &horus_packet, sizeof(horus_packet) - 2);

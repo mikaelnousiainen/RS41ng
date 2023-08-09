@@ -391,7 +391,7 @@ uBloxPacket msgcfgrxm = {
         },
         .data.cfgrxm = {
                 .reserved1=8, // Always set to 8
-                .lpMode=0 // Low power mode: Eco mode -- TODO: set back to Eco mode
+                .lpMode=0 // Enable max performance mode at start-up time to acquire GPS fix quickly
         }
 };
 
@@ -488,6 +488,28 @@ uBloxPacket msgcfgnmea = {
                 .flags = 0x00,
         }
 };
+
+bool ubxg6010_enable_power_save_mode()
+{
+    bool success;
+    uBloxPacket packet;
+
+    // Copy the packet header
+    memcpy(&packet, &msgcfgrxm, sizeof(uBloxPacket));
+
+    // The default power-save settings should be OK (1 second cyclic)
+    // Enable power-saving mode
+    packet.data.cfgrxm.lpMode = 1;
+
+    log_info("GPS: Entering power-saving mode\n");
+    ubxg6010_send_packet(&packet);
+    success = ubxg6010_wait_for_ack();
+    if (!success) {
+        log_error("GPS: Entering power-saving mode failed\n")
+    }
+
+    return success;
+}
 
 bool ubxg6010_init()
 {
@@ -713,6 +735,11 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x20) {
         ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navtimegps.iTOW;
         ubxg6010_current_gps_data.week = pkt->data.navtimegps.week;
+
+        if (pkt->data.navtimegps.valid & 0x04) {
+            // Flag set if leap seconds are valid
+            ubxg6010_current_gps_data.leap_seconds = pkt->data.navtimegps.leapS;
+        }
 
         ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x21) {

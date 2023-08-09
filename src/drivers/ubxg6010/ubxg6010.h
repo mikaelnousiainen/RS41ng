@@ -7,6 +7,8 @@
 
 bool ubxg6010_init();
 
+bool ubxg6010_enable_power_save_mode();
+
 void ubxg6010_request_gpstime();
 
 bool ubxg6010_get_current_gps_data(gps_data *data);

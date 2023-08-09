@@ -9,6 +9,11 @@
 #include "config.h"
 #include "log.h"
 
+// Initialize leap seconds with a known good value
+int8_t gps_time_leap_seconds = GPS_TIME_LEAP_SECONDS;
+
+static bool gps_power_saving_enabled = false;
+
 void telemetry_collect(telemetry_data *data)
 {
     log_info("Collecting telemetry...\n");
@@ -31,9 +36,22 @@ void telemetry_collect(telemetry_data *data)
 
     ubxg6010_get_current_gps_data(&data->gps);
 
-    // Zero out position data if we don't have a valid GPS fix.
-    // This is done to avoid transmitting invalid position information.
-    if (!GPS_HAS_FIX(data->gps)) {
+    if (GPS_HAS_FIX(data->gps)) {
+        // If we have a good fix, we can enter power-saving mode
+        if ((data->gps.satellites_visible >= 6) && !gps_power_saving_enabled) {
+            #ifdef GPS_POWER_SAVING_ENABLE
+            ubxg6010_enable_power_save_mode();
+            gps_power_saving_enabled = true;
+            #endif
+        }
+
+        // If we get the number of leap seconds from GPS data, use it
+        if (data->gps.leap_seconds > 0) {
+            gps_time_leap_seconds = data->gps.leap_seconds;
+        }
+    } else {
+        // Zero out position data if we don't have a valid GPS fix.
+        // This is done to avoid transmitting invalid position information.
         data->gps.latitude_degrees_1000000 = 0;
         data->gps.longitude_degrees_1000000 = 0;
         data->gps.altitude_mm = 0;

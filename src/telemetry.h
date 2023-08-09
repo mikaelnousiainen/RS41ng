@@ -25,4 +25,6 @@ typedef struct _telemetry_data {
 
 void telemetry_collect(telemetry_data *data);
 
+extern int8_t gps_time_leap_seconds;
+
 #endif

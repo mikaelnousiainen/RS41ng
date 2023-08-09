@@ -2,7 +2,8 @@
 #define __CONFIG_H
 
 // Enable semihosting to receive debug logs during development
-// NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to the STM32 programmer dongle, otherwise the firmware will not run.
+// See the README for details on how to set up debugging and debug logs with GDB
+// NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
 //#define SEMIHOSTING_ENABLE
 //#define LOGGING_ENABLE
 
@@ -58,10 +59,21 @@
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
 
 // Number of leap seconds to add to the raw GPS time reported by the GPS chip (see https://timetoolsltd.com/gps/what-is-gps-time/ for more info)
+// This value is used by default, but if the received GPS data contains indication about leap seconds, that one is used instead.
 #define GPS_TIME_LEAP_SECONDS 18
 
 // Enable this setting to require 3D fix (altitude required, enable for airborne use), otherwise 2D fix is enough
 #define GPS_REQUIRE_3D_FIX true
+
+// Enable power-saving features of the GPS chip to save power.
+// This option should be safe to enable, as it enters a selective power saving mode.
+// If the GPS chip loses fix, it will enter a higher power state automatically.
+// Note that power saving mode is only enabled after the GPS chip has acquired good GPS fix for the first time.
+// It is not necessary to use power saving on short flights (e.g. less than 6 hours).
+// Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
+// where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
+// See the README for details about power consumption.
+#define GPS_POWER_SAVING_ENABLE false
 
 // Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
@@ -105,6 +117,7 @@
 // 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
 // This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
 // For APRS usage, you might want to use maximum power setting of 7 (20 dBm, 100 mW). Note that this setting reduces battery life.
+// See the README for details about power consumption.
 #define RADIO_SI4032_TX_POWER 5
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
