@@ -108,6 +108,7 @@
 #define RADIO_SI4032_TX_POWER 5
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
+// The COUNT settings define the number of times that each type of transmission is repeated
 #define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
@@ -142,6 +143,7 @@
 #define RADIO_SI5351_TX_POWER 3
 
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
+// The COUNT settings define the number of times that each type of transmission is repeated
 #define RADIO_SI5351_TX_CW true
 #define RADIO_SI5351_TX_CW_COUNT 1
 #define RADIO_SI5351_TX_PIP false
@@ -211,8 +213,9 @@
 #define APRS_WEATHER_REPORT_ENABLE false
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define APRS_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset after the scheduled time.
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define APRS_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -236,8 +239,9 @@
 #define HORUS_V1_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define HORUS_V1_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset after the scheduled time.
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V1_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -254,8 +258,9 @@
 #define HORUS_V2_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define HORUS_V2_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset after the scheduled time.
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -266,8 +271,9 @@
 #define CW_SPEED_WPM 20
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define CW_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset after the scheduled time.
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define CW_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -278,8 +284,9 @@
 #define PIP_SPEED_WPM 18
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define PIP_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset after the scheduled time.
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define PIP_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -290,7 +297,10 @@
 #define WSPR_LOCATOR_FIXED "AA00"
 #define WSPR_DBM 10
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define WSPR_TIME_SYNC_SECONDS 120
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define WSPR_TIME_SYNC_OFFSET_SECONDS 1
 
 /**
@@ -300,7 +310,10 @@
 
 #define FSQ_SUBMODE RADIO_DATA_MODE_FSQ_3
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define FSQ_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define FSQ_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
@@ -312,13 +325,22 @@
 // Delay transmission for 1 second after the scheduled time.
 #define FT8_TIME_SYNC_OFFSET_SECONDS 1
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define JT9_TIME_SYNC_SECONDS 60
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define JT9_TIME_SYNC_OFFSET_SECONDS 1
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define JT4_TIME_SYNC_SECONDS 60
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define JT4_TIME_SYNC_OFFSET_SECONDS 1
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
 #define JT65_TIME_SYNC_SECONDS 60
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define JT65_TIME_SYNC_OFFSET_SECONDS 1
 
 #include "config_internal.h"

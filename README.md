@@ -133,6 +133,113 @@ Sensor driver code contributions are welcome!
    transmit frequencies and transmission mode parameters in `config.h`
 2. Set up transmitted message templates in `config.c`, depending on the modes you use
 
+### Time sync settings
+
+The time sync feature is a simple way to activate the transmissions every N seconds, delayed by the `TIME_SYNC_OFFSET_SECONDS` setting.
+
+Please note that the time sync requires a stable GPS signal (good visibility to the sky) to work correctly!
+
+#### Time-slotted modes
+
+For time-slotted modes like FT8 and WSPR, there default configuration file (`config.h`) already contains useful defaults.
+
+##### FT8 example
+
+The default FT8 configuration is:
+
+```
+#define FT8_TIME_SYNC_SECONDS 15
+#define FT8_TIME_SYNC_OFFSET_SECONDS 1
+```
+
+The above means that transmissions should start every 15 seconds (counting from the beginning of each hour),
+but delayed by 1 second. As an example, transmissions after 12:00:00 (hh:mm:ss) would happen at
+12:00:01, 12:00:16, 12:00:31; 12:00:46, 12:01:01 and so on.
+
+The offset of 1 second is just to make sure the transmission starts strictly after the 15-second periods and never before.
+
+If the offset was 5 seconds, transmissions would happen at 12:00:05, 12:00:20, 12:00:35, 12:00:50 and 12:01:05.
+
+In order to transmit only in even or odd time slots of FT8, you could use:
+
+```
+// Transmit every 30 seconds, even time slot
+#define FT8_TIME_SYNC_SECONDS 30
+#define FT8_TIME_SYNC_OFFSET_SECONDS 1
+```
+
+```
+// Transmit every 30 seconds, odd time slot
+#define FT8_TIME_SYNC_SECONDS 30
+#define FT8_TIME_SYNC_OFFSET_SECONDS 16
+```
+
+The latter (odd time slot) example would transmit at 12:00:16, 12:00:46, 12:01:16, 12:01:46 and so on.
+
+##### WSPR example
+
+For WSPR, the transmissions happen every 120 seconds, so the configuration has to be:
+
+```
+#define WSPR_TIME_SYNC_SECONDS 120
+#define WSPR_TIME_SYNC_OFFSET_SECONDS 1
+```
+
+The above means that transmissions should start every 120 seconds (counting from the beginning of each hour),
+but delayed by 1 second. As an example, transmissions after 12:00:00 (hh:mm:ss) would happen at
+12:00:01, 12:02:01, 12:04:01 and so on.
+
+The offset of 1 second is just to make sure the transmission starts strictly after the 120-second periods and never before.
+
+#### Manually configuring time slots for multiple payloads transmitting at different times
+
+Sometimes it is necessary to set transmission time slots when using multiple payloads/transmitters on the same frequency.
+The time slots guarantee that the transmissions from different payloads will not happen simultaneously.
+
+The time sync settings can be used to configure this type of time slots.
+
+In this example, we configure 3 payloads to transmit every 120 seconds, so that each payload is scheduled to transmit
+evenly across the 120-second period, every 40 seconds (120 / 3 = 40).
+
+First, the `TIME_SYNC_SECONDS` setting of the particular mode has to be set to the *full interval where all payloads are expected to have their transmissions finished*.
+This setting has to be the same for every payload. Do also remember to take into account transmission length too (depending on the mode).
+
+Next, the `TIME_SYNC_OFFSET_SECONDS` needs to be set independently for each payload. The first payload would have
+an offset of 0, the second an offset of 40 and the third and offset of 80.
+
+As an example, transmissions after 12:00:00 (hh:mm:ss) would happen at:
+-
+- Payload 1: 12:00:00
+- Payload 2: 12:00:40
+- Payload 3: 12:01:20
+- Payload 1: 12:02:00
+- Payload 2: 12:02:40
+- Payload 3: 12:03:20
+- ...
+
+The configuration with 3 payloads using Horus 4FSK V2 mode would be the following.
+
+Payload 1:
+
+```
+#define HORUS_V2_TIME_SYNC_SECONDS 120 // everything happens at 120 seconds interval
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0 // the first payload will transmit at 0 seconds within the 120 second interval
+```
+
+Payload 2:
+
+```
+#define HORUS_V2_TIME_SYNC_SECONDS 120 // everything happens at 120 seconds interval
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 40 // the second payload will transmit at 40 seconds within the 120 second interval
+```
+
+Payload 3:
+
+```
+#define HORUS_V2_TIME_SYNC_SECONDS 120 // everything happens at 120 seconds interval
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 80 // the third payload will transmit at 80 seconds within the 120 second interval
+```
+
 ## Building the firmware
 
 Software requirements:
