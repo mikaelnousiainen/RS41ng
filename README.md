@@ -208,7 +208,7 @@ Next, the `TIME_SYNC_OFFSET_SECONDS` needs to be set independently for each payl
 an offset of 0, the second an offset of 40 and the third and offset of 80.
 
 As an example, transmissions after 12:00:00 (hh:mm:ss) would happen at:
--
+
 - Payload 1: 12:00:00
 - Payload 2: 12:00:40
 - Payload 3: 12:01:20
