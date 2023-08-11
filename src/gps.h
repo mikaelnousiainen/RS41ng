@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include "config.h"
 
-// Acquisition state: The receiver actively searches for and acquires signals. Maximum power consumption.
+// Acquisition state: The receiver actively searches for and acquires signals.
+// Maximum power consumption. Can also mean that power saving is not turned on.
 #define POWER_SAFE_MODE_STATE_ACQUISITION 0
 // Tracking state: The receiver continuously tracks and downloads data. Less power consumption than in Acquisition state.
 #define POWER_SAFE_MODE_STATE_TRACKING 1

@@ -44,7 +44,8 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
     } else if (gps_data->power_safe_mode_state == POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING) {
         horus_packet.Sats += 200;
     } else if (gps_data->power_safe_mode_state == POWER_SAFE_MODE_STATE_INACTIVE) {
-        horus_packet.Sats += 300;
+        // Inactive = Most parts of the receiver are switched off
+        horus_packet.Sats += 50;
     }
 
     memset(horus_packet.CustomData, 0, sizeof(horus_packet.CustomData));

@@ -39,7 +39,7 @@ void telemetry_collect(telemetry_data *data)
     if (GPS_HAS_FIX(data->gps)) {
         // If we have a good fix, we can enter power-saving mode
         if ((data->gps.satellites_visible >= 6) && !gps_power_saving_enabled) {
-            #ifdef GPS_POWER_SAVING_ENABLE
+            #if GPS_POWER_SAVING_ENABLE
             ubxg6010_enable_power_save_mode();
             gps_power_saving_enabled = true;
             #endif

@@ -139,10 +139,12 @@ Sensor driver code contributions are welcome!
 
 Power consumption notes (at 3V supply voltage) by Mark VK5QI:
 
-- GPS in default (max performance) mode, transmitting with Si4032 @ 13 dBm = ~150 mA
-- GPS in default (max performance) mode, not transmitting = 70-90 mA
-- GPS in power-saving mode, transmitting with Si4032 @ 13 dBm = ~120 mA
-- GPS in power-saving mode, not transmitting = 30-50 mA, depending on GPS state.
+- GPS in full power acquisition mode: 110-120 mA (TX off), 160-170 mA (TX on)
+- GPS locked (5 sats), full power: 96 - 126 mA (TX off), 170 mA (TX on)
+- GPS locked, powersave mode, state 1: ~96 - 110 mA (TX off), ?
+- GPS locked, powersave mode, state 2: 60 - 90mA (TX off), 130 mA (TX on)
+
+The variations seem to be the GPS powering up every second to do its fixes.
 
 ### Time sync settings
 
