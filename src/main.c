@@ -90,7 +90,10 @@ int main(void)
         pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
         log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+#ifdef RS41
+        // dfm17 does not use i2c
         i2c_init(I2C_BUS_CLOCK_SPEED);
+#endif //RS41
     }
 
     log_info("SPI init\n");
@@ -105,8 +108,15 @@ int main(void)
         goto gps_init;
     }
 
+#if defined(RS41)
     log_info("Si4032 init\n");
     si4032_init();
+#elif defined(DFM17)
+    log_info("Si4063 init\n");
+    si4063_init();
+#else
+	Error.  Must defined RS41 or DFM17
+#endif 
 
     if (bmp280_enabled) {
         for (int i = 0; i < 3; i++) {
@@ -162,6 +172,12 @@ int main(void)
         radio_handle_main_loop();
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
+#ifdef DFM17
+//DFM17 testing... delete next two lines eventually
+        log_info("Fix: %d, Time: %02d:%02d:%02d.\n", (int) current_gps_data.fix_ok, current_gps_data.hours, current_gps_data.minutes, current_gps_data.seconds);
+        delay_ms(1000);
+#endif //DFM17
+
     }
 }
 

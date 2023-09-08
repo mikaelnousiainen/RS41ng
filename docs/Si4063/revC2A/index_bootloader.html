@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Si4063 revC2A Command/Property API Documentation (PUBLIC)</title>
+<link rel="stylesheet" type="text/css" href="content/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="content/css/apixml.css">
+<script language="javascript" src="content/jquery/jquery-1.11.1.min.js"></script><script language="javascript" src="content/js/bootstrap.min.js"></script><script language="javascript" src="content/js/apixml-navbar.js"></script><script language="javascript" src="content/js/apixml-fields.js"></script><script language="javascript" src="content/CollapsibleLists.js"></script><script language="javascript" src="content/CommandControl.js"></script><script language="javascript" src="content/TableListControl.js"></script><script language="javascript" src="content/PropertyControl.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-inverse navbar-fixed-top" role="navigation"><div id="nav-bar-ext" class="container-fluid">
+<div class="navbar-header"><a class="navbar-brand" href="#">Si4063 revC2A API (PUBLIC)</a></div>
+<div class="collapse navbar-collapse">
+<ul class="nav navbar-nav">
+<li><a href="../../index.html">Index</a></li>
+<li>
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">Mode (Bootloader)<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
+<li><a href="./index_bootloader.html">Bootloader</a></li>
+<li><a href="./index_ezradiopro.html">EZRadioPro</a></li>
+<li class="divider">
+<li><a href="./index_all.html">All</a></li>
+</ul>
+</li>
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">Command<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
+<li class="dropdown-submenu">
+<a tabindex="-1" href="#details_cmd_set_BOOT_COMMANDS">BOOT_COMMANDS</a><ul class="dropdown-menu"><li><a href="#details_cmd_POWER_UP">POWER_UP (0x02)</a></li></ul>
+</li>
+<li class="dropdown-submenu">
+<a tabindex="-1" href="#details_cmd_set_COMMON_COMMANDS">COMMON_COMMANDS</a><ul class="dropdown-menu">
+<li><a href="#details_cmd_NOP">NOP (0x00)</a></li>
+<li><a href="#details_cmd_PART_INFO">PART_INFO (0x01)</a></li>
+<li><a href="#details_cmd_FUNC_INFO">FUNC_INFO (0x10)</a></li>
+<li><a href="#details_cmd_READ_CMD_BUFF">READ_CMD_BUFF (0x44)</a></li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a tabindex="-1" href="#details_cmd_set_ADVANCED_COMMANDS">ADVANCED_COMMANDS</a><ul class="dropdown-menu"><li><a href="#details_cmd_GET_CHIP_STATUS">GET_CHIP_STATUS (0x23)</a></li></ul>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">Property<span class="caret"></span></a><ul class="dropdown-menu" role="menu"></ul>
+</li>
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">Collapse<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
+<li><a href="javascript:global_collapse_all_tables();">Summary Tables</a></li>
+<li><a href="javascript:GlobalCollapseFieldHeadings();">Field Headings</a></li>
+<li><a href="javascript:GlobalCollapseFieldDetails();">Field Details</a></li>
+<li class="divider">
+<li><a href="javascript:GlobalCollapseAll();">All</a></li>
+</ul>
+</li>
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">Expand<span class="caret"></span></a><ul class="dropdown-menu" role="menu">
+<li><a href="javascript:global_expand_all_tables();">Summary Tables</a></li>
+<li><a href="javascript:GlobalExpandFieldHeadings();">Field Headings</a></li>
+<li><a href="javascript:GlobalExpandFieldDetails();">Field Details</a></li>
+<li class="divider">
+<li><a href="javascript:GlobalExpandAll();">All</a></li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right"><li><a href="#version_details">Version</a></li></ul>
+</div>
+</div></nav><div class="container-fluid">
+<a href="http://www.silabs.com/"><img src="content/silicon-labs-logo-256x128.png" border="0" height="96" width="192" title="http://www.silabs.com/"></a><hr>
+<h1>Si4063 revC2A Command/Property API Documentation</h1>
+<a name="version_details"></a><h4>Interface Version: 1.0</h4>
+<h4>Document Version: 2.0.5</h4>
+<h4>Generated: 2015-03-18T10:15:42-05:00</h4>
+<hr>
+<h2>Introduction</h2>
+<p>This document provides API descriptions for the commands and properties used
+to control and configure the part.  The interface version tracks any functional
+changes to the API (command, property, field, enumeration, etc.).  The documentation
+version tracks any text changes to the summary or description text of the API
+components.<br><br>The commands are listed in a summary table with links to command details.  
+The properties are listed in a summary
+table with links to property details.  The feature available column in the 
+summary tables lists the firmware revision which first implemented the command
+or property.<br><br>An entry in the summary table will link
+to a details section, which contains a register view with fields.  Clicking a 
+field in the register view will auto-expand the corresponding field details.
+An up button in the field detail links back to the register view.  Each 
+register view title links back to the summary table entry.  These hyper-links 
+provide two-click access from top to bottom.
+</p>
+<h2>Command Summary</h2>
+<table class="table-bordered sum-table" style="border-collapse:collapse;">
+<colgroup>
+<col class="sum-control">
+<col class="sum-number-hdr">
+<col class="sum-name">
+<col class="sum-sum">
+<col class="sum-feature">
+</colgroup>
+<tbody id="sum_cmd_set_a54b88c2_cd81_11e4_ad97_180373e564d0"><tr>
+<th class="sum-control"><a onclick="toggleItems('cmd_set_hide_a54b88c2_cd81_11e4_ad97_180373e564d0', 'cmd_set_show_a54b88c2_cd81_11e4_ad97_180373e564d0'); toggle_sum_cmd_set('a54b88c2_cd81_11e4_ad97_180373e564d0');"><img id="cmd_set_hide_a54b88c2_cd81_11e4_ad97_180373e564d0" src="content/minus.png" width="16" height="16" border="0" title="Collapse" class="cmd_set_hide" style="display:"><img id="cmd_set_show_a54b88c2_cd81_11e4_ad97_180373e564d0" src="content/plus.png" width="16" height="16" border="0" title="Expand" class="cmd_set_show" style="display:none"></a></th>
+<th class="sum-header" colspan="4">
+<a name="sum_cmd_set_BOOT_COMMANDS"></a><a class="dark-ref" title="sum_cmd_set_BOOT_COMMANDS" href="#details_cmd_set_BOOT_COMMANDS">BOOT_COMMANDS</a>
+</th>
+</tr></tbody>
+<tbody id="sum_cmd_set_hdr_a54b88c2_cd81_11e4_ad97_180373e564d0"><tr class="sum-header">
+<th class="sum-control"></th>
+<th class="sum-number-hdr">Number</th>
+<th class="sum-name">Name</th>
+<th class="sum-sum">Summary</th>
+<th class="sum-feature">Feature Available</th>
+</tr></tbody>
+<tbody id="sum_cmd_a54bd6f1_cd81_11e4_8fa9_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x02</td>
+<td>
+<a name="sum_cmd_POWER_UP"></a><a title="sum_cmd_POWER_UP" class="dark-ref" href="#details_cmd_POWER_UP">POWER_UP</a>
+</td>
+<td class="sum-sum">Command to power-up the device and select the operational mode and functionality.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+</table>
+<table class="table-bordered sum-table" style="border-collapse:collapse;">
+<colgroup>
+<col class="sum-control">
+<col class="sum-number-hdr">
+<col class="sum-name">
+<col class="sum-sum">
+<col class="sum-feature">
+</colgroup>
+<tbody id="sum_cmd_set_a5517c5c_cd81_11e4_9686_180373e564d0"><tr>
+<th class="sum-control"><a onclick="toggleItems('cmd_set_hide_a5517c5c_cd81_11e4_9686_180373e564d0', 'cmd_set_show_a5517c5c_cd81_11e4_9686_180373e564d0'); toggle_sum_cmd_set('a5517c5c_cd81_11e4_9686_180373e564d0');"><img id="cmd_set_hide_a5517c5c_cd81_11e4_9686_180373e564d0" src="content/minus.png" width="16" height="16" border="0" title="Collapse" class="cmd_set_hide" style="display:"><img id="cmd_set_show_a5517c5c_cd81_11e4_9686_180373e564d0" src="content/plus.png" width="16" height="16" border="0" title="Expand" class="cmd_set_show" style="display:none"></a></th>
+<th class="sum-header" colspan="4">
+<a name="sum_cmd_set_COMMON_COMMANDS"></a><a class="dark-ref" title="sum_cmd_set_COMMON_COMMANDS" href="#details_cmd_set_COMMON_COMMANDS">COMMON_COMMANDS</a>
+</th>
+</tr></tbody>
+<tbody id="sum_cmd_set_hdr_a5517c5c_cd81_11e4_9686_180373e564d0"><tr class="sum-header">
+<th class="sum-control"></th>
+<th class="sum-number-hdr">Number</th>
+<th class="sum-name">Name</th>
+<th class="sum-sum">Summary</th>
+<th class="sum-feature">Feature Available</th>
+</tr></tbody>
+<tbody id="sum_cmd_a551a36e_cd81_11e4_81ce_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x00</td>
+<td>
+<a name="sum_cmd_NOP"></a><a title="sum_cmd_NOP" class="dark-ref" href="#details_cmd_NOP">NOP</a>
+</td>
+<td class="sum-sum">No Operation command.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+<tbody id="sum_cmd_a551ca8a_cd81_11e4_9bdf_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x01</td>
+<td>
+<a name="sum_cmd_PART_INFO"></a><a title="sum_cmd_PART_INFO" class="dark-ref" href="#details_cmd_PART_INFO">PART_INFO</a>
+</td>
+<td class="sum-sum">Reports basic information about the device.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+<tbody id="sum_cmd_a55266ce_cd81_11e4_a76c_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x10</td>
+<td>
+<a name="sum_cmd_FUNC_INFO"></a><a title="sum_cmd_FUNC_INFO" class="dark-ref" href="#details_cmd_FUNC_INFO">FUNC_INFO</a>
+</td>
+<td class="sum-sum">Returns the Function revision information of the device.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+<tbody id="sum_cmd_a566647b_cd81_11e4_9cec_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x44</td>
+<td>
+<a name="sum_cmd_READ_CMD_BUFF"></a><a title="sum_cmd_READ_CMD_BUFF" class="dark-ref" href="#details_cmd_READ_CMD_BUFF">READ_CMD_BUFF</a>
+</td>
+<td class="sum-sum">Used to read CTS and the command response.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+</table>
+<table class="table-bordered sum-table" style="border-collapse:collapse;">
+<colgroup>
+<col class="sum-control">
+<col class="sum-number-hdr">
+<col class="sum-name">
+<col class="sum-sum">
+<col class="sum-feature">
+</colgroup>
+<tbody id="sum_cmd_set_a57299ca_cd81_11e4_bab7_180373e564d0"><tr>
+<th class="sum-control"><a onclick="toggleItems('cmd_set_hide_a57299ca_cd81_11e4_bab7_180373e564d0', 'cmd_set_show_a57299ca_cd81_11e4_bab7_180373e564d0'); toggle_sum_cmd_set('a57299ca_cd81_11e4_bab7_180373e564d0');"><img id="cmd_set_hide_a57299ca_cd81_11e4_bab7_180373e564d0" src="content/minus.png" width="16" height="16" border="0" title="Collapse" class="cmd_set_hide" style="display:"><img id="cmd_set_show_a57299ca_cd81_11e4_bab7_180373e564d0" src="content/plus.png" width="16" height="16" border="0" title="Expand" class="cmd_set_show" style="display:none"></a></th>
+<th class="sum-header" colspan="4">
+<a name="sum_cmd_set_ADVANCED_COMMANDS"></a><a class="dark-ref" title="sum_cmd_set_ADVANCED_COMMANDS" href="#details_cmd_set_ADVANCED_COMMANDS">ADVANCED_COMMANDS</a>
+</th>
+</tr></tbody>
+<tbody id="sum_cmd_set_hdr_a57299ca_cd81_11e4_bab7_180373e564d0"><tr class="sum-header">
+<th class="sum-control"></th>
+<th class="sum-number-hdr">Number</th>
+<th class="sum-name">Name</th>
+<th class="sum-sum">Summary</th>
+<th class="sum-feature">Feature Available</th>
+</tr></tbody>
+<tbody id="sum_cmd_a573f962_cd81_11e4_9146_180373e564d0"><tr>
+<td class="sum-control"></td>
+<td class="sum-number">0x23</td>
+<td>
+<a name="sum_cmd_GET_CHIP_STATUS"></a><a title="sum_cmd_GET_CHIP_STATUS" class="dark-ref" href="#details_cmd_GET_CHIP_STATUS">GET_CHIP_STATUS</a>
+</td>
+<td class="sum-sum">Returns the interrupt status of the Chip Interrupt Group (both STATUS and PENDING).  Optionally, it may be used to clear latched (PENDING) interrupt events.</td>
+<td class="sum-feature"></td>
+</tr></tbody>
+</table>
+<h2>Property Summary</h2>
+<h2>Command Details</h2>
+<h3><a class="dark-ref" title="details_cmd_set_BOOT_COMMANDS" name="details_cmd_set_BOOT_COMMANDS" href="#sum_cmd_set_BOOT_COMMANDS">BOOT_COMMANDS</a></h3>
+<h4><a class="dark-ref" title="details_cmd_POWER_UP" name="details_cmd_POWER_UP" href="#sum_cmd_POWER_UP">POWER_UP</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x02</span>
+</li>
+<li>Summary: <i>Command to power-up the device and select the operational mode and functionality.</i>
+</li>
+<li>Purpose: </li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_POWER_UP_arg" title="reg_view_cmd_POWER_UP_arg" href="#sum_cmd_POWER_UP">POWER_UP Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a54bd6ef_cd81_11e4_80b9_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x02</i></span></td>
+</tr></tbody>
+<tbody id="sum_cmd_a54c2510_cd81_11e4_bf96_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>BOOT_OPTIONS</b></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a54bfe00_cd81_11e4_a212_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c2510_cd81_11e4_bf96_180373e564d0', 'a54bfe00_cd81_11e4_a212_180373e564d0');"><span class="numbers">PATCH</span></a></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="6"><a href="javascript:ChangeUrl('#field_a54bfdfe_cd81_11e4_9df5_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c2510_cd81_11e4_bf96_180373e564d0', 'a54bfdfe_cd81_11e4_9df5_180373e564d0');"><span class="numbers">FUNC</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a54c2516_cd81_11e4_94e1_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x02</td>
+<td class="reg-view-name" rowspan="1"><b>RESERVED0</b></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+</tr></tbody>
+<tbody id="sum_cmd_a54c4c24_cd81_11e4_939f_180373e564d0">
+<tr align="center">
+<td class="reg-view-control" rowspan="4"></td>
+<td class="reg-view-number">0x03</td>
+<td class="reg-view-name" rowspan="4"><b>XO_FREQ</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a54c4c1e_cd81_11e4_8a51_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c4c24_cd81_11e4_939f_180373e564d0', 'a54c4c1e_cd81_11e4_8a51_180373e564d0');"><span class="numbers">XO_FREQ[31:24]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x04</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a54c4c1e_cd81_11e4_8a51_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c4c24_cd81_11e4_939f_180373e564d0', 'a54c4c1e_cd81_11e4_8a51_180373e564d0');"><span class="numbers">XO_FREQ[23:16]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x05</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a54c4c1e_cd81_11e4_8a51_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c4c24_cd81_11e4_939f_180373e564d0', 'a54c4c1e_cd81_11e4_8a51_180373e564d0');"><span class="numbers">XO_FREQ[15:8]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x06</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a54c4c1e_cd81_11e4_8a51_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c4c24_cd81_11e4_939f_180373e564d0', 'a54c4c1e_cd81_11e4_8a51_180373e564d0');"><span class="numbers">XO_FREQ[7:0]</span></a></td>
+</tr>
+</tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_POWER_UP_reply" title="reg_view_cmd_POWER_UP_reply" href="#sum_cmd_POWER_UP">POWER_UP Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a54c7332_cd81_11e4_ae41_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a54c732e_cd81_11e4_ad98_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a54c7332_cd81_11e4_ae41_180373e564d0', 'a54c732e_cd81_11e4_ad98_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details">
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a54c2510_cd81_11e4_bf96_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_POWER_UP_arg_BOOT_OPTIONS" title="details_cmd_POWER_UP_arg_BOOT_OPTIONS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a54c2510_cd81_11e4_bf96_180373e564d0"><b>BOOT_OPTIONS</b></a></h6></div>
+<div id="panel_collapse_details_a54c2510_cd81_11e4_bf96_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a54bfe00_cd81_11e4_a212_180373e564d0" name="details_cmd_POWER_UP_arg_BOOT_OPTIONS_field_PATCH" title="details_cmd_POWER_UP_arg_BOOT_OPTIONS_field_PATCH" href="javascript:;" data-toggle="collapse" data-target="#div_field_a54bfe00_cd81_11e4_a212_180373e564d0"><b>PATCH</b></a><a href="#reg_view_cmd_POWER_UP_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a54bfe00_cd81_11e4_a212_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Select patch mode or normal boot mode.</dd>
+<dt title="enumeration">Format:</dt>
+<dd>Enumeration<br><table class="table enum-table"><tbody>
+<tr>
+<th class="enum-name">Name</th>
+<th class="enum-number">Value</th>
+<th class="enum-desc">Description</th>
+<th class="enum-feature">Feature Available</th>
+</tr>
+<tr>
+<td class="enum-name">NO_PATCH</td>
+<td class="enum-number numbers">0</td>
+<td class="enum-desc">Power up into functional mode specified by FUNC parameter.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">PATCH</td>
+<td class="enum-number numbers">1</td>
+<td class="enum-desc">Indicates a patch has been applied.  Validate patch matches the function selected (indicated by the FUNC parameter) and boot the device.</td>
+<td class="enum-feature"></td>
+</tr>
+</tbody></table>
+</dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a54bfdfe_cd81_11e4_9df5_180373e564d0" name="details_cmd_POWER_UP_arg_BOOT_OPTIONS_field_FUNC" title="details_cmd_POWER_UP_arg_BOOT_OPTIONS_field_FUNC" href="javascript:;" data-toggle="collapse" data-target="#div_field_a54bfdfe_cd81_11e4_9df5_180373e564d0"><b>FUNC[5:0]</b></a><a href="#reg_view_cmd_POWER_UP_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a54bfdfe_cd81_11e4_9df5_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Selects the functionality of the device by specifying the firmware image to be loaded upon boot-up. </dd>
+<dt title="enumeration">Format:</dt>
+<dd>Enumeration<br><table class="table enum-table"><tbody><tr>
+<th class="enum-name">Name</th>
+<th class="enum-number">Value</th>
+<th class="enum-desc">Description</th>
+<th class="enum-feature">Feature Available</th>
+</tr></tbody></table>
+</dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a54c4c24_cd81_11e4_939f_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_POWER_UP_arg_XO_FREQ" title="details_cmd_POWER_UP_arg_XO_FREQ" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a54c4c24_cd81_11e4_939f_180373e564d0"><b>XO_FREQ</b></a></h6></div>
+<div id="panel_collapse_details_a54c4c24_cd81_11e4_939f_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a54c4c1e_cd81_11e4_8a51_180373e564d0" name="details_cmd_POWER_UP_arg_XO_FREQ_field_XO_FREQ" title="details_cmd_POWER_UP_arg_XO_FREQ_field_XO_FREQ" href="javascript:;" data-toggle="collapse" data-target="#div_field_a54c4c1e_cd81_11e4_8a51_180373e564d0"><b>XO_FREQ[31:0]</b></a><a href="#reg_view_cmd_POWER_UP_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a54c4c1e_cd81_11e4_8a51_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd><ul>
+<li>Specifies the frequency of the internal crystal oscillator or external TCXO in Hz.    The nominal value is 30000000 (30 MHz) = 0x01C9C380.<br>    </li>
+<li>This parameter is used during calibration of the Boot Clock Oscillator and 32kHz R-C Oscillator,    but is NOT used for calibration or tuning of the PLL Synthesizer. </li>
+</ul></dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U32</span></dd>
+<dt>Min:</dt>
+<dd><span class="numbers">0x17d7840</span></dd>
+<dt>Max: </dt>
+<dd><span class="numbers">0x1e84800</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+</div>
+</li>
+<br><li>Reply Fields:<div><div class="panel-group"><div class="panel panel-default" id="panel_details_a54c7332_cd81_11e4_ae41_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_POWER_UP_reply_CTS" title="details_cmd_POWER_UP_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a54c7332_cd81_11e4_ae41_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a54c7332_cd81_11e4_ae41_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a54c732e_cd81_11e4_ad98_180373e564d0" name="details_cmd_POWER_UP_reply_CTS_field_CTS" title="details_cmd_POWER_UP_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a54c732e_cd81_11e4_ad98_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_POWER_UP_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a54c732e_cd81_11e4_ad98_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div></div>
+</li>
+</ul>
+<hr>
+<h3><a class="dark-ref" title="details_cmd_set_COMMON_COMMANDS" name="details_cmd_set_COMMON_COMMANDS" href="#sum_cmd_set_COMMON_COMMANDS">COMMON_COMMANDS</a></h3>
+<h4><a class="dark-ref" title="details_cmd_NOP" name="details_cmd_NOP" href="#sum_cmd_NOP">NOP</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x00</span>
+</li>
+<li>Summary: <i>No Operation command.</i>
+</li>
+<li>Purpose: <ul><li>This command may be used to ensure that communication with the device has been established.     Upon receipt of this command, the chip performs no action except to return CTS.</li></ul>
+</li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_NOP_arg" title="reg_view_cmd_NOP_arg" href="#sum_cmd_NOP">NOP Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a551a36c_cd81_11e4_92fa_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x00</i></span></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_NOP_reply" title="reg_view_cmd_NOP_reply" href="#sum_cmd_NOP">NOP Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a551a373_cd81_11e4_a119_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a551a36f_cd81_11e4_8f22_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a551a373_cd81_11e4_a119_180373e564d0', 'a551a36f_cd81_11e4_8f22_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details"></div>
+</li>
+<br><li>Reply Fields:<div><div class="panel-group"><div class="panel panel-default" id="panel_details_a551a373_cd81_11e4_a119_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_NOP_reply_CTS" title="details_cmd_NOP_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a551a373_cd81_11e4_a119_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a551a373_cd81_11e4_a119_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a551a36f_cd81_11e4_8f22_180373e564d0" name="details_cmd_NOP_reply_CTS_field_CTS" title="details_cmd_NOP_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a551a36f_cd81_11e4_8f22_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_NOP_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a551a36f_cd81_11e4_8f22_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div></div>
+</li>
+</ul>
+<hr>
+<h4><a class="dark-ref" title="details_cmd_PART_INFO" name="details_cmd_PART_INFO" href="#sum_cmd_PART_INFO">PART_INFO</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x01</span>
+</li>
+<li>Summary: <i>Reports basic information about the device.</i>
+</li>
+<li>Purpose: <ul><li>Returns Part Number, Part Version, ROM ID, etc.</li></ul>
+</li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_PART_INFO_arg" title="reg_view_cmd_PART_INFO_arg" href="#sum_cmd_PART_INFO">PART_INFO Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a551ca88_cd81_11e4_9488_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x01</i></span></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_PART_INFO_reply" title="reg_view_cmd_PART_INFO_reply" href="#sum_cmd_PART_INFO">PART_INFO Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a551ca8f_cd81_11e4_86d8_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a551ca8b_cd81_11e4_a128_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a551ca8f_cd81_11e4_86d8_180373e564d0', 'a551ca8b_cd81_11e4_a128_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a551f19a_cd81_11e4_8e4e_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>CHIPREV</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a551ca91_cd81_11e4_a9fa_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a551f19a_cd81_11e4_8e4e_180373e564d0', 'a551ca91_cd81_11e4_a9fa_180373e564d0');"><span class="numbers">CHIPREV</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a551f1a0_cd81_11e4_a1bc_180373e564d0">
+<tr align="center">
+<td class="reg-view-control" rowspan="2"></td>
+<td class="reg-view-number">0x02</td>
+<td class="reg-view-name" rowspan="2"><b>PART</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a551f19c_cd81_11e4_9529_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a551f1a0_cd81_11e4_a1bc_180373e564d0', 'a551f19c_cd81_11e4_9529_180373e564d0');"><span class="numbers">PART[15:8]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x03</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a551f19c_cd81_11e4_9529_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a551f1a0_cd81_11e4_a1bc_180373e564d0', 'a551f19c_cd81_11e4_9529_180373e564d0');"><span class="numbers">PART[7:0]</span></a></td>
+</tr>
+</tbody>
+<tbody id="sum_cmd_a55218a9_cd81_11e4_860a_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x04</td>
+<td class="reg-view-name" rowspan="1"><b>PBUILD</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a55218a6_cd81_11e4_a44f_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a55218a9_cd81_11e4_860a_180373e564d0', 'a55218a6_cd81_11e4_a44f_180373e564d0');"><span class="numbers">PBUILD</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a55218af_cd81_11e4_8832_180373e564d0">
+<tr align="center">
+<td class="reg-view-control" rowspan="2"></td>
+<td class="reg-view-number">0x05</td>
+<td class="reg-view-name" rowspan="2"><b>ID</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a55218ab_cd81_11e4_8ded_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a55218af_cd81_11e4_8832_180373e564d0', 'a55218ab_cd81_11e4_8ded_180373e564d0');"><span class="numbers">ID[15:8]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x06</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a55218ab_cd81_11e4_8ded_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a55218af_cd81_11e4_8832_180373e564d0', 'a55218ab_cd81_11e4_8ded_180373e564d0');"><span class="numbers">ID[7:0]</span></a></td>
+</tr>
+</tbody>
+<tbody id="sum_cmd_a5523fbc_cd81_11e4_9941_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x07</td>
+<td class="reg-view-name" rowspan="1"><b>CUSTOMER</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5523fb9_cd81_11e4_89f7_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5523fbc_cd81_11e4_9941_180373e564d0', 'a5523fb9_cd81_11e4_89f7_180373e564d0');"><span class="numbers">CUSTOMER</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a5523fc1_cd81_11e4_9200_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x08</td>
+<td class="reg-view-name" rowspan="1"><b>ROMID</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5523fbe_cd81_11e4_9f8a_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5523fc1_cd81_11e4_9200_180373e564d0', 'a5523fbe_cd81_11e4_9f8a_180373e564d0');"><span class="numbers">ROMID</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details"></div>
+</li>
+<br><li>Reply Fields:<div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a551ca8f_cd81_11e4_86d8_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_CTS" title="details_cmd_PART_INFO_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a551ca8f_cd81_11e4_86d8_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a551ca8f_cd81_11e4_86d8_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a551ca8b_cd81_11e4_a128_180373e564d0" name="details_cmd_PART_INFO_reply_CTS_field_CTS" title="details_cmd_PART_INFO_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a551ca8b_cd81_11e4_a128_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a551ca8b_cd81_11e4_a128_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a551f19a_cd81_11e4_8e4e_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_CHIPREV" title="details_cmd_PART_INFO_reply_CHIPREV" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a551f19a_cd81_11e4_8e4e_180373e564d0"><b>CHIPREV</b></a></h6></div>
+<div id="panel_collapse_details_a551f19a_cd81_11e4_8e4e_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a551ca91_cd81_11e4_a9fa_180373e564d0" name="details_cmd_PART_INFO_reply_CHIPREV_field_CHIPREV" title="details_cmd_PART_INFO_reply_CHIPREV_field_CHIPREV" href="javascript:;" data-toggle="collapse" data-target="#div_field_a551ca91_cd81_11e4_a9fa_180373e564d0"><b>CHIPREV[7:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a551ca91_cd81_11e4_a9fa_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Chip Mask Revision.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a551f1a0_cd81_11e4_a1bc_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_PART" title="details_cmd_PART_INFO_reply_PART" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a551f1a0_cd81_11e4_a1bc_180373e564d0"><b>PART</b></a></h6></div>
+<div id="panel_collapse_details_a551f1a0_cd81_11e4_a1bc_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a551f19c_cd81_11e4_9529_180373e564d0" name="details_cmd_PART_INFO_reply_PART_field_PART" title="details_cmd_PART_INFO_reply_PART_field_PART" href="javascript:;" data-toggle="collapse" data-target="#div_field_a551f19c_cd81_11e4_9529_180373e564d0"><b>PART[15:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a551f19c_cd81_11e4_9529_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Part Number (e.g., si4461 will return - 0x4461).</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U16</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a55218a9_cd81_11e4_860a_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_PBUILD" title="details_cmd_PART_INFO_reply_PBUILD" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a55218a9_cd81_11e4_860a_180373e564d0"><b>PBUILD</b></a></h6></div>
+<div id="panel_collapse_details_a55218a9_cd81_11e4_860a_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a55218a6_cd81_11e4_a44f_180373e564d0" name="details_cmd_PART_INFO_reply_PBUILD_field_PBUILD" title="details_cmd_PART_INFO_reply_PBUILD_field_PBUILD" href="javascript:;" data-toggle="collapse" data-target="#div_field_a55218a6_cd81_11e4_a44f_180373e564d0"><b>PBUILD[7:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a55218a6_cd81_11e4_a44f_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Part Build.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a55218af_cd81_11e4_8832_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_ID" title="details_cmd_PART_INFO_reply_ID" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a55218af_cd81_11e4_8832_180373e564d0"><b>ID</b></a></h6></div>
+<div id="panel_collapse_details_a55218af_cd81_11e4_8832_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a55218ab_cd81_11e4_8ded_180373e564d0" name="details_cmd_PART_INFO_reply_ID_field_ID" title="details_cmd_PART_INFO_reply_ID_field_ID" href="javascript:;" data-toggle="collapse" data-target="#div_field_a55218ab_cd81_11e4_8ded_180373e564d0"><b>ID[15:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a55218ab_cd81_11e4_8ded_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Id.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U16</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5523fbc_cd81_11e4_9941_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_CUSTOMER" title="details_cmd_PART_INFO_reply_CUSTOMER" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5523fbc_cd81_11e4_9941_180373e564d0"><b>CUSTOMER</b></a></h6></div>
+<div id="panel_collapse_details_a5523fbc_cd81_11e4_9941_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5523fb9_cd81_11e4_89f7_180373e564d0" name="details_cmd_PART_INFO_reply_CUSTOMER_field_CUSTOMER" title="details_cmd_PART_INFO_reply_CUSTOMER_field_CUSTOMER" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5523fb9_cd81_11e4_89f7_180373e564d0"><b>CUSTOMER[7:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5523fb9_cd81_11e4_89f7_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Customer ID.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5523fc1_cd81_11e4_9200_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_PART_INFO_reply_ROMID" title="details_cmd_PART_INFO_reply_ROMID" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5523fc1_cd81_11e4_9200_180373e564d0"><b>ROMID</b></a></h6></div>
+<div id="panel_collapse_details_a5523fc1_cd81_11e4_9200_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5523fbe_cd81_11e4_9f8a_180373e564d0" name="details_cmd_PART_INFO_reply_ROMID_field_ROMID" title="details_cmd_PART_INFO_reply_ROMID_field_ROMID" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5523fbe_cd81_11e4_9f8a_180373e564d0"><b>ROMID[7:0]</b></a><a href="#reg_view_cmd_PART_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5523fbe_cd81_11e4_9f8a_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>ROM Id.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+</div>
+</li>
+</ul>
+<hr>
+<h4><a class="dark-ref" title="details_cmd_FUNC_INFO" name="details_cmd_FUNC_INFO" href="#sum_cmd_FUNC_INFO">FUNC_INFO</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x10</span>
+</li>
+<li>Summary: <i>Returns the Function revision information of the device.</i>
+</li>
+<li>Purpose: <ul><li>Return Function revision numbers for currently loaded functional mode. Contrast with <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_cmd_PART_INFO');">PART_INFO</a>.</li></ul>
+</li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_FUNC_INFO_arg" title="reg_view_cmd_FUNC_INFO_arg" href="#sum_cmd_FUNC_INFO">FUNC_INFO Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a55266cc_cd81_11e4_a9e9_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x10</i></span></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_FUNC_INFO_reply" title="reg_view_cmd_FUNC_INFO_reply" href="#sum_cmd_FUNC_INFO">FUNC_INFO Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a5528dd8_cd81_11e4_bc66_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5528dd4_cd81_11e4_8750_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5528dd8_cd81_11e4_bc66_180373e564d0', 'a5528dd4_cd81_11e4_8750_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a5528ddd_cd81_11e4_b67a_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>REVEXT</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5528dda_cd81_11e4_8edc_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5528ddd_cd81_11e4_b67a_180373e564d0', 'a5528dda_cd81_11e4_8edc_180373e564d0');"><span class="numbers">REVEXT</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a552b4e7_cd81_11e4_b1ff_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x02</td>
+<td class="reg-view-name" rowspan="1"><b>REVBRANCH</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a552b4e4_cd81_11e4_8192_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a552b4e7_cd81_11e4_b1ff_180373e564d0', 'a552b4e4_cd81_11e4_8192_180373e564d0');"><span class="numbers">REVBRANCH</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a552b4ec_cd81_11e4_bd1e_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x03</td>
+<td class="reg-view-name" rowspan="1"><b>REVINT</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a552b4e9_cd81_11e4_a962_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a552b4ec_cd81_11e4_bd1e_180373e564d0', 'a552b4e9_cd81_11e4_a962_180373e564d0');"><span class="numbers">REVINT</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a552dbfa_cd81_11e4_9182_180373e564d0">
+<tr align="center">
+<td class="reg-view-control" rowspan="2"></td>
+<td class="reg-view-number">0x04</td>
+<td class="reg-view-name" rowspan="2"><b>PATCH</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a552dbf6_cd81_11e4_94f3_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a552dbfa_cd81_11e4_9182_180373e564d0', 'a552dbf6_cd81_11e4_94f3_180373e564d0');"><span class="numbers">PATCH[15:8]</span></a></td>
+</tr>
+<tr align="center">
+<td class="reg-view-number">0x05</td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a552dbf6_cd81_11e4_94f3_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a552dbfa_cd81_11e4_9182_180373e564d0', 'a552dbf6_cd81_11e4_94f3_180373e564d0');"><span class="numbers">PATCH[7:0]</span></a></td>
+</tr>
+</tbody>
+<tbody id="sum_cmd_a5530306_cd81_11e4_9bdb_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x06</td>
+<td class="reg-view-name" rowspan="1"><b>FUNC</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a552dbfd_cd81_11e4_967c_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5530306_cd81_11e4_9bdb_180373e564d0', 'a552dbfd_cd81_11e4_967c_180373e564d0');"><span class="numbers">FUNC</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details"></div>
+</li>
+<br><li>Reply Fields:<div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5528dd8_cd81_11e4_bc66_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_CTS" title="details_cmd_FUNC_INFO_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5528dd8_cd81_11e4_bc66_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a5528dd8_cd81_11e4_bc66_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5528dd4_cd81_11e4_8750_180373e564d0" name="details_cmd_FUNC_INFO_reply_CTS_field_CTS" title="details_cmd_FUNC_INFO_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5528dd4_cd81_11e4_8750_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5528dd4_cd81_11e4_8750_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5528ddd_cd81_11e4_b67a_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_REVEXT" title="details_cmd_FUNC_INFO_reply_REVEXT" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5528ddd_cd81_11e4_b67a_180373e564d0"><b>REVEXT</b></a></h6></div>
+<div id="panel_collapse_details_a5528ddd_cd81_11e4_b67a_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5528dda_cd81_11e4_8edc_180373e564d0" name="details_cmd_FUNC_INFO_reply_REVEXT_field_REVEXT" title="details_cmd_FUNC_INFO_reply_REVEXT_field_REVEXT" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5528dda_cd81_11e4_8edc_180373e564d0"><b>REVEXT[7:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5528dda_cd81_11e4_8edc_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>External revision number.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+<dt>Min:</dt>
+<dd><span class="numbers">0x0</span></dd>
+<dt>Max: </dt>
+<dd><span class="numbers">0xff</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a552b4e7_cd81_11e4_b1ff_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_REVBRANCH" title="details_cmd_FUNC_INFO_reply_REVBRANCH" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a552b4e7_cd81_11e4_b1ff_180373e564d0"><b>REVBRANCH</b></a></h6></div>
+<div id="panel_collapse_details_a552b4e7_cd81_11e4_b1ff_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a552b4e4_cd81_11e4_8192_180373e564d0" name="details_cmd_FUNC_INFO_reply_REVBRANCH_field_REVBRANCH" title="details_cmd_FUNC_INFO_reply_REVBRANCH_field_REVBRANCH" href="javascript:;" data-toggle="collapse" data-target="#div_field_a552b4e4_cd81_11e4_8192_180373e564d0"><b>REVBRANCH[7:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a552b4e4_cd81_11e4_8192_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Branch revision number.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+<dt>Min:</dt>
+<dd><span class="numbers">0x0</span></dd>
+<dt>Max: </dt>
+<dd><span class="numbers">0xff</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a552b4ec_cd81_11e4_bd1e_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_REVINT" title="details_cmd_FUNC_INFO_reply_REVINT" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a552b4ec_cd81_11e4_bd1e_180373e564d0"><b>REVINT</b></a></h6></div>
+<div id="panel_collapse_details_a552b4ec_cd81_11e4_bd1e_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a552b4e9_cd81_11e4_a962_180373e564d0" name="details_cmd_FUNC_INFO_reply_REVINT_field_REVINT" title="details_cmd_FUNC_INFO_reply_REVINT_field_REVINT" href="javascript:;" data-toggle="collapse" data-target="#div_field_a552b4e9_cd81_11e4_a962_180373e564d0"><b>REVINT[7:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a552b4e9_cd81_11e4_a962_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Internal revision number.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+<dt>Min:</dt>
+<dd><span class="numbers">0x0</span></dd>
+<dt>Max: </dt>
+<dd><span class="numbers">0xff</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a552dbfa_cd81_11e4_9182_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_PATCH" title="details_cmd_FUNC_INFO_reply_PATCH" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a552dbfa_cd81_11e4_9182_180373e564d0"><b>PATCH</b></a></h6></div>
+<div id="panel_collapse_details_a552dbfa_cd81_11e4_9182_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a552dbf6_cd81_11e4_94f3_180373e564d0" name="details_cmd_FUNC_INFO_reply_PATCH_field_PATCH" title="details_cmd_FUNC_INFO_reply_PATCH_field_PATCH" href="javascript:;" data-toggle="collapse" data-target="#div_field_a552dbf6_cd81_11e4_94f3_180373e564d0"><b>PATCH[15:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a552dbf6_cd81_11e4_94f3_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd><ul>
+<li>ID of applied patch. This is also the last 2 bytes in the associated patch file (*.csg).</li>
+<li>0x0000 = No patch applied.</li>
+</ul></dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U16</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5530306_cd81_11e4_9bdb_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_FUNC_INFO_reply_FUNC" title="details_cmd_FUNC_INFO_reply_FUNC" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5530306_cd81_11e4_9bdb_180373e564d0"><b>FUNC</b></a></h6></div>
+<div id="panel_collapse_details_a5530306_cd81_11e4_9bdb_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a552dbfd_cd81_11e4_967c_180373e564d0" name="details_cmd_FUNC_INFO_reply_FUNC_field_FUNC" title="details_cmd_FUNC_INFO_reply_FUNC_field_FUNC" href="javascript:;" data-toggle="collapse" data-target="#div_field_a552dbfd_cd81_11e4_967c_180373e564d0"><b>FUNC[7:0]</b></a><a href="#reg_view_cmd_FUNC_INFO_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a552dbfd_cd81_11e4_967c_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Current functional mode.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+</div>
+</li>
+</ul>
+<hr>
+<h4><a class="dark-ref" title="details_cmd_READ_CMD_BUFF" name="details_cmd_READ_CMD_BUFF" href="#sum_cmd_READ_CMD_BUFF">READ_CMD_BUFF</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x44</span>
+</li>
+<li>Summary: <i>Used to read CTS and the command response.</i>
+</li>
+<li>Purpose: <ul>
+<li>Processing of API commands is handled by the command handler in the chip.     A subsequent command may not be sent until the chip has completed processing of the first command.     The chip indicates the ability to receive another command and the availability of response data by issuing a Clear To Send (CTS) signal;    it is necessary for the host MCU to poll the chip for this CTS signal.     The CTS signal may be polled via SPI command, or monitored on a GPIO line or as an interrupt on the nIRQ pin.<br>    </li>
+<li>This command is used to poll the CTS signal via the SPI bus.     The NSEL line should be pulled low, followed by sending the READ_CMD_BUFF command on SDI.    While NSEL remains asserted low, an additional eight clock pulses are sent on SCLK and the CTS response byte is read on SDO.    If the CTS response byte is not 0xFF, the host MCU should pull NSEL high and repeat the polling procedure.<br>    </li>
+<li>If the CTS response byte is 0xFF, the host MCU should keep NSEL asserted low and provide additional clock    cycles on SCLK to read out as many response bytes (on SDO) as necessary.     The host MCU should pull NSEL high upon completion of reading the response stream.<br>    </li>
+<li>A primary function of this command is to determine when CTS goes high, and thus by definition this command may be sent while CTS is low.     This command itself does not cause CTS to go low.<br>    </li>
+<li>Attempting to read response bytes from the command buffer while CTS is not 0xFF will return invalid results.     The response bytes are valid only if CTS = 0xFF.<br></li>
+</ul>
+</li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_READ_CMD_BUFF_arg" title="reg_view_cmd_READ_CMD_BUFF_arg" href="#sum_cmd_READ_CMD_BUFF">READ_CMD_BUFF Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a5666479_cd81_11e4_b511_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x44</i></span></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_READ_CMD_BUFF_reply" title="reg_view_cmd_READ_CMD_BUFF_reply" href="#sum_cmd_READ_CMD_BUFF">READ_CMD_BUFF Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a5668b88_cd81_11e4_af22_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a566647c_cd81_11e4_b249_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5668b88_cd81_11e4_af22_180373e564d0', 'a566647c_cd81_11e4_b249_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_array_start_a5668b8d_cd81_11e4_b481_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>BYTE[0]</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7');" title="Feature Available: " onclick="ExpandFieldPanel('a5668b8d_cd81_11e4_b481_180373e564d0', 'a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7');"><span class="numbers">CMD_BUFF</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_array_ellipsis_a5668b8d_cd81_11e4_b481_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">...</td>
+<td class="numbers">...</td>
+<td class="numbers" colspan="8">...</td>
+</tr></tbody>
+<tbody id="sum_cmd_array_end_a5668b8d_cd81_11e4_b481_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x10</td>
+<td class="reg-view-name" rowspan="1"><b>BYTE[15]</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7');" title="Feature Available: " onclick="ExpandFieldPanel('a5668b8d_cd81_11e4_b481_180373e564d0', 'a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7');"><span class="numbers">CMD_BUFF</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details"></div>
+</li>
+<br><li>Reply Fields:<div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5668b88_cd81_11e4_af22_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_READ_CMD_BUFF_reply_CTS" title="details_cmd_READ_CMD_BUFF_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5668b88_cd81_11e4_af22_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a5668b88_cd81_11e4_af22_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a566647c_cd81_11e4_b249_180373e564d0" name="details_cmd_READ_CMD_BUFF_reply_CTS_field_CTS" title="details_cmd_READ_CMD_BUFF_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a566647c_cd81_11e4_b249_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_READ_CMD_BUFF_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a566647c_cd81_11e4_b249_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5668b8d_cd81_11e4_b481_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" href="javascript:;" name="details_cmd_READ_CMD_BUFF_reply_array_BYTE" title="details_cmd_READ_CMD_BUFF_reply_array_BYTE" data-toggle="collapse" data-target="#panel_collapse_details_a5668b8d_cd81_11e4_b481_180373e564d0"><b title="details_cmd_READ_CMD_BUFF_reply_array_BYTE">BYTE[0...15]</b></a></h6></div>
+<div id="panel_collapse_details_a5668b8d_cd81_11e4_b481_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7" name="details_cmd_READ_CMD_BUFF_reply_array_BYTE_field_CMD_BUFF" title="details_cmd_READ_CMD_BUFF_reply_array_BYTE_field_CMD_BUFF" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7"><b>CMD_BUFF[7:0]</b></a><a href="#reg_view_cmd_READ_CMD_BUFF_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5668b8d_cd81_11e4_b481_180373e564d0_CMD_BUFF_7" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Byte 0-15 of the command response buffer.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+</div>
+</li>
+</ul>
+<hr>
+<h3><a class="dark-ref" title="details_cmd_set_ADVANCED_COMMANDS" name="details_cmd_set_ADVANCED_COMMANDS" href="#sum_cmd_set_ADVANCED_COMMANDS">ADVANCED_COMMANDS</a></h3>
+<h4><a class="dark-ref" title="details_cmd_GET_CHIP_STATUS" name="details_cmd_GET_CHIP_STATUS" href="#sum_cmd_GET_CHIP_STATUS">GET_CHIP_STATUS</a></h4>
+<ul>
+<li>Number: <span class="numbers">0x23</span>
+</li>
+<li>Summary: <i>Returns the interrupt status of the Chip Interrupt Group (both STATUS and PENDING).  Optionally, it may be used to clear latched (PENDING) interrupt events.</i>
+</li>
+<li>Purpose: <ul>
+<li>Returns the current interrupt status of Chip interrupt events (both STATUS and PENDING) and optionally clears PENDING interrupts.               </li>
+<li>Please refer to the <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_cmd_GET_INT_STATUS');">GET_INT_STATUS</a> command for more details regarding the difference between STATUS and PENDING interrupts.               </li>
+<li>Sending the <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_cmd_GET_CHIP_STATUS');">GET_CHIP_STATUS</a> command with NO input parameter results in clearing all of the PENDING interrupts.               </li>
+<li>When PENDING interrupts are being cleared, the reply stream reflects their status prior to clearing.</li>
+</ul>
+</li>
+<li>Argument Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_GET_CHIP_STATUS_arg" title="reg_view_cmd_GET_CHIP_STATUS_arg" href="#sum_cmd_GET_CHIP_STATUS">GET_CHIP_STATUS Argument Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a573d255_cd81_11e4_92bb_180373e564d0"><tr align="center">
+<td class="reg-view-control"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name"><b>CMD</b></td>
+<td class="fixed-width-bit" colspan="8"><span class="numbers"><i>0x23</i></span></td>
+</tr></tbody>
+<tbody id="sum_cmd_a5742071_cd81_11e4_b2ee_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>CHIP_CLR_PEND</b></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">0</span></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f969_cd81_11e4_a2a4_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f969_cd81_11e4_a2a4_180373e564d0');"><span class="numbers">CAL_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f968_cd81_11e4_8a5e_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f968_cd81_11e4_8a5e_180373e564d0');"><span class="numbers">FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f967_cd81_11e4_83c5_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f967_cd81_11e4_83c5_180373e564d0');"><span class="numbers">STATE_CHANGE_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f966_cd81_11e4_a10c_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f966_cd81_11e4_a10c_180373e564d0');"><span class="numbers">CMD_ERROR_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f965_cd81_11e4_b8d4_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f965_cd81_11e4_b8d4_180373e564d0');"><span class="numbers">CHIP_READY_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f964_cd81_11e4_a243_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f964_cd81_11e4_a243_180373e564d0');"><span class="numbers">LOW_BATT_PEND_CLR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a573f963_cd81_11e4_a1d6_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5742071_cd81_11e4_b2ee_180373e564d0', 'a573f963_cd81_11e4_a1d6_180373e564d0');"><span class="numbers">WUT_PEND_CLR</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Reply Stream: <table class="table-bordered table-condensed reg-view-table">
+<tr><th class="reg-view-header" colspan="11"><a class="dark-ref" name="reg_view_cmd_GET_CHIP_STATUS_reply" title="reg_view_cmd_GET_CHIP_STATUS_reply" href="#sum_cmd_GET_CHIP_STATUS">GET_CHIP_STATUS Reply Stream</a></th></tr>
+<tr class="reg-view-header">
+<th class="reg-view-control"></th>
+<th class="reg-view-number-hdr">Index</th>
+<th class="reg-view-name">Name</th>
+<th class="reg-view-header">7</th>
+<th class="reg-view-header">6</th>
+<th class="reg-view-header">5</th>
+<th class="reg-view-header">4</th>
+<th class="reg-view-header">3</th>
+<th class="reg-view-header">2</th>
+<th class="reg-view-header">1</th>
+<th class="reg-view-header">0</th>
+</tr>
+<tbody id="sum_cmd_a5744782_cd81_11e4_840e_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x00</td>
+<td class="reg-view-name" rowspan="1"><b>CTS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5742073_cd81_11e4_a0e9_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5744782_cd81_11e4_840e_180373e564d0', 'a5742073_cd81_11e4_a0e9_180373e564d0');"><span class="numbers">CTS</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a5746e95_cd81_11e4_8030_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x01</td>
+<td class="reg-view-name" rowspan="1"><b>CHIP_PEND</b></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">X</span></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5746e92_cd81_11e4_bf29_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5746e92_cd81_11e4_bf29_180373e564d0');"><span class="numbers">CAL_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744789_cd81_11e4_b20b_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744789_cd81_11e4_b20b_180373e564d0');"><span class="numbers">FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744788_cd81_11e4_a269_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744788_cd81_11e4_a269_180373e564d0');"><span class="numbers">STATE_CHANGE_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744787_cd81_11e4_aa39_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744787_cd81_11e4_aa39_180373e564d0');"><span class="numbers">CMD_ERROR_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744786_cd81_11e4_96b0_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744786_cd81_11e4_96b0_180373e564d0');"><span class="numbers">CHIP_READY_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744785_cd81_11e4_aebf_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744785_cd81_11e4_aebf_180373e564d0');"><span class="numbers">LOW_BATT_PEND</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5744784_cd81_11e4_8088_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5746e95_cd81_11e4_8030_180373e564d0', 'a5744784_cd81_11e4_8088_180373e564d0');"><span class="numbers">WUT_PEND</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a574bcb8_cd81_11e4_a54d_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x02</td>
+<td class="reg-view-name" rowspan="1"><b>CHIP_STATUS</b></td>
+<td class="fixed-width-bit" colspan="1"><span class="numbers">X</span></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a574bcb5_cd81_11e4_8fb0_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a574bcb5_cd81_11e4_8fb0_180373e564d0');"><span class="numbers">CAL</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a574bcb4_cd81_11e4_8b80_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a574bcb4_cd81_11e4_8b80_180373e564d0');"><span class="numbers">FIFO_UNDERFLOW_OVERFLOW_ERROR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a57495a5_cd81_11e4_bed6_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a57495a5_cd81_11e4_bed6_180373e564d0');"><span class="numbers">STATE_CHANGE</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a57495a4_cd81_11e4_b7db_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a57495a4_cd81_11e4_b7db_180373e564d0');"><span class="numbers">CMD_ERROR</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a57495a3_cd81_11e4_a51d_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a57495a3_cd81_11e4_a51d_180373e564d0');"><span class="numbers">CHIP_READY</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a57495a2_cd81_11e4_b9f0_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a57495a2_cd81_11e4_b9f0_180373e564d0');"><span class="numbers">LOW_BATT</span></a></td>
+<td class="fixed-width-bit" colspan="1"><a href="javascript:ChangeUrl('#field_a5746e97_cd81_11e4_8d49_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574bcb8_cd81_11e4_a54d_180373e564d0', 'a5746e97_cd81_11e4_8d49_180373e564d0');"><span class="numbers">WUT</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a574e3cf_cd81_11e4_afcb_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x03</td>
+<td class="reg-view-name" rowspan="1"><b>CMD_ERR_STATUS</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a574e3cc_cd81_11e4_a911_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a574e3cf_cd81_11e4_afcb_180373e564d0', 'a574e3cc_cd81_11e4_a911_180373e564d0');"><span class="numbers">CMD_ERR_STATUS</span></a></td>
+</tr></tbody>
+<tbody id="sum_cmd_a5750adf_cd81_11e4_98d3_180373e564d0"><tr align="center">
+<td class="reg-view-control" rowspan="1"></td>
+<td class="reg-view-number">0x04</td>
+<td class="reg-view-name" rowspan="1"><b>CMD_ERR_CMD_ID</b></td>
+<td class="fixed-width-bit" colspan="8"><a href="javascript:ChangeUrl('#field_a5750adc_cd81_11e4_9a91_180373e564d0');" title="Feature Available: " onclick="ExpandFieldPanel('a5750adf_cd81_11e4_98d3_180373e564d0', 'a5750adc_cd81_11e4_9a91_180373e564d0');"><span class="numbers">CMD_ERR_CMD_ID</span></a></td>
+</tr></tbody>
+</table>
+</li>
+<br><li>Argument Fields:<div class="div-field-details"><div class="panel-group"><div class="panel panel-default" id="panel_details_a5742071_cd81_11e4_b2ee_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5742071_cd81_11e4_b2ee_180373e564d0"><b>CHIP_CLR_PEND</b></a></h6></div>
+<div id="panel_collapse_details_a5742071_cd81_11e4_b2ee_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f969_cd81_11e4_a2a4_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CAL_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CAL_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f969_cd81_11e4_a2a4_180373e564d0"><b>CAL_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f969_cd81_11e4_a2a4_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending CAL interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f968_cd81_11e4_8a5e_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f968_cd81_11e4_8a5e_180373e564d0"><b>FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f968_cd81_11e4_8a5e_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending FIFO_UNDERFLOW_OVERFLOW_ERROR interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f967_cd81_11e4_83c5_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_STATE_CHANGE_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_STATE_CHANGE_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f967_cd81_11e4_83c5_180373e564d0"><b>STATE_CHANGE_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f967_cd81_11e4_83c5_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending STATE_CHANGE interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f966_cd81_11e4_a10c_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CMD_ERROR_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CMD_ERROR_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f966_cd81_11e4_a10c_180373e564d0"><b>CMD_ERROR_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f966_cd81_11e4_a10c_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending CMD_ERROR interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f965_cd81_11e4_b8d4_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CHIP_READY_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_CHIP_READY_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f965_cd81_11e4_b8d4_180373e564d0"><b>CHIP_READY_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f965_cd81_11e4_b8d4_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending CHIP_READY interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f964_cd81_11e4_a243_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_LOW_BATT_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_LOW_BATT_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f964_cd81_11e4_a243_180373e564d0"><b>LOW_BATT_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f964_cd81_11e4_a243_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending LOW_BATT interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a573f963_cd81_11e4_a1d6_180373e564d0" name="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_WUT_PEND_CLR" title="details_cmd_GET_CHIP_STATUS_arg_CHIP_CLR_PEND_field_WUT_PEND_CLR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a573f963_cd81_11e4_a1d6_180373e564d0"><b>WUT_PEND_CLR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_arg"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a573f963_cd81_11e4_a1d6_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If clear, clear any pending WUT interrupt. If set, leave interrupt pending.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+</div></div>
+</div></div></div>
+</li>
+<br><li>Reply Fields:<div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5744782_cd81_11e4_840e_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_reply_CTS" title="details_cmd_GET_CHIP_STATUS_reply_CTS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5744782_cd81_11e4_840e_180373e564d0"><b>CTS</b></a></h6></div>
+<div id="panel_collapse_details_a5744782_cd81_11e4_840e_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5742073_cd81_11e4_a0e9_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CTS_field_CTS" title="details_cmd_GET_CHIP_STATUS_reply_CTS_field_CTS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5742073_cd81_11e4_a0e9_180373e564d0"><b>CTS[7:0]</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5742073_cd81_11e4_a0e9_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Clear to Send. Indicates that the previous command has completed execution and the response byte stream (if any) is valid. The next command may be sent.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">U8</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5746e95_cd81_11e4_8030_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5746e95_cd81_11e4_8030_180373e564d0"><b>CHIP_PEND</b></a></h6></div>
+<div id="panel_collapse_details_a5746e95_cd81_11e4_8030_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5746e92_cd81_11e4_bf29_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CAL_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CAL_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5746e92_cd81_11e4_bf29_180373e564d0"><b>CAL_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5746e92_cd81_11e4_bf29_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the CAL status bit has been detected and therefore a CAL interrupt is pending.  See associated CAL status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744789_cd81_11e4_b20b_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744789_cd81_11e4_b20b_180373e564d0"><b>FIFO_UNDERFLOW_OVERFLOW_ERROR_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744789_cd81_11e4_b20b_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the FIFO_UNDERFLOW_OVERFLOW_ERROR status bit has been detected and therefore a FIFO_UNDERFLOW_OVERFLOW_ERROR interrupt is pending.  See associated FIFO_UNDERFLOW_OVERFLOW_ERROR status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744788_cd81_11e4_a269_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_STATE_CHANGE_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_STATE_CHANGE_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744788_cd81_11e4_a269_180373e564d0"><b>STATE_CHANGE_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744788_cd81_11e4_a269_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the STATE_CHANGE status bit has been detected and therefore a STATE_CHANGE interrupt is pending.  See associated STATE_CHANGE status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744787_cd81_11e4_aa39_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CMD_ERROR_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CMD_ERROR_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744787_cd81_11e4_aa39_180373e564d0"><b>CMD_ERROR_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744787_cd81_11e4_aa39_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the CMD_ERROR status bit has been detected and therefore a CMD_ERROR interrupt is pending.  See associated CMD_ERROR status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744786_cd81_11e4_96b0_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CHIP_READY_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_CHIP_READY_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744786_cd81_11e4_96b0_180373e564d0"><b>CHIP_READY_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744786_cd81_11e4_96b0_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the CHIP_READY status bit has been detected and therefore a CHIP_READY interrupt is pending.  See associated CHIP_READY status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744785_cd81_11e4_aebf_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_LOW_BATT_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_LOW_BATT_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744785_cd81_11e4_aebf_180373e564d0"><b>LOW_BATT_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744785_cd81_11e4_aebf_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the LOW_BATT status bit has been detected and therefore a LOW_BATT interrupt is pending.  See associated LOW_BATT status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5744784_cd81_11e4_8088_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_WUT_PEND" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_PEND_field_WUT_PEND" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5744784_cd81_11e4_8088_180373e564d0"><b>WUT_PEND</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5744784_cd81_11e4_8088_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>If set, a rising edge of the WUT status bit has been detected and therefore a WUT interrupt is pending.  See associated WUT status bit for more details.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a574bcb8_cd81_11e4_a54d_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a574bcb8_cd81_11e4_a54d_180373e564d0"><b>CHIP_STATUS</b></a></h6></div>
+<div id="panel_collapse_details_a574bcb8_cd81_11e4_a54d_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a574bcb5_cd81_11e4_8fb0_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CAL" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CAL" href="javascript:;" data-toggle="collapse" data-target="#div_field_a574bcb5_cd81_11e4_8fb0_180373e564d0"><b>CAL</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a574bcb5_cd81_11e4_8fb0_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Self clearing signal that pulses high to indicate a RC32K calibration event is pending. If this occurs, the RC32K oscillator will be calibrated on the next transition to Sleep/Standby state.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a574bcb4_cd81_11e4_8b80_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_FIFO_UNDERFLOW_OVERFLOW_ERROR" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_FIFO_UNDERFLOW_OVERFLOW_ERROR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a574bcb4_cd81_11e4_8b80_180373e564d0"><b>FIFO_UNDERFLOW_OVERFLOW_ERROR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a574bcb4_cd81_11e4_8b80_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Set to indicate that the number of received or transmitted bytes exceeds the size of the RX or TX FIFO, respectively (i.e., 64 bytes for each FIFO, or 129 bytes when sharing the FIFO).  Upon such an underflow/overflow event, the FIFO(s) will need to be reset.  Cleared by issuing a <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_cmd_FIFO_INFO');">FIFO_INFO</a> command to reset the FIFOs.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a57495a5_cd81_11e4_bed6_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_STATE_CHANGE" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_STATE_CHANGE" href="javascript:;" data-toggle="collapse" data-target="#div_field_a57495a5_cd81_11e4_bed6_180373e564d0"><b>STATE_CHANGE</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a57495a5_cd81_11e4_bed6_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Set to indicate a successful transition from one state to another operating state.  Cleared when a state transition is in progress.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a57495a4_cd81_11e4_b7db_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CMD_ERROR" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CMD_ERROR" href="javascript:;" data-toggle="collapse" data-target="#div_field_a57495a4_cd81_11e4_b7db_180373e564d0"><b>CMD_ERROR</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a57495a4_cd81_11e4_b7db_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Self clearing signal that pulses high to indicate an error has occurred in the processing of a command. For example, an incorrect command/property ID is sent, or an attempt was made to write a property that is outside of the given property group.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a57495a3_cd81_11e4_a51d_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CHIP_READY" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_CHIP_READY" href="javascript:;" data-toggle="collapse" data-target="#div_field_a57495a3_cd81_11e4_a51d_180373e564d0"><b>CHIP_READY</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a57495a3_cd81_11e4_a51d_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Set to indicate the chip (upon completion of the POWER_UP sequence) has reached the state where it is ready to accept commands, or when the IR calibration process is completed.  Cleared when the chip is shutdown or when IR calibration has begun.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a57495a2_cd81_11e4_b9f0_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_LOW_BATT" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_LOW_BATT" href="javascript:;" data-toggle="collapse" data-target="#div_field_a57495a2_cd81_11e4_b9f0_180373e564d0"><b>LOW_BATT</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a57495a2_cd81_11e4_b9f0_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Set to indicate the battery voltage is below the threshold set by <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_prop_GLOBAL_LOW_BATT_THRESH');">GLOBAL_LOW_BATT_THRESH</a>.  Cleared to indicate the battery voltage is above the threshold set by <a class="reference" href="javascript:;" onclick="ChangeUrl('#details_prop_GLOBAL_LOW_BATT_THRESH');">GLOBAL_LOW_BATT_THRESH</a>.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5746e97_cd81_11e4_8d49_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_WUT" title="details_cmd_GET_CHIP_STATUS_reply_CHIP_STATUS_field_WUT" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5746e97_cd81_11e4_8d49_180373e564d0"><b>WUT</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5746e97_cd81_11e4_8d49_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Self clearing signal that pulses high to indicate the WUT (Wake-up timer) has expired.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">BOOL</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a574e3cf_cd81_11e4_afcb_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_STATUS" title="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_STATUS" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a574e3cf_cd81_11e4_afcb_180373e564d0"><b>CMD_ERR_STATUS</b></a></h6></div>
+<div id="panel_collapse_details_a574e3cf_cd81_11e4_afcb_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a574e3cc_cd81_11e4_a911_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_STATUS_field_CMD_ERR_STATUS" title="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_STATUS_field_CMD_ERR_STATUS" href="javascript:;" data-toggle="collapse" data-target="#div_field_a574e3cc_cd81_11e4_a911_180373e564d0"><b>CMD_ERR_STATUS[7:0]</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a574e3cc_cd81_11e4_a911_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Last command error cause.  Only valid if CMD_ERROR status bit is set.</dd>
+<dt title="enumeration">Format:</dt>
+<dd>Enumeration<br><table class="table enum-table"><tbody>
+<tr>
+<th class="enum-name">Name</th>
+<th class="enum-number">Value</th>
+<th class="enum-desc">Description</th>
+<th class="enum-feature">Feature Available</th>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_NONE</td>
+<td class="enum-number numbers">0</td>
+<td class="enum-desc">No error.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_BAD_COMMAND</td>
+<td class="enum-number numbers">16</td>
+<td class="enum-desc">Bad command issued.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_BAD_ARG</td>
+<td class="enum-number numbers">17</td>
+<td class="enum-desc">Argment(s) in issued command were invalid.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_COMMAND_BUSY</td>
+<td class="enum-number numbers">18</td>
+<td class="enum-desc">Command was issued before previous command was completed.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_INVALID_STATE</td>
+<td class="enum-number numbers">19</td>
+<td class="enum-desc">Command issued was not allowed while in the current device state.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_BAD_BOOTMODE</td>
+<td class="enum-number numbers">49</td>
+<td class="enum-desc">Invalid bootmode supplied.</td>
+<td class="enum-feature"></td>
+</tr>
+<tr>
+<td class="enum-name">CMD_ERROR_BAD_PROPERTY</td>
+<td class="enum-number numbers">64</td>
+<td class="enum-desc">Bad Property ID was provided.</td>
+<td class="enum-feature"></td>
+</tr>
+</tbody></table>
+</dd>
+</dl></div>
+</div></div>
+</div></div>
+<div class="panel-group"><div class="panel panel-default" id="panel_details_a5750adf_cd81_11e4_98d3_180373e564d0">
+<div class="panel-heading"><h6 class="panel-title field-panel-title"><a class="dark-ref collapsed" name="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_CMD_ID" title="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_CMD_ID" href="javascript:;" data-toggle="collapse" data-target="#panel_collapse_details_a5750adf_cd81_11e4_98d3_180373e564d0"><b>CMD_ERR_CMD_ID</b></a></h6></div>
+<div id="panel_collapse_details_a5750adf_cd81_11e4_98d3_180373e564d0" class="panel-collapse collapse"><div class="panel-body">
+<div>
+<a class="dark-ref numbers collapsed" id="field_a5750adc_cd81_11e4_9a91_180373e564d0" name="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_CMD_ID_field_CMD_ERR_CMD_ID" title="details_cmd_GET_CHIP_STATUS_reply_CMD_ERR_CMD_ID_field_CMD_ERR_CMD_ID" href="javascript:;" data-toggle="collapse" data-target="#div_field_a5750adc_cd81_11e4_9a91_180373e564d0"><b>CMD_ERR_CMD_ID[7:0]</b></a><a href="#reg_view_cmd_GET_CHIP_STATUS_reply"><img src="content/button-up.png" width="15" height="15" border="0" title="Up to Register View" class="icon-img-right"></a>
+</div>
+<div id="div_field_a5750adc_cd81_11e4_9a91_180373e564d0" class="collapse"><dl class="dl-horizontal">
+<dt>Description:</dt>
+<dd>Command ID that was being proccessed at the time of the last command error.</dd>
+<dt>Type: </dt>
+<dd><span class="numbers">ENUM</span></dd>
+</dl></div>
+</div></div>
+</div></div>
+</div>
+</li>
+</ul>
+<hr>
+<h2>Property Details</h2>
+<p class="footer-copyright">Copyright © 2012-2014 Silicon Laboratories Inc. All Rights Reserved.</p>
+</div>
+<script language="javascript">
+
+    // generated data
+    var CMD_SET_KEYS = {
+                key_a5517c5c_cd81_11e4_9686_180373e564d0 : ['sum_cmd_set_hdr_a5517c5c_cd81_11e4_9686_180373e564d0', 'sum_cmd_a551a36e_cd81_11e4_81ce_180373e564d0', 'sum_cmd_a551ca8a_cd81_11e4_9bdf_180373e564d0', 'sum_cmd_a55266ce_cd81_11e4_a76c_180373e564d0', 'sum_cmd_a566647b_cd81_11e4_9cec_180373e564d0'],        key_a54b88c2_cd81_11e4_ad97_180373e564d0 : ['sum_cmd_set_hdr_a54b88c2_cd81_11e4_ad97_180373e564d0', 'sum_cmd_a54bd6f1_cd81_11e4_8fa9_180373e564d0'],        key_a57299ca_cd81_11e4_bab7_180373e564d0 : ['sum_cmd_set_hdr_a57299ca_cd81_11e4_bab7_180373e564d0', 'sum_cmd_a573f962_cd81_11e4_9146_180373e564d0']
+    }
+    var PROP_GRP_KEYS = {
+        
+    }
+    // initialize
+    startup();
+</script>
+</body>
+</html>

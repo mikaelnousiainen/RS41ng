@@ -1,0 +1,240 @@
+
+html *
+{
+  font-family: Arial
+}
+
+a:link { text-decoration: none; color: #000000; }
+a:hover { text-decoration:underline; color: #0000FF; }
+a:active { text-decoration: none; color: #000000; } 
+a:visited {text-decoration: none; color: #000000; }
+
+table.title {
+  border: 0;
+  width: 95%;
+}
+
+td.title {
+  border: 0;
+}
+
+td.view_desc
+{
+  border: 1;
+}
+
+td.title_logo {
+  border: 0;
+  width: 230px;
+}
+
+table, th, td {
+  border: 1px solid black;     
+  padding: 1px;
+  padding-left: 2px;            
+}
+
+.collapse {
+  border: 1px solid black;     
+  width:20px;
+  background-color:white;
+  text-align: center;
+}
+
+.numbers {
+  font-family:Monospace;       
+  color:#505050;
+  font-size:16px;
+}                                    
+
+td.numbers {                         
+  text-align:center;            
+}                                    
+
+table.basic, table.narrower {         
+  width:95%;                   
+  border-spacing:1;            
+  empty-cells:show;            
+  border-collapse:collapse;    
+  border: 1px solid black;     
+}                                    
+
+td.sum_number
+{
+  width:60px;
+  text-align:center;            
+  font-family:Monospace;       
+  color:#505050;
+  font-size:16px;
+}
+
+td.reg_view_number
+{
+  width:60px;
+  text-align:center;            
+  font-family:Monospace;       
+  color:#505050;
+  font-size:16px;
+}
+
+td.sum_name
+{
+  width:250px;
+}
+
+td.reg_view_name
+{
+  width:100px;
+  text-align:center;            
+  font-family:Monospace;       
+}
+
+td.sum_default
+{
+  width:100px;
+  font-family:Monospace;       
+  color:#505050;
+  font-size:16px;
+  text-align:center;            
+}
+
+td.sum_sum
+{
+}
+
+td.enum_desc
+{
+}
+
+td.sum_vis
+{
+  width:100px;
+  text-align:center;            
+}
+
+td.sum_status
+{
+  width:100px;
+  text-align:center;            
+}
+
+td.sum_status_detail
+{
+  width:100px;
+  text-align:center;            
+}
+
+td.sum_release_detail
+{
+  width:100px;
+  text-align:center;            
+}
+
+td.sum_ellipsis
+{
+  text-align:center;            
+}
+
+table.narrower {                     
+  width:50%;                   
+}
+
+table.enum {         
+  width:75%;                   
+  border-spacing:1;            
+  empty-cells:show;            
+  border-collapse:collapse;    
+  border: 1px solid black;     
+} 
+                                 
+tr.header
+{                          
+  background-color:#bbd5f0;
+}
+
+ul
+{
+  margin-top:0px;
+  margin-bottom:0px;
+}
+
+.collapsibleList {
+  list-style-image:url('button.png');
+  cursor:auto;
+}
+
+
+li.collapsibleListOpen{
+  list-style-image:url('button-open.png');
+  cursor:pointer;
+}
+
+li.collapsibleListClosed{
+  list-style-image:url('button-closed.png');
+  cursor:pointer;
+}
+
+.centeredImage
+{
+  width:95%;
+  text-align:center;
+  margin-top:0px;
+  margin-bottom:2px;
+  padding:0px;
+}
+
+.fieldDetailsDiv
+{
+  padding:2px;
+  margin-left:30px;
+}
+
+div.int_comments
+{
+  border-width: 4px;
+  border-style: groove;
+  border-color: red
+}
+
+.prop_field_expand
+{
+}
+
+.prop_field_collapse
+{
+}
+
+a.reference
+{
+  color:#0000ff;
+  font-style:italic;
+}
+
+.restricted_doc
+{
+  color:#ff0000;
+  font-style:italic;
+}
+
+a.part_link
+{
+  color:#004080;
+}
+
+a.part_group_link
+{
+  color:#004080;
+}
+
+h4.part_link
+{
+  margin-top:2px;
+  margin-bottom:0px;
+}
+
+.footer-copyright
+{
+  color:#505050;
+  font-size:11px;
+}
+
