@@ -1,4 +1,3 @@
-#ifdef DFM17
 /*!
  * File:
  *  radio_comm.h
@@ -16,6 +15,8 @@
 
 #include "bsp.h"
 
+// kd2eat - rest of code inside a big ifdef
+#ifdef DFM17
                 /* ======================================= *
                  *          D E F I N I T I O N S          *
                  * ======================================= */

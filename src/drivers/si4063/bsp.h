@@ -15,7 +15,9 @@
 /*------------------------------------------------------------------------*/
 
 #include <stdint.h>
-
+// kd2eat - add config.h to pick up any necessary defines
+#include <config.h>
+#include <gpio.h>
 // kd2eat - define SILABS_RADIO_SI446X to enable support for Si4x6x chips.
 #define SILABS_RADIO_SI446X
 typedef unsigned char bit;

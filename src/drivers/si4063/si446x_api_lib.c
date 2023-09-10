@@ -1,4 +1,3 @@
-#ifdef DFM17
 /*!
  * File:
  *  si446x_api_lib.c
@@ -13,6 +12,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include "bsp.h"
+
+#ifdef DFM17
 
 union si446x_cmd_reply_union Si446xCmd;
 uint8_t Pro2Cmd[16];

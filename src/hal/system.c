@@ -111,6 +111,28 @@ static void gpio_init()
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BANK_RED_LED, &gpio_init);
+
+#ifdef DFM17
+
+    // 4063 SDN (shutdown) pin
+    gpio_init.GPIO_Pin = PIN_SDN;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_SDN, &gpio_init);
+
+    //  4063 GPIO2 pin
+    gpio_init.GPIO_Pin = PIN_4064_GPIO2;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_4063_GPIO2, &gpio_init);
+
+    //  4063 GPIO3 pin
+    gpio_init.GPIO_Pin = PIN_4064_GPIO3;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_4063_GPIO3, &gpio_init);
+
+#endif //DFM17
 }
 
 /**

@@ -1,7 +1,10 @@
 #ifndef __GPIO_H
 #define __GPIO_H
+#include <system_stm32f10x.h>
+#include <stm32f10x_gpio.h>
 
 #include "config.h"
+
 
 // GPIO definitions for devices we use
 

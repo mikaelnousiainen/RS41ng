@@ -1,7 +1,6 @@
-#ifdef DFM17
 /*!
  * File:
- *  radio_hal.c
+ *  radio_hal.c 
  *
  * Description:
  *  This file contains RADIO HAL.
@@ -16,6 +15,8 @@
 
 #include "bsp.h"
 
+// kd2eat - rest of code inside big ifdef
+#ifdef DFM17
 
                 /* ======================================= *
                  *          D E F I N I T I O N S          *
@@ -38,7 +39,7 @@ void radio_hal_AssertShutdown(void)
 #if (defined SILABS_PLATFORM_RFSTICK) || (defined SILABS_PLATFORM_LCDBB) || (defined SILABS_PLATFORM_WMB)
   RF_PWRDN = 1;
 #else
-  PWRDN = 1;
+  GPIO_SetBits(BANK_SDN, PIN_SDN);
 #endif
 }
 
@@ -47,23 +48,24 @@ void radio_hal_DeassertShutdown(void)
 #if (defined SILABS_PLATFORM_RFSTICK) || (defined SILABS_PLATFORM_LCDBB) || (defined SILABS_PLATFORM_WMB)
   RF_PWRDN = 0;
 #else
-  PWRDN = 0;
+  GPIO_ResetBits(BANK_SDN, PIN_SDN);
 #endif
 }
 
 void radio_hal_ClearNsel(void)
 {
-    RF_NSEL = 0;
+    GPIO_ResetBits(BANK_NSEL, PIN_NSEL);
 }
 
 void radio_hal_SetNsel(void)
 {
-    RF_NSEL = 1;
+    GPIO_SetBits(BANK_NSEL, PIN_NSEL);
 }
 
 BIT radio_hal_NirqLevel(void)
 {
-    return RF_NIRQ;
+    // no NIRQ pin in the DFM17
+    return 0;
 }
 
 void radio_hal_SpiWriteByte(uint8_t byteToWrite)

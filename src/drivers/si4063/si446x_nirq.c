@@ -1,4 +1,3 @@
-#ifdef DFM17
 /*
  * Silicon Laboratories Confidential
  * Copyright 2011 Silicon Laboratories, Inc.
@@ -9,6 +8,7 @@
 #include "stdint.h"
 #include "bsp.h"
 
+#ifdef DFM17
 
 //SEGMENT_VARIABLE( Si446xChipPend, U8, SEG_BDATA );
 //SBIT(Si446xWUTPend,Si446xChipPend,0);
