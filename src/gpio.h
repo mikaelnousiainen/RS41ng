@@ -1,5 +1,6 @@
 #ifndef __GPIO_H
 #define __GPIO_H
+
 #include <system_stm32f10x.h>
 #include <stm32f10x_gpio.h>
 
@@ -37,6 +38,7 @@
 #define PIN_MISO	GPIO_Pin_14
 #define	APBPERIPHERAL_SPI	RCC_APB1Periph_SPI2
 #define	PERIPHERAL_SPI	SPI2
+#define RCC_SPIPeriphClockCmd RCC_APB1PeriphClockCmd
 
 #define	PIN_USART_TX	GPIO_Pin_9
 #define BANK_USART_TX	GPIOA
@@ -73,16 +75,9 @@
 #define PIN_SCK		GPIO_Pin_5
 #define BANK_MISO	GPIOA
 #define PIN_MISO	GPIO_Pin_6
-#define BANK_NSEL	GPIOB
-#define PIN_NSEL	GPIO_Pin_2
-#define BANK_SDN	GPIOC
-#define PIN_SDN		GPIO_Pin_3
-#define BANK_4063_GPIO2	GPIOD
-#define PIN_4064_GPIO2	GPIO_Pin_0
-#define BANK_4063_GPIO3	GPIOA
-#define PIN_4064_GPIO3	GPIO_Pin_4
 #define	APBPERIPHERAL_SPI	RCC_APB2Periph_SPI1
 #define	PERIPHERAL_SPI	SPI1
+#define RCC_SPIPeriphClockCmd RCC_APB2PeriphClockCmd
 
 #define	PIN_USART_TX	GPIO_Pin_2
 #define BANK_USART_TX	GPIOA

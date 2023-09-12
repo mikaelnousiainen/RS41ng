@@ -1,15 +1,15 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-// Define SONDE Type.  Must be DFM17 or RS41
+// Define radiosonde type. Must be either RS41 or DFM17.
 //#define RS41
 #define DFM17
 
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+#define SEMIHOSTING_ENABLE
+#define LOGGING_ENABLE
 
 /**
  * Global configuration
@@ -130,11 +130,11 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 true
+#define RADIO_SI4032_TX_HORUS_V2 false
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 6
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -150,6 +150,41 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+
+/**
+ * Built-in Si4063 radio chip transmission configuration
+ */
+
+// Si4063 transmit power: 0..127
+// TODO: Document Si4063 transmit power levels
+#define RADIO_SI4063_TX_POWER 127
+
+// Which modes to transmit using the built-in Si4063 transmitter chip
+// The COUNT settings define the number of times that each type of transmission is repeated
+#define RADIO_SI4063_TX_CW false
+#define RADIO_SI4063_TX_CW_COUNT 1
+#define RADIO_SI4063_TX_PIP false
+#define RADIO_SI4063_TX_PIP_COUNT 6
+#define RADIO_SI4063_TX_APRS false
+#define RADIO_SI4063_TX_APRS_COUNT 2
+#define RADIO_SI4063_TX_HORUS_V1 false
+#define RADIO_SI4063_TX_HORUS_V1_COUNT 1
+#define RADIO_SI4063_TX_HORUS_V2 true
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+
+// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+// The continuous mode transmits Horus 4FSK preamble between transmissions
+// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
+#define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
+#define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
+
+// Transmit frequencies for the Si4063 transmitter modes
+#define RADIO_SI4063_TX_FREQUENCY_CW        432500000
+#define RADIO_SI4063_TX_FREQUENCY_PIP       432500000
+#define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
+// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
 
 /**
  * External Si5351 radio chip transmission configuration
@@ -240,6 +275,7 @@
  */
 
 #define HORUS_FREQUENCY_OFFSET_SI4032 0
+#define HORUS_FREQUENCY_OFFSET_SI4063 0
 
 /**
  * Horus V1 4FSK mode settings (deprecated, please use Horus V2 mode)
@@ -250,6 +286,7 @@
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V1_PAYLOAD_ID 0
 #define HORUS_V1_BAUD_RATE_SI4032 100
+#define HORUS_V1_BAUD_RATE_SI4063 100
 #define HORUS_V1_BAUD_RATE_SI5351 50
 #define HORUS_V1_PREAMBLE_LENGTH 16
 #define HORUS_V1_IDLE_PREAMBLE_LENGTH 32
@@ -269,6 +306,7 @@
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V2_PAYLOAD_ID 256
 #define HORUS_V2_BAUD_RATE_SI4032 100
+#define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
 #define HORUS_V2_PREAMBLE_LENGTH 16
 #define HORUS_V2_IDLE_PREAMBLE_LENGTH 32

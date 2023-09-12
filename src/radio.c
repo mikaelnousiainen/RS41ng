@@ -13,7 +13,12 @@
 #include "codecs/jtencode/jtencode.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "radio_internal.h"
+#ifdef RS41
 #include "radio_si4032.h"
+#endif
+#ifdef DFM17
+#include "radio_si4063.h"
+#endif
 #include "radio_si5351.h"
 #include "radio_payload_cw.h"
 #include "radio_payload_aprs_position.h"
@@ -25,6 +30,8 @@
 #include "radio_payload_fsq.h"
 
 radio_transmit_entry radio_transmit_schedule[] = {
+#ifdef RS41
+// Si4032
 #if RADIO_SI4032_TX_HORUS_V1_CONTINUOUS
         {
                 .enabled = RADIO_SI4032_TX_HORUS_V1,
@@ -155,6 +162,145 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #endif
+#endif
+#endif
+
+#ifdef DFM17
+// Si4063
+#if RADIO_SI4063_TX_HORUS_V1_CONTINUOUS
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v1_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v1_idle_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#elif RADIO_SI4063_TX_HORUS_V2_CONTINUOUS
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v2_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v2_idle_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#else
+#if RADIO_SI4063_TX_PIP
+        {
+                .enabled = RADIO_SI4063_TX_PIP,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_PIP,
+                .transmit_count = RADIO_SI4063_TX_PIP_COUNT,
+                .time_sync_seconds = PIP_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = PIP_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_PIP,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
+#endif
+#if RADIO_SI4063_TX_CW
+        {
+                .enabled = RADIO_SI4063_TX_CW,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_CW,
+                .transmit_count = RADIO_SI4063_TX_CW_COUNT,
+                .time_sync_seconds = CW_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = CW_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_CW,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(CW_SPEED_WPM),
+                .payload_encoder = &radio_cw_payload_encoder,
+                .fsk_encoder_api = &morse_fsk_encoder_api,
+        },
+#endif
+#if RADIO_SI4063_TX_APRS
+        {
+                .enabled = RADIO_SI4063_TX_APRS,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_APRS_1200,
+                .transmit_count = RADIO_SI4063_TX_APRS_COUNT,
+                .time_sync_seconds = APRS_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = APRS_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_APRS_1200,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = 1200,
+#if APRS_WEATHER_REPORT_ENABLE
+                .payload_encoder = &radio_aprs_weather_report_payload_encoder,
+#else
+                .payload_encoder = &radio_aprs_position_payload_encoder,
+#endif
+                .fsk_encoder_api = &bell_fsk_encoder_api,
+        },
+#endif
+#if RADIO_SI4063_TX_HORUS_V1
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V1,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V1,
+                .transmit_count = RADIO_SI4063_TX_HORUS_V1_COUNT,
+                .time_sync_seconds = HORUS_V1_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V1_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V1,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V1_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v1_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#endif
+#if RADIO_SI4063_TX_HORUS_V2
+        {
+                .enabled = RADIO_SI4063_TX_HORUS_V2,
+                .radio_type = RADIO_TYPE_SI4063,
+                .data_mode = RADIO_DATA_MODE_HORUS_V2,
+                .transmit_count = RADIO_SI4063_TX_HORUS_V2_COUNT,
+                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
+                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
+                .frequency = RADIO_SI4063_TX_FREQUENCY_HORUS_V2,
+                .tx_power = RADIO_SI4063_TX_POWER,
+                .symbol_rate = HORUS_V2_BAUD_RATE_SI4063,
+                .payload_encoder = &radio_horus_v2_payload_encoder,
+                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+        },
+#endif
+#endif
+#endif
+
+// Si5351
 #if RADIO_SI5351_ENABLE
 #if RADIO_SI5351_TX_PIP
         {
@@ -301,7 +447,6 @@ radio_transmit_entry radio_transmit_schedule[] = {
         },
 #endif
 #endif
-#endif
         {
                 .end = true,
         }
@@ -328,6 +473,8 @@ uint8_t radio_current_payload[RADIO_PAYLOAD_MAX_LENGTH];
 uint16_t radio_current_payload_length = 0;
 
 uint8_t radio_current_symbol_data[RADIO_SYMBOL_DATA_MAX_LENGTH];
+
+uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
 
@@ -515,9 +662,16 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     }
 
     switch (entry->radio_type) {
+#ifdef RS41
         case RADIO_TYPE_SI4032:
             success = radio_start_transmit_si4032(entry, &radio_shared_state);
             break;
+#endif
+#ifdef DFM17
+        case RADIO_TYPE_SI4063:
+            success = radio_start_transmit_si4063(entry, &radio_shared_state);
+            break;
+#endif
         case RADIO_TYPE_SI5351:
             success = radio_start_transmit_si5351(entry, &radio_shared_state);
             break;
@@ -562,9 +716,16 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
     bool success;
 
     switch (entry->radio_type) {
+#ifdef RS41
         case RADIO_TYPE_SI4032:
             success = radio_stop_transmit_si4032(entry, &radio_shared_state);
             break;
+#endif
+#ifdef DFM17
+        case RADIO_TYPE_SI4063:
+            success = radio_stop_transmit_si4063(entry, &radio_shared_state);
+            break;
+#endif
         case RADIO_TYPE_SI5351:
             success = radio_stop_transmit_si5351(entry, &radio_shared_state);
             break;
@@ -620,9 +781,16 @@ static bool radio_transmit_symbol(radio_transmit_entry *entry)
     bool success;
 
     switch (entry->radio_type) {
+#ifdef RS41
         case RADIO_TYPE_SI4032:
             success = radio_transmit_symbol_si4032(entry, &radio_shared_state);
             break;
+#endif
+#ifdef DFM17
+        case RADIO_TYPE_SI4063:
+            success = radio_transmit_symbol_si4063(entry, &radio_shared_state);
+            break;
+#endif
         case RADIO_TYPE_SI5351:
             success = radio_transmit_symbol_si5351(entry, &radio_shared_state);
             break;
@@ -687,7 +855,12 @@ void radio_handle_timer_tick()
 
 void radio_handle_data_timer_tick()
 {
+#ifdef RS41
     radio_handle_data_timer_si4032();
+#endif
+#ifdef DFM17
+    radio_handle_data_timer_si4063();
+#endif
 
     radio_handle_data_timer_si5351();
 }
@@ -788,7 +961,13 @@ void radio_handle_main_loop()
         radio_start_transmit_entry = radio_current_transmit_entry;
     }
 
+#ifdef RS41
     radio_handle_main_loop_si4032(radio_current_transmit_entry, &radio_shared_state);
+#endif
+#ifdef DFM17
+    radio_handle_main_loop_si4063(radio_current_transmit_entry, &radio_shared_state);
+#endif
+
     radio_handle_main_loop_si5351(radio_current_transmit_entry, &radio_shared_state);
 
     bool first_symbol = false;
@@ -901,7 +1080,12 @@ void radio_init()
         radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
     }
 
+#ifdef RS41
     radio_init_si4032();
+#endif
+#ifdef DFM17
+    radio_init_si4063();
+#endif
 
     radio_module_initialized = true;
 }

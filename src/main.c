@@ -1,12 +1,10 @@
 #include "hal/system.h"
-#include "hal/i2c.h"
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
 #include "hal/usart_ext.h"
 #include "hal/delay.h"
 #include "hal/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
-#include "drivers/si4032/si4032.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
 #include "radsens_handler.h"
@@ -14,6 +12,15 @@
 #include "radio.h"
 #include "config.h"
 #include "log.h"
+
+#ifdef RS41
+#include "hal/i2c.h"
+#include "drivers/si4032/si4032.h"
+#endif
+
+#ifdef DFM17
+#include "drivers/si4063/si4063.h"
+#endif
 
 uint32_t counter = 0;
 bool led_state = true;

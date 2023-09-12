@@ -81,5 +81,6 @@ typedef struct _radio_module_state {
 
 extern radio_transmit_entry *radio_current_transmit_entry;
 extern radio_module_state radio_shared_state;
+extern uint32_t precalculated_pwm_periods[];
 
 #endif

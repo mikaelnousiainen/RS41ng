@@ -40,7 +40,7 @@ static void rcc_init()
 {
     RCC_DeInit();
 #ifdef RS41
-    // We don't have an external clock on the DFM17.
+    // The RS41 hardware uses an external clock
     RCC_HSEConfig(RCC_HSE_ON);
 
     ErrorStatus hse_status = RCC_WaitForHSEStartUp();
@@ -48,7 +48,15 @@ static void rcc_init()
         // If HSE fails to start up, the application will have incorrect clock configuration.
         while (true) {}
     }
-#endif //RS41
+#endif
+#ifdef DFM17
+    // The DFM17 hardware uses the internal clock
+    RCC_AdjustHSICalibrationValue(0x10U);
+    RCC_PLLConfig(RCC_PLLSource_HSI_Div2, RCC_PLLMul_4);
+    RCC_HSICmd(ENABLE);
+    RCC_PLLCmd(ENABLE);
+#endif
+
     //SystemInit();
 
     FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
@@ -60,11 +68,15 @@ static void rcc_init()
     RCC_PCLK2Config(RCC_HCLK_Div1); // Was: 4
     RCC_PCLK1Config(RCC_HCLK_Div1); // Was: 2
 #ifdef RS41
-    // DFM17 does not have an external clock
     RCC_SYSCLKConfig(RCC_SYSCLKSource_HSE);
 
     while (RCC_GetSYSCLKSource() != 0x04);
-#endif //RS41
+#endif
+#ifdef DFM17
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+    while (RCC_GetSYSCLKSource() != 0x08);
+#endif
 }
 
 static void gpio_init()
@@ -99,7 +111,6 @@ static void gpio_init()
     gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
     GPIO_Init(BANK_BUTTON, &gpio_init);
 
-
     // Green LED
     gpio_init.GPIO_Pin = PIN_GREEN_LED;
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -111,28 +122,6 @@ static void gpio_init()
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BANK_RED_LED, &gpio_init);
-
-#ifdef DFM17
-
-    // 4063 SDN (shutdown) pin
-    gpio_init.GPIO_Pin = PIN_SDN;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_SDN, &gpio_init);
-
-    //  4063 GPIO2 pin
-    gpio_init.GPIO_Pin = PIN_4064_GPIO2;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_4063_GPIO2, &gpio_init);
-
-    //  4063 GPIO3 pin
-    gpio_init.GPIO_Pin = PIN_4064_GPIO3;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_4063_GPIO3, &gpio_init);
-
-#endif //DFM17
 }
 
 /**

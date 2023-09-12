@@ -1,7 +1,6 @@
-#ifdef DFM17
-#include <stdint.h>
-#include <string.h>
+#include "config.h"
 
+#ifdef DFM17
 #include "hal/system.h"
 #include "hal/spi.h"
 #include "hal/pwm.h"
@@ -15,28 +14,11 @@
 
 #define CW_SYMBOL_RATE_MULTIPLIER 4
 
-/**
- * I have attempted to implement Bell 202 frequency generation using hardware DMA and PWM, but have failed to generate
- * correct symbol rate that other APRS equipment are able to decode. I have tried to decode the DMA-based modulation with
- * some tools intended for debugging APRS and while some bytes are decoded correctly every once in a while,
- * the timings are mostly off for some unknown reason.
- *
- * The Bell 202 modulation implementation uses hardware PWM to generate the individual tone frequencies,
- * but when si4063_use_dma is false, the symbol timing is created in a loop with delay that was chosen
- * carefully via experiments.
- */
-static bool si4063_use_dma = false;
-
 // TODO: Add support for multiple APRS baud rates
-uint16_t symbol_delay_bell_202_1200bps_us = 823;
+#define symbol_delay_bell_202_1200bps_us 823
 
 static volatile bool radio_si4063_state_change = false;
 static volatile uint32_t radio_si4063_freq = 0;
-static volatile int8_t radio_dma_transfer_stop_after_counter = -1;
-
-uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
-
-uint16_t radio_si4063_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer);
 
 bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
@@ -55,23 +37,19 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             break;
         case RADIO_DATA_MODE_RTTY:
             frequency_offset = 0;
-            modulation_type = SI4063_MODULATION_TYPE_NONE;
+            modulation_type = SI4063_MODULATION_TYPE_CW;
             use_direct_mode = false;
             break;
         case RADIO_DATA_MODE_APRS_1200:
             frequency_offset = 0;
             modulation_type = SI4063_MODULATION_TYPE_FSK;
             use_direct_mode = true;
-            if (si4063_use_dma) {
-                pwm_data_timer_init();
-                radio_si4063_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
-            }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
             frequency_offset = (uint16_t) idle_tone->index + HORUS_FREQUENCY_OFFSET_SI4063;
-            modulation_type = SI4063_MODULATION_TYPE_OOK;
+            modulation_type = SI4063_MODULATION_TYPE_CW;
             use_direct_mode = false;
 
             data_timer_init(entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder));
@@ -105,14 +83,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            if (si4063_use_dma) {
-                shared_state->radio_dma_transfer_active = true;
-                radio_dma_transfer_stop_after_counter = -1;
-                system_disable_tick();
-                pwm_dma_start();
-            } else {
-                shared_state->radio_manual_transmit_active = true;
-            }
+            shared_state->radio_manual_transmit_active = true;
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
@@ -256,14 +227,14 @@ inline void radio_handle_data_timer_si4063()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
-                log_info("Horus V1 TX finished\n");
+                log_info("Horus TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 system_enable_tick();
                 break;
             }
 
-            si4063_set_frequency_offset_small(tone_index + HORUS_FREQUENCY_OFFSET_SI4063);
+            si4063_set_frequency_offset(tone_index + HORUS_FREQUENCY_OFFSET_SI4063);
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
@@ -312,10 +283,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             system_enable_tick();
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            if (si4063_use_dma) {
-                pwm_data_timer_uninit();
-                system_enable_tick();
-            }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
@@ -328,79 +295,8 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
     return true;
 }
 
-uint16_t radio_si4063_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer)
-{
-    uint16_t count = 0;
-    for (uint16_t i = offset; i < (offset + length); i++, count++) {
-        uint32_t frequency = radio_next_symbol_si4063(radio_current_transmit_entry, &radio_shared_state);
-        if (frequency == 0) {
-            // TODO: fill the other side of the buffer with zeroes too?
-            memset(buffer + offset, 0, (length - i) * sizeof(uint16_t));
-            break;
-        }
-        buffer[i] = pwm_calculate_period(frequency);
-    }
-
-    return count;
-}
-
-bool radio_si4063_stop_dma_transfer_if_requested(radio_module_state *shared_state)
-{
-    if (radio_dma_transfer_stop_after_counter > 0) {
-        radio_dma_transfer_stop_after_counter--;
-    } else if (radio_dma_transfer_stop_after_counter == 0) {
-        pwm_dma_stop();
-        radio_dma_transfer_stop_after_counter = -1;
-        shared_state->radio_transmission_finished = true;
-        shared_state->radio_dma_transfer_active = false;
-        return true;
-    }
-
-    return false;
-}
-
-uint16_t radio_si4063_handle_pwm_transfer_half(uint16_t buffer_size, uint16_t *buffer)
-{
-    if (radio_si4063_stop_dma_transfer_if_requested(&radio_shared_state)) {
-        return 0;
-    }
-    if (radio_shared_state.radio_transmission_finished) {
-        log_info("Should not be here, half-transfer!\n");
-    }
-
-    uint16_t length = radio_si4063_fill_pwm_buffer(0, buffer_size / 2, buffer);
-    if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
-        radio_dma_transfer_stop_after_counter = 2;
-    }
-
-    return length;
-}
-
-uint16_t radio_si4063_handle_pwm_transfer_full(uint16_t buffer_size, uint16_t *buffer)
-{
-    if (radio_si4063_stop_dma_transfer_if_requested(&radio_shared_state)) {
-        return 0;
-    }
-    if (radio_shared_state.radio_transmission_finished) {
-        log_info("Should not be here, transfer complete!\n");
-    }
-
-    uint16_t length = radio_si4063_fill_pwm_buffer(buffer_size / 2, buffer_size / 2, buffer);
-    if (radio_dma_transfer_stop_after_counter < 0 && length < buffer_size / 2) {
-        radio_dma_transfer_stop_after_counter = 2;
-    }
-
-    return length;
-}
 
 void radio_init_si4063()
 {
-    pwm_handle_dma_transfer_half = radio_si4063_handle_pwm_transfer_half;
-    pwm_handle_dma_transfer_full = radio_si4063_handle_pwm_transfer_full;
-
-    if (si4063_use_dma) {
-        pwm_data_timer_init();
-        pwm_dma_init();
-    }
 }
 #endif //DFM17
