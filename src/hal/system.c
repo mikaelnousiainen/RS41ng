@@ -11,6 +11,7 @@
 #include "system.h"
 #include "delay.h"
 #include "log.h"
+#include "gpio.h"
 
 #define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND
 
@@ -38,6 +39,8 @@ static void nvic_init()
 static void rcc_init()
 {
     RCC_DeInit();
+#ifdef RS41
+    // We don't have an external clock on the DFM17.
     RCC_HSEConfig(RCC_HSE_ON);
 
     ErrorStatus hse_status = RCC_WaitForHSEStartUp();
@@ -45,6 +48,7 @@ static void rcc_init()
         // If HSE fails to start up, the application will have incorrect clock configuration.
         while (true) {}
     }
+#endif //RS41
     //SystemInit();
 
     FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
@@ -55,9 +59,12 @@ static void rcc_init()
     RCC_HCLKConfig(RCC_SYSCLK_Div1); // Was: RCC_SYSCLK_Div4
     RCC_PCLK2Config(RCC_HCLK_Div1); // Was: 4
     RCC_PCLK1Config(RCC_HCLK_Div1); // Was: 2
+#ifdef RS41
+    // DFM17 does not have an external clock
     RCC_SYSCLKConfig(RCC_SYSCLKSource_HSE);
 
     while (RCC_GetSYSCLKSource() != 0x04);
+#endif //RS41
 }
 
 static void gpio_init()
@@ -72,28 +79,60 @@ static void gpio_init()
     GPIO_InitTypeDef gpio_init;
 
     // Shutdown request
-    gpio_init.GPIO_Pin = GPIO_Pin_12;
+    gpio_init.GPIO_Pin = PIN_SHUTDOWN;
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpio_init);
+    GPIO_Init(BANK_SHUTDOWN, &gpio_init);
+#ifdef DFM17
+    GPIO_SetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);		// Pull high to keep BMS from removing battery power after startup
+#endif //DFM17
 
     // Battery voltage (analog)
-    gpio_init.GPIO_Pin = GPIO_Pin_5;
+    gpio_init.GPIO_Pin = PIN_VOLTAGE;
     gpio_init.GPIO_Mode = GPIO_Mode_AIN;
     gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_Init(GPIOA, &gpio_init);
+    GPIO_Init(BANK_VOLTAGE, &gpio_init);
 
     // Button state (analog)
-    gpio_init.GPIO_Pin = GPIO_Pin_6;
+    gpio_init.GPIO_Pin = PIN_BUTTON;
     gpio_init.GPIO_Mode = GPIO_Mode_AIN;
     gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_Init(GPIOA, &gpio_init);
+    GPIO_Init(BANK_BUTTON, &gpio_init);
 
-    // LEDs
-    gpio_init.GPIO_Pin = GPIO_PIN_LED_GREEN | GPIO_PIN_LED_RED;
+
+    // Green LED
+    gpio_init.GPIO_Pin = PIN_GREEN_LED;
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB, &gpio_init);
+    GPIO_Init(BANK_GREEN_LED, &gpio_init);
+
+    // Red LED
+    gpio_init.GPIO_Pin = PIN_RED_LED;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_RED_LED, &gpio_init);
+
+#ifdef DFM17
+
+    // 4063 SDN (shutdown) pin
+    gpio_init.GPIO_Pin = PIN_SDN;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_SDN, &gpio_init);
+
+    //  4063 GPIO2 pin
+    gpio_init.GPIO_Pin = PIN_4064_GPIO2;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_4063_GPIO2, &gpio_init);
+
+    //  4063 GPIO3 pin
+    gpio_init.GPIO_Pin = PIN_4064_GPIO3;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_4063_GPIO3, &gpio_init);
+
+#endif //DFM17
 }
 
 /**
@@ -108,7 +147,12 @@ static void dma_adc_init()
 
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
+#ifdef RS41
     dma_init.DMA_BufferSize = 2;
+#endif //RS41
+#ifdef DFM17
+    dma_init.DMA_BufferSize = 1;
+#endif //DFM17
     dma_init.DMA_DIR = DMA_DIR_PeripheralSRC;
     dma_init.DMA_M2M = DMA_M2M_Disable;
     dma_init.DMA_MemoryBaseAddr = (uint32_t) &dma_buffer_adc;
@@ -132,11 +176,21 @@ static void dma_adc_init()
     adc_init.ADC_ContinuousConvMode = ENABLE;
     adc_init.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
     adc_init.ADC_DataAlign = ADC_DataAlign_Right;
+#ifdef RS41
     adc_init.ADC_NbrOfChannel = 2;
+#endif //RS41
+#ifdef DFM17
+    adc_init.ADC_NbrOfChannel = 1;
+#endif //DFM17
     ADC_Init(ADC1, &adc_init);
 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 2, ADC_SampleTime_28Cycles5);
+    ADC_RegularChannelConfig(ADC1, CHANNEL_VOLTAGE, 1, ADC_SampleTime_28Cycles5);
+#ifdef RS41
+    ADC_RegularChannelConfig(ADC1, CHANNEL_BUTTON, 2, ADC_SampleTime_28Cycles5);
+#endif //RS41
+#ifdef DFM17
+// Not using ADC for button on DFM17
+#endif //DFM17
 
     // ADC1 DMA requests are routed to DMA1 Channel1
     ADC_DMACmd(ADC1, ENABLE);
@@ -160,12 +214,23 @@ uint16_t system_get_battery_voltage_millivolts()
 
 uint16_t system_get_button_adc_value()
 {
+#ifdef RS41
     return (uint16_t) dma_buffer_adc[1];
+#endif //RS41
+#ifdef DFM17
+    // Fake being an ADC.  Take the binary value and if non-zero, make it trigger button-down
+    return ( ((int) GPIO_ReadInputDataBit(BANK_BUTTON,PIN_BUTTON)) * 2100);
+#endif //DFM17
 }
 
 void system_shutdown()
 {
-    GPIO_SetBits(GPIOA, GPIO_Pin_12);
+#ifdef RS41
+    GPIO_SetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
+#endif // RS41
+#ifdef DFM17
+    GPIO_ResetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
+#endif //DFM17
 }
 
 void system_handle_button()
@@ -252,18 +317,18 @@ void system_enable_tick()
 void system_set_green_led(bool enabled)
 {
     if (enabled) {
-        GPIO_ResetBits(GPIOB, GPIO_PIN_LED_GREEN);
+        GPIO_ResetBits(BANK_GREEN_LED, PIN_GREEN_LED);
     } else {
-        GPIO_SetBits(GPIOB, GPIO_PIN_LED_GREEN);
+        GPIO_SetBits(BANK_GREEN_LED, PIN_GREEN_LED);
     }
 }
 
 void system_set_red_led(bool enabled)
 {
     if (enabled) {
-        GPIO_ResetBits(GPIOB, GPIO_PIN_LED_RED);
+        GPIO_ResetBits(BANK_RED_LED, PIN_RED_LED);
     } else {
-        GPIO_SetBits(GPIOB, GPIO_PIN_LED_RED);
+        GPIO_SetBits(BANK_RED_LED, PIN_RED_LED);
     }
 }
 

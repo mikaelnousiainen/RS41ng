@@ -1,6 +1,10 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+// Define SONDE Type.  Must be DFM17 or RS41
+//#define RS41
+#define DFM17
+
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
