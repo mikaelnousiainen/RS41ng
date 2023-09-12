@@ -10,6 +10,7 @@
 typedef enum _radio_type {
     RADIO_TYPE_SI4032 = 1,
     RADIO_TYPE_SI5351,
+    RADIO_TYPE_SI4063,
 } radio_type;
 
 typedef enum _radio_data_mode {
