@@ -31,6 +31,7 @@
 #define SI4063_COMMAND_START_TX     0x31
 #define SI4063_COMMAND_CHANGE_STATE 0x34
 #define SI4063_COMMAND_GET_ADC_READING  0x14
+#define SI4063_COMMAND_READ_CMD_BUFF    0x44
 
 #define SI4063_STATE_SLEEP        0x01
 #define SI4063_STATE_SPI_ACTIVE   0x02
@@ -41,6 +42,9 @@
 static inline void si4063_set_chip_select(bool select)
 {
     spi_set_chip_select(GPIO_SI4063_NSEL, GPIO_PIN_SI4063_NSEL, select);
+
+    // Output enable time, 20ns
+    for (uint32_t i = 0; i < 0xFFFFF; i++);
 }
 
 static int si4063_wait_for_cts()
@@ -52,10 +56,14 @@ static int si4063_wait_for_cts()
     do
     {
         si4063_set_chip_select(true);
-        spi_send(0x44);
+        spi_send(SI4063_COMMAND_READ_CMD_BUFF);
         response = spi_read();
         si4063_set_chip_select(false);
     } while (response != 0xFF && timeout--);
+
+    if (timeout == 0) {
+        log_error("ERROR: Si4063 timeout\n");
+    }
 
     return timeout > 0 ? HAL_OK : HAL_ERROR;
 }
@@ -68,7 +76,7 @@ static int si4063_read_response(uint8_t length, uint8_t *data)
     // Poll CTS over SPI
     do {
         si4063_set_chip_select(true);
-        spi_send(0x44);
+        spi_send(SI4063_COMMAND_READ_CMD_BUFF);
         response = spi_read();
         if (response == 0xFF) {
             break;
@@ -79,6 +87,7 @@ static int si4063_read_response(uint8_t length, uint8_t *data)
     } while(timeout--);
 
     if (timeout == 0) {
+        log_error("ERROR: Si4063 timeout\n");
         si4063_set_chip_select(false);
         return HAL_ERROR;
     }
@@ -99,9 +108,6 @@ static void si4063_send_command(uint8_t command, uint8_t length, uint8_t *data)
 
     si4063_set_chip_select(true);
 
-    // Output enable time, 20ns
-    for (uint32_t i = 0; i < 0xFFFFF; i++);
-
     spi_send(command);
 
     while (length--) {
@@ -113,6 +119,8 @@ static void si4063_send_command(uint8_t command, uint8_t length, uint8_t *data)
 
 static void si4063_power_up()
 {
+    si4063_wait_for_cts();
+
     uint8_t data[] = {
             0x01, // 0x01 = FUNC PRO - Power the chip up into EZRadio PRO functional mode.
             0x01, // 0x01 = Reference signal is derived from an external TCXO.
@@ -123,6 +131,8 @@ static void si4063_power_up()
     };
 
     si4063_send_command(SI4063_COMMAND_POWER_UP, sizeof(data), data);
+
+    si4063_wait_for_cts();
 }
 
 static void si4603_set_shutdown(bool active)
@@ -389,6 +399,11 @@ void si4063_init()
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIO_SI4063_NSEL, &gpio_init);
+
+    si4603_set_shutdown(false);
+    delay_us(50);
+
+    si4063_wait_for_cts();
 
     si4603_set_shutdown(true);
     delay_us(20);

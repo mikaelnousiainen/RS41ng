@@ -52,7 +52,7 @@ void spi_init()
 #endif
 #ifdef DFM17
     // TODO: Adjust SPI speed correctly, not sure what this should be
-    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
+    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
 #endif
     spi_init.SPI_FirstBit = SPI_FirstBit_MSB;
 #ifdef RS41
