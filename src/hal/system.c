@@ -305,20 +305,38 @@ void system_enable_tick()
 
 void system_set_green_led(bool enabled)
 {
+#ifdef RS41
     if (enabled) {
         GPIO_ResetBits(BANK_GREEN_LED, PIN_GREEN_LED);
     } else {
         GPIO_SetBits(BANK_GREEN_LED, PIN_GREEN_LED);
     }
+#endif
+#ifdef DFM17
+    if (enabled) {
+        GPIO_SetBits(BANK_GREEN_LED, PIN_GREEN_LED);
+    } else {
+        GPIO_ResetBits(BANK_GREEN_LED, PIN_GREEN_LED);
+    }
+#endif
 }
 
 void system_set_red_led(bool enabled)
 {
+#ifdef RS41
     if (enabled) {
         GPIO_ResetBits(BANK_RED_LED, PIN_RED_LED);
     } else {
         GPIO_SetBits(BANK_RED_LED, PIN_RED_LED);
     }
+#endif
+#ifdef DFM17
+    if (enabled) {
+        GPIO_SetBits(BANK_RED_LED, PIN_RED_LED);
+    } else {
+        GPIO_ResetBits(BANK_RED_LED, PIN_RED_LED);
+    }
+#endif
 }
 
 void system_disable_irq()

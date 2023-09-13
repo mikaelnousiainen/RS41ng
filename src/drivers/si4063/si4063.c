@@ -100,7 +100,7 @@ static void si4063_send_command(uint8_t command, uint8_t length, uint8_t *data)
     si4063_set_chip_select(true);
 
     // Output enable time, 20ns
-    for (uint32_t i = 0; i < 0xFFFF; i++);
+    for (uint32_t i = 0; i < 0xFFFFF; i++);
 
     spi_send(command);
 
@@ -114,8 +114,8 @@ static void si4063_send_command(uint8_t command, uint8_t length, uint8_t *data)
 static void si4063_power_up()
 {
     uint8_t data[] = {
-            0x01, //
-            0x01, // No patch, boot main app. img, TXCO
+            0x01, // 0x01 = FUNC PRO - Power the chip up into EZRadio PRO functional mode.
+            0x01, // 0x01 = Reference signal is derived from an external TCXO.
             (SI4063_CLOCK >> 24) & 0xFF, // VCXO frequency
             (SI4063_CLOCK >> 16) & 0xFF,
             (SI4063_CLOCK >> 8) & 0xFF,
@@ -313,7 +313,7 @@ int32_t si4063_read_temperature_celsius_100()
     si4063_read_response(sizeof(response), response);
 
     for (int i = 0; i < sizeof(response); i++) {
-        log_info("response: %02x\n", response[i]);
+        log_info("Si4063 ADC reading: %02x\n", response[i]);
     }
 
     // Calculate the temperature in C * 10
@@ -336,7 +336,7 @@ uint8_t si4063_read_part_info()
     si4063_read_response(sizeof(response), response);
 
     for (int i = 0; i < sizeof(response); i++) {
-        log_info("part info: %02x\n", response[i]);
+        log_info("Si4063 part info: %02x\n", response[i]);
     }
 
     return response[0];
@@ -393,6 +393,7 @@ void si4063_init()
     si4603_set_shutdown(true);
     delay_us(20);
     si4603_set_shutdown(false);
+    delay_us(50);
 
     si4063_power_up();
 

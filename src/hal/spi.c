@@ -23,7 +23,12 @@ void spi_init()
 
     // MISO
     gpio_init.GPIO_Pin = PIN_MISO;
+#ifdef RS41
     gpio_init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+#endif
+#ifdef DFM17
+    gpio_init.GPIO_Mode = GPIO_Mode_IPU;
+#endif
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BANK_MISO, &gpio_init);
 
@@ -46,7 +51,8 @@ void spi_init()
     spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
 #endif
 #ifdef DFM17
-    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
+    // TODO: Adjust SPI speed correctly, not sure what this should be
+    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
 #endif
     spi_init.SPI_FirstBit = SPI_FirstBit_MSB;
 #ifdef RS41
@@ -58,10 +64,18 @@ void spi_init()
 #endif
     SPI_Init(PERIPHERAL_SPI, &spi_init);
 
+#ifdef RS41
     SPI_SSOutputCmd(PERIPHERAL_SPI, ENABLE);
+#endif
+#ifdef DFM17
+    SPI_CalculateCRC(PERIPHERAL_SPI, DISABLE);
+#endif
 
     SPI_Cmd(PERIPHERAL_SPI, ENABLE);
+#ifdef RS41
+    // TODO: Why is this call even here?
     SPI_Init(PERIPHERAL_SPI, &spi_init);
+#endif
 }
 
 void spi_uninit()
@@ -84,24 +98,36 @@ void spi_uninit()
     GPIO_Init(BANK_MOSI, &gpio_init);
 }
 
-inline void spi_send(uint16_t data)
+void spi_send(uint16_t data)
 {
     // Wait for TX buffer
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
     SPI_I2S_SendData(PERIPHERAL_SPI, data);
+#ifdef DFM17
+    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
+    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+#endif
 }
 
-inline uint8_t spi_receive()
+uint8_t spi_receive()
 {
     // Wait for data in RX buffer
+#ifdef DFM17
+    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+#endif
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
     return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
 }
 
-inline uint8_t spi_read()
+uint8_t spi_read()
 {
-    spi_send(0xFF);
-    return spi_receive();
+    // TODO: This is the minimal read routine, not sure if reading the other registers has an effect?
+    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+    SPI_I2S_SendData(PERIPHERAL_SPI, 0xFF);
+    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
+    return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
+    /*spi_send(0xFF);
+    return spi_receive();*/
 }
 
 void spi_set_chip_select(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, bool select)
