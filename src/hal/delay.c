@@ -18,6 +18,7 @@ void delay_init()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB1PeriphResetCmd(RCC_APB1Periph_TIM3, DISABLE);
 
+    // The delay timer assumes a 24 MHz clock source
     tim_init.TIM_Prescaler = 24 - 1;
     tim_init.TIM_CounterMode = TIM_CounterMode_Up;
     tim_init.TIM_Period = 0;

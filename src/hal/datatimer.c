@@ -19,6 +19,7 @@ void data_timer_init(uint32_t baud_rate)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     RCC_APB2PeriphResetCmd(RCC_APB1Periph_TIM2, DISABLE);
 
+    // The data timer assumes a 24 MHz clock source
     tim_init.TIM_Prescaler = 24 - 1; // tick every 1/1000000 s
     tim_init.TIM_CounterMode = TIM_CounterMode_Up;
     tim_init.TIM_Period = (uint16_t) ((1000000 / baud_rate) - 1);

@@ -8,6 +8,11 @@
 // Comment the following error to make the DFM17 development branch compile :)
 #error "DFM17 radiosonde support is a work in progress. This code does not work yet!"
 
+#if !defined(RS41) && !defined(DFM17)
+#error "No hardware type specified. Please define RS41 or DFM17."
+#endif
+
+
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.

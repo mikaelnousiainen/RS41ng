@@ -96,11 +96,11 @@ int main(void)
         log_info("Pulse counter init\n");
         pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
-        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
 #ifdef RS41
-        // dfm17 does not use i2c
+        // Only RS41 uses the I2C bus
+        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
         i2c_init(I2C_BUS_CLOCK_SPEED);
-#endif //RS41
+#endif
     }
 
     log_info("SPI init\n");
@@ -121,9 +121,7 @@ int main(void)
 #elif defined(DFM17)
     log_info("Si4063 init\n");
     si4063_init();
-#else
-	Error.  Must defined RS41 or DFM17
-#endif 
+#endif
 
     if (bmp280_enabled) {
         for (int i = 0; i < 3; i++) {

@@ -40,7 +40,7 @@ static void rcc_init()
 {
     RCC_DeInit();
 #ifdef RS41
-    // The RS41 hardware uses an external clock
+    // The RS41 hardware uses an external clock at 24 MHz
     RCC_HSEConfig(RCC_HSE_ON);
 
     ErrorStatus hse_status = RCC_WaitForHSEStartUp();
@@ -52,9 +52,11 @@ static void rcc_init()
 #ifdef DFM17
     // The DFM17 hardware uses the internal clock
     RCC_AdjustHSICalibrationValue(0x10U);
-    RCC_PLLConfig(RCC_PLLSource_HSI_Div2, RCC_PLLMul_4);
+    // Set up a 24 MHz PLL for 24 MHz SYSCLK (8 MHz / 2) * 6 = 24 MHz
+    RCC_PLLConfig(RCC_PLLSource_HSI_Div2, RCC_PLLMul_6);
     RCC_HSICmd(ENABLE);
     RCC_PLLCmd(ENABLE);
+    while (RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
 #endif
 
     //SystemInit();
@@ -64,15 +66,17 @@ static void rcc_init()
 
     // TODO: Check what the delay timer TIM3 settings really should be and WTF the clock tick really is!?!?!?
 
-    RCC_HCLKConfig(RCC_SYSCLK_Div1); // Was: RCC_SYSCLK_Div4
-    RCC_PCLK2Config(RCC_HCLK_Div1); // Was: 4
-    RCC_PCLK1Config(RCC_HCLK_Div1); // Was: 2
+    RCC_HCLKConfig(RCC_SYSCLK_Div1);
+    RCC_PCLK2Config(RCC_HCLK_Div1);
+    RCC_PCLK1Config(RCC_HCLK_Div1);
 #ifdef RS41
+    // Use the 24 MHz external clock as SYSCLK
     RCC_SYSCLKConfig(RCC_SYSCLKSource_HSE);
 
     while (RCC_GetSYSCLKSource() != 0x04);
 #endif
 #ifdef DFM17
+    // Use the 24 MHz PLL as SYSCLK
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 
     while (RCC_GetSYSCLKSource() != 0x08);
