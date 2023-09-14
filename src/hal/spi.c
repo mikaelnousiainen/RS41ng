@@ -51,8 +51,7 @@ void spi_init()
     spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
 #endif
 #ifdef DFM17
-    // TODO: Adjust SPI speed correctly, not sure what this should be
-    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
 #endif
     spi_init.SPI_FirstBit = SPI_FirstBit_MSB;
 #ifdef RS41
@@ -106,6 +105,11 @@ void spi_send(uint16_t data)
 #ifdef DFM17
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+
+    // Reset the overrun error by reading the data and status registers
+    // NOTE: It seems this sequence is required to make Si4063 SPI communication work on DFM17 radiosondes
+    SPI_I2S_ReceiveData(PERIPHERAL_SPI);
+    SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_OVR);
 #endif
 }
 
@@ -121,13 +125,12 @@ uint8_t spi_receive()
 
 uint8_t spi_read()
 {
-    // TODO: This is the minimal read routine, not sure if reading the other registers has an effect?
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+    // Send dummy data to read in bidirectional mode
     SPI_I2S_SendData(PERIPHERAL_SPI, 0xFF);
+    // Wait for data in RX buffer
     while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
     return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
-    /*spi_send(0xFF);
-    return spi_receive();*/
 }
 
 void spi_set_chip_select(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, bool select)
