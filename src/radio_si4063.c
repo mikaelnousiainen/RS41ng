@@ -59,7 +59,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             return false;
     }
 
-    si4063_set_tx_frequency(((float) entry->frequency) / 1000000.0f);
+    si4063_set_tx_frequency(entry->frequency);
     si4063_set_tx_power(entry->tx_power);
     si4063_set_frequency_offset(frequency_offset);
     si4063_set_modulation_type(modulation_type);
@@ -234,7 +234,8 @@ inline void radio_handle_data_timer_si4063()
                 break;
             }
 
-            si4063_set_frequency_offset(tone_index + HORUS_FREQUENCY_OFFSET_SI4063);
+            // NOTE: The factor of 23 will produce a tone spacing of about 270 Hz, which is the standard spacing for Horus 4FSK
+            si4063_set_frequency_offset(tone_index * 23 + HORUS_FREQUENCY_OFFSET_SI4063);
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;

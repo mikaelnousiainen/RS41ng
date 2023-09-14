@@ -146,16 +146,20 @@ static void si4603_set_shutdown(bool active)
 
 static void si4063_set_state(uint8_t state)
 {
+    log_info("Si4063: Set state %02x\n", state);
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
 void si4063_enable_tx()
 {
+    log_info("Si4063: Enable TX\n");
     si4063_set_state(SI4063_STATE_TX);
+    log_info("Si4063: After enable TX\n");
 }
 
 void si4063_inhibit_tx()
 {
+    log_info("Si4063: Inhibit TX\n");
     si4063_set_state(SI4063_STATE_READY);
 }
 
@@ -179,6 +183,8 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     uint8_t outdiv, band;
     uint32_t f_pfd, n, m;
     float ratio, rest;
+
+    log_info("Si4063: Set frequency %lu\n", frequency_hz);
 
     /* Set the output divider according to the recommended ranges in the si406x datasheet */
     if (frequency_hz < 177000000UL)      {
@@ -248,6 +254,8 @@ void si4063_set_tx_power(uint8_t power)
             power & 0x7F // Power level from 00..7F
     };
 
+    log_info("Si4063: Set TX power %02x\n", power);
+
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
@@ -275,6 +283,8 @@ void si4063_set_frequency_deviation(uint32_t deviation)
             deviation & 0xFF
     };
 
+    log_info("Si4063: Set freq deviation %lu\n", deviation);
+
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
@@ -288,6 +298,8 @@ void si4063_set_modulation_type(si4063_modulation_type type)
             0x40 | // 0x40 = Use GPIO2 as source for FSK modulation (alternatively, use 0x60 for GPIO3)
             0x08 // 0x08 = Direct modulation source (MCU-controlled)
     };
+
+    log_info("Si4063: Set modulation type %d\n", type);
 
     switch (type) {
         case SI4063_MODULATION_TYPE_CW:

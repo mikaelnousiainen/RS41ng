@@ -177,12 +177,6 @@ int main(void)
         radio_handle_main_loop();
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
-#ifdef DFM17
-//DFM17 testing... delete next two lines eventually
-        log_info("Fix: %d, Time: %02d:%02d:%02d.\n", (int) current_gps_data.fix_ok, current_gps_data.hours, current_gps_data.minutes, current_gps_data.seconds);
-        delay_ms(1000);
-#endif //DFM17
-
     }
 }
 
