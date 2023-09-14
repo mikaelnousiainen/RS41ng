@@ -71,7 +71,6 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
         pwm_timer_init(100 * 100); // TODO: Idle tone
         pwm_timer_use(true);
         pwm_timer_pwm_enable(true);
-        si4063_use_direct_mode(true);
     }
 
     switch (entry->data_mode) {
@@ -79,7 +78,6 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_PIP:
             spi_uninit();
             system_disable_tick();
-            si4063_use_sdi_pin(true);
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_APRS_1200:
@@ -206,7 +204,7 @@ inline void radio_handle_data_timer_si4063()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
-                si4063_set_sdi_pin(false);
+                si4063_set_direct_mode_pin(false);
                 log_info("CW TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
@@ -214,7 +212,7 @@ inline void radio_handle_data_timer_si4063()
                 break;
             }
 
-            si4063_set_sdi_pin(tone_index == 0 ? false : true);
+            si4063_set_direct_mode_pin(tone_index == 0 ? false : true);
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
@@ -252,7 +250,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-            si4063_use_sdi_pin(false);
             data_timer_uninit();
             spi_init();
             break;
@@ -269,7 +266,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
     }
 
     if (use_direct_mode) {
-        si4063_use_direct_mode(false);
         pwm_timer_pwm_enable(false);
         pwm_timer_use(false);
         pwm_timer_uninit();

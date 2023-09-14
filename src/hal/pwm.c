@@ -91,6 +91,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM15_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
     TIM15_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_High;
 
+    // TIM15 channel 2 can be used to drive pin PB15, which is connected to RS41 Si4032 SDI pin for direct modulation
     TIM_OC2Init(TIM15, &TIM15_OCInitStruct);
 
     // These are not needed?
@@ -195,6 +196,8 @@ void pwm_timer_pwm_enable(bool enabled)
 
 void pwm_timer_use(bool use)
 {
+    // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
+    // which is connected to RS41 Si4032 SDI pin for direct modulation
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, use ? ENABLE : DISABLE);
 }
 
