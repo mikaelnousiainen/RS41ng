@@ -15,7 +15,13 @@
 #define CW_SYMBOL_RATE_MULTIPLIER 4
 
 // TODO: Add support for multiple APRS baud rates
+#if defined(RS41)
 #define symbol_delay_bell_202_1200bps_us 823
+#elif defined(DFM17)
+#define symbol_delay_bell_202_1200bps_us 820
+#else
+Improper definitions
+#endif // Sonde Type
 
 static volatile bool radio_si4063_state_change = false;
 static volatile uint32_t radio_si4063_freq = 0;
@@ -145,6 +151,7 @@ static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, ra
         case RADIO_DATA_MODE_APRS_1200: {
             int8_t tone_index;
 
+            log_info("APRS TX starts\n");
             while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
                 pwm_timer_set_frequency(precalculated_pwm_periods[tone_index]);
                 shared_state->radio_symbol_count_loop++;
@@ -153,6 +160,7 @@ static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, ra
 
             radio_si4063_state_change = false;
             shared_state->radio_transmission_finished = true;
+            log_info("APRS TX ends\n");
             break;
         }
         default:
