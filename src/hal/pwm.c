@@ -6,6 +6,7 @@
 
 #include "pwm.h"
 #include "log.h"
+#include "drivers/si4063/si4063.h"
 
 uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 
@@ -13,6 +14,7 @@ uint16_t (*pwm_handle_dma_transfer_half)(uint16_t buffer_size, uint16_t *buffer)
 uint16_t (*pwm_handle_dma_transfer_full)(uint16_t buffer_size, uint16_t *buffer) = NULL;
 
 DMA_Channel_TypeDef *pwm_dma_channel = DMA1_Channel2;
+
 
 void pwm_data_timer_init()
 {
@@ -65,7 +67,9 @@ void pwm_data_timer_uninit()
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_DeInit(TIM15);
+#ifdef RS41
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
+#endif //RS41
     // Not needed: AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
@@ -83,6 +87,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 
     TIM_TimeBaseInit(TIM15, &tim_init);
 
+#ifdef RS41
     TIM_OCInitTypeDef TIM15_OCInitStruct;
 
     TIM_OCStructInit(&TIM15_OCInitStruct);
@@ -105,6 +110,19 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM_OC2FastConfig(TIM15, TIM_OCFast_Enable);
 
     TIM_CtrlPWMOutputs(TIM15, DISABLE);
+#endif //RS41
+#ifdef DFM17
+    // For DFM17 we don't have a PWM pin in the right place, so we manually toggle the pin in the ISR
+    TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+    TIM_ITConfig(TIM15, TIM_IT_Update, ENABLE);
+
+    NVIC_InitTypeDef nvic_init;
+    nvic_init.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
+    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&nvic_init);
+#endif //DFM17
 
     TIM_Cmd(TIM15, ENABLE);
 }
@@ -191,14 +209,18 @@ void DMA1_Channel2_IRQHandler(void)
 
 void pwm_timer_pwm_enable(bool enabled)
 {
+#ifdef RS41
     TIM_CtrlPWMOutputs(TIM15, enabled ? ENABLE : DISABLE);
+#endif //RS41
 }
 
 void pwm_timer_use(bool use)
 {
+#ifdef RS41
     // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
     // which is connected to RS41 Si4032 SDI pin for direct modulation
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, use ? ENABLE : DISABLE);
+#endif //RS41
 }
 
 void pwm_timer_uninit()
@@ -208,7 +230,9 @@ void pwm_timer_uninit()
 
     TIM_DeInit(TIM15);
 
+#ifdef RS41
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
+#endif //RS41
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
 }
@@ -229,3 +253,22 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
     // TIM_Cmd(TIM15, ENABLE);
     // TIM_CtrlPWMOutputs(TIM15, ENABLE);
 }
+
+static uint32_t Tim15Cnt = 0;
+volatile bool	Tim15On = false;
+
+void TIM1_BRK_TIM15_IRQHandler(void)
+{
+    if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
+        TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+#ifdef DFM17
+        // Just in case this ISR gets called on RS41, we restrict this to DFM only
+        
+	Tim15Cnt++;
+        Tim15On = !Tim15On;
+        si4063_set_direct_mode_pin(Tim15On);
+    }
+#endif //DFM17
+
+}
+
