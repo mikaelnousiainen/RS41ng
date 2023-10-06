@@ -421,7 +421,8 @@ _____
 
 1. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
-2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
+2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins.
+   Note that you will need to either solder wires directly to the connector or solder a 0.5" (1.27mm) 5-by-2 pin header to the connector.
 * SWDIO -> (SWDIO)
 * SWCLK -> (SWCLK)
 * RST -> (RST)
