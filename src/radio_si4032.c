@@ -1,3 +1,6 @@
+#include "config.h"
+
+#ifdef RS41
 #include <stdint.h>
 #include <string.h>
 
@@ -27,6 +30,7 @@
 static bool si4032_use_dma = false;
 
 // TODO: Add support for multiple APRS baud rates
+// This delay is for RS41 radiosondes
 #define symbol_delay_bell_202_1200bps_us 823
 
 static volatile bool radio_si4032_state_change = false;
@@ -403,3 +407,4 @@ void radio_init_si4032()
         pwm_dma_init();
     }
 }
+#endif

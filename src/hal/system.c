@@ -101,7 +101,7 @@ static void gpio_init()
     GPIO_Init(BANK_SHUTDOWN, &gpio_init);
 #ifdef DFM17
     GPIO_SetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);		// Pull high to keep BMS from removing battery power after startup
-#endif //DFM17
+#endif
 
     // Battery voltage (analog)
     gpio_init.GPIO_Pin = PIN_VOLTAGE;
@@ -142,10 +142,10 @@ static void dma_adc_init()
 
 #ifdef RS41
     dma_init.DMA_BufferSize = 2;
-#endif //RS41
+#endif
 #ifdef DFM17
     dma_init.DMA_BufferSize = 1;
-#endif //DFM17
+#endif
     dma_init.DMA_DIR = DMA_DIR_PeripheralSRC;
     dma_init.DMA_M2M = DMA_M2M_Disable;
     dma_init.DMA_MemoryBaseAddr = (uint32_t) &dma_buffer_adc;
@@ -171,19 +171,19 @@ static void dma_adc_init()
     adc_init.ADC_DataAlign = ADC_DataAlign_Right;
 #ifdef RS41
     adc_init.ADC_NbrOfChannel = 2;
-#endif //RS41
+#endif
 #ifdef DFM17
     adc_init.ADC_NbrOfChannel = 1;
-#endif //DFM17
+#endif
     ADC_Init(ADC1, &adc_init);
 
     ADC_RegularChannelConfig(ADC1, CHANNEL_VOLTAGE, 1, ADC_SampleTime_28Cycles5);
 #ifdef RS41
     ADC_RegularChannelConfig(ADC1, CHANNEL_BUTTON, 2, ADC_SampleTime_28Cycles5);
-#endif //RS41
+#endif
 #ifdef DFM17
 // Not using ADC for button on DFM17
-#endif //DFM17
+#endif
 
     // ADC1 DMA requests are routed to DMA1 Channel1
     ADC_DMACmd(ADC1, ENABLE);
@@ -209,21 +209,21 @@ uint16_t system_get_button_adc_value()
 {
 #ifdef RS41
     return (uint16_t) dma_buffer_adc[1];
-#endif //RS41
+#endif
 #ifdef DFM17
     // Fake being an ADC.  Take the binary value and if non-zero, make it trigger button-down
     return ( ((int) GPIO_ReadInputDataBit(BANK_BUTTON,PIN_BUTTON)) * 2100);
-#endif //DFM17
+#endif
 }
 
 void system_shutdown()
 {
 #ifdef RS41
     GPIO_SetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
-#endif // RS41
+#endif
 #ifdef DFM17
     GPIO_ResetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
-#endif //DFM17
+#endif
 }
 
 void system_handle_button()
