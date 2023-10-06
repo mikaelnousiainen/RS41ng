@@ -119,7 +119,7 @@
 #endif
 
 /**
- * Built-in Si4032 radio chip transmission configuration
+ * RS41 only: Built-in Si4032 radio chip transmission configuration
  */
 
 // Si4032 transmit power: 0..7
@@ -157,7 +157,7 @@
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
 
 /**
- * Built-in Si4063 radio chip transmission configuration
+ * DFM-17 only: Built-in Si4063 radio chip transmission configuration
  */
 
 // Si4063 transmit power: 0..127
@@ -192,7 +192,7 @@
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
 
 /**
- * External Si5351 radio chip transmission configuration
+ * RS41 only: External Si5351 radio chip transmission configuration
  */
 
 // Si5351 transmit power: 0..3
