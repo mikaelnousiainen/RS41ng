@@ -78,7 +78,7 @@ void usart_gps_uninit()
     usart_gps_enable_irq(false);
     USART_Cmd(USART_IT, DISABLE);
     USART_DeInit(USART_IT);
-#ifdef defined(RS41)
+#if defined(RS41)
     RCC_APB2PeriphClockCmd(APBPERIPHERAL_USART, DISABLE);
 #elif defined(DFM17)
     RCC_APB1PeriphClockCmd(APBPERIPHERAL_USART, DISABLE);

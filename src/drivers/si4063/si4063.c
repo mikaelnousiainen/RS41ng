@@ -403,7 +403,7 @@ uint16_t si4063_read_part_info()
     return response[1] << 8 | response[2];
 }
 
-void si4063_set_direct_mode_pin(bool high)
+inline void si4063_set_direct_mode_pin(bool high)
 {
     if (high) {
         GPIO_SetBits(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3);
