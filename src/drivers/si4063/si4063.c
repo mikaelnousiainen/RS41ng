@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stm32f10x_gpio.h>
+#include <stm32f10x_tim.h>
 
 #include "hal/hal.h"
 #include "hal/delay.h"
@@ -53,18 +54,6 @@
 
 #define SI4063_DATA_RATE_APRS 4400
 
-#define RF_DEVIATION_HZ_RTTY 200.0f
-#define RF_DEVIATION_HZ_APRS 1300.0f
-
-#define OUTDIV_70CM 8
-#define OUTDIV_2M   24
-#define OUTDIV_DFM  10
-
-#define FREQUENCY_DEVIATION_RTTY ((((uint32_t)1 << 19) * OUTDIV_2M * RF_DEVIATION_HZ_RTTY)/(2*SI4063_CLOCK))
-#define FREQUENCY_DEVIATION_APRS ((((uint32_t)1 << 19) * OUTDIV_2M * RF_DEVIATION_HZ_APRS)/(2*SI4063_CLOCK))
-#define FREQUENCY_DEVIATION_APRS_DFM ((((uint32_t)1 << 19) * OUTDIV_DFM * RF_DEVIATION_HZ_APRS)/(2*SI4063_CLOCK))
-#define FREQUENCY_DEVIATION_DFM 0x90000
-
 /**
  * Filters from uTrak: https://github.com/thasti/utrak
  *
@@ -96,6 +85,9 @@ uint8_t si4063_filter_lp_4400[9] = {0xd5, 0xe9, 0x03, 0x20, 0x3d, 0x58, 0x6d, 0x
  * 6dB@1200Hz, 4400 Hz (bad stopband)
  */
 uint8_t si4063_filter_6db_1200_4400[9] = {0x81, 0x9f, 0xc4, 0xee, 0x18, 0x3e, 0x5c, 0x70, 0x76};
+
+uint32_t current_frequency_hz = 434000000UL;
+uint32_t current_deviation_hz = 0;
 
 static inline void si4063_set_chip_select(bool select)
 {
@@ -226,6 +218,41 @@ void si4063_disable_tx()
     si4063_set_state(SI4063_STATE_SLEEP);
 }
 
+static int si4063_get_outdiv(const uint32_t frequency_hz)
+{
+    // Select the output divider according to the recommended ranges in the Si406x datasheet
+    if (frequency_hz < 177000000UL)      {
+        return 24;
+    } else if (frequency_hz < 239000000UL) {
+        return 16;
+    } else if (frequency_hz < 353000000UL) {
+        return 12;
+    } else if (frequency_hz < 525000000UL) {
+        return 8;
+    } else if (frequency_hz < 705000000UL) {
+        return 6;
+    }
+
+    return 4;
+}
+
+static int si4063_get_band(const uint32_t frequency_hz)
+{
+    if (frequency_hz < 177000000UL)      {
+        return 5;
+    } else if (frequency_hz < 239000000UL) {
+        return 4;
+    } else if (frequency_hz < 353000000UL) {
+        return 3;
+    } else if (frequency_hz < 525000000UL) {
+        return 2;
+    } else if (frequency_hz < 705000000UL) {
+        return 1;
+    }
+
+    return 0;
+}
+
 void si4063_set_tx_frequency(const uint32_t frequency_hz)
 {
     uint8_t outdiv, band;
@@ -234,26 +261,8 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
 
     log_debug("Si4063: Set frequency %lu\n", frequency_hz);
 
-    /* Set the output divider according to the recommended ranges in the si406x datasheet */
-    if (frequency_hz < 177000000UL)      {
-        outdiv = 24;
-        band = 5;
-    } else if (frequency_hz < 239000000UL) {
-        outdiv = 16;
-        band = 4;
-    } else if (frequency_hz < 353000000UL) {
-        outdiv = 12;
-        band = 3;
-    } else if (frequency_hz < 525000000UL) {
-        outdiv = 8;
-        band = 2;
-    } else if (frequency_hz < 705000000UL) {
-        outdiv = 6;
-        band = 1;
-    } else {
-        outdiv = 4;
-        band = 0;
-    }
+    outdiv = si4063_get_outdiv(frequency_hz);
+    band = si4063_get_band(frequency_hz);
 
     f_pfd = 2 * SI4063_CLOCK / outdiv;
     n = frequency_hz / f_pfd - 1;
@@ -291,6 +300,11 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
 
         si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
     }
+
+    current_frequency_hz = frequency_hz;
+
+    // Deviation depends on the frequency band
+    si4063_set_frequency_deviation(current_deviation_hz);
 }
 
 void si4063_set_tx_power(uint8_t power)
@@ -320,8 +334,18 @@ void si4063_set_frequency_offset(uint16_t offset)
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
-void si4063_set_frequency_deviation(uint32_t deviation)
+static uint32_t si4063_calculate_deviation(uint32_t deviation_hz)
 {
+    uint8_t outdiv = si4063_get_outdiv(current_frequency_hz);
+
+    // SY_SEL = Div-by-2
+    return (uint32_t) (((double) (1 << 19) * outdiv * deviation_hz) / (2 * SI4063_CLOCK));
+}
+
+void si4063_set_frequency_deviation(uint32_t deviation_hz)
+{
+    uint32_t deviation = si4063_calculate_deviation(deviation_hz);
+
     uint8_t data[] = {
             0x20, // 0x20 = Group MODEM
             0x03, // Set 3 properties (3 bytes)
@@ -331,9 +355,11 @@ void si4063_set_frequency_deviation(uint32_t deviation)
             deviation & 0xFF
     };
 
-    log_debug("Si4063: Set freq deviation %lu\n", deviation);
+    log_info("Si4063: Set frequency deviation to value %lu with %lu Hz\n", deviation, deviation_hz);
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
+
+    current_deviation_hz = deviation_hz;
 }
 
 void si4063_set_modulation_type(si4063_modulation_type type)
@@ -511,6 +537,7 @@ void si4063_configure()
     }
 }
 
+// Not used yet, for future use
 void si4063_set_filter(const uint8_t *filter)
 {
     uint8_t data[12] = {
@@ -541,11 +568,11 @@ void si4063_configure_data_rate(uint32_t data_rate)
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
+// Not used yet, for future use
 void si4063_configure_aprs()
 {
     // For APRS in direct mode with GFSK modulation
-    si4063_configure_data_rate(4400);
-    si4063_set_frequency_deviation((uint16_t)(2*FREQUENCY_DEVIATION_APRS));
+    si4063_configure_data_rate(SI4063_DATA_RATE_APRS);
 
     // Used only for GFSK mode filtering
     uint32_t nco_mod = SI4063_CLOCK / 10;
@@ -563,6 +590,7 @@ void si4063_configure_aprs()
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
+// Not used yet, for future use
 void si4063_configure_rtty()
 {
     // For RTTY:
@@ -643,11 +671,27 @@ int si4063_init()
     si4063_set_tx_power(0x00);
 
     si4063_set_frequency_offset(0);
-    si4063_set_frequency_deviation(0x22);
+
+    // Set deviation to zero for non-FSK modulations
+    si4063_set_frequency_deviation(0);
 
     si4063_set_modulation_type(SI4063_MODULATION_TYPE_CW);
 
     si4063_set_state(SI4063_STATE_READY);
 
     return HAL_OK;
+}
+
+void TIM1_BRK_TIM15_IRQHandler(void)
+{
+    static bool pin_state = false;
+
+    if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
+        TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+#ifdef DFM17
+        // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
+        pin_state = !pin_state;
+        si4063_set_direct_mode_pin(pin_state);
+#endif
+    }
 }

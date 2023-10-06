@@ -6,7 +6,6 @@
 
 #include "pwm.h"
 #include "log.h"
-#include "drivers/si4063/si4063.h"
 
 uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 
@@ -69,7 +68,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM_DeInit(TIM15);
 #ifdef RS41
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
-#endif //RS41
+#endif
     // Not needed: AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
@@ -110,7 +109,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM_OC2FastConfig(TIM15, TIM_OCFast_Enable);
 
     TIM_CtrlPWMOutputs(TIM15, DISABLE);
-#endif //RS41
+#endif
 #ifdef DFM17
     // For DFM17 we don't have a PWM pin in the right place, so we manually toggle the pin in the ISR
     TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
@@ -122,7 +121,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     nvic_init.NVIC_IRQChannelSubPriority = 1;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
-#endif //DFM17
+#endif
 
     TIM_Cmd(TIM15, ENABLE);
 }
@@ -211,7 +210,7 @@ void pwm_timer_pwm_enable(bool enabled)
 {
 #ifdef RS41
     TIM_CtrlPWMOutputs(TIM15, enabled ? ENABLE : DISABLE);
-#endif //RS41
+#endif
 }
 
 void pwm_timer_use(bool use)
@@ -220,7 +219,7 @@ void pwm_timer_use(bool use)
     // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
     // which is connected to RS41 Si4032 SDI pin for direct modulation
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, use ? ENABLE : DISABLE);
-#endif //RS41
+#endif
 }
 
 void pwm_timer_uninit()
@@ -232,7 +231,7 @@ void pwm_timer_uninit()
 
 #ifdef RS41
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
-#endif //RS41
+#endif
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
 }
@@ -253,22 +252,3 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
     // TIM_Cmd(TIM15, ENABLE);
     // TIM_CtrlPWMOutputs(TIM15, ENABLE);
 }
-
-static uint32_t Tim15Cnt = 0;
-volatile bool	Tim15On = false;
-
-void TIM1_BRK_TIM15_IRQHandler(void)
-{
-    if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
-        TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
-#ifdef DFM17
-        // Just in case this ISR gets called on RS41, we restrict this to DFM only
-        
-	Tim15Cnt++;
-        Tim15On = !Tim15On;
-        si4063_set_direct_mode_pin(Tim15On);
-    }
-#endif //DFM17
-
-}
-
