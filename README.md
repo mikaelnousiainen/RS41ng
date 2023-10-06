@@ -6,7 +6,7 @@
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
 
-This is a custom, amateur radio-oriented firmware for [Vaisala RS41](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
+This is a custom, amateur radio-oriented firmware for [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
 and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/) radiosondes. These radiosonde models
 have very similar hardware, so that it is relatively easy to support both with the same codebase.
 
@@ -42,7 +42,7 @@ For your own receiver station, you will need:
 
 ### What can I do with the RS41 and DFM-17 radiosondes?
 
-The [Vaisala RS41](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
+The [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
 and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/)
 radiosondes both use off-the-shelf 32-bit [STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) microcontrollers,
 which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
