@@ -453,7 +453,7 @@ _____
     * RST -> (RST)
     * GND -> (GND)
     * 3.3V -> (VTRef) (only required when using the programmer to power the sonde)
-    * Note that you will need to either solder wires directly to the connector or solder a 0.5" (1.27mm) 5-by-2 pin header to the connector.
+    * Note that you will need to either solder wires directly to the connector or solder a 0.05" (1.27mm) 5-by-2 pin header to the connector.
 
 ## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
 
