@@ -1,6 +1,8 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-**NOTE:** While this firmware has been tested with great success on a number of high-altitude balloon
+**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
+
+**NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
 
@@ -109,7 +111,7 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 #### Notes about APRS
 
 * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
-* There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
+* There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but the timings are not working correctly
 
 #### Notes about Horus 4FSK
 
@@ -146,7 +148,16 @@ Sensor driver code contributions are welcome!
 
 1. Configure your amateur radio call sign, transmission schedule (time sync),
    transmit frequencies and transmission mode parameters in `config.h`
-2. Set up transmitted message templates in `config.c`, depending on the modes you use
+    * Select the desired radiosonde type in the beginning of the file by removing the `//` comment from either
+      the `#define RS41` or `#define DFM17` lines.
+    * Customize at least the following settings:
+        * `CALLSIGN`
+        * For RS41, the settings beginning with `RADIO_SI4032_` to select transmit power and the modes to transmit
+        * For DFM-17, the settings beginning with `RADIO_SI4063_` to select transmit power and the modes to transmit
+        * `HORUS_V2_PAYLOAD_ID` if you transmit Horus 4FSK
+        * `APRS_COMMENT` if you transmit APRS
+2. Set up transmitted message templates in `config.c`, depending on the modes you use.
+   You can customize the APRS and CW messages in more detail here.
 
 ### Power consumption and power-saving features
 
@@ -374,10 +385,10 @@ ______________________|           |______________________
 1. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
-  * SWDIO -> Pin 9 (SWDIO)
-  * SWCLK -> Pin 8 (SWCLK)
-  * GND -> Pin 1 (GND)
-  * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
+    * SWDIO -> Pin 9 (SWDIO)
+    * SWCLK -> Pin 8 (SWCLK)
+    * GND -> Pin 1 (GND)
+    * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
 
 ### Graw DFM-17 programming connector
 
@@ -421,13 +432,13 @@ _____
 
 1. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
-2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins.
-   Note that you will need to either solder wires directly to the connector or solder a 0.5" (1.27mm) 5-by-2 pin header to the connector.
-* SWDIO -> (SWDIO)
-* SWCLK -> (SWCLK)
-* RST -> (RST)
-* GND -> (GND)
-* 3.3V -> (VTRef) (only required when using the programmer to power the sonde)
+2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
+    * SWDIO -> (SWDIO)
+    * SWCLK -> (SWCLK)
+    * RST -> (RST)
+    * GND -> (GND)
+    * 3.3V -> (VTRef) (only required when using the programmer to power the sonde)
+    * Note that you will need to either solder wires directly to the connector or solder a 0.5" (1.27mm) 5-by-2 pin header to the connector.
 
 ## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
 

@@ -56,6 +56,7 @@ volatile bool system_initialized = false;
  * Maximum length: 64 characters.
  */
 char *cw_message_templates[] = {
+        "$cs",
 //        "$cs $loc6 $altm $gs km/h $tiC",
 //        "$cs $loc6",
 //        "$alt m",
@@ -83,7 +84,7 @@ char *aprs_comment_templates[] = {
 //        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
 //        " $loc12 - " APRS_COMMENT,
 //        " $teC $hu% $prmb PC $pc RI $ri uR/h - " APRS_COMMENT,
-//        " " APRS_COMMENT,
+        " " APRS_COMMENT,
         NULL
 };
 
