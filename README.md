@@ -578,7 +578,9 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 
 # Authors
 
-* Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
+* Mikael Nousiainen OH3BHX <mikael@0xfeed.tech>
+* Mike Hojnowski KD2EAT contributed significantly to Graw DFM-17 support
+* Various authors with smaller contributions from GitHub pull requests
 * Original codebase: DF8OE and other authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 * Horus 4FSK code adapted from [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP) project
 
