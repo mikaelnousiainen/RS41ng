@@ -12,7 +12,7 @@
 
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
-// NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
+// NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
 //#define SEMIHOSTING_ENABLE
 //#define LOGGING_ENABLE
 
@@ -135,11 +135,11 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS false
+#define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 false
+#define RADIO_SI4032_TX_HORUS_V2 true
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 6
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -170,7 +170,7 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS false
+#define RADIO_SI4063_TX_APRS true
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
