@@ -59,6 +59,21 @@ GPS chips, so it can be used as a tracker device, e.g. for high-altitude balloon
 
 The RS41ng firmware is just one example of what can be achieved with the hardware of these radiosondes!
 
+## What are high-altitude balloon flights?
+
+High-altitude balloon flights arranged by hobbyists are fun technical experiments.
+The flight goals are usually related to aerial photography, testing of radio tracker and transmitter hardware
+and different kinds of measurements with on-board sensors.
+
+The following websites contain more information about planning and launching a high-altitude balloon flight:
+
+* https://www.overlookhorizon.com/ - Overlook Horizon high-altitude balloon flights.
+* http://www.projecthorus.org/ - Australian high-altitude balloon project. Website no longer updated.
+* https://www.areg.org.au/archives/category/activities/project-horus - Newer Project Horus flights.
+* https://ukhas.org.uk/ - UK high-altitude society.
+* http://www.daveakerman.com/ - High-altitude balloon blog of Dave Akerman.
+* https://0xfeed.tech/ - High-altitude balloon / ham radio blog of Mikael Nousiainen OH3BHX.
+
 ## Why does the RS41ng firmware exist?
 
 The motivation to develop this firmware is to provide a clean, customizable and
