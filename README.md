@@ -365,7 +365,7 @@ Follow the instructions below for the radiosonde model you have.
 
 ### Vaisala RS41 programming connector
 
-The pinout of the RS41 connector (by DF8OE and VK5QI) is the following:
+The pinout of the RS41 programming connector (by DF8OE and VK5QI) is the following:
 
 ```
 ______________________|           |______________________
@@ -407,7 +407,10 @@ ______________________|           |______________________
 
 ### Graw DFM-17 programming connector
 
-The pinout of the DFM-17 connector is the following:
+The DFM-17 programming connector is an unpopulated group of pads on the circuit board
+between the sensor boom connector and the main STM32 microcontroller.
+
+The pinout of the DFM-17 programming connector is the following:
 
 ```
 _____
@@ -435,7 +438,7 @@ _____
     * This pin powers the device via 3.3V voltage from an ST-LINK programmer dongle
 * 2 - SWDIO / TMS
 * 3 - GND
-* 4 - SWDCLK / TCK
+* 4 - SWCLK / TCK
 * 5 - GND
 * 6 - SWO EXT TRACECTL / TDO
 * 7 - KEY
@@ -445,15 +448,17 @@ _____
 
 #### Connect the DFM-17 radiosonde to the programmer
 
-1. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
-   remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
+1. Since the DFM-17 programming connector is just an unpopulated group of pads on the circuit board,
+   **you will need to either solder wires directly to the pads or alternatively solder a 0.05" (1.27mm) 5-by-2 pin header to the pads**.
+   There are suitable ribbon cables with 5x2 0.05" connectors available for this type of pin header.
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
-    * SWDIO -> (SWDIO)
-    * SWCLK -> (SWCLK)
-    * RST -> (RST)
-    * GND -> (GND)
-    * 3.3V -> (VTRef) (only required when using the programmer to power the sonde)
-    * Note that you will need to either solder wires directly to the connector or solder a 0.05" (1.27mm) 5-by-2 pin header to the connector.
+    * SWDIO -> Pin 2 (SWDIO)
+    * SWCLK -> Pin 4 (SWCLK)
+    * RST -> Pin 10 (RST)
+    * GND -> Pin 5 (GND)
+    * 3.3V -> Pin 1 (VTRef) (only required when using the programmer to power the sonde)
+3. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
+   remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 
 ## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
 
