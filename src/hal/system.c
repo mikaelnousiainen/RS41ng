@@ -360,7 +360,7 @@ void system_init()
     gpio_init();
     dma_adc_init();
     delay_init();
-
+    millis_timer_init();
     system_scheduler_timer_init();
 
     RCC_ClocksTypeDef RCC_Clocks;

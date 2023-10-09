@@ -49,7 +49,7 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = USART_IRQ;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 15;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 3;
     nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);

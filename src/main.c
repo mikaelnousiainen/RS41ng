@@ -12,6 +12,7 @@
 #include "radio.h"
 #include "config.h"
 #include "log.h"
+#include "hal/timepulse.h"
 
 #ifdef RS41
 #include "hal/i2c.h"
@@ -114,6 +115,17 @@ int main(void)
         delay_ms(1000);
         goto gps_init;
     }
+
+#ifdef DFM17
+    log_info("Timepulse init\n");
+    timepulse_init();
+    while (1) {
+      if (timepulsed != 0) {
+        log_info("Time Pulse. Calib: %d, Delta: %d\n", calib_suggestion, d_millis);
+        timepulsed = 0;
+      }
+    }
+#endif //DFM17
 
 #if defined(RS41)
     log_info("Si4032 init\n");

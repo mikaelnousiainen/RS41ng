@@ -19,7 +19,7 @@
 
 // TODO: Add support for multiple APRS baud rates
 // This delay is for DFM-17 radiosondes
-#define symbol_delay_bell_202_1200bps_us 820
+#define symbol_delay_bell_202_1200bps_us 821
 
 static volatile bool radio_si4063_state_change = false;
 static volatile uint32_t radio_si4063_freq = 0;

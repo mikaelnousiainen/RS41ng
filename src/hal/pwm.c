@@ -43,8 +43,8 @@ void pwm_data_timer_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
     */
@@ -117,7 +117,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
     nvic_init.NVIC_IRQChannelSubPriority = 1;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
@@ -164,8 +164,8 @@ void pwm_dma_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 0;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 }
@@ -246,6 +246,7 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
     // TIM_CtrlPWMOutputs(TIM15, DISABLE);
     // TIM_Cmd(TIM15, DISABLE);
 
+//    TIM_SetAutoreload(TIM15, pwm_period);
     TIM_SetAutoreload(TIM15, pwm_period);
     // TIM_SetCompare2(TIM15, pwm_period / 2);
 
