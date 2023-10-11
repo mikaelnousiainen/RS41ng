@@ -1,3 +1,4 @@
+#include "hal/stm_lib/inc/stm32f10x_rcc.h"
 #include "hal/system.h"
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
@@ -13,6 +14,7 @@
 #include "config.h"
 #include "log.h"
 #include "hal/timepulse.h"
+#include "hal/millis.h"
 
 #ifdef RS41
 #include "hal/i2c.h"
@@ -75,9 +77,24 @@ void set_red_led(bool enabled)
     system_set_red_led(enabled);
 }
 
+#ifdef DFM17
+void set_yellow_led(bool enabled)
+{
+    if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
+        enabled = false;
+    }
+
+    system_set_yellow_led(enabled);
+}
+
+#endif //DFM17
+
 int main(void)
 {
     bool success;
+    bool yellowLEDstate = false;
+    int old_calib_suggestion = 16;
+    int calib_changes = 0;
 
     // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
@@ -121,8 +138,15 @@ int main(void)
     timepulse_init();
     while (1) {
       if (timepulsed != 0) {
-        log_info("Time Pulse. Calib: %d, Delta: %d\n", calib_suggestion, d_millis);
+        log_info("Time Pulse. Calib: %d, Delta: %d\n", calib_suggestion, (int) d_millis);
         timepulsed = 0;
+        if (calib_suggestion != old_calib_suggestion) {
+          old_calib_suggestion = calib_suggestion;
+          RCC_AdjustHSICalibrationValue(calib_suggestion);
+          yellowLEDstate = !yellowLEDstate;
+          set_yellow_led(yellowLEDstate);
+          calib_changes++;
+        }
       }
     }
 #endif //DFM17

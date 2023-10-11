@@ -77,7 +77,7 @@ void EXTI9_5_IRQHandler(void)
        old_millis = m;		// First timepulse.  Just store millis.
     } else {
        d_millis = m - old_millis;
-       delta = (int) (m - old_millis - 1000) / 5;	
+       delta = (int) (1000 - d_millis) / 5;	
        if (((delta + calib_suggestion) >= 0) &&
            ((delta + calib_suggestion <= 31)) ) {
           // If the delta makes sense, apply to the suggestion.  Otherwise, skip.
