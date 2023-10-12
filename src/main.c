@@ -92,9 +92,6 @@ void set_yellow_led(bool enabled)
 int main(void)
 {
     bool success;
-    bool yellowLEDstate = false;
-    int old_calib_suggestion = 16;
-    int calib_changes = 0;
 
     // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
@@ -136,19 +133,15 @@ int main(void)
 #ifdef DFM17
     log_info("Timepulse init\n");
     timepulse_init();
+/*
     while (1) {
       if (timepulsed != 0) {
-        log_info("Time Pulse. Calib: %d, Delta: %d\n", calib_suggestion, (int) d_millis);
+        log_info("Time Pulse. Calib: %d\n", get_clock_calibration());
         timepulsed = 0;
-        if (calib_suggestion != old_calib_suggestion) {
-          old_calib_suggestion = calib_suggestion;
-          RCC_AdjustHSICalibrationValue(calib_suggestion);
-          yellowLEDstate = !yellowLEDstate;
-          set_yellow_led(yellowLEDstate);
-          calib_changes++;
+        adjust_clock_calibration();
         }
       }
-    }
+*/
 #endif //DFM17
 
 #if defined(RS41)
@@ -211,6 +204,9 @@ int main(void)
 
     while (true) {
         radio_handle_main_loop();
+#ifdef DFM17
+        adjust_clock_calibration();
+#endif //DFM17
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
     }

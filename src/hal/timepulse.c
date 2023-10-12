@@ -4,6 +4,7 @@
 #include "stm32f10x_rcc.h"
 #include "misc.h"
 #include "config.h"
+#include "system.h"
 #include "millis.h"
 #include "timepulse.h"
 
@@ -26,10 +27,34 @@ by the timepulse IRQ and can be used at any time it's convenient to adjust the c
 */
 
 int calib_suggestion = 16;  // Default, but we will check it in the init routine below.
+int calib_current = 16;     // Default, but we will check it in the init routine below.
 uint32_t old_millis = 0;
 volatile int timepulsed = 0;
 volatile uint32_t d_millis = 0;
+bool yellowLEDstate = true;
+uint16_t calib_change_count = 0;
 
+
+uint8_t get_clock_calibration(void)
+{
+   return(CURRENT_TRIM);
+}
+
+uint16_t get_calib_change_count(void)
+{
+   return(calib_change_count);
+}
+
+void adjust_clock_calibration(void)
+{
+  if (calib_suggestion != calib_current) {
+     RCC_AdjustHSICalibrationValue(calib_suggestion);
+     calib_current = calib_suggestion;
+     yellowLEDstate = !yellowLEDstate;
+     system_set_yellow_led(yellowLEDstate);
+     calib_change_count++;
+  }
+}
 
 void timepulse_init(void)
 {
@@ -60,7 +85,11 @@ void timepulse_init(void)
     NVIC_Init(&NVIC_InitStruct);
 
     // Pull the current calibration to start
-    calib_suggestion = CURRENT_TRIM;		
+    calib_current = CURRENT_TRIM;		
+    calib_suggestion = calib_current;
+    
+    // Set the yellow LED to help identify calibration changes
+    system_set_yellow_led(yellowLEDstate);
 }
 
 // This handler is (at present) only being used for the Timepulse interrupt, so we shouldn't need
@@ -76,8 +105,9 @@ void EXTI9_5_IRQHandler(void)
     if (old_millis == 0) {
        old_millis = m;		// First timepulse.  Just store millis.
     } else {
-       d_millis = m - old_millis;
-       delta = (int) (1000 - d_millis) / 5;	
+       d_millis = m - old_millis;			// mS since last timepulse.  Ideally there were 1000.
+       delta = (int) (1000 - d_millis) / 5;		// If too few clicks, speed up clock.  If too many, slow down.
+       // Don't allow calibration suggestion to go out of range
        if (((delta + calib_suggestion) >= 0) &&
            ((delta + calib_suggestion <= 31)) ) {
           // If the delta makes sense, apply to the suggestion.  Otherwise, skip.

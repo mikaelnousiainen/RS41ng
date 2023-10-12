@@ -1,9 +1,11 @@
 #ifndef __TIMEPULSE_H
 #define __TIMEPULSE_H
 
+extern uint8_t get_clock_calibration(void);
+extern uint16_t get_calib_change_count(void);
 extern void timepulse_init(void);
-extern int calib_suggestion;
+extern void adjust_clock_calibration(void);
+
 extern volatile int timepulsed;
-extern volatile uint32_t d_millis;
 
 #endif // __TIMEPULSE_H

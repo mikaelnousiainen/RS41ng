@@ -7,6 +7,7 @@
 #include "locator.h"
 #include "config.h"
 #include "log.h"
+#include "hal/timepulse.h"
 
 #ifdef RS41
 #include "drivers/si4032/si4032.h"
@@ -70,6 +71,8 @@ void telemetry_collect(telemetry_data *data)
         data->gps.heading_degrees_100000 = 0;
         data->gps.climb_cm_per_second = 0;
     }
+    data->clock_calibration = get_clock_calibration();
+    data->clock_calibration_count = get_calib_change_count();
 
     locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);

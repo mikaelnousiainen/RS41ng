@@ -30,7 +30,7 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
 
     return snprintf((char *) payload,
             length,
-            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06d/P%dS%dT%02dV%04dC%02d%s"),
+            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06d/P%dS%dT%02dV%04dC%02dR%02dU%02d%s"),
             timestamp,
             abs(la_degrees), la_minutes, la_h_minutes,
             la_degrees > 0 ? 'N' : 'S',
@@ -46,6 +46,8 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
             (int) data->internal_temperature_celsius_100 / 100,
             data->battery_voltage_millivolts,
             (int16_t) ((float) data->gps.climb_cm_per_second / 100.0f),
+            data->clock_calibration,
+            data->clock_calibration_count,
             comment
     );
 }
