@@ -146,6 +146,9 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+// Use a rotating alternate 2nd frequency for HORUS_V2 (not continously)
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  false
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2  437600000
 
 /**
  * External Si5351 radio chip transmission configuration

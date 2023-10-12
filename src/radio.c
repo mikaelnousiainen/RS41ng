@@ -319,6 +319,7 @@ static volatile uint32_t radio_post_transmit_delay_counter = 0;
 static volatile uint32_t radio_next_symbol_counter = 0;
 
 static radio_transmit_entry *radio_start_transmit_entry = NULL;
+static uint8_t radio_alternate_frequency = 1;
 
 static uint32_t radio_previous_time_sync_scheduled = 0;
 
@@ -655,6 +656,20 @@ static void radio_next_transmit_entry()
         do {
             radio_current_transmit_entry_index = (radio_current_transmit_entry_index + 1) % radio_transmit_entry_count;
             radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
+            // If this queue entry is enabled and its HORUS_V2 and 2nd frequency enabled then rotate frequencies each TX
+            if (radio_current_transmit_entry->enabled) {
+              if (radio_current_transmit_entry->data_mode == RADIO_DATA_MODE_HORUS_V2) {
+                if (RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV) {
+                  if (radio_alternate_frequency == 0) {
+                      radio_alternate_frequency = 1;
+                      radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY2_HORUS_V2;
+                  } else {
+                      radio_alternate_frequency = 0;
+                      radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2;
+                  }
+                }
+              }
+            }
         } while (!radio_current_transmit_entry->enabled);
     }
 
