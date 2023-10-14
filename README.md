@@ -2,6 +2,9 @@
 
 **NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
 
+**NOTE:** DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
+DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
+
 **NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
