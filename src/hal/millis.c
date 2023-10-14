@@ -17,7 +17,7 @@ void millis_timer_init(void)
     // The data timer assumes a 24 MHz clock source
     tim_init.TIM_Prescaler = 24 - 1; // tick every 1/1000000 s
     tim_init.TIM_CounterMode = TIM_CounterMode_Up;
-    tim_init.TIM_Period = (uint16_t) (1000 - 1);	// Timer pop 1/millisec
+    tim_init.TIM_Period = (uint16_t) (1000 - 1); // set up period of 1 millisecond
     tim_init.TIM_ClockDivision = TIM_CKD_DIV1;
     tim_init.TIM_RepetitionCounter = 0;
 
@@ -55,13 +55,11 @@ void TIM7_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM7, TIM_IT_Update) != RESET) {
         TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
-
         millis_counter++;
-
     }
 }
 
 uint32_t millis(void)
 {
-	return millis_counter;
+    return millis_counter;
 }

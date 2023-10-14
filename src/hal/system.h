@@ -4,9 +4,6 @@
 #include "config.h"
 #include "hal.h"
 
-#define GPIO_PIN_LED_GREEN GPIO_Pin_7
-#define GPIO_PIN_LED_RED GPIO_Pin_8
-
 #define SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND 10000
 
 void system_init();
@@ -20,7 +17,7 @@ void system_set_green_led(bool enabled);
 void system_set_red_led(bool enabled);
 #ifdef DFM17
 void system_set_yellow_led(bool enabled);
-#endif //DFM17
+#endif
 uint16_t system_get_battery_voltage_millivolts();
 uint16_t system_get_button_adc_value();
 

@@ -129,13 +129,12 @@ static void gpio_init()
     GPIO_Init(BANK_RED_LED, &gpio_init);
 
 #ifdef DFM17
-    // Yellow LED
+    // Yellow LED (only in DFM-17)
     gpio_init.GPIO_Pin = PIN_YELLOW_LED;
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BANK_YELLOW_LED, &gpio_init);
-
-#endif //DFM17
+#endif
 }
 
 /**
@@ -355,14 +354,8 @@ void system_set_red_led(bool enabled)
 
 void system_set_yellow_led(bool enabled)
 {
-#ifdef RS41
-    if (enabled) {
-        GPIO_ResetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
-    } else {
-        GPIO_SetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
-    }
-#endif
 #ifdef DFM17
+    // Only DFM-17 has a yellow LED
     if (enabled) {
         GPIO_SetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
     } else {
@@ -388,7 +381,10 @@ void system_init()
     gpio_init();
     dma_adc_init();
     delay_init();
+#ifdef DFM17
+    // The millis timer is used for clock calibration on DFM-17 only
     millis_timer_init();
+#endif
     system_scheduler_timer_init();
 
     RCC_ClocksTypeDef RCC_Clocks;

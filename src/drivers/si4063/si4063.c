@@ -499,7 +499,7 @@ void si4063_configure()
 
         si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
     }
-// HERE
+
     {
         // Used only in synchronous mode (for GFSK modulation/filtering)
         uint8_t data[] = {

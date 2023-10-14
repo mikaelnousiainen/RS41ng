@@ -8,6 +8,9 @@
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
 #endif
+#if defined(RS41) && defined(DFM17)
+#error "Please define either RS41 or DFM17."
+#endif
 
 
 // Enable semihosting to receive debug logs during development

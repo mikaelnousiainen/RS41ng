@@ -1,7 +1,6 @@
 #include "config.h"
 
 #ifdef RS41
-#include <stdint.h>
 #include <string.h>
 
 #include "hal/system.h"
@@ -260,7 +259,7 @@ inline void radio_handle_data_timer_si4032()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
-                log_info("Horus V1 TX finished\n");
+                log_info("Horus TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 system_enable_tick();

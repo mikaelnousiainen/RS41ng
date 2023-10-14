@@ -27,6 +27,8 @@
  * $he - Heading in degrees (up to 3 chars)
  * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
  * $ri - Radiation intensity in µR/h (up to 5 chars)
+ * $ct - Clock calibration trim value (0-31, only for DFM-17)
+ * $cc - Clock calibration change count (only for DFM-17)
  *
  * Allowed message lengths:
  *
