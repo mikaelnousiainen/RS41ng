@@ -22,7 +22,7 @@ the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
 
 ## Asking questions, filing feature requests and reporting issues
 
-* Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your RS41-based projects
+* Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your radiosonde-based projects
   * For example, questions about firmware configuration and connecting of external chips to the sonde belong here
 * Please use [GitHub issues](../../issues) to file new feature requests or issues that you have already identified with the firmware
   * However, please remember to post questions about usage to [GitHub discussions](../../discussions)
