@@ -12,6 +12,7 @@
 #include "delay.h"
 #include "log.h"
 #include "gpio.h"
+#include "millis.h"
 
 #define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND
 
@@ -126,6 +127,15 @@ static void gpio_init()
     gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
     gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BANK_RED_LED, &gpio_init);
+
+#ifdef DFM17
+    // Yellow LED
+    gpio_init.GPIO_Pin = PIN_YELLOW_LED;
+    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
+    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(BANK_YELLOW_LED, &gpio_init);
+
+#endif //DFM17
 }
 
 /**
@@ -343,6 +353,24 @@ void system_set_red_led(bool enabled)
 #endif
 }
 
+void system_set_yellow_led(bool enabled)
+{
+#ifdef RS41
+    if (enabled) {
+        GPIO_ResetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
+    } else {
+        GPIO_SetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
+    }
+#endif
+#ifdef DFM17
+    if (enabled) {
+        GPIO_SetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
+    } else {
+        GPIO_ResetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
+    }
+#endif
+}
+
 void system_disable_irq()
 {
     __disable_irq();
@@ -360,7 +388,7 @@ void system_init()
     gpio_init();
     dma_adc_init();
     delay_init();
-
+    millis_timer_init();
     system_scheduler_timer_init();
 
     RCC_ClocksTypeDef RCC_Clocks;

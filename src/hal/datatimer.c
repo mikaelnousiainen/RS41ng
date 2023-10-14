@@ -34,8 +34,8 @@ void data_timer_init(uint32_t baud_rate)
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 
@@ -48,8 +48,8 @@ void data_timer_uninit()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = DISABLE;
     NVIC_Init(&nvic_init);
 

@@ -31,7 +31,7 @@ void delay_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM3_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 1;
     nvic_init.NVIC_IRQChannelSubPriority = 1;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);

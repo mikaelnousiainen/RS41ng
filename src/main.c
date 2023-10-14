@@ -1,3 +1,4 @@
+#include "hal/stm_lib/inc/stm32f10x_rcc.h"
 #include "hal/system.h"
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
@@ -12,6 +13,8 @@
 #include "radio.h"
 #include "config.h"
 #include "log.h"
+#include "hal/timepulse.h"
+#include "hal/millis.h"
 
 #ifdef RS41
 #include "hal/i2c.h"
@@ -74,6 +77,18 @@ void set_red_led(bool enabled)
     system_set_red_led(enabled);
 }
 
+#ifdef DFM17
+void set_yellow_led(bool enabled)
+{
+    if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
+        enabled = false;
+    }
+
+    system_set_yellow_led(enabled);
+}
+
+#endif //DFM17
+
 int main(void)
 {
     bool success;
@@ -114,6 +129,20 @@ int main(void)
         delay_ms(1000);
         goto gps_init;
     }
+
+#ifdef DFM17
+    log_info("Timepulse init\n");
+    timepulse_init();
+/*
+    while (1) {
+      if (timepulsed != 0) {
+        log_info("Time Pulse. Calib: %d\n", get_clock_calibration());
+        timepulsed = 0;
+        adjust_clock_calibration();
+        }
+      }
+*/
+#endif //DFM17
 
 #if defined(RS41)
     log_info("Si4032 init\n");
@@ -175,6 +204,9 @@ int main(void)
 
     while (true) {
         radio_handle_main_loop();
+#ifdef DFM17
+        adjust_clock_calibration();
+#endif //DFM17
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
     }
