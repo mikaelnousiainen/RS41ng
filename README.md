@@ -291,7 +291,8 @@ Now you can flash the firmware using instructions below (skip the build instruct
 Software requirements:
 
 * [GNU GCC toolchain](https://developer.arm.com/downloads/-/gnu-rm)
-  version 8.3.0 or higher for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
+  for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
+  * Pick the latest toolchain version available for your operating system.
 * [CMake](https://cmake.org/) version 3.6 or higher for building the firmware
 * [OpenOCD](http://openocd.org/) version 0.10.0 or higher for flashing the firmware
 
