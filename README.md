@@ -516,7 +516,9 @@ otherwise the firmware will not run.**
 To load debugging symbols for settings breakpoints and to perform more detailed inspection,
 use command `file src/RS41ng.elf`.
 
-## Si4032 Bell FSK modulation hack for APRS (notes by Mikael OH3BHX)
+## Si4032 Bell FSK modulation hack for APRS
+
+Notes by Mikael OH3BHX:
 
 The idea behind the APRS / Bell 202 modulation implementation is based on RS41HUP project and its "ancestors"
 and I'm describing it here, since it has not been documented elsewhere.
@@ -600,6 +602,7 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 * http://happysat.nl/RS-41/RS41.html - Vaisala RS-41 SGP Modification and info about the original firmware settings
 * https://destevez.net/2018/06/flashing-a-vaisala-rs41-radiosonde/
 * https://destevez.net/2017/11/tracking-an-rs41-sgp-radiosonde-and-reporting-to-aprs/
+* https://github.com/digiampietro/esp8266-rs41 - A tool for reconfiguring RS41s via its serial port
 
 ## Graw DFM-17 hardware documentation
 
