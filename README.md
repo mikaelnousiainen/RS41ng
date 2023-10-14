@@ -106,6 +106,15 @@ Features available on RS41 hardware only:
 * GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 
+Notes for DFM-17:
+
+* **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
+  This is necessary, because the internal oscillator is not particularly accurate.
+  DFM-17 transmissions, especially ARPS, may not decode correctly because of incorrect timing before
+  the internal oscillator has been calibrated.
+  * The RS41 radiosonde hardware uses an external oscillator, which is more stable, so RS41 does not
+    suffer from the same issue.
+
 ### Transmission modes
 
 On the internal Si4032 (RS41) and Si4063 (DFM-17) transmitters:
