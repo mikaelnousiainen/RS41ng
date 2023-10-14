@@ -290,7 +290,7 @@ Now you can flash the firmware using instructions below (skip the build instruct
 
 Software requirements:
 
-* [GNU GCC toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/9-2-2019-12)
+* [GNU GCC toolchain](https://developer.arm.com/downloads/-/gnu-rm)
   version 8.3.0 or higher for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
 * [CMake](https://cmake.org/) version 3.6 or higher for building the firmware
 * [OpenOCD](http://openocd.org/) version 0.10.0 or higher for flashing the firmware
@@ -373,7 +373,8 @@ ______________________|           |______________________
 It is possible to receive log messages from the firmware program and to perform debugging of the firmware using GNU GDB.
 
 Also, please note that Red Hat/Fedora do not provide GDB for ARM architectures, so you will need to manually download
-and install GDB from [ARM GNU GCC toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/9-2-2019-12).
+and install GDB from [ARM GNU GCC toolchain](https://developer.arm.com/downloads/-/gnu-rm).
+Pick the latest version available for your operating system.
 
 Semihosting allows the firmware to send log messages via special system calls to OpenOCD, so that you
 can get real-time feedback and debug output from the application.
