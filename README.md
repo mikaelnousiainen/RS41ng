@@ -9,9 +9,12 @@ DFM-17 transmissions, especially APRS, may not decode correctly because of incor
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
 
-This is a custom, amateur radio-oriented firmware for [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
+## What is RS41ng?
+
+RS41ng is a custom, amateur radio-oriented firmware for [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
 and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/) radiosondes. These radiosonde models
 have very similar hardware, so that it is relatively easy to support both with the same codebase.
+It is unlikely that RS41ng could support any other radiosonde hardware for now.
 
 Some code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
