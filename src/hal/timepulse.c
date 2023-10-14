@@ -106,13 +106,15 @@ void EXTI9_5_IRQHandler(void)
        old_millis = m;		// First timepulse.  Just store millis.
     } else {
        d_millis = m - old_millis;			// mS since last timepulse.  Ideally there were 1000.
-       delta = (int) (1000 - d_millis) / 5;		// If too few clicks, speed up clock.  If too many, slow down.
-       // Don't allow calibration suggestion to go out of range
-       if (((delta + calib_suggestion) >= 0) &&
-           ((delta + calib_suggestion <= 31)) ) {
-          // If the delta makes sense, apply to the suggestion.  Otherwise, skip.
-	  calib_suggestion += delta;
-       }
        old_millis = m;
+       delta = (int) (1000 - d_millis) / 5;		// If too few clicks, speed up clock.  If too many, slow down.
+       if (delta > 1) delta = 1;	// Take one step at a time in case we had a bad clock tick
+       if (delta < -1) delta = -1;
+       // Don't allow calibration suggestion to go out of range
+       if (((delta + calib_current) >= 0) &&
+           ((delta + calib_current <= 31)) ) {
+          // If the delta makes sense, apply to the suggestion.  Otherwise, skip.
+	  calib_suggestion = calib_current + delta;
+       }
     }
 }
