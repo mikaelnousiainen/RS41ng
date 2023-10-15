@@ -619,9 +619,22 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 * https://destevez.net/2017/11/tracking-an-rs41-sgp-radiosonde-and-reporting-to-aprs/
 * https://github.com/digiampietro/esp8266-rs41 - A tool for reconfiguring RS41s via its serial port
 
+## Vaisala RS41 hardware datasheets
+
+* STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
+* Si4032 datasheet: https://www.silabs.com/documents/public/data-sheets/Si4030-31-32.pdf
+* Si4030/31/32 Register Descriptions: https://www.silabs.com/documents/public/application-notes/AN466.pdf
+
 ## Graw DFM-17 hardware documentation
 
 * https://wiki.recessim.com/view/DFM-17_Radiosonde - Reverse-engineered documentation on the DFM-17 hardware
+
+## Graw DFM-17 hardware datasheets
+
+- STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
+- Si4063 datasheet:  https://www.silabs.com/documents/public/data-sheets/Si4063-60-C.pdf
+- Programming Guide for EZRadioPRO Si4x6x Devices: https://www.silabs.com/documents/public/application-notes/AN633.pdf
+- Si4x6x API Documentation:  http://www.silabs.com/documents/public/application-notes/EZRadioPRO_REVC2_API.zip
 
 ## Alternative RS41 firmware projects (only for RS41!)
 
