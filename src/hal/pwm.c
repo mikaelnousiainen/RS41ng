@@ -42,19 +42,13 @@ void pwm_data_timer_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
     */
 
     TIM_Cmd(TIM2, ENABLE);
-}
-
-void pwm_data_timer_dma_request_enable(bool enabled)
-{
-    // TIM2 Update DMA requests are routed to DMA1 Channel2
-    TIM_DMACmd(TIM2, TIM_DMA_Update, enabled ? ENABLE : DISABLE);
 }
 
 void pwm_data_timer_uninit()
@@ -65,7 +59,9 @@ void pwm_data_timer_uninit()
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_DeInit(TIM15);
+#ifdef RS41
     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
+#endif
     // Not needed: AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
@@ -83,6 +79,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 
     TIM_TimeBaseInit(TIM15, &tim_init);
 
+#ifdef RS41
     TIM_OCInitTypeDef TIM15_OCInitStruct;
 
     TIM_OCStructInit(&TIM15_OCInitStruct);
@@ -91,6 +88,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM15_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
     TIM15_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_High;
 
+    // TIM15 channel 2 can be used to drive pin PB15, which is connected to RS41 Si4032 SDI pin for direct modulation
     TIM_OC2Init(TIM15, &TIM15_OCInitStruct);
 
     // These are not needed?
@@ -104,9 +102,67 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM_OC2FastConfig(TIM15, TIM_OCFast_Enable);
 
     TIM_CtrlPWMOutputs(TIM15, DISABLE);
+#endif
+#ifdef DFM17
+    // For DFM17 we don't have a PWM pin in the right place, so we manually toggle the pin in the ISR
+    TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+    TIM_ITConfig(TIM15, TIM_IT_Update, ENABLE);
+
+    NVIC_InitTypeDef nvic_init;
+    nvic_init.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&nvic_init);
+#endif
 
     TIM_Cmd(TIM15, ENABLE);
 }
+
+void pwm_timer_pwm_enable(bool enabled)
+{
+#ifdef RS41
+    TIM_CtrlPWMOutputs(TIM15, enabled ? ENABLE : DISABLE);
+#endif
+}
+
+void pwm_timer_use(bool use)
+{
+#ifdef RS41
+    // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
+    // which is connected to RS41 Si4032 SDI pin for direct modulation
+    GPIO_PinRemapConfig(GPIO_Remap_TIM15, use ? ENABLE : DISABLE);
+#endif
+}
+
+void pwm_timer_uninit()
+{
+    TIM_CtrlPWMOutputs(TIM15, DISABLE);
+    TIM_Cmd(TIM15, DISABLE);
+
+    TIM_DeInit(TIM15);
+
+#ifdef RS41
+    GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
+#endif
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
+}
+
+inline uint16_t pwm_calculate_period(uint32_t frequency_hz_100)
+{
+    return (uint16_t) (((100.0f * 1000000.0f) / (frequency_hz_100 * 2.0f))) - 1;
+}
+
+inline void pwm_timer_set_frequency(uint32_t pwm_period)
+{
+    TIM_SetAutoreload(TIM15, pwm_period);
+}
+
+/**
+ * Below are experimental DMA routines for supplying PWM data for APRS modulation.
+ * This does not work correctly, but is left for future reference.
+ */
 
 static void pwm_dma_init_channel()
 {
@@ -146,8 +202,8 @@ void pwm_dma_init()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 0;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 }
@@ -172,6 +228,12 @@ void pwm_dma_stop()
     //pwm_dma_interrupt_enable(false);
 }
 
+void pwm_data_timer_dma_request_enable(bool enabled)
+{
+    // TIM2 Update DMA requests are routed to DMA1 Channel2
+    TIM_DMACmd(TIM2, TIM_DMA_Update, enabled ? ENABLE : DISABLE);
+}
+
 void DMA1_Channel2_IRQHandler(void)
 {
     if (DMA_GetITStatus(DMA1_IT_TE2)) {
@@ -186,43 +248,4 @@ void DMA1_Channel2_IRQHandler(void)
         DMA_ClearITPendingBit(DMA1_IT_TC2);
         pwm_handle_dma_transfer_full(PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
     }
-}
-
-void pwm_timer_pwm_enable(bool enabled)
-{
-    TIM_CtrlPWMOutputs(TIM15, enabled ? ENABLE : DISABLE);
-}
-
-void pwm_timer_use(bool use)
-{
-    GPIO_PinRemapConfig(GPIO_Remap_TIM15, use ? ENABLE : DISABLE);
-}
-
-void pwm_timer_uninit()
-{
-    TIM_CtrlPWMOutputs(TIM15, DISABLE);
-    TIM_Cmd(TIM15, DISABLE);
-
-    TIM_DeInit(TIM15);
-
-    GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, DISABLE);
-}
-
-inline uint16_t pwm_calculate_period(uint32_t frequency_hz_100)
-{
-    return (uint16_t) (((100.0f * 1000000.0f) / (frequency_hz_100 * 2.0f))) - 1;
-}
-
-inline void pwm_timer_set_frequency(uint32_t pwm_period)
-{
-    // TIM_CtrlPWMOutputs(TIM15, DISABLE);
-    // TIM_Cmd(TIM15, DISABLE);
-
-    TIM_SetAutoreload(TIM15, pwm_period);
-    // TIM_SetCompare2(TIM15, pwm_period / 2);
-
-    // TIM_Cmd(TIM15, ENABLE);
-    // TIM_CtrlPWMOutputs(TIM15, ENABLE);
 }

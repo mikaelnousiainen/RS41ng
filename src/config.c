@@ -27,6 +27,8 @@
  * $he - Heading in degrees (up to 3 chars)
  * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
  * $ri - Radiation intensity in µR/h (up to 5 chars)
+ * $ct - Clock calibration trim value (0-31, only for DFM-17)
+ * $cc - Clock calibration change count (only for DFM-17)
  *
  * Allowed message lengths:
  *
@@ -56,6 +58,7 @@ volatile bool system_initialized = false;
  * Maximum length: 64 characters.
  */
 char *cw_message_templates[] = {
+        "$cs",
 //        "$cs $loc6 $altm $gs km/h $tiC",
 //        "$cs $loc6",
 //        "$alt m",
@@ -83,7 +86,7 @@ char *aprs_comment_templates[] = {
 //        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
 //        " $loc12 - " APRS_COMMENT,
 //        " $teC $hu% $prmb PC $pc RI $ri uR/h - " APRS_COMMENT,
-//        " " APRS_COMMENT,
+        " " APRS_COMMENT,
         NULL
 };
 

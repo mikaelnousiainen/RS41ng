@@ -1,12 +1,10 @@
 #include "hal/system.h"
-#include "hal/i2c.h"
 #include "hal/spi.h"
 #include "hal/usart_gps.h"
 #include "hal/usart_ext.h"
 #include "hal/delay.h"
 #include "hal/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
-#include "drivers/si4032/si4032.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
 #include "radsens_handler.h"
@@ -14,6 +12,16 @@
 #include "radio.h"
 #include "config.h"
 #include "log.h"
+
+#ifdef RS41
+#include "hal/i2c.h"
+#include "drivers/si4032/si4032.h"
+#endif
+
+#ifdef DFM17
+#include "hal/clock_calibration.h"
+#include "drivers/si4063/si4063.h"
+#endif
 
 uint32_t counter = 0;
 bool led_state = true;
@@ -67,6 +75,17 @@ void set_red_led(bool enabled)
     system_set_red_led(enabled);
 }
 
+#ifdef DFM17
+void set_yellow_led(bool enabled)
+{
+    if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
+        enabled = false;
+    }
+
+    system_set_yellow_led(enabled);
+}
+#endif
+
 int main(void)
 {
     bool success;
@@ -89,8 +108,11 @@ int main(void)
         log_info("Pulse counter init\n");
         pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
+#ifdef RS41
+        // Only RS41 uses the I2C bus
         log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
         i2c_init(I2C_BUS_CLOCK_SPEED);
+#endif
     }
 
     log_info("SPI init\n");
@@ -105,8 +127,18 @@ int main(void)
         goto gps_init;
     }
 
+#ifdef DFM17
+    log_info("Timepulse init\n");
+    timepulse_init();
+#endif
+
+#if defined(RS41)
     log_info("Si4032 init\n");
     si4032_init();
+#elif defined(DFM17)
+    log_info("Si4063 init\n");
+    si4063_init();
+#endif
 
     if (bmp280_enabled) {
         for (int i = 0; i < 3; i++) {
@@ -160,6 +192,9 @@ int main(void)
 
     while (true) {
         radio_handle_main_loop();
+#ifdef DFM17
+        clock_calibration_adjust();
+#endif
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
     }

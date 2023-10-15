@@ -21,6 +21,9 @@ typedef struct _telemetry_data {
     gps_data gps;
 
     char locator[LOCATOR_PAIR_COUNT_FULL * 2 + 1];
+
+    int	clock_calibration_trim;
+    uint16_t clock_calibration_count;
 } telemetry_data;
 
 void telemetry_collect(telemetry_data *data);

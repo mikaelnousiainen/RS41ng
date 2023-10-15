@@ -1,4 +1,6 @@
-#include <stdint.h>
+#include "config.h"
+
+#ifdef RS41
 #include <string.h>
 
 #include "hal/system.h"
@@ -27,13 +29,12 @@
 static bool si4032_use_dma = false;
 
 // TODO: Add support for multiple APRS baud rates
-uint16_t symbol_delay_bell_202_1200bps_us = 823;
+// This delay is for RS41 radiosondes
+#define symbol_delay_bell_202_1200bps_us 823
 
 static volatile bool radio_si4032_state_change = false;
 static volatile uint32_t radio_si4032_freq = 0;
 static volatile int8_t radio_dma_transfer_stop_after_counter = -1;
-
-uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
 
 uint16_t radio_si4032_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t *buffer);
 
@@ -258,7 +259,7 @@ inline void radio_handle_data_timer_si4032()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
-                log_info("Horus V1 TX finished\n");
+                log_info("Horus TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 system_enable_tick();
@@ -405,3 +406,4 @@ void radio_init_si4032()
         pwm_dma_init();
     }
 }
+#endif

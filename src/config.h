@@ -1,9 +1,21 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
+//#define RS41
+//#define DFM17
+
+#if !defined(RS41) && !defined(DFM17)
+#error "No hardware type specified. Please define RS41 or DFM17."
+#endif
+#if defined(RS41) && defined(DFM17)
+#error "Please define either RS41 or DFM17."
+#endif
+
+
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
-// NOTE: Semihosting has to be disabled when the RS41 radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
+// NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
 //#define SEMIHOSTING_ENABLE
 //#define LOGGING_ENABLE
 
@@ -24,30 +36,6 @@
 
 // Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
 #define ALLOW_POWER_OFF false
-
-// Define the I²C bus clock speed in Hz.
-// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
-// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
-#define I2C_BUS_CLOCK_SPEED 100000
-
-// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
-// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
-#define SENSOR_BMP280_ENABLE false
-// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
-#define SENSOR_BMP280_I2C_ADDRESS 0x77
-
-// Enable use of an externally connected I²C RadSens radiation sensor
-#define SENSOR_RADSENS_ENABLE false
-// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
-#define SENSOR_RADSENS_CHIP_ID 0x7D
-// RadSens I²C device address, default is 0x66.
-#define SENSOR_RADSENS_I2C_ADDRESS 0x66
-// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
-// The value is stored in the non-volatile memory of the microcontroller.
-#define SENSOR_RADSENS_SENSITIVITY 105
-
-// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
-#define RADIO_SI5351_ENABLE false
 
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
@@ -82,6 +70,34 @@
 #error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
 #endif
 
+/**
+ * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
+ */
+
+// Define the I²C bus clock speed in Hz.
+// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
+// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
+#define I2C_BUS_CLOCK_SPEED 100000
+
+// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
+// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
+#define SENSOR_BMP280_ENABLE false
+// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BMP280_I2C_ADDRESS 0x77
+
+// Enable use of an externally connected I²C RadSens radiation sensor
+#define SENSOR_RADSENS_ENABLE false
+// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
+#define SENSOR_RADSENS_CHIP_ID 0x7D
+// RadSens I²C device address, default is 0x66.
+#define SENSOR_RADSENS_I2C_ADDRESS 0x66
+// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
+// The value is stored in the non-volatile memory of the microcontroller.
+#define SENSOR_RADSENS_SENSITIVITY 105
+
+// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
+#define RADIO_SI5351_ENABLE false
+
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
 // Also changes the Horus 4FSK V2 data format and adds a custom data field for pulse count.
@@ -110,7 +126,7 @@
 #endif
 
 /**
- * Built-in Si4032 radio chip transmission configuration
+ * RS41 only: Built-in Si4032 radio chip transmission configuration
  */
 
 // Si4032 transmit power: 0..7
@@ -148,7 +164,42 @@
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
 
 /**
- * External Si5351 radio chip transmission configuration
+ * DFM-17 only: Built-in Si4063 radio chip transmission configuration
+ */
+
+// Si4063 transmit power: 0..127
+// TODO: Document Si4063 transmit power levels
+#define RADIO_SI4063_TX_POWER 127
+
+// Which modes to transmit using the built-in Si4063 transmitter chip
+// The COUNT settings define the number of times that each type of transmission is repeated
+#define RADIO_SI4063_TX_CW false
+#define RADIO_SI4063_TX_CW_COUNT 1
+#define RADIO_SI4063_TX_PIP false
+#define RADIO_SI4063_TX_PIP_COUNT 6
+#define RADIO_SI4063_TX_APRS true
+#define RADIO_SI4063_TX_APRS_COUNT 2
+#define RADIO_SI4063_TX_HORUS_V1 false
+#define RADIO_SI4063_TX_HORUS_V1_COUNT 1
+#define RADIO_SI4063_TX_HORUS_V2 true
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+
+// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+// The continuous mode transmits Horus 4FSK preamble between transmissions
+// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
+#define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
+#define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
+
+// Transmit frequencies for the Si4063 transmitter modes
+#define RADIO_SI4063_TX_FREQUENCY_CW        432500000
+#define RADIO_SI4063_TX_FREQUENCY_PIP       432500000
+#define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
+// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+
+/**
+ * RS41 only: External Si5351 radio chip transmission configuration
  */
 
 // Si5351 transmit power: 0..3
@@ -236,6 +287,7 @@
  */
 
 #define HORUS_FREQUENCY_OFFSET_SI4032 0
+#define HORUS_FREQUENCY_OFFSET_SI4063 0
 
 /**
  * Horus V1 4FSK mode settings (deprecated, please use Horus V2 mode)
@@ -246,6 +298,7 @@
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V1_PAYLOAD_ID 0
 #define HORUS_V1_BAUD_RATE_SI4032 100
+#define HORUS_V1_BAUD_RATE_SI4063 100
 #define HORUS_V1_BAUD_RATE_SI5351 50
 #define HORUS_V1_PREAMBLE_LENGTH 16
 #define HORUS_V1_IDLE_PREAMBLE_LENGTH 32
@@ -265,6 +318,7 @@
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 #define HORUS_V2_PAYLOAD_ID 256
 #define HORUS_V2_BAUD_RATE_SI4032 100
+#define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
 #define HORUS_V2_PREAMBLE_LENGTH 16
 #define HORUS_V2_IDLE_PREAMBLE_LENGTH 32

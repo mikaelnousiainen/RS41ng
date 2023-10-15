@@ -1,10 +1,64 @@
-#include "drivers/si5351/si5351.h"
+#include "config.h"
+
+#if SI5351_FAST_ENABLE
 #include "drivers/si5351fast/si5351mcu.h"
+#else
+#include "drivers/si5351/si5351.h"
+#endif
 #include "si5351_handler.h"
 
-Si5351 *si5351;
+#if SI5351_FAST_ENABLE
 Si5351mcu si5351_fast;
+#else
+Si5351 *si5351;
+#endif
 
+#if SI5351_FAST_ENABLE
+bool si5351_handler_init()
+{
+    si5351_fast.init(&DEFAULT_I2C_PORT, SIADDR);
+    return true;
+}
+
+bool si5351_set_frequency(si5351_clock_id clock, uint64_t frequency_hz_100)
+{
+    si5351_fast.setFreq((uint8_t) clock, frequency_hz_100 / 100L);
+    return true;
+}
+
+void si5351_output_enable(si5351_clock_id clock, bool enabled)
+{
+    if (enabled) {
+        si5351_fast.enable((uint8_t) clock);
+    } else {
+        si5351_fast.disable((uint8_t) clock);
+    }
+}
+
+void si5351_set_drive_strength(si5351_clock_id clock, uint8_t drive)
+{
+    int si5351_drive;
+
+    switch (drive) {
+        case 0:
+            si5351_drive = SIOUT_2mA;
+            break;
+        case 1:
+            si5351_drive = SIOUT_4mA;
+            break;
+        case 2:
+            si5351_drive = SIOUT_6mA;
+            break;
+        case 3:
+            si5351_drive = SIOUT_8mA;
+            break;
+        default:
+            si5351_drive = SIOUT_2mA;
+    }
+
+    si5351_fast.setPower(si5351_drive, (uint8_t) clock);
+}
+#else
 bool si5351_handler_init()
 {
     si5351 = new Si5351(&DEFAULT_I2C_PORT);
@@ -14,9 +68,6 @@ bool si5351_handler_init()
     if (!si5351_found) {
         return si5351_found;
     }
-
-    // si5351_fast.init(&DEFAULT_I2C_PORT, SIADDR);
-
     return si5351_found;
 }
 
@@ -53,42 +104,4 @@ void si5351_set_drive_strength(si5351_clock_id clock, uint8_t drive)
 
     si5351->drive_strength((enum si5351_clock) clock, si5351_drive);
 }
-
-bool si5351_set_frequency_fast(si5351_clock_id clock, uint64_t frequency_hz_100)
-{
-    si5351_fast.setFreq((uint8_t) clock, frequency_hz_100 / 100L);
-    return true;
-}
-
-void si5351_output_enable_fast(si5351_clock_id clock, bool enabled)
-{
-    if (enabled) {
-        si5351_fast.enable((uint8_t) clock);
-    } else {
-        si5351_fast.disable((uint8_t) clock);
-    }
-}
-
-void si5351_set_drive_strength_fast(si5351_clock_id clock, uint8_t drive)
-{
-    int si5351_drive;
-
-    switch (drive) {
-        case 0:
-            si5351_drive = SIOUT_2mA;
-            break;
-        case 1:
-            si5351_drive = SIOUT_4mA;
-            break;
-        case 2:
-            si5351_drive = SIOUT_6mA;
-            break;
-        case 3:
-            si5351_drive = SIOUT_8mA;
-            break;
-        default:
-            si5351_drive = SIOUT_2mA;
-    }
-
-    si5351_fast.setPower(si5351_drive, (uint8_t) clock);
-}
+#endif

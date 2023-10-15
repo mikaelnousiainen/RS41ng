@@ -10,6 +10,7 @@
 typedef enum _radio_type {
     RADIO_TYPE_SI4032 = 1,
     RADIO_TYPE_SI5351,
+    RADIO_TYPE_SI4063,
 } radio_type;
 
 typedef enum _radio_data_mode {
@@ -80,5 +81,6 @@ typedef struct _radio_module_state {
 
 extern radio_transmit_entry *radio_current_transmit_entry;
 extern radio_module_state radio_shared_state;
+extern uint32_t precalculated_pwm_periods[];
 
 #endif

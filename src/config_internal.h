@@ -13,6 +13,9 @@
 // PARIS: 50 dot durations, 20 WPM -> 60ms per unit
 #define MORSE_WPM_TO_SYMBOL_RATE(wpm) (1000 / (60 * 20 / wpm))
 
+// Experimental fast frequency change routine for Si5351, not tested
+#define SI5351_FAST_ENABLE false
+
 #include <stdbool.h>
 
 extern bool leds_enabled;

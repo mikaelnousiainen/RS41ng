@@ -19,6 +19,7 @@ void data_timer_init(uint32_t baud_rate)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     RCC_APB2PeriphResetCmd(RCC_APB1Periph_TIM2, DISABLE);
 
+    // The data timer assumes a 24 MHz clock source
     tim_init.TIM_Prescaler = 24 - 1; // tick every 1/1000000 s
     tim_init.TIM_CounterMode = TIM_CounterMode_Up;
     tim_init.TIM_Period = (uint16_t) ((1000000 / baud_rate) - 1);
@@ -33,8 +34,8 @@ void data_timer_init(uint32_t baud_rate)
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_init);
 
@@ -47,8 +48,8 @@ void data_timer_uninit()
 
     NVIC_InitTypeDef nvic_init;
     nvic_init.NVIC_IRQChannel = TIM2_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
+    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
+    nvic_init.NVIC_IRQChannelSubPriority = 2;
     nvic_init.NVIC_IRQChannelCmd = DISABLE;
     NVIC_Init(&nvic_init);
 
@@ -60,8 +61,6 @@ void TIM2_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-
         system_handle_data_timer_tick();
-
     }
 }

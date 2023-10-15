@@ -1,25 +1,37 @@
-# RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
+# RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-**NOTE:** While this firmware has been tested with great success on a number of high-altitude balloon
+**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
+
+**NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
+DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
+
+**NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
 
-This is a custom, amateur radio-oriented firmware for [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41).
+## What is RS41ng?
+
+RS41ng is a custom, amateur radio-oriented firmware for [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
+and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/) radiosondes. These radiosonde models
+have very similar hardware, so that it is relatively easy to support both with the same codebase.
+It is unlikely that RS41ng could support any other radiosonde hardware for now.
+
 Some code is based on an earlier RS41 firmware project called [RS41HUP](https://github.com/df8oe/RS41HUP),
 but most of it has been rewritten from scratch. The Horus 4FSK code has been adapted from
 the [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP).
 
 ## Asking questions, filing feature requests and reporting issues
 
-* Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your RS41-based projects
+* Please use [GitHub discussions](../../discussions) for asking questions and for sharing info about your radiosonde-based projects
   * For example, questions about firmware configuration and connecting of external chips to the sonde belong here
 * Please use [GitHub issues](../../issues) to file new feature requests or issues that you have already identified with the firmware
   * However, please remember to post questions about usage to [GitHub discussions](../../discussions)
 
-## What are the Vaisala RS41 radiosondes and how can I get one?
+## What are radiosondes and how can I get one?
 
-The RS41 radiosondes are used extensively for atmospheric sounding by the meteorological institutes in various countries and thus easily
-available to be collected once they land, an activity called radiosonde hunting: see YouTube presentation about
+Radiosondes, especially the RS41 and DFM-17, are used extensively for atmospheric sounding by the meteorological
+institutes in various countries and thus easily available to be collected once they land, an activity called
+radiosonde hunting: see YouTube presentation about
 [Tracking and Chasing Weather Balloons by Andreas Spiess](https://www.youtube.com/watch?v=vQfztG60umI) or
 [Chasing Radiosonde Weather Balloons used in Meteorology for Fun by Mark VK5QI](https://www.youtube.com/watch?v=fb9gNomWrAY)
 for more details!
@@ -34,23 +46,44 @@ For your own receiver station, you will need:
 3. Radiosonde tracker software: common choices are [RS41 Tracker](http://escursioni.altervista.org/Radiosonde/) for Windows
    and [radiosonde_auto_rx](https://github.com/projecthorus/radiosonde_auto_rx) for Linux / Raspberry Pi.
 
-### What can I do with an RS41 radiosonde?
+### What can I do with the RS41 and DFM-17 radiosondes?
 
-The [Vaisala RS41 radiosondes](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
-uses an off-the-shelf [STM32F100C8](https://www.st.com/en/microcontrollers-microprocessors/stm32f100c8.html)
-32-bit microcontroller, which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
+The [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
+and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/)
+radiosondes both use off-the-shelf 32-bit [STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) microcontrollers,
+which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
 or a smaller [ST-LINK v2 USB dongle](https://www.adafruit.com/product/2548).
 
-The RS41 hardware can be programmed to transmit different kinds of RF modulations (morse code, APRS and different FSK modulations)
-on the 70 cm (~433 MHz) amateur radio band. The radiosonde contains a [UBX-G6010](https://www.u-blox.com/en/product/ubx-g6010-st-chip)
-GPS chip, so it can be used as a tracker device, e.g. for high-altitude balloons.
+There is detailed information about the hardware of these radiosonde models on the following pages:
 
-The RS41ng firmware is just one example of what can be achieved with the RS41 hardware!
+* https://github.com/bazjo/RS41_Hardware
+* https://wiki.recessim.com/view/DFM-17_Radiosonde
+
+The radiosondes can be reprogrammed to transmit different kinds of RF modulations (morse code, APRS and different FSK modulations)
+on the 70 cm (~433 MHz) amateur radio band. The radiosonde contain Ublox
+GPS chips, so it can be used as a tracker device, e.g. for high-altitude balloons.
+
+The RS41ng firmware is just one example of what can be achieved with the hardware of these radiosondes!
+
+## What are high-altitude balloon flights?
+
+High-altitude balloon flights arranged by hobbyists are fun technical experiments.
+The flight goals are usually related to aerial photography, testing of radio tracker and transmitter hardware
+and different kinds of measurements with on-board sensors.
+
+The following websites contain more information about planning and launching a high-altitude balloon flight:
+
+* https://www.overlookhorizon.com/ - Overlook Horizon high-altitude balloon flights.
+* http://www.projecthorus.org/ - Australian high-altitude balloon project. Website no longer updated.
+* https://www.areg.org.au/archives/category/activities/project-horus - Newer Project Horus flights.
+* https://ukhas.org.uk/ - UK high-altitude society.
+* http://www.daveakerman.com/ - High-altitude balloon blog of Dave Akerman.
+* https://0xfeed.tech/ - High-altitude balloon / ham radio blog of Mikael Nousiainen OH3BHX.
 
 ## Why does the RS41ng firmware exist?
 
 The motivation to develop this firmware is to provide a clean, customizable and
-modular codebase for developing RS41 radiosonde-based experiments.
+modular codebase for developing radiosonde-based experiments.
 
 See the feature list below.
 
@@ -60,25 +93,37 @@ The main features the RS41ng firmware are:
 
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
-    * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor
+    * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
   * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
     * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
   * Morse code (CW)
-  * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
   * "Pip" mode, which transmits a short beep generated using CW to indicate presence of the transmitter
+  * **RS41 only:** JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
+* Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation
+* Extensibility to allow easy addition of new transmission modes and new sensors
+
+Features available on RS41 hardware only:
+
 * Support for custom sensors via the external I²C bus
 * Support for counting pulses on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
 * GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
-* Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation (and ultimately DMA-based symbol timing, if possible)
-* Extensibility to allow easy addition of new transmission modes and new sensors
+
+Notes for DFM-17:
+
+* **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
+  This is necessary, because the internal oscillator is not particularly accurate.
+  DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before
+  the internal oscillator has been calibrated.
+  * The RS41 radiosonde hardware uses an external oscillator, which is more stable, so RS41 does not
+    suffer from the same issue.
 
 ### Transmission modes
 
-On the internal Si4032 transmitter:
+On the internal Si4032 (RS41) and Si4063 (DFM-17) transmitters:
 
 * APRS (1200 baud)
 * Horus 4FSK v1 and v2 (100 baud)
@@ -96,7 +141,7 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 #### Notes about APRS
 
 * Bell 202 frequencies are generated via hardware PWM, but the symbol timing is created in a loop with delay
-* There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but I have not been able to get the timings working correctly
+* There is also code available to use DMA transfers for symbol timing to achieve greater accuracy, but the timings are not working correctly
 
 #### Notes about Horus 4FSK
 
@@ -105,7 +150,7 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
 * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
 
-### External sensors
+### External sensors (RS41 only)
 
 It is possible to connect external sensors to the I²C bus of the RS41 radiosonde.
 
@@ -123,7 +168,7 @@ Sensor driver code contributions are welcome!
 
 * Configurable transmission frequencies and schedules based on location / altitude
 * Support for more I²C sensors
-* RTTY on both Si4032 (70 cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
+* RTTY on both Si4032/Si4063 (70 cm, non-standard shift) and Si5351 (HF + 2m) with configurable shift
 * Investigate possibility to implement 1200 bps Bell 202 modulation (and
   possibly also 300 bps Bell 103 modulation) for APRS using Si5351,
   this requires special handling to make Si5351 change frequency quickly
@@ -133,11 +178,20 @@ Sensor driver code contributions are welcome!
 
 1. Configure your amateur radio call sign, transmission schedule (time sync),
    transmit frequencies and transmission mode parameters in `config.h`
-2. Set up transmitted message templates in `config.c`, depending on the modes you use
+    * Select the desired radiosonde type in the beginning of the file by removing the `//` comment from either
+      the `#define RS41` or `#define DFM17` lines.
+    * Customize at least the following settings:
+        * `CALLSIGN`
+        * For RS41, the settings beginning with `RADIO_SI4032_` to select transmit power and the modes to transmit
+        * For DFM-17, the settings beginning with `RADIO_SI4063_` to select transmit power and the modes to transmit
+        * `HORUS_V2_PAYLOAD_ID` if you transmit Horus 4FSK
+        * `APRS_COMMENT` if you transmit APRS
+2. Set up transmitted message templates in `config.c`, depending on the modes you use.
+   You can customize the APRS and CW messages in more detail here.
 
 ### Power consumption and power-saving features
 
-Power consumption notes (at 3V supply voltage) by Mark VK5QI:
+Power consumption notes (at 3V supply voltage) for RS41 by Mark VK5QI:
 
 - GPS in full power acquisition mode: 110-120 mA (TX off), 160-170 mA (TX on)
 - GPS locked (5 sats), full power: 96 - 126 mA (TX off), 170 mA (TX on)
@@ -313,16 +367,21 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
     ```
 3. The firmware will be stored in file `build/src/RS41ng.elf`
 
-## Flashing the firmware
+## Prepare the radiosonde for flashing the firmware
 
 Hardware requirements:
 
-* A working [Vaisala RS41 radiosonde](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41) :)
-* An [ST-LINK v2 programmer for the STM32 microcontroller](https://www.st.com/en/development-tools/st-link-v2.html) in the RS41 radiosonde. 
-  * These smaller [ST-LINK v2 USB dongles](https://www.adafruit.com/product/2548) also work well.
-  * [Partco sells the ST-LINK v2 USB dongles in Finland](https://www.partco.fi/en/measurement/debugging/20140-stlinkv2.html)
+* A working [Vaisala RS41](https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/soundings-products/rs41)
+  or [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/) radiosonde :)
+* An [ST-LINK v2 programmer for the STM32 microcontroller](https://www.st.com/en/development-tools/st-link-v2.html) in the RS41 radiosonde.
+    * These smaller [ST-LINK v2 USB dongles](https://www.adafruit.com/product/2548) also work well.
+    * [Partco sells the ST-LINK v2 USB dongles in Finland](https://www.partco.fi/en/measurement/debugging/20140-stlinkv2.html)
 
-The pinout of the RS41 connector (by DF8OE and VK5QI) is the following:
+Follow the instructions below for the radiosonde model you have.
+
+### Vaisala RS41 programming connector
+
+The pinout of the RS41 programming connector (by DF8OE and VK5QI) is the following:
 
 ```
 ______________________|           |______________________
@@ -352,22 +411,80 @@ ______________________|           |______________________
 * 9 - SWDIO (PA13)
 * 10 - GND
 
-### Steps to flash the firmware
+#### Connect the RS41 radiosonde to the programmer
 
-1. If your ST-LINK v2 programmer is capable of providing power (as some third-party clones are),
+1. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
-  * SWDIO -> Pin 9 (SWDIO)
-  * SWCLK -> Pin 8 (SWCLK)
-  * GND -> Pin 1 (GND)
-  * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
-3. Unlock the flash protection - needed only before reprogramming the sonde for the first time
-  * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
-  * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `63` with `31`:
-    * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
-4. Flash the firmware
-  * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
-5. Power cycle the sonde to start running the new firmware
+    * SWDIO -> Pin 9 (SWDIO)
+    * SWCLK -> Pin 8 (SWCLK)
+    * GND -> Pin 1 (GND)
+    * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
+
+### Graw DFM-17 programming connector
+
+The DFM-17 programming connector is an unpopulated group of pads on the circuit board
+between the sensor boom connector and the main STM32 microcontroller.
+
+The pinout of the DFM-17 programming connector is the following:
+
+```
+_____
+|   |
+| S |       _____________________
+| e |       |                   |
+| n |       |   1           2   |
+| s |       |                   |
+| o |       |   3           4   |             ________________________
+| r |       |                   |             |
+|   |       |   5           6   |             | STM32 microcontroller
+| b |       |                   |             |
+| o |       |   7           8   |             |
+| o |       |                   |             |
+| m |       |   9          10   |             |
+|   |       |                   |             |
+|   |       |____________________             |
+|   |
+|___|
+
+(The sensor boom connector is on the left and the main microcontroller unit on the right side)
+```
+
+* 1 - VTRef
+    * This pin powers the device via 3.3V voltage from an ST-LINK programmer dongle
+* 2 - SWDIO / TMS
+* 3 - GND
+* 4 - SWCLK / TCK
+* 5 - GND
+* 6 - SWO EXT TRACECTL / TDO
+* 7 - KEY
+* 8 - NC EXT / TDI
+* 9 - GNDDetect
+* 10 - nRESET
+
+#### Connect the DFM-17 radiosonde to the programmer
+
+1. Since the DFM-17 programming connector is just an unpopulated group of pads on the circuit board,
+   **you will need to either solder wires directly to the pads or alternatively solder a 0.05" (1.27mm) 5-by-2 pin header to the pads**.
+   There are suitable ribbon cables with 5x2 0.05" connectors available for this type of pin header.
+2. Connect an ST-LINK v2 programmer dongle to the sonde via the following pins:
+    * SWDIO -> Pin 2 (SWDIO)
+    * SWCLK -> Pin 4 (SWCLK)
+    * RST -> Pin 10 (RST)
+    * GND -> Pin 5 (GND)
+    * 3.3V -> Pin 1 (VTRef) (only required when using the programmer to power the sonde)
+3. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
+   remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
+
+## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
+
+1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
+    * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+    * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `63` with either `31` or the number the error message suggests:
+        * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+2. Flash the firmware
+    * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+3. Power cycle the sonde to start running the new firmware
 
 ## Developing / debugging the firmware
 
@@ -415,6 +532,8 @@ To load debugging symbols for settings breakpoints and to perform more detailed 
 use command `file src/RS41ng.elf`.
 
 ## Si4032 Bell FSK modulation hack for APRS
+
+Notes by Mikael OH3BHX:
 
 The idea behind the APRS / Bell 202 modulation implementation is based on RS41HUP project and its "ancestors"
 and I'm describing it here, since it has not been documented elsewhere.
@@ -483,7 +602,9 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 
 # Authors
 
-* Mikael Nousiainen OH3BHX <oh3bhx@sral.fi>
+* Mikael Nousiainen OH3BHX <mikael@0xfeed.tech>
+* Mike Hojnowski KD2EAT contributed significantly to Graw DFM-17 support
+* Various authors with smaller contributions from GitHub pull requests
 * Original codebase: DF8OE and other authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 * Horus 4FSK code adapted from [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP) project
 
@@ -496,8 +617,26 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 * http://happysat.nl/RS-41/RS41.html - Vaisala RS-41 SGP Modification and info about the original firmware settings
 * https://destevez.net/2018/06/flashing-a-vaisala-rs41-radiosonde/
 * https://destevez.net/2017/11/tracking-an-rs41-sgp-radiosonde-and-reporting-to-aprs/
+* https://github.com/digiampietro/esp8266-rs41 - A tool for reconfiguring RS41s via its serial port
 
-## Alternative firmware projects
+## Vaisala RS41 hardware datasheets
+
+* STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
+* Si4032 datasheet: https://www.silabs.com/documents/public/data-sheets/Si4030-31-32.pdf
+* Si4030/31/32 Register Descriptions: https://www.silabs.com/documents/public/application-notes/AN466.pdf
+
+## Graw DFM-17 hardware documentation
+
+* https://wiki.recessim.com/view/DFM-17_Radiosonde - Reverse-engineered documentation on the DFM-17 hardware
+
+## Graw DFM-17 hardware datasheets
+
+* STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
+* Si4063 datasheet:  https://www.silabs.com/documents/public/data-sheets/Si4063-60-C.pdf
+* Programming Guide for EZRadioPRO Si4x6x Devices: https://www.silabs.com/documents/public/application-notes/AN633.pdf
+* Si4x6x API Documentation:  http://www.silabs.com/documents/public/application-notes/EZRadioPRO_REVC2_API.zip
+
+## Alternative RS41 firmware projects (only for RS41!)
 
 * https://github.com/df8oe/RS41HUP - The original amateur radio firmware for RS41
 * https://github.com/darksidelemm/RS41HUP - A fork of the original firmware that includes support for Horus 4FSK (but omits APRS)
