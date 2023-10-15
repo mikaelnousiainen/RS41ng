@@ -37,30 +37,6 @@
 // Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
 #define ALLOW_POWER_OFF false
 
-// Define the I²C bus clock speed in Hz.
-// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
-// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
-#define I2C_BUS_CLOCK_SPEED 100000
-
-// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
-// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
-#define SENSOR_BMP280_ENABLE false
-// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
-#define SENSOR_BMP280_I2C_ADDRESS 0x77
-
-// Enable use of an externally connected I²C RadSens radiation sensor
-#define SENSOR_RADSENS_ENABLE false
-// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
-#define SENSOR_RADSENS_CHIP_ID 0x7D
-// RadSens I²C device address, default is 0x66.
-#define SENSOR_RADSENS_I2C_ADDRESS 0x66
-// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
-// The value is stored in the non-volatile memory of the microcontroller.
-#define SENSOR_RADSENS_SENSITIVITY 105
-
-// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
-#define RADIO_SI5351_ENABLE false
-
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
@@ -93,6 +69,34 @@
 #if (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
 #error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
 #endif
+
+/**
+ * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
+ */
+
+// Define the I²C bus clock speed in Hz.
+// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
+// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
+#define I2C_BUS_CLOCK_SPEED 100000
+
+// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
+// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
+#define SENSOR_BMP280_ENABLE false
+// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BMP280_I2C_ADDRESS 0x77
+
+// Enable use of an externally connected I²C RadSens radiation sensor
+#define SENSOR_RADSENS_ENABLE false
+// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
+#define SENSOR_RADSENS_CHIP_ID 0x7D
+// RadSens I²C device address, default is 0x66.
+#define SENSOR_RADSENS_I2C_ADDRESS 0x66
+// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
+// The value is stored in the non-volatile memory of the microcontroller.
+#define SENSOR_RADSENS_SENSITIVITY 105
+
+// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
+#define RADIO_SI5351_ENABLE false
 
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
