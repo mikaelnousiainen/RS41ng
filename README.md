@@ -631,10 +631,10 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 
 ## Graw DFM-17 hardware datasheets
 
-- STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
-- Si4063 datasheet:  https://www.silabs.com/documents/public/data-sheets/Si4063-60-C.pdf
-- Programming Guide for EZRadioPRO Si4x6x Devices: https://www.silabs.com/documents/public/application-notes/AN633.pdf
-- Si4x6x API Documentation:  http://www.silabs.com/documents/public/application-notes/EZRadioPRO_REVC2_API.zip
+* STM32F100x8 datasheet:  https://www.st.com/resource/en/datasheet/stm32f100cb.pdf
+* Si4063 datasheet:  https://www.silabs.com/documents/public/data-sheets/Si4063-60-C.pdf
+* Programming Guide for EZRadioPRO Si4x6x Devices: https://www.silabs.com/documents/public/application-notes/AN633.pdf
+* Si4x6x API Documentation:  http://www.silabs.com/documents/public/application-notes/EZRadioPRO_REVC2_API.zip
 
 ## Alternative RS41 firmware projects (only for RS41!)
 
