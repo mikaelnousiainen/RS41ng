@@ -1,6 +1,6 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
+**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues! **Using a DFM-17 as a primary flight tracker is NOT recommended yet!**
 
 **NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
 DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
