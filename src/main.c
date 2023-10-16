@@ -17,20 +17,46 @@
 
 uint32_t counter = 0;
 bool led_state = true;
+uint32_t noFixCounter = 0;
+bool inuse_handle_timer_tick = false;
+bool led_state2 = true;
 
 gps_data current_gps_data;
 
 void handle_timer_tick()
 {
+    if (inuse_handle_timer_tick) { return; } 
+    else { 
+        inuse_handle_timer_tick = true; 
+    }
     if (!system_initialized) {
+        inuse_handle_timer_tick = false; 
         return;
     }
-
     radio_handle_timer_tick();
-
+ 
     counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
         ubxg6010_get_current_gps_data(&current_gps_data);
+        if (GPS_REBOOT_MISSING_GPS_FIX_ENABLE) {
+            if (!GPS_HAS_FIX(current_gps_data)) {
+                noFixCounter = noFixCounter + 1;
+                //led_state2 = !led_state2;
+                //set_red_led(!led_state2);
+                if (noFixCounter >= GPS_REBOOT_MISSING_GPS_FIX_SECONDS) {
+                    noFixCounter = 0;
+                    // unproofed: secure: stop interrupt calls
+                    //system_handle_timer_tick = NULL;
+                    //system_handle_data_timer_tick = NULL;
+                    //usart_gps_handle_incoming_byte = NULL;
+
+                    // request cold boot on the STM32 processor
+                    inuse_handle_timer_tick = false; 
+                    nvic_cold_start();
+                    return;
+                }
+            }
+        } else { noFixCounter = 0; }
     }
 
     if (leds_enabled) {
@@ -47,6 +73,7 @@ void handle_timer_tick()
             }
         }
     }
+    inuse_handle_timer_tick = false;
 }
 
 void set_green_led(bool enabled)
@@ -70,6 +97,7 @@ void set_red_led(bool enabled)
 int main(void)
 {
     bool success;
+    system_initialized = false;
 
     // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
@@ -78,9 +106,14 @@ int main(void)
 
     log_info("System init\n");
     system_init();
-
+    set_red_led(false);
     set_green_led(false);
-    set_red_led(true);
+    system_flicker_green_led(5);
+    // delay_ms(100);
+    system_flicker_red_led(5);
+
+    //WOHA set_green_led(false);
+    //WOHA set_red_led(true);
 
     if (gps_nmea_output_enabled) {
         log_info("External USART init\n");
@@ -148,9 +181,11 @@ int main(void)
 
     log_info("System initialized!\n");
 
+set_green_led(false);
+
     if (leds_enabled) {
-        set_green_led(true);
-        set_red_led(false);
+        //WOHA set_green_led(true);
+        //WOHA set_red_led(false);
     } else {
         set_green_led(false);
         set_red_led(false);
@@ -158,7 +193,9 @@ int main(void)
 
     system_initialized = true;
 
+
     while (true) {
+//        set_red_led(true); delay_ms(50);set_red_led(false);
         radio_handle_main_loop();
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();

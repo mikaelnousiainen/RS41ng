@@ -50,7 +50,7 @@
 #define RADIO_SI5351_ENABLE false
 
 // Number of character pairs to include in locator
-#define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
+#define LOCATOR_PAIR_COUNT_FULL 12 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
 #define RADIO_POST_TRANSMIT_DELAY_MS 1000
@@ -65,6 +65,13 @@
 // Enable this setting to require 3D fix (altitude required, enable for airborne use), otherwise 2D fix is enough
 #define GPS_REQUIRE_3D_FIX true
 
+// Enable this setting to make a cold start on the CPU if GPS-Fix missing longer then GPS_REBOOT_MISSING_GPS_FIX_SECONDS 
+#define GPS_REBOOT_MISSING_GPS_FIX_ENABLE true
+
+// If enabled above, define threschold how long a missing GPS-Fix before cold start (dont hold it to short)
+#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 80
+
+
 // Enable power-saving features of the GPS chip to save power.
 // This option should be safe to enable, as it enters a selective power saving mode.
 // If the GPS chip loses fix, it will enter a higher power state automatically.
@@ -73,7 +80,7 @@
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
-#define GPS_POWER_SAVING_ENABLE false
+#define GPS_POWER_SAVING_ENABLE true
 
 // Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
@@ -124,14 +131,14 @@
 // The COUNT settings define the number of times that each type of transmission is repeated
 #define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
-#define RADIO_SI4032_TX_PIP false
-#define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_PIP true
+#define RADIO_SI4032_TX_PIP_COUNT 1
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -141,11 +148,11 @@
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432500000
-#define RADIO_SI4032_TX_FREQUENCY_PIP       432500000
+#define RADIO_SI4032_TX_FREQUENCY_PIP       434713000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  434713000
 // Use a rotating alternate 2nd frequency for HORUS_V2 (not continously)
 #define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  false
 #define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2  437600000
@@ -266,7 +273,7 @@
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V2_PAYLOAD_ID 256
+#define HORUS_V2_PAYLOAD_ID 373
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
 #define HORUS_V2_PREAMBLE_LENGTH 16
@@ -275,9 +282,9 @@
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define HORUS_V2_TIME_SYNC_SECONDS 0
+#define HORUS_V2_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 1
 
 /**
  * CW settings
@@ -297,13 +304,13 @@
  */
 
 // Pip speed is defined as CW WPM, range 5 - 40
-#define PIP_SPEED_WPM 18
+#define PIP_SPEED_WPM 10
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define PIP_TIME_SYNC_SECONDS 0
+#define PIP_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define PIP_TIME_SYNC_OFFSET_SECONDS 0
+#define PIP_TIME_SYNC_OFFSET_SECONDS 31
 
 /**
  * WSPR settings

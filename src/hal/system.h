@@ -15,10 +15,13 @@ void system_disable_tick();
 void system_enable_tick();
 void system_disable_irq();
 void system_enable_irq();
+void system_flicker_green_led(uint8_t count);
 void system_set_green_led(bool enabled);
+void system_flicker_red_led(uint8_t count);
 void system_set_red_led(bool enabled);
 uint16_t system_get_battery_voltage_millivolts();
 uint16_t system_get_button_adc_value();
+void nvic_cold_start();
 
 extern void (*system_handle_timer_tick)();
 

@@ -11,6 +11,7 @@
 #include "system.h"
 #include "delay.h"
 #include "log.h"
+#include "hal/cmsis/core_cm3.h"  // for NVIC_SystemReset
 
 #define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND
 
@@ -31,6 +32,11 @@ static void nvic_init()
 #else  // VECT_TAB_FLASH
     NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
 #endif
+}
+
+void nvic_cold_start()
+{
+    NVIC_SystemReset();
 }
 
 // TODO: Find out how to configure watchdog!
@@ -249,6 +255,18 @@ void system_enable_tick()
     TIM_Cmd(TIM4, ENABLE);
 }
 
+void system_flicker_green_led(uint8_t count)
+{
+  uint8_t i;
+      system_set_green_led(false);
+  for(i=1;i<=count;i++) {
+      system_set_green_led(true);
+      delay_ms(50);
+      system_set_green_led(false);
+      delay_ms(100);
+  }
+}
+
 void system_set_green_led(bool enabled)
 {
     if (enabled) {
@@ -256,6 +274,18 @@ void system_set_green_led(bool enabled)
     } else {
         GPIO_SetBits(GPIOB, GPIO_PIN_LED_GREEN);
     }
+}
+
+void system_flicker_red_led(uint8_t count)
+{
+  uint8_t i;
+      system_set_red_led(false);
+  for(i=1;i<=count;i++) {
+      system_set_red_led(true);
+      delay_ms(50);
+      system_set_red_led(false);
+      delay_ms(100);
+  }
 }
 
 void system_set_red_led(bool enabled)
