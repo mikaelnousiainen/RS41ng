@@ -56,7 +56,7 @@
 #define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
-#define RADIO_TIME_SYNC_THRESHOLD_MS 2000
+#define RADIO_TIME_SYNC_THRESHOLD_MS 4001
 
 // Number of leap seconds to add to the raw GPS time reported by the GPS chip (see https://timetoolsltd.com/gps/what-is-gps-time/ for more info)
 // This value is used by default, but if the received GPS data contains indication about leap seconds, that one is used instead.
@@ -69,7 +69,7 @@
 #define GPS_REBOOT_MISSING_GPS_FIX_ENABLE true
 
 // If enabled above, define threschold how long a missing GPS-Fix before cold start (dont hold it to short)
-#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 80
+#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 201
 
 
 // Enable power-saving features of the GPS chip to save power.

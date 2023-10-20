@@ -332,6 +332,8 @@ uint8_t radio_current_symbol_data[RADIO_SYMBOL_DATA_MAX_LENGTH];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
 
+bool led_state_radio = true;
+
 telemetry_data current_telemetry_data;
 
 radio_module_state radio_shared_state = {
@@ -422,6 +424,8 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     log_info("\n    ");
     log_bytes(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n");
+    log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
+
 #endif
 
     // USART interrupts may interfere with transmission timing
@@ -514,6 +518,8 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     if (!enable_gps_during_transmit) {
         ubxg6010_reset_parser();
     }
+    // to be sure:
+    success = false;
 
     switch (entry->radio_type) {
         case RADIO_TYPE_SI4032:
@@ -700,6 +706,7 @@ void radio_handle_timer_tick()
     }
 }
 
+// Called by Interrupt TIM2_IRQ
 void radio_handle_data_timer_tick()
 {
     radio_handle_data_timer_si4032();
@@ -731,17 +738,22 @@ bool radio_handle_time_sync()
 
     if (time_millis == radio_previous_time_sync_scheduled) {
         // The GPS chip has not provided an updated time yet for some reason
+        // WOHA
+        // log_info("@ time_millis same as last\n");
         return false;
     }
 
     uint32_t time_sync_offset_millis = radio_current_transmit_entry->time_sync_seconds_offset * 1000;
 
+    // Only at start of week, millis can be lower then offset :-)
     if (time_millis < time_sync_offset_millis) {
+        // WOHA
+        // log_info("@ Time millis: %lu lower %lu\n", time_millis, time_sync_offset_millis);
         return false;
     }
 
     uint32_t time_sync_millis = radio_current_transmit_entry->time_sync_seconds * 1000;
-
+        
     uint32_t time_with_offset_millis = time_millis - time_sync_offset_millis;
     uint32_t time_sync_period_millis = time_with_offset_millis % time_sync_millis;
 
@@ -779,7 +791,6 @@ void radio_handle_main_loop()
             delay_ms(100);
             return;
         }
-
         radio_reset_transmit_delay_counter();
         radio_start_transmit_entry = radio_current_transmit_entry;
     } else if (!radio_shared_state.radio_transmission_active && radio_post_transmit_delay_counter == 0) {

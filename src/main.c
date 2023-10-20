@@ -97,6 +97,8 @@ void set_red_led(bool enabled)
 int main(void)
 {
     bool success;
+    uint8_t gps_init_fail_counter = 0;
+    
     system_initialized = false;
 
     // Set up interrupt handlers
@@ -106,14 +108,9 @@ int main(void)
 
     log_info("System init\n");
     system_init();
-    set_red_led(false);
-    set_green_led(false);
-    system_flicker_green_led(5);
-    // delay_ms(100);
-    system_flicker_red_led(5);
 
-    //WOHA set_green_led(false);
-    //WOHA set_red_led(true);
+    set_green_led(false);
+    set_red_led(true);
 
     if (gps_nmea_output_enabled) {
         log_info("External USART init\n");
@@ -129,12 +126,28 @@ int main(void)
     log_info("SPI init\n");
     spi_init();
 
+        // look for Voltage
+        // maybe interessting to check if reset only helpfull after mV climbed up > 1500 mV by solar panel source
+        uint16_t batteryV = system_get_battery_voltage_millivolts();
+        float batteryVf = (float)batteryV / 5.0f;
+        uint8_t volts_scaled = (uint8_t)(255 * batteryVf);
+        // on debug with dongle the VCC is only 170 mV because board feed by dongle not on battery.
+        log_info("Startup Voltage: %d mV \n",volts_scaled);
+
     gps_init:
     log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {
         log_error("GPS initialization failed, retrying...\n");
         delay_ms(1000);
+        system_flicker_red_led(2);
+        gps_init_fail_counter++;
+        if (gps_init_fail_counter >= 10) {
+            system_disable_irq();
+            system_flicker_red_led(5);
+            nvic_cold_start();
+            
+        }
         goto gps_init;
     }
 
@@ -181,11 +194,9 @@ int main(void)
 
     log_info("System initialized!\n");
 
-set_green_led(false);
-
     if (leds_enabled) {
-        //WOHA set_green_led(true);
-        //WOHA set_red_led(false);
+        set_green_led(true);
+        set_red_led(false);
     } else {
         set_green_led(false);
         set_red_led(false);
