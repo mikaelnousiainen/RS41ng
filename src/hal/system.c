@@ -259,6 +259,7 @@ void system_flicker_green_led(uint8_t count)
 {
   uint8_t i;
       system_set_green_led(false);
+      delay_ms(50);
   for(i=1;i<=count;i++) {
       system_set_green_led(true);
       delay_ms(50);
@@ -280,6 +281,7 @@ void system_flicker_red_led(uint8_t count)
 {
   uint8_t i;
       system_set_red_led(false);
+      delay_ms(50);
   for(i=1;i<=count;i++) {
       system_set_red_led(true);
       delay_ms(50);

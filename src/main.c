@@ -126,27 +126,31 @@ int main(void)
     log_info("SPI init\n");
     spi_init();
 
-        // look for Voltage
-        // maybe interessting to check if reset only helpfull after mV climbed up > 1500 mV by solar panel source
-        uint16_t batteryV = system_get_battery_voltage_millivolts();
-        float batteryVf = (float)batteryV / 5.0f;
-        uint8_t volts_scaled = (uint8_t)(255 * batteryVf);
-        // on debug with dongle the VCC is only 170 mV because board feed by dongle not on battery.
-        log_info("Startup Voltage: %d mV \n",volts_scaled);
-
+    /* ---- not in use now because log_info only work with dongle, so mV is not helpfull to know ------
+    // look for Voltage
+    // maybe interessting to check if reset only helpfull after mV climbed up > 1500 mV by solar panel source
+    uint16_t batteryV = system_get_battery_voltage_millivolts();
+    float batteryVf = (float)batteryV / 5.0f;
+    uint8_t volts_scaled = (uint8_t)(255 * batteryVf);
+    // on debug with dongle the VCC is only 170 mV because board feed by dongle, not on battery.
+    log_info("Startup Voltage: %d mV \n",volts_scaled);
+    ------------------------------ */
     gps_init:
     log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {
+        // on use of solar panels at sunrise, the power is not fully available. 
+        // So the ubxg6010_init() maybe fail. The fail will be shown as flicker red led two times.
+        // Counter increases and after 10 times a system restart will be fired.
+        // if system starts new the sunrise meanwhile will give more energy until it is enough for a successfull ubxg6010_init()
         log_error("GPS initialization failed, retrying...\n");
         delay_ms(1000);
         system_flicker_red_led(2);
         gps_init_fail_counter++;
         if (gps_init_fail_counter >= 10) {
-            system_disable_irq();
             system_flicker_red_led(5);
+            // dont think here to stop some interrupts before. In practis the cold start will not work.
             nvic_cold_start();
-            
         }
         goto gps_init;
     }
