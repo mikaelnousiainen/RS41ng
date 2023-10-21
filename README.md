@@ -253,6 +253,16 @@ Payload 3:
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 80 // the third payload will transmit at 80 seconds within the 120 second interval
 ```
 
+### Using two alternating frequencies in HORUS-V2 Mode
+
+In Europe there are two areas of RX stations they listen on their regional frequencies. So the problem may occur that you have to decide
+wich channel you have to choose for best reception reports on the track. So the idea was to define an additional channel to transmit.
+You will find in the config.h the entry `RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV` on default `false`.
+To activate this, set it to `true` and use define `RADIO_SI4032_TX_FREQUENCY2_HORUS_V2` to add a second frequency e.g. `437600000`. 
+From now on, the frequency will change after each TX Intervall in HORUS-V2 Mode (not working on HORUS-V2-continous-mode).
+
+
+
 ## Building the firmware
 
 The easiest and the recommended method to build the firmware is using Docker.
