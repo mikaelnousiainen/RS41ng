@@ -255,11 +255,65 @@ Payload 3:
 
 ### Using two alternating frequencies in HORUS-V2 Mode
 
-In Europe there are two areas of RX stations they listen on their regional frequencies. So the problem may occur that you have to decide
-wich channel you have to choose for best reception reports on the track. So the idea was to define an additional channel to transmit.
-You will find in the config.h the entry `RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV` on default `false`.
-To activate this, set it to `true` and use define `RADIO_SI4032_TX_FREQUENCY2_HORUS_V2` to add a second frequency e.g. `437600000`. 
+In Europe, there are two areas where the receivers listen on their respective regional frequencies. So the problem can arise that you have to decide
+which channel to choose for the best reception reports on the route. So the idea was to define an additional channel for sending.
+You can find these two new entries in config.h 
+
+```
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  false
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2        437600000
+```
+To activate this, set it to `true` and add a second frequency. 
+
 From now on, the frequency will change after each TX Intervall in HORUS-V2 Mode (not working on HORUS-V2-continous-mode).
+
+
+### Flying solar powered 
+
+#### Rebooting after not reaching a 3D fix
+
+Sometimes you launch the sonde in an area where GPS cannot be received and then take it to where GPS is available. 
+In such cases, it has been found that there is simply no GPS FIX, no matter how long they wait. Then you try a RESTART. 
+Most of the time it works then quite fast. This is not a problem if you are still on the ground.
+
+There are ideas to prepare a RS41 powered by solar panels only. Goal is to fly more then one day don't have this limit with batteries. 
+Some addional enhancements are needable to reach this goal. One of them is to make sure after sunrise that there is a GPS fix.
+To solve this its a good idea to make a System Reset in the air if a missing GPS-FIX reaches out some time limit (e.g. 3 minutes or longer).
+
+The `config.h` shows new entries to activate this improvement.
+
+```
+// Enable this setting to make a cold start on the CPU if GPS-Fix missing longer then GPS_REBOOT_MISSING_GPS_FIX_SECONDS 
+#define GPS_REBOOT_MISSING_GPS_FIX_ENABLE true
+
+// If enabled above, define threschold how long a missing GPS-Fix before cold start (dont hold it to short)
+#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 200
+```
+
+#### Probe does not start at sunrise because current too low
+
+If solar panels are to be used, it is important to consider a few things:
+
+- Autostart nessesery. Currently, it is still unclear when the RS41ng software will cause a probe to start on its own when batteries are connected.
+If the batteries are inserted into the existing holder (2 x AA type) the voltage is conducted via a voltage regulator on the board. In this case, 
+the button on the board probably works and must be pressed to start the software. This is not helpfull if you wait for pushing a button in the air.
+But there is another method to connect the battery voltage. In this case, the regulator is bypassed. Here the probe starts immediately as soon as at 
+least 1.5 volts are present (up to 4 volts are tested). The battery is connected directly to one end of an SMD component. 
+I'm sure your community has more info on this.
+- Solar panels should deliver 3-4 volts and a current of 200 mA.
+- You need a capacity of around 2.000 µF to buffer the solar power a little bit. Somehow the RS41 will not start without them.
+
+Lets have look on the voltage if the sun rises:
+- Its dark, the capacitors are empty.
+- First sun on the panels brings the voltage up to 300 mV. This will load slowly the capacitors.
+- After a while the voltage comes up to 500 mV. The LEDs on the board start to glow and flicker a bit.
+- More and more sun falling on the panels. The voltage climbs to 800-1.000 mV. Over 800 mV the red LED shows that the software starts but...
+- While the voltage is still to low on 800 mV the main procedure on the board tries to init some hardware elements. This is successful 
+up to the moment when the GPS module gets initialized. There is a loop programmed and waiting the gps_init will work one day. Not this time.
+- The voltage climbs still in background but the loop will never end. The only way to init the GPS unit successful is to initiate a System Reset.
+- A System Restart is now implemented after waiting 10 times the loop initiated the GPS unit unsuccessfull.
+- If the System is booting meanwhile the voltage is up to get the GPS unit initiated this time. 
+- Everything fine now .... But there is no guarantee this way of recovering is the best one - in practice it works.
 
 
 
