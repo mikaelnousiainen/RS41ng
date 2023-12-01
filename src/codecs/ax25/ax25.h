@@ -13,7 +13,7 @@ typedef struct _ax25_packet_header {
     char destination[6];
     uint8_t destination_ssid;
     char source[6];
-    char source_ssid;
+    uint8_t source_ssid;
 } ax25_packet_header;
 
 typedef struct _ax25_packet_header_end {
