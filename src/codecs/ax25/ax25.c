@@ -89,7 +89,7 @@ uint16_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destin
     call_length = strlen(destination);
     memset(header->destination, ' ', sizeof(header->destination));
     memcpy(header->destination, destination, call_length < 6 ? call_length : 6);
-    header->destination_ssid = destination_ssid;
+    header->destination_ssid = (uint8_t) destination_ssid >= 'A' ? destination_ssid - 7 : destination_ssid);;
 
     char *digipeater_addresses_start = ((char *) header) + 1 + 14;
     uint16_t digipeater_addresses_length = ax25_encode_digipeater_path(digipeater_addresses, digipeater_addresses_start);
