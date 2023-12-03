@@ -1,3 +1,4 @@
+
 #include <string.h>
 
 #include "hal/system.h"
@@ -801,7 +802,6 @@ void ubxg6010_handle_incoming_byte(uint8_t data)
     static uint8_t buffer_pos = 0;
     static uint8_t incoming_packet_buffer[sizeof(uBloxPacket) + sizeof(uBloxChecksum)];
     static uBloxPacket *incoming_packet = (uBloxPacket *) incoming_packet_buffer;
-
     if (!sync_ubx && (sync_nmea < 3)) {
         if (!buffer_pos && data == 0xB5) {
             buffer_pos = 1;
@@ -820,6 +820,7 @@ void ubxg6010_handle_incoming_byte(uint8_t data)
         ubxg6010_handle_nmea_output(data);
     } else {
         ((uint8_t *) incoming_packet)[buffer_pos] = data;
+
         if ((buffer_pos >= sizeof(uBloxHeader) - 1) &&
             (buffer_pos - 1 == (incoming_packet->header.payloadSize + sizeof(uBloxHeader) + sizeof(uBloxChecksum)))) {
             ubxg6010_handle_packet((uBloxPacket *) incoming_packet);

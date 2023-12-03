@@ -56,10 +56,10 @@ volatile bool system_initialized = false;
  * Maximum length: 64 characters.
  */
 char *cw_message_templates[] = {
-//        "$cs $loc6 $altm $gs km/h $tiC",
+        "vvv de $cs solar rs41 $loc8 $altm $gs kmh sk",
 //        "$cs $loc6",
 //        "$alt m",
-//        "$gs km/h $ti C",
+//        "$gs kmh $ti C",
         NULL
 };
 
@@ -78,7 +78,7 @@ char *pip_message_templates[] = {
  * Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
  */
 char *aprs_comment_templates[] = {
-//        " B$bu $teC $hu% $prmb $hh:$mm:$ss @ $tow ms - " APRS_COMMENT,
+        " $ $altm $gskm/h $bvmV $clvel dir:$he - " APRS_COMMENT,
 //        " B$bu $teC $hu% $prmb - " APRS_COMMENT,
 //        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
 //        " $loc12 - " APRS_COMMENT,

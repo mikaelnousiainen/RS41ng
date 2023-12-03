@@ -15,6 +15,8 @@
 #include "config.h"
 #include "log.h"
 
+
+
 uint32_t counter = 0;
 bool led_state = true;
 uint32_t noFixCounter = 0;
@@ -27,7 +29,7 @@ void handle_timer_tick()
 {
     if (inuse_handle_timer_tick) { return; } 
     else { 
-        inuse_handle_timer_tick = true; 
+        inuse_handle_timer_tick = true;  
     }
     if (!system_initialized) {
         inuse_handle_timer_tick = false; 
@@ -37,6 +39,7 @@ void handle_timer_tick()
  
     counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
+        // WATCHDOG - Check, if lost GPX-Fix for longer then GPS_REBOOT_MISSING_GPS_FIX_SECONDS
         ubxg6010_get_current_gps_data(&current_gps_data);
         if (GPS_REBOOT_MISSING_GPS_FIX_ENABLE) {
             if (!GPS_HAS_FIX(current_gps_data)) {
@@ -52,11 +55,25 @@ void handle_timer_tick()
 
                     // request cold boot on the STM32 processor
                     inuse_handle_timer_tick = false; 
+                    //log_info("** GPS LOST - REBOOT ** \n");
+                    //delay_ms(1000);
                     nvic_cold_start();
                     return;
                 }
             }
         } else { noFixCounter = 0; }
+        // WATCHDOG - Check, if no TX after longer then RADIO_TX_LOST_FOR_SECONDS
+        if (RADIO_TX_LOST_CHECK_ENABLE) {
+            
+            if (radio_Inc_tx_watchdog_counter() >= RADIO_TX_LOST_FOR_SECONDS) {
+                radio_reset_tx_watchdog_counter();
+                // request cold boot on the STM32 processor
+                inuse_handle_timer_tick = false; 
+                //log_info("** TX LOST - REBOOT ** \n");
+                nvic_cold_start();
+                return;
+            }
+        } else { radio_reset_tx_watchdog_counter(); }
     }
 
     if (leds_enabled) {
@@ -185,6 +202,7 @@ int main(void)
             log_info("Si5351 init\n");
             success = si5351_handler_init();
             if (success) {
+                log_info("Si5351 OK\n");
                 break;
             }
             log_error("Si5351 init failed, retrying...");

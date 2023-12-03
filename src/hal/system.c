@@ -11,6 +11,7 @@
 #include "system.h"
 #include "delay.h"
 #include "log.h"
+#include "hal/gpio.h"
 #include "hal/cmsis/core_cm3.h"  // for NVIC_SystemReset
 
 #define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND

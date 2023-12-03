@@ -12,6 +12,7 @@
 #include "codecs/mfsk/mfsk.h"
 #include "codecs/jtencode/jtencode.h"
 #include "drivers/ubxg6010/ubxg6010.h"
+#include "radio.h"
 #include "radio_internal.h"
 #include "radio_si4032.h"
 #include "radio_si5351.h"
@@ -319,7 +320,10 @@ static volatile uint32_t radio_post_transmit_delay_counter = 0;
 static volatile uint32_t radio_next_symbol_counter = 0;
 
 static radio_transmit_entry *radio_start_transmit_entry = NULL;
-static uint8_t radio_alternate_frequency = 1;
+static uint32_t radio_alternate_frequency_v1 = 1;
+static uint32_t radio_alternate_frequency_v2 = 1;
+static uint32_t radio_tx_watchdog_counter = 0;
+
 
 static uint32_t radio_previous_time_sync_scheduled = 0;
 
@@ -404,12 +408,21 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     radio_shared_state.radio_symbol_count_loop = 0;
 
     telemetry_collect(&current_telemetry_data);
+#ifdef SEMIHOSTING_ENABLE
+        log_info("radio_start_transmit template\n");
+#endif
 
     if (entry->messages != NULL && entry->message_count > 0) {
+#ifdef SEMIHOSTING_ENABLE
+        log_info("radio_start_transmit template\n");
+#endif
         template_replace(radio_current_payload_message, sizeof(radio_current_payload_message),
                 entry->messages[entry->current_message_index], &current_telemetry_data);
     } else {
-        radio_current_payload_message[0] = '\0';
+#ifdef SEMIHOSTING_ENABLE
+            log_info("radio_start_transmit no template filled\n");
+#endif      
+            radio_current_payload_message[0] = '\0';
     }
 
     radio_current_payload_length = entry->payload_encoder->encode(
@@ -418,14 +431,14 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     log_info("Full payload length: %d\n", radio_current_payload_length);
 
+
 #ifdef SEMIHOSTING_ENABLE
     log_info("Payload: ");
     log_bytes_hex(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n    ");
-    log_bytes(radio_current_payload_length, (char *) radio_current_payload);
-    log_info("\n");
-    log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
-
+//    log_bytes(radio_current_payload_length, (char *) radio_current_payload);
+//    log_info("\n");
+//    log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
 #endif
 
     // USART interrupts may interfere with transmission timing
@@ -467,7 +480,8 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             break;
         case RADIO_DATA_MODE_HORUS_V2:
             // GPS should not disturb the timing of Horus modes
-            enable_gps_during_transmit = true;
+// WOHA - Temp false
+            enable_gps_during_transmit = false;
 
             mfsk_encoder_new(&entry->fsk_encoder, MFSK_4, entry->symbol_rate, HORUS_V2_TONE_SPACING_HZ_SI5351 * 100);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
@@ -666,12 +680,23 @@ static void radio_next_transmit_entry()
             if (radio_current_transmit_entry->enabled) {
               if (radio_current_transmit_entry->data_mode == RADIO_DATA_MODE_HORUS_V2) {
                 if (RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV) {
-                  if (radio_alternate_frequency == 0) {
-                      radio_alternate_frequency = 1;
+                  if (radio_alternate_frequency_v2 == 0) {
+                      radio_alternate_frequency_v2 = 1;
                       radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY2_HORUS_V2;
                   } else {
-                      radio_alternate_frequency = 0;
+                      radio_alternate_frequency_v2 = 0;
                       radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V2;
+                  }
+                }
+              }
+              if (radio_current_transmit_entry->data_mode == RADIO_DATA_MODE_HORUS_V1) {
+                if (RADIO_SI4032_TX_FREQUENCY2_HORUS_V1_ACTIV) {
+                  if (radio_alternate_frequency_v1 == 0) {
+                      radio_alternate_frequency_v1 = 1;
+                      radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY2_HORUS_V1;
+                  } else {
+                      radio_alternate_frequency_v1 = 0;
+                      radio_current_transmit_entry->frequency = RADIO_SI4032_TX_FREQUENCY_HORUS_V1;
                   }
                 }
               }
@@ -724,7 +749,7 @@ bool radio_handle_time_sync()
     ubxg6010_get_current_gps_data(&gps);
 
     if (!gps.updated) {
-        // The GPS data has not been updated yet
+      // The GPS data has not been updated yet
         return false;
     }
 
@@ -759,21 +784,23 @@ bool radio_handle_time_sync()
 
     bool is_scheduled_time = time_sync_period_millis < RADIO_TIME_SYNC_THRESHOLD_MS;
 
-    log_debug("Time with offset: %lu, sync period: %lu, scheduled: %d\n", time_with_offset_millis, time_sync_period_millis, is_scheduled_time);
+//    log_info("---- Time with offset: %lu, sync period: %lu, scheduled: %d\n", time_with_offset_millis, time_sync_period_millis, is_scheduled_time);
 
     if (!is_scheduled_time) {
-        log_info("Time: %lu, GPS fix: %d - Waiting for time sync at every %d seconds with offset of %d\n", time_millis,
+/*
+        log_info("Time: %lu, GPS fix: %d - SyncWait every %d sec+offset %d\n", time_millis,
                 gps.fix,
                 radio_current_transmit_entry->time_sync_seconds,
                 radio_current_transmit_entry->time_sync_seconds_offset);
+*/
         return false;
     }
-
-    log_info("Time: %lu, GPS fix: %d, sync period: %lu - Scheduling transmit at %d seconds with offset of %d\n",
+/*
+    log_info("Time: %lu, GPS fix: %d, sync period: %lu - Schedule TX at %d sec+offset %d\n",
             time_millis, gps.fix,
             time_sync_period_millis, radio_current_transmit_entry->time_sync_seconds,
             radio_current_transmit_entry->time_sync_seconds_offset);
-
+*/
     radio_previous_time_sync_scheduled = time_millis;
 
     return true;
@@ -793,10 +820,13 @@ void radio_handle_main_loop()
         }
         radio_reset_transmit_delay_counter();
         radio_start_transmit_entry = radio_current_transmit_entry;
+//        log_info("main_loop: oben\n");
     } else if (!radio_shared_state.radio_transmission_active && radio_post_transmit_delay_counter == 0) {
+//        log_info("main_loop: unten\n");
+
         #if defined(SEMIHOSTING_ENABLE) && defined(LOGGING_ENABLE)
         telemetry_collect(&current_telemetry_data);
-        log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
+        log_info("Battery: %d mV.\n", current_telemetry_data.battery_voltage_millivolts);
         log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
         log_info("Time: %02d:%02d:%02d\n",
                 current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
@@ -819,12 +849,13 @@ void radio_handle_main_loop()
 
     bool first_symbol = false;
     if (radio_start_transmit_entry != NULL) {
-        log_info("Start transmit\n");
+        log_info("Start TX\n");
         bool success = radio_start_transmit(radio_start_transmit_entry);
         start_tick = system_get_tick();
 
         radio_start_transmit_entry = NULL;
         if (!success) {
+            log_info("main_loop: Fehler radio_start_transmit\n");
             radio_next_transmit_entry();
             return;
         }
@@ -858,6 +889,10 @@ void radio_handle_main_loop()
         radio_next_transmit_entry();
 
         log_info("TX stop\n");
+
+        // Watchdog: TX counter reset
+        radio_reset_tx_watchdog_counter();
+/*
         log_info("Symbol count (interrupt): %ld\n", radio_shared_state.radio_symbol_count_interrupt);
         log_info("Symbol count (loop): %ld\n", radio_shared_state.radio_symbol_count_loop);
         log_info("Total ticks: %ld\n", end_tick - start_tick);
@@ -865,7 +900,20 @@ void radio_handle_main_loop()
         log_info("Symbol rate: %ld\n", radio_shared_state.radio_current_symbol_rate);
         log_info("Symbol delay: %ld\n", radio_shared_state.radio_current_symbol_delay_ms_100);
         log_info("Tone spacing: %ld\n", radio_shared_state.radio_current_tone_spacing_hz_100);
+*/
     }
+}
+
+
+void radio_reset_tx_watchdog_counter ()
+{
+    radio_tx_watchdog_counter = 0;
+}
+
+uint32_t radio_Inc_tx_watchdog_counter ()
+{
+    radio_tx_watchdog_counter++;
+    return radio_tx_watchdog_counter;
 }
 
 void radio_init()

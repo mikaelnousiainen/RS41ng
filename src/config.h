@@ -6,15 +6,14 @@
 // NOTE: DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
-// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
-//#define DFM17
+// Define radiosonde type. 
+// This clone supports only RS41 - DO NOT TRY TO USES DFM17 !!!!!!!!!
+// ------------------------------------------------------------------
+#define RS41
+// ------------------------------------------------------------------
 
-#if !defined(RS41) && !defined(DFM17)
-#error "No hardware type specified. Please define RS41 or DFM17."
-#endif
-#if defined(RS41) && defined(DFM17)
-#error "Please define either RS41 or DFM17."
+#if !defined(RS41)
+#error "Please define ONLY  RS41. Support DFM17 is not fully implemented yet"
 #endif
 
 
@@ -29,7 +28,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+#define CALLSIGN "yourCall"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -43,12 +42,14 @@
 #define ALLOW_POWER_OFF false
 
 // Number of character pairs to include in locator
-#define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
+#define LOCATOR_PAIR_COUNT_FULL 12 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
 #define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
+// best Results for 4FSK : 2500
+// if value here is to high, TX send packets more than once
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
 
 // Number of leap seconds to add to the raw GPS time reported by the GPS chip (see https://timetoolsltd.com/gps/what-is-gps-time/ for more info)
@@ -59,10 +60,16 @@
 #define GPS_REQUIRE_3D_FIX true
 
 // Enable this setting to make a cold start on the CPU if GPS-Fix missing longer then GPS_REBOOT_MISSING_GPS_FIX_SECONDS 
-#define GPS_REBOOT_MISSING_GPS_FIX_ENABLE false
+#define GPS_REBOOT_MISSING_GPS_FIX_ENABLE true
 
 // If enabled above, define threschold how long a missing GPS-Fix before cold start (dont hold it to short)
-#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 200
+// 5 Minutes no GPS Signal than REBOOT
+#define GPS_REBOOT_MISSING_GPS_FIX_SECONDS 300
+
+// Enable this setting to watch TX and make a cold start on the CPU if no transmission occured after TX_LOST_FOR_SECONDS 
+// TX hangs up longer then 10 min, then REBOOT
+#define RADIO_TX_LOST_CHECK_ENABLE true
+#define RADIO_TX_LOST_FOR_SECONDS 600
 
 // Enable power-saving features of the GPS chip to save power.
 // This option should be safe to enable, as it enters a selective power saving mode.
@@ -72,7 +79,7 @@
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
-#define GPS_POWER_SAVING_ENABLE false
+#define GPS_POWER_SAVING_ENABLE true
 
 // Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
@@ -152,13 +159,13 @@
 #define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
-#define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_PIP_COUNT 1
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -167,15 +174,17 @@
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
 
 // Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW        432500000
-#define RADIO_SI4032_TX_FREQUENCY_PIP       432500000
+#define RADIO_SI4032_TX_FREQUENCY_CW        432051000
+#define RADIO_SI4032_TX_FREQUENCY_PIP       434713000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  434714000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  434714000
 // Use a rotating alternate 2nd frequency for HORUS_V2 (not continously)
 #define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  false
-#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2  437600000
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2  437600500
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V1_ACTIV  false
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V1  437600500
 
 
 /**
@@ -192,11 +201,11 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS true
-#define RADIO_SI4063_TX_APRS_COUNT 2
+#define RADIO_SI4063_TX_APRS false
+#define RADIO_SI4063_TX_APRS_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4063_TX_HORUS_V2 true
+#define RADIO_SI4063_TX_HORUS_V2 false
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 6
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -223,14 +232,14 @@
 
 // Which modes to transmit using an externally connected Si5351 chip in the I²C bus
 // The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI5351_TX_CW true
+#define RADIO_SI5351_TX_CW false
 #define RADIO_SI5351_TX_CW_COUNT 1
 #define RADIO_SI5351_TX_PIP false
 #define RADIO_SI5351_TX_PIP_COUNT 6
 #define RADIO_SI5351_TX_HORUS_V1 false
 #define RADIO_SI5351_TX_HORUS_V1_COUNT 1
-#define RADIO_SI5351_TX_HORUS_V2 true
-#define RADIO_SI5351_TX_HORUS_V2_COUNT 4
+#define RADIO_SI5351_TX_HORUS_V2 false
+#define RADIO_SI5351_TX_HORUS_V2_COUNT 1
 #define RADIO_SI5351_TX_JT9 false
 #define RADIO_SI5351_TX_JT9_COUNT 1
 #define RADIO_SI5351_TX_JT65 false
@@ -245,14 +254,14 @@
 #define RADIO_SI5351_TX_FT8_COUNT 1
 
 // Transmit frequencies for the Si5351 transmitter modes
-#define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
+#define RADIO_SI5351_TX_FREQUENCY_CW         14105000UL
 #define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
-#define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3605000UL
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
 #define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
 #define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
-#define RADIO_SI5351_TX_FREQUENCY_WSPR       14085000UL    // Was: 14097200UL
+#define RADIO_SI5351_TX_FREQUENCY_WSPR       14097200UL    // Was: 14097200UL
 #define RADIO_SI5351_TX_FREQUENCY_FSQ        3608350UL    // Was: 7105350UL     // Base freq is 1350 Hz higher than dial freq in USB
 #define RADIO_SI5351_TX_FREQUENCY_FT8        14085000UL    // Was: 14075000UL
 
@@ -284,18 +293,18 @@
 // See APRS symbol table documentation in: http://www.aprs.org/symbols/symbolsX.txt
 #define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
 #define APRS_SYMBOL 'O'
-#define APRS_COMMENT "RS41ng radiosonde firmware test"
+#define APRS_COMMENT " RS41"
 #define APRS_RELAYS "WIDE1-1,WIDE2-1"
 #define APRS_DESTINATION "APZ41N"
-#define APRS_DESTINATION_SSID '0'
+#define APRS_DESTINATION_SSID 'B'
 // Generate an APRS weather report instead of a position report. This will override the APRS symbol with the weather station symbol.
 #define APRS_WEATHER_REPORT_ENABLE false
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define APRS_TIME_SYNC_SECONDS 0
+#define APRS_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define APRS_TIME_SYNC_OFFSET_SECONDS 0
+#define APRS_TIME_SYNC_OFFSET_SECONDS 53
 
 /**
  * Common Horus 4FSK mode settings
@@ -341,42 +350,42 @@
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define HORUS_V2_TIME_SYNC_SECONDS 0
+#define HORUS_V2_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+#define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 15
 
 /**
  * CW settings
  */
 
 // CW speed in WPM, range 5 - 40
-#define CW_SPEED_WPM 20
+#define CW_SPEED_WPM 30
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define CW_TIME_SYNC_SECONDS 0
+#define CW_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define CW_TIME_SYNC_OFFSET_SECONDS 0
+#define CW_TIME_SYNC_OFFSET_SECONDS 25
 
 /**
  * Pip settings (short beep generated using CW to indicate presence of the transmitter)
  */
 
 // Pip speed is defined as CW WPM, range 5 - 40
-#define PIP_SPEED_WPM 18
+#define PIP_SPEED_WPM 27
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
-#define PIP_TIME_SYNC_SECONDS 0
+#define PIP_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define PIP_TIME_SYNC_OFFSET_SECONDS 0
+#define PIP_TIME_SYNC_OFFSET_SECONDS 43
 
 /**
  * WSPR settings
  */
 #define WSPR_CALLSIGN CALLSIGN
-#define WSPR_LOCATOR_FIXED_ENABLED false
-#define WSPR_LOCATOR_FIXED "AA00"
+#define WSPR_LOCATOR_FIXED_ENABLED true
+#define WSPR_LOCATOR_FIXED "JN49"
 #define WSPR_DBM 10
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
