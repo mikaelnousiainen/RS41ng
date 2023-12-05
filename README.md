@@ -259,19 +259,22 @@ Payload 3:
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 80 // the third payload will transmit at 80 seconds within the 120 second interval
 ```
 
-### Using two alternating frequencies in HORUS-V2 Mode
+### Using two alternating frequencies in HORUS-V1/V2 Mode
 
 In Europe, there are two areas where the receivers listen on their respective regional frequencies. So the problem can arise that you have to decide
 which channel to choose for the best reception reports on the route. So the idea was to define an additional channel for sending.
 You can find these two new entries in config.h 
 
 ```
-#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  false
+// V1 and V2 Version of horus 4FSK have their own switch
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2_ACTIV  true
 #define RADIO_SI4032_TX_FREQUENCY2_HORUS_V2        437600000
-```
-To activate this, set it to `true` and add a second frequency. 
 
-From now on, the frequency will change after each TX Intervall in HORUS-V2 Mode (not working on HORUS-V2-continous-mode).
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V1_ACTIV  false
+#define RADIO_SI4032_TX_FREQUENCY2_HORUS_V1        437600000
+```
+
+If activated, the frequency will change after each TX Intervall in HORUS-V1 also V2-Mode (not working in continous mode)
 
 ### TX-Watchdog: Rebooting after no transmissions over long time
 
