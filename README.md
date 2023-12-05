@@ -1,7 +1,7 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
-##Attention: This clone do not support DFM17 (cloned during implementation)
+## Attention: This clone do not support DFM17 (cloned during implementation)
 
-##This clone has special attention to 
+## This clone has special attention to 
 - recover GPS after disortion
 - TX Watchdog to reboot if 10 min silent.
 - 4FSK Mode with two frequencies used alternating every intervall (reach more receivers)
