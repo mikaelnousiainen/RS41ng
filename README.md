@@ -1,4 +1,10 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 radiosonde
+##Attention: This clone do not support DFM17 (cloned during implementation)
+
+##This clone has special attention to 
+- recover GPS after disortion
+- TX Watchdog to reboot if 10 min silent.
+- 4FSK Mode with two frequencies used alternating every intervall (reach more receivers)
 
 **NOTE:** While this firmware has been tested with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
@@ -142,7 +148,7 @@ Power consumption notes (at 3V supply voltage) by Mark VK5QI:
 - GPS in full power acquisition mode: 110-120 mA (TX off), 160-170 mA (TX on)
 - GPS locked (5 sats), full power: 96 - 126 mA (TX off), 170 mA (TX on)
 - GPS locked, powersave mode, state 1: ~96 - 110 mA (TX off), ?
-- GPS locked, powersave mode, state 2: 60 - 90mA (TX off), 130 mA (TX on)
+- GPS locked, powersave mode, state 2: 60 - 90mA (TX off), 130 mA (TX on) - average 72 mA with TX every minute 
 
 The variations seem to be the GPS powering up every second to do its fixes.
 
@@ -267,14 +273,29 @@ To activate this, set it to `true` and add a second frequency.
 
 From now on, the frequency will change after each TX Intervall in HORUS-V2 Mode (not working on HORUS-V2-continous-mode).
 
+### TX-Watchdog: Rebooting after no transmissions over long time
+
+While doing much testing sessions, sometimes the sonde was found in an state where GPS signals good conditions (long interval blink)
+but there where no transmissions over a longer time. I did not found the reason so i decided to implement an watchdog. You can define the timeout
+in the config (see sample)
+
+The `config.h` shows new entries to activate this improvement.
+
+```
+// Enable this setting to watch TX and make a cold start on the CPU if no transmission occured after TX_LOST_FOR_SECONDS 
+// TX hangs up longer then 10 min, then REBOOT
+#define RADIO_TX_LOST_CHECK_ENABLE true
+#define RADIO_TX_LOST_FOR_SECONDS 600
+```
 
 ### Flying solar powered 
 
-#### Rebooting after not reaching a 3D fix
+#### GPS-Watchdog: Rebooting after not reaching a 3D fix
 
-Sometimes you launch the sonde in an area where GPS cannot be received and then take it to where GPS is available. 
-In such cases, it has been found that there is simply no GPS FIX, no matter how long they wait. Then you try a RESTART. 
-Most of the time it works then quite fast. This is not a problem if you are still on the ground.
+Sometimes you launch the sonde in an area where GPS cannot be received and then take it to a place where GPS is available again. 
+Also if the sonde lost GPS in a jamming-zone. Anyway if this signal lost longer then aprox. 20 seconds the Ublox fall into a sleep mode.
+I did not found a way to get it out of that sleep mode other then making a reboot. Thats what acually is implemented.
+You can decide what the sonde should do after lost GPS signal and how long it waits before kicks an reboot.
 
 There are ideas to prepare a RS41 powered by solar panels only. Goal is to fly more then one day don't have this limit with batteries. 
 Some addional enhancements are needable to reach this goal. One of them is to make sure after sunrise that there is a GPS fix.
