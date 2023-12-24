@@ -684,7 +684,9 @@ int si4063_init()
 
 void TIM1_BRK_TIM15_IRQHandler(void)
 {
+#ifdef DFM17
     static bool pin_state = false;
+#endif
 
     if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
         TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
