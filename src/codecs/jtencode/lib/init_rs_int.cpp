@@ -30,7 +30,7 @@ void * JTEncode::init_rs_int(int symsize, int gfpoly, int fcr, int prim,
 
   rs = ((struct rs *)0);
   /* Check parameter ranges */
-  if(symsize < 0 || symsize > 8*sizeof(data_t)){
+  if(symsize < 0 || (unsigned) symsize > 8*sizeof(data_t)){
     goto done;
   }
 
