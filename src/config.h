@@ -275,7 +275,7 @@
 #define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
 #define APRS_SYMBOL 'O'
 #define APRS_COMMENT "RS41ng radiosonde firmware test"
-#define APRS_RELAYS "WIDE1-1,WIDE2-1"   //Do not include any spaces in the APRS_RELAYS
+#define APRS_RELAYS "WIDE1-1,WIDE2-1" // Do not include any spaces in the APRS_RELAYS
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
 // Generate an APRS weather report instead of a position report. This will override the APRS symbol with the weather station symbol.
