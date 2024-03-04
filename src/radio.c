@@ -708,11 +708,11 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         return false;
     }
 
-    log_info("TX start\n");
-
     if (leds_enabled) {
         set_red_led(true);
     }
+
+    log_info("TX start\n");
 
     radio_shared_state.radio_transmission_active = true;
 
