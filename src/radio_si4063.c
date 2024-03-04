@@ -352,6 +352,8 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+            system_enable_tick();
+            break;
         case RADIO_DATA_MODE_CATS:
             break;
         default:

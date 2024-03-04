@@ -239,8 +239,6 @@ uint16_t si4063_start_tx(uint8_t *data, int len)
     }
     si4063_send_command(SI4063_COMMAND_WRITE_TX_FIFO, fifo_len, data);
 
-    //si4063_get_int_status();
-
     // Start transmitting
     uint8_t tx_cmd[] = {
         0, // channel
@@ -251,8 +249,6 @@ uint16_t si4063_start_tx(uint8_t *data, int len)
     };
     si4063_send_command(SI4063_COMMAND_START_TX, sizeof(tx_cmd), tx_cmd);
     si4063_wait_for_cts();
-
-    //si4063_get_int_status();
 
     return fifo_len;
 }
