@@ -90,6 +90,11 @@ char *aprs_comment_templates[] = {
         NULL
 };
 
+char *cats_comment_templates[] = {
+    CATS_COMMENT,
+    NULL
+};
+
 /**
  * FSQ mode comment message templates.
  * Maximum length: 130 characters.

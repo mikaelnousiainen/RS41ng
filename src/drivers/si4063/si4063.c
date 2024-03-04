@@ -37,14 +37,19 @@
 #define SI4063_COMMAND_POWER_UP     0x02
 #define SI4063_COMMAND_SET_PROPERTY 0x11
 #define SI4063_COMMAND_GPIO_PIN_CFG 0x13
+#define SI4063_COMMAND_FIFO_INFO    0x15
+#define SI4063_COMMAND_GET_INT_STATUS 0x20
 #define SI4063_COMMAND_START_TX     0x31
+#define SI4063_COMMAND_REQUEST_DEVICE_STATE 0x33
 #define SI4063_COMMAND_CHANGE_STATE 0x34
 #define SI4063_COMMAND_GET_ADC_READING  0x14
 #define SI4063_COMMAND_READ_CMD_BUFF    0x44
+#define SI4063_COMMAND_WRITE_TX_FIFO 0x66
 
 #define SI4063_STATE_SLEEP        0x01
 #define SI4063_STATE_SPI_ACTIVE   0x02
 #define SI4063_STATE_READY        0x03
+#define SI4063_STATE_READY2       0x04
 #define SI4063_STATE_TX_TUNE      0x05
 #define SI4063_STATE_TX           0x07
 
@@ -200,6 +205,21 @@ static void si4063_set_state(uint8_t state)
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
+void si4063_get_int_status()
+{
+    uint8_t data[] = {0xFF, 0xFF, 0xFF};
+    si4063_send_command(SI4063_COMMAND_GET_INT_STATUS, 0, NULL);//sizeof(data), data);
+    uint8_t response[6];
+    si4063_read_response(sizeof(response), response);
+    log_debug("int status: %#x %#x %#x %#x %#x %#x\n",
+              response[0],
+              response[1],
+              response[2],
+              response[3],
+              response[4],
+              response[5]);
+}
+
 void si4063_enable_tx()
 {
     log_debug("Si4063: Enable TX\n");
@@ -218,10 +238,93 @@ void si4063_disable_tx()
     si4063_set_state(SI4063_STATE_SLEEP);
 }
 
+// Returns number of bytes sent from *data
+// If less than len, remaining bytes will need to be used to top up the buffer
+uint16_t si4063_start_tx(uint8_t *data, int len)
+{
+    // Clear TX FIFO
+    uint8_t fifo_clear_data[] = {1};
+    si4063_send_command(SI4063_COMMAND_FIFO_INFO, 1, fifo_clear_data);
+    si4063_wait_for_cts();
+
+    // Add our data to the TX FIFO
+    int fifo_len = len;
+    if(fifo_len > 64) {
+        fifo_len = 64;
+    }
+    si4063_send_command(SI4063_COMMAND_WRITE_TX_FIFO, fifo_len, data);
+
+    //si4063_get_int_status();
+
+    // Start transmitting
+    uint8_t tx_cmd[] = {
+        0, // channel
+        SI4063_STATE_SLEEP << 4,
+        len >> 8,
+        len & 0xFF,
+        0 // delay
+    };
+    si4063_send_command(SI4063_COMMAND_START_TX, sizeof(tx_cmd), tx_cmd);
+    si4063_wait_for_cts();
+
+    //si4063_get_int_status();
+
+    return fifo_len;
+}
+
+// Add additional bytes to the si4063's FIFO buffer
+// Needed for large packets that don't fit in its buffer.
+// Keep refilling it while transmitting
+// Returns number of bytes taken from *data
+// If less than len, you will need to keep calling this
+uint16_t si4063_refill_buffer(uint8_t *data, int len)
+{
+    uint8_t response[2];
+
+    // Check how many bytes we have free
+    si4063_send_command(SI4063_COMMAND_FIFO_INFO, 0, NULL);
+    si4063_read_response(sizeof(response), response);
+
+    uint8_t free_space = response[1];
+    // printf("free space %d\n", free_space);
+    if(free_space < len) {
+        len = free_space;
+    }
+
+    si4063_send_command(SI4063_COMMAND_WRITE_TX_FIFO, len, data);
+
+    return len;
+}
+
+// Wait for our buffer to be emptied, and for the si4063 to leave TX mode
+// If timeout, we force it to sleep
+int si4063_wait_for_tx_complete(int timeout_ms)
+{
+    for(int i = 0; i < timeout_ms; i++) {
+        uint8_t status = 0;
+        si4063_send_command(SI4063_COMMAND_REQUEST_DEVICE_STATE, 0, NULL);
+        si4063_read_response(1, &status);
+
+        if(status == SI4063_STATE_SLEEP ||
+           status == SI4063_STATE_READY ||
+           status == SI4063_STATE_READY2 ||
+           status == SI4063_STATE_SPI_ACTIVE) {
+            return HAL_OK;
+        }
+
+        delay_ms(1);
+    }
+
+    si4063_disable_tx();
+    si4063_wait_for_cts();
+
+    return HAL_ERROR_TIMEOUT;
+}
+
 static int si4063_get_outdiv(const uint32_t frequency_hz)
 {
     // Select the output divider according to the recommended ranges in the Si406x datasheet
-    if (frequency_hz < 177000000UL)      {
+    if (frequency_hz < 177000000UL) {
         return 24;
     } else if (frequency_hz < 239000000UL) {
         return 16;
@@ -306,6 +409,25 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     // Deviation depends on the frequency band
     si4063_set_frequency_deviation(current_deviation_hz);
 }
+void si4063_set_data_rate(const uint32_t rate_bps)
+{
+    int rate = rate_bps * 10;
+    // Set TX_NCO_MODE to our crystal frequency, as recommended by the data sheet for rates <= 200kbps
+    // Set MODEM_DATA_RATE to rate_bps * 10 (will get downsampled because NCO_MODE defaults to 10x)
+    uint8_t data[] = {
+        0x20, // Group
+        0x07, // Set 7 properties
+        0x03, // Start from MODEM_DATA_RATE
+        (rate >> 16) & 0xFF,
+        (rate >> 8) & 0xFF,
+        rate & 0xFF,
+        (SI4063_CLOCK >> 24) & 0xFF,
+        (SI4063_CLOCK >> 16) & 0xFF,
+        (SI4063_CLOCK >> 8) & 0xFF,
+        SI4063_CLOCK & 0xFF,
+    };
+    si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
+}
 
 void si4063_set_tx_power(uint8_t power)
 {
@@ -387,6 +509,10 @@ void si4063_set_modulation_type(si4063_modulation_type type)
         case SI4063_MODULATION_TYPE_FSK:
             // Direct Async Mode with FSK modulation
             data[3] |= 0x02;
+            break;
+        case SI4063_MODULATION_TYPE_FIFO_FSK:
+            // FIFO with FSK modulation
+            data[3] = 0x02;
             break;
         default:
             return;

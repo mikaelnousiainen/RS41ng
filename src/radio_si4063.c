@@ -14,6 +14,7 @@
 
 #define SI4063_DEVIATION_HZ_RTTY 200.0
 #define SI4063_DEVIATION_HZ_APRS 2600.0
+#define SI4063_DEVIATION_HZ_CATS 4800.0
 
 #define CW_SYMBOL_RATE_MULTIPLIER 4
 
@@ -28,8 +29,10 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
 {
     uint16_t frequency_offset;
     uint32_t frequency_deviation = 0;
+    uint32_t data_rate = 0;
     si4063_modulation_type modulation_type;
     bool use_direct_mode;
+    bool use_fifo_mode = false;
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
@@ -62,6 +65,14 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             data_timer_init(entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder));
             break;
         }
+        case RADIO_DATA_MODE_CATS:
+            frequency_offset = 0;
+            frequency_deviation = SI4063_DEVIATION_HZ_CATS;
+            modulation_type = SI4063_MODULATION_TYPE_FIFO_FSK;
+            use_direct_mode = false;
+            use_fifo_mode = true;
+            data_rate = 9600;
+            break;
         default:
             return false;
     }
@@ -72,7 +83,12 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
     si4063_set_modulation_type(modulation_type);
     si4063_set_frequency_deviation(frequency_deviation);
 
-    si4063_enable_tx();
+    if (use_fifo_mode) {
+        si4063_set_data_rate(data_rate);
+    }
+    else {
+        si4063_enable_tx();
+    }
 
     if (use_direct_mode) {
         spi_uninit();
@@ -95,6 +111,9 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_HORUS_V2:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
+            break;
+        case RADIO_DATA_MODE_CATS:
+            shared_state->radio_fifo_transmit_active = true;
             break;
         default:
             break;
@@ -170,6 +189,37 @@ static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, ra
     system_enable_tick();
 }
 
+// TODO check for FIFO underflows!
+void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *shared_state) {
+    log_debug("Start FIFO TX\n");
+    fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
+    fsk_encoder *fsk_enc = &entry->fsk_encoder;
+
+    uint8_t *data = fsk_encoder_api->get_data(fsk_enc);
+    uint16_t len = fsk_encoder_api->get_data_len(fsk_enc);
+
+    uint16_t written = si4063_start_tx(data, len);
+    log_debug("Wrote %d bytes\n", written);
+    data += written;
+    len -= written;
+    
+    while(len > 0) {
+        uint16_t written = si4063_refill_buffer(data, len);
+        log_debug("Wrote %d bytes\n", written);
+        data += written;
+        len -= written;
+    }
+
+    int err = si4063_wait_for_tx_complete(100);
+    if(err != HAL_OK) {
+        log_debug("Error waiting for tx complete: %d\n", err);
+    }
+
+    log_debug("Finished FIFO TX\n");
+
+    shared_state->radio_transmission_finished = true;
+}
+
 void radio_handle_main_loop_si4063(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
     if (entry->radio_type != RADIO_TYPE_SI4063 || shared_state->radio_interrupt_transmit_active) {
@@ -178,6 +228,11 @@ void radio_handle_main_loop_si4063(radio_transmit_entry *entry, radio_module_sta
 
     if (shared_state->radio_manual_transmit_active) {
         radio_handle_main_loop_manual_si4063(entry, shared_state);
+        return;
+    }
+
+    if (shared_state->radio_fifo_transmit_active) {
+        radio_handle_fifo_si4063(entry, shared_state);
         return;
     }
 
@@ -266,6 +321,8 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
         case RADIO_DATA_MODE_HORUS_V2:
             data_timer_uninit();
             break;
+        case RADIO_DATA_MODE_CATS:
+            break;
         case RADIO_DATA_MODE_APRS_1200:
             use_direct_mode = true;
             break;
@@ -291,7 +348,7 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
-            system_enable_tick();
+        case RADIO_DATA_MODE_CATS:
             break;
         default:
             break;

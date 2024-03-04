@@ -8,7 +8,7 @@
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 //#define RS41
-//#define DFM17
+#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -21,15 +21,15 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+#define SEMIHOSTING_ENABLE
+#define LOGGING_ENABLE
 
 /**
  * Global configuration
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+#define CALLSIGN "VE9QLE"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -182,12 +182,14 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS true
+#define RADIO_SI4063_TX_APRS false
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4063_TX_HORUS_V2 true
+#define RADIO_SI4063_TX_HORUS_V2 false
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4063_TX_CATS true
+#define RADIO_SI4063_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -201,7 +203,8 @@
 #define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  434500000
+#define RADIO_SI4063_TX_FREQUENCY_CATS      434500000
 
 /**
  * RS41 only: External Si5351 radio chip transmission configuration
@@ -334,6 +337,20 @@
 #define HORUS_V2_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * CATS mode settings
+ */
+#define CATS_CALLSIGN CALLSIGN
+#define CATS_SSID 0
+#define CATS_ICON 0
+#define CATS_COMMENT "I am a radiosonde. Hear me meow!"
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define CATS_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
+#define CATS_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * CW settings

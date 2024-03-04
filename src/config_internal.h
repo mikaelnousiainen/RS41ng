@@ -30,6 +30,7 @@ extern volatile bool system_initialized;
 extern char *cw_message_templates[];
 extern char *pip_message_templates[];
 extern char *aprs_comment_templates[];
+extern char *cats_comment_templates[];
 extern char *fsq_comment_templates[];
 extern char *ftjt_message_templates[];
 
