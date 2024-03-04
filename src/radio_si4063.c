@@ -214,7 +214,7 @@ void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *s
         }
     }
 
-    int err = si4063_wait_for_tx_complete(100);
+    int err = si4063_wait_for_tx_complete(1000);
     if(err != HAL_OK) {
         log_info("Error waiting for tx complete: %d\n", err);
     }
