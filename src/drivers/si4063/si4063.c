@@ -205,21 +205,6 @@ static void si4063_set_state(uint8_t state)
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
-void si4063_get_int_status()
-{
-    uint8_t data[] = {0xFF, 0xFF, 0xFF};
-    si4063_send_command(SI4063_COMMAND_GET_INT_STATUS, 0, NULL);//sizeof(data), data);
-    uint8_t response[6];
-    si4063_read_response(sizeof(response), response);
-    log_debug("int status: %#x %#x %#x %#x %#x %#x\n",
-              response[0],
-              response[1],
-              response[2],
-              response[3],
-              response[4],
-              response[5]);
-}
-
 void si4063_enable_tx()
 {
     log_debug("Si4063: Enable TX\n");
@@ -286,7 +271,6 @@ uint16_t si4063_refill_buffer(uint8_t *data, int len)
     si4063_read_response(sizeof(response), response);
 
     uint8_t free_space = response[1];
-    // printf("free space %d\n", free_space);
     if(free_space < len) {
         len = free_space;
     }
@@ -356,6 +340,17 @@ static int si4063_get_band(const uint32_t frequency_hz)
     return 0;
 }
 
+bool si4063_fifo_underflow()
+{
+    uint8_t data[] = {0xFF, 0xFF, ~0x20}; // Clear underflow status
+    si4063_send_command(SI4063_COMMAND_GET_INT_STATUS, sizeof(data), data);
+    uint8_t response[7];
+    si4063_read_response(sizeof(response), response);
+
+    bool fifo_underflow_pending = response[6] & 0x20;
+    return fifo_underflow_pending;
+}
+
 void si4063_set_tx_frequency(const uint32_t frequency_hz)
 {
     uint8_t outdiv, band;
@@ -409,6 +404,7 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     // Deviation depends on the frequency band
     si4063_set_frequency_deviation(current_deviation_hz);
 }
+
 void si4063_set_data_rate(const uint32_t rate_bps)
 {
     int rate = rate_bps * 10;

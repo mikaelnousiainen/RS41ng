@@ -189,7 +189,6 @@ static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, ra
     system_enable_tick();
 }
 
-// TODO check for FIFO underflows!
 void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *shared_state) {
     log_debug("Start FIFO TX\n");
     fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
@@ -199,20 +198,25 @@ void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *s
     uint16_t len = fsk_encoder_api->get_data_len(fsk_enc);
 
     uint16_t written = si4063_start_tx(data, len);
-    log_debug("Wrote %d bytes\n", written);
     data += written;
     len -= written;
     
     while(len > 0) {
         uint16_t written = si4063_refill_buffer(data, len);
-        log_debug("Wrote %d bytes\n", written);
         data += written;
         len -= written;
+
+        if(si4063_fifo_underflow()) {
+            log_info("FIFO underflow - Aborting");
+            shared_state->radio_transmission_finished = true;
+
+            return;
+        }
     }
 
     int err = si4063_wait_for_tx_complete(100);
     if(err != HAL_OK) {
-        log_debug("Error waiting for tx complete: %d\n", err);
+        log_info("Error waiting for tx complete: %d\n", err);
     }
 
     log_debug("Finished FIFO TX\n");
