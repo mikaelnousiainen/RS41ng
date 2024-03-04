@@ -591,6 +591,7 @@ void si4063_configure()
                 0x03, // 0x03 = GLOBAL_CONFIG
                 0x40 | // 0x40 = Reserved, needs to be set to 1
                 0x20 | // 0x20 = Fast sequencer mode
+                0x10 | // 129-byte FIFO
                 0x00   // High-performance mode
         };
 
@@ -655,6 +656,31 @@ void si4063_configure()
                 // Alternative: 0xC0 = Single-ended drive signal, 25% duty cycle. For low-power applications.
         };
 
+        si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
+    }
+
+    {
+        /*
+          2. Detailed Errata Descriptions
+2.1 If Configured to Skip Sync and Preamble on Transmit, the TX Data from the FIFO is Corrupted
+Description of Errata
+If preamble and sync word are excluded from the transmitted data (PREMABLE_TX_LENGTH = 0 and SYNC_CONFIG: SKIP_TX = 1), data from the FIFO is not transmitted correctly.
+Affected Conditions / Impacts
+Some number of missed bytes will occur at the beginning of the packet and some number of repeated bytes at the end of the packet.
+Workaround
+Set PKT_FIELD_1_CRC_CONFIG: CRC_START to 1. This will trigger the packet handler and result in transmitting the correct data,
+while still not sending a CRC unless enabled in a FIELD configuration. A fix has been identified and will be included in a future release
+        */
+
+        // In other words, without this, the FIFO buffer gets corrupted while TXing, because we're not using
+        // the preamble/sync word stuff
+        // To be clear - we're not doing any CRC stuff! This is just the recommended workaround
+        uint8_t data[] = {
+            0x12, // Group
+            0x01, // Set 1 property
+            0x10, // PKT_FIELD_1_CRC_CONFIG
+            0x80, // CRC_START
+        };
         si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
     }
 }

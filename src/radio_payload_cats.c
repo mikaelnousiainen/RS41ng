@@ -6,7 +6,7 @@
 #include "log.h"
 
 #define CATS_PREAMBLE_BYTE 0x55
-#define CATS_PREAMBLE_LENGTH 40
+#define CATS_PREAMBLE_LENGTH 4
 #define CATS_SYNC_WORD 0xABCDEF12
 #define CATS_SYNC_WORD_LENGTH 4
 
