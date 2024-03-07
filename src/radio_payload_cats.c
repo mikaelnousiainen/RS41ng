@@ -23,10 +23,8 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
     }
 
     // sync word
-    // TODO can clean this up!
-    for(int i = 0; i < CATS_SYNC_WORD_LENGTH; i++) {
-        int j = CATS_SYNC_WORD_LENGTH - i - 1;
-        *(cur++) = (CATS_SYNC_WORD & (0xFF << (j * 8))) >> (j * 8);
+    for(int i = CATS_SYNC_WORD_LENGTH - 1; i >= 0; i--) {
+        *(cur++) = (CATS_SYNC_WORD >> (i * 8));
     }
 
     uint8_t *data = malloc(length);
