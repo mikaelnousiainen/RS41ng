@@ -342,8 +342,8 @@
  * CATS mode settings
  */
 #define CATS_CALLSIGN CALLSIGN
-#define CATS_SSID 0
-#define CATS_ICON 0
+#define CATS_SSID 24
+#define CATS_ICON 8237
 #define CATS_COMMENT "I am a radiosonde. Hear me meow!"
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
