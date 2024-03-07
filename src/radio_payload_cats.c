@@ -31,6 +31,15 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
     cats_packet packet = cats_create(data);
     cats_append_identification_whisker(&packet, CATS_CALLSIGN, CATS_SSID, CATS_ICON);
     cats_append_comment_whisker(&packet, message);
+
+    if(GPS_HAS_FIX(telemetry_data->gps) &&
+       (telemetry_data->gps.latitude_degrees_1000000 != 0 ||
+        telemetry_data->gps.longitude_degrees_1000000 != 0)) {
+        cats_append_gps_whisker(&packet, telemetry_data->gps);
+    }
+
+    cats_append_node_info_whisker(&packet, telemetry_data);
+
     int len = cats_fully_encode(packet, cur);
     free(data);
 

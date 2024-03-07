@@ -345,6 +345,7 @@
 #define CATS_SSID 24
 #define CATS_ICON 8237
 #define CATS_COMMENT "I am a radiosonde. Hear me meow!"
+#define CATS_REPORTED_TX_POWER_DBM 20
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
