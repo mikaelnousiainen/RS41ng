@@ -8,7 +8,7 @@
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 //#define RS41
-#define DFM17
+//#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -186,7 +186,7 @@
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4063_TX_HORUS_V2 false
+#define RADIO_SI4063_TX_HORUS_V2 true
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 6
 #define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
