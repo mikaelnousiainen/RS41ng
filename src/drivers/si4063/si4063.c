@@ -260,7 +260,7 @@ uint16_t si4063_start_tx(uint8_t *data, int len)
 // If less than len, you will need to keep calling this
 uint16_t si4063_refill_buffer(uint8_t *data, int len)
 {
-    uint8_t response[2];
+    uint8_t response[2] = {0, 0};
 
     // Check how many bytes we have free
     si4063_send_command(SI4063_COMMAND_FIFO_INFO, 0, NULL);

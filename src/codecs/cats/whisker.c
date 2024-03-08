@@ -38,8 +38,9 @@ static inline void cats_push_u16(cats_packet *p, uint16_t val)
     }
 }
 
-static inline void cats_push_i32(cats_packet *p, int32_t val)
+static inline void cats_push_u32(cats_packet *p, uint32_t val)
 {
+    
     for(int i = 0; i < 4; i++) {
         p->data[p->len++] = val >> (i * 8);
     }
@@ -61,11 +62,13 @@ void cats_append_gps_whisker(cats_packet *packet, gps_data gps)
 {
     packet->data[packet->len++] = 0x02; // type = gps
     packet->data[packet->len++] = 14; // len
-    cats_push_i32(packet, gps.latitude_degrees_1000000 / 90 * ((1<<31) / 1000000)); // lat
-    cats_push_i32(packet, gps.longitude_degrees_1000000 / 180 * ((1<<31) / 1000000)); // lon
-    cats_push_f16(packet, gps.altitude_mm / 100.0); // alt
+    int32_t lat_converted = gps.latitude_degrees_1000000 * (1LL<<31) / 90LL / 10000000LL;
+    int32_t lon_converted = gps.longitude_degrees_1000000 * (1LL<<31) / 180LL / 10000000LL;
+    cats_push_u32(packet, lat_converted); // lat
+    cats_push_u32(packet, lon_converted); // lon
+    cats_push_f16(packet, gps.altitude_mm / 1000.0); // alt
     packet->data[packet->len++] = 0; // max error = 0m
-    packet->data[packet->len++] = gps.heading_degrees_100000 * 128 / 180 / 100000; // heading
+    packet->data[packet->len++] = gps.heading_degrees_100000 / 100000.0 * 128.0 / 180.0; // heading
     cats_push_f16(packet, gps.ground_speed_cm_per_second / 100.0); // horizontal speed
 }
 

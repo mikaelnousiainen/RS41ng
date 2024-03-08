@@ -21,15 +21,15 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-#define SEMIHOSTING_ENABLE
-#define LOGGING_ENABLE
+//#define SEMIHOSTING_ENABLE
+//#define LOGGING_ENABLE
 
 /**
  * Global configuration
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "VE9QLE"
+#define CALLSIGN "MYCALL"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -182,13 +182,13 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS false
+#define RADIO_SI4063_TX_APRS true
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 false
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 6
-#define RADIO_SI4063_TX_CATS true
+#define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -203,8 +203,8 @@
 #define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  434500000
-#define RADIO_SI4063_TX_FREQUENCY_CATS      434500000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
 
 /**
  * RS41 only: External Si5351 radio chip transmission configuration
@@ -342,8 +342,8 @@
  * CATS mode settings
  */
 #define CATS_CALLSIGN CALLSIGN
-#define CATS_SSID 24
-#define CATS_ICON 8237
+#define CATS_SSID 29 // 0 - 255
+#define CATS_ICON 13 // Balloon. See the CATS standard for more options
 #define CATS_COMMENT "I am a radiosonde. Hear me meow!"
 #define CATS_REPORTED_TX_POWER_DBM 20
 

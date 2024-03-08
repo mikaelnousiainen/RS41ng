@@ -10,7 +10,7 @@
 #define log_error printf
 #define log_warn printf
 #define log_info printf
-#define log_debug printf
+#define log_debug(...)
 #define log_trace(...)
 
 #else

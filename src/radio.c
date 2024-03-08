@@ -981,7 +981,7 @@ void radio_handle_main_loop()
         log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
                 current_telemetry_data.gps.latitude_degrees_1000000 / 10,
                 current_telemetry_data.gps.longitude_degrees_1000000 / 10,
-                (current_telemetry_data.gps.altitude_mm / 1000) * 3280 / 1000);
+                (current_telemetry_data.gps.altitude_mm / 1000));
         #endif
 
         radio_reset_transmit_delay_counter();
