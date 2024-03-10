@@ -346,6 +346,10 @@
 #define CATS_ICON 13 // Balloon. See the CATS standard for more options
 #define CATS_COMMENT "I am a radiosonde. Hear me meow!"
 #define CATS_REPORTED_TX_POWER_DBM 20
+// You probably want this to be true
+// Set to false if you're using your radiosonde for something other than a balloon payload
+// We don't want non-balloons showing up as balloons on FELINET!
+#define CATS_IS_BALLOON true
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting

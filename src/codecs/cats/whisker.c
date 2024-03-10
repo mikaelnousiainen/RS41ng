@@ -31,6 +31,22 @@ static inline void cats_push_f16(cats_packet *p, float val)
     p->data[p->len++] = f16 >> 8;
 }
 
+static inline void cats_push_f32(cats_packet *p, float val)
+{
+    union {
+        float f;
+        uint32_t u;
+    } fu = { .f = val };
+
+    assert(sizeof fu.f == sizeof fu.u);
+
+    uint32_t f32 = fu.u;
+    p->data[p->len++] = f32;
+    p->data[p->len++] = f32 >> 8;
+    p->data[p->len++] = f32 >> 16;
+    p->data[p->len++] = f32 >> 24;
+}
+
 static inline void cats_push_u16(cats_packet *p, uint16_t val)
 {
     for(int i = 0; i < 2; i++) {
@@ -87,11 +103,14 @@ void cats_append_node_info_whisker(cats_packet *packet, telemetry_data *data)
     uint8_t *d = packet->data;
     size_t *l = &packet->len;
 
+    bool has_altitude = GPS_HAS_FIX(data->gps);
+    float altitude = data->gps.altitude_mm / 1000.0;
+
     d[(*l)++] = 0x09; // type = node info
-    d[(*l)++] = 10; // len
+    d[(*l)++] = has_altitude ? 14 : 10; // len
     // bitmask
     d[(*l)++] = 0;
-    d[(*l)++] = 0;
+    d[(*l)++] = (CATS_IS_BALLOON << 2) | (has_altitude << 1);
     d[(*l)++] = 0b11110011;
 
     cats_push_u16(packet, HARDWARE_ID);
@@ -100,4 +119,7 @@ void cats_append_node_info_whisker(cats_packet *packet, telemetry_data *data)
     d[(*l)++] = CATS_REPORTED_TX_POWER_DBM * 4.0; // TX power
     d[(*l)++] = data->battery_voltage_millivolts / 100; // voltage
     d[(*l)++] = data->internal_temperature_celsius_100 / 100; // transmitter temperature
+    if(has_altitude) {
+        cats_push_f32(packet, altitude);
+    }
 }

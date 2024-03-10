@@ -27,9 +27,9 @@
 #define GPS_FIX_TIME_ONLY 5
 
 #if GPS_REQUIRE_3D_FIX
-#define GPS_HAS_FIX(gps_data) (gps_data.fix_ok && (gps_data.fix == GPS_FIX_3D))
+#define GPS_HAS_FIX(gps_data) ((gps_data).fix_ok && ((gps_data).fix == GPS_FIX_3D))
 #else
-#define GPS_HAS_FIX(gps_data) (gps_data.fix_ok && (gps_data.fix == GPS_FIX_2D || gps_data.fix == GPS_FIX_3D))
+#define GPS_HAS_FIX(gps_data) ((gps_data).fix_ok && ((gps_data).fix == GPS_FIX_2D || (gps_data).fix == GPS_FIX_3D))
 #endif
 
 typedef struct _gps_data {
