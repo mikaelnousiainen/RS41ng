@@ -73,6 +73,7 @@ size_t cats_ldpc_encode(uint8_t *data, size_t len)
     // This means we can only encode up to 511 bytes
     assert(len < 512);
     
+    // A 128 byte array is needed to support CATS packets up to 511 bytes.
     uint8_t parity[128];
 
     // Split data into blocks and encode each block
