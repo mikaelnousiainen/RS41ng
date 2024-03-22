@@ -341,9 +341,15 @@
 /**
  * CATS mode settings
  */
+// CATS is a new digital mode, vaguely meant to be a better APRS (but also much more powerful)
+// While it offers a number of advantages, probably the best one for balloons is the rapid beacon rate.
+// The protocol is meant to allow for a much higher channel capacity, so beaconing every second is totally fine.
+// For more information, see here: https://cats.radio/
 #define CATS_CALLSIGN CALLSIGN
 #define CATS_SSID 29 // 0 - 255
-#define CATS_ICON 13 // Balloon. See the CATS standard for more options
+// Balloon. See the CATS standard for more options
+// https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf
+#define CATS_ICON 13
 #define CATS_COMMENT "I am a radiosonde. Hear me meow!"
 #define CATS_REPORTED_TX_POWER_DBM 20
 // You probably want this to be true

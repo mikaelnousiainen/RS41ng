@@ -4,8 +4,8 @@
 #include "ldpc_matrices.h"
 
 cats_ldpc_code_t tc128 = {
-    .n = 128,
-    .k = 64,
+    .code_length_bits = 128,
+    .data_length_bits = 64,
     .punctured_bits = 0,
     .bf_working_len = 128 + 0,
     .circulant_size = 128/8,
@@ -14,8 +14,8 @@ cats_ldpc_code_t tc128 = {
 };
 
 cats_ldpc_code_t tc256 = {
-    .n = 256,
-    .k = 128,
+    .code_length_bits = 256,
+    .data_length_bits = 128,
     .punctured_bits = 0,
     .bf_working_len = 256 + 0,
     .circulant_size = 256/8,
@@ -24,8 +24,8 @@ cats_ldpc_code_t tc256 = {
 };
 
 cats_ldpc_code_t tc512 = {
-    .n = 512,
-    .k = 256,
+    .code_length_bits = 512,
+    .data_length_bits = 256,
     .punctured_bits = 0,
     .bf_working_len = 512 + 0,
     .circulant_size = 512/8,
@@ -34,8 +34,8 @@ cats_ldpc_code_t tc512 = {
 };
 
 cats_ldpc_code_t tm2048 = {
-    .n = 2048,
-    .k = 1024,
+    .code_length_bits = 2048,
+    .data_length_bits = 1024,
     .punctured_bits = 512,
     .bf_working_len = 2048 + 512,
     .circulant_size = 512/4,

@@ -2,10 +2,10 @@
 #define __CATS_LDPC_MATRICES_H
 
 typedef struct cats_ldpc_code {
-    // Code length (data+parity)
-    int n;
+    // Code length in bits (data+parity)
+    int code_length_bits;
     // Data length in bits
-    int k;
+    int data_length_bits;
     int punctured_bits;
     int bf_working_len;
     size_t circulant_size;

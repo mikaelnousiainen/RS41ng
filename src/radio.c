@@ -10,7 +10,7 @@
 #include "codecs/morse/morse.h"
 #include "codecs/bell/bell.h"
 #include "codecs/mfsk/mfsk.h"
-#include "codecs/fifo/fifo.h"
+#include "codecs/raw/raw.h"
 #include "codecs/jtencode/jtencode.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "radio_internal.h"
@@ -310,7 +310,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .frequency = RADIO_SI4063_TX_FREQUENCY_CATS,
                 .tx_power = RADIO_SI4063_TX_POWER,
                 .payload_encoder = &radio_cats_payload_encoder,
-                .fsk_encoder_api = &fifo_fsk_encoder_api,
+                .fsk_encoder_api = &raw_fsk_encoder_api,
         },
 #endif
 #endif
@@ -639,7 +639,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_CATS:
             enable_gps_during_transmit = true;
 
-            fifo_encoder_new(&entry->fsk_encoder);
+            raw_encoder_new(&entry->fsk_encoder);
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_WSPR:
@@ -778,7 +778,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
             mfsk_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_CATS:
-            fifo_encoder_destroy(&entry->fsk_encoder);
+            raw_encoder_destroy(&entry->fsk_encoder);
             break;
         case RADIO_DATA_MODE_WSPR:
         case RADIO_DATA_MODE_FT8:
