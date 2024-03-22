@@ -227,6 +227,9 @@ void si4063_disable_tx()
 // If less than len, remaining bytes will need to be used to top up the buffer
 uint16_t si4063_start_tx(uint8_t *data, int len)
 {
+    // Clear fifo underflow interrupt
+    si4063_fifo_underflow();
+
     // Clear TX FIFO
     uint8_t fifo_clear_data[] = {1};
     si4063_send_command(SI4063_COMMAND_FIFO_INFO, 1, fifo_clear_data);
@@ -336,6 +339,7 @@ static int si4063_get_band(const uint32_t frequency_hz)
     return 0;
 }
 
+// Also clears status
 bool si4063_fifo_underflow()
 {
     uint8_t data[] = {0xFF, 0xFF, ~0x20}; // Clear underflow status

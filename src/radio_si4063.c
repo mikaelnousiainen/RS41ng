@@ -207,7 +207,7 @@ void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *s
         len -= written;
 
         if(si4063_fifo_underflow()) {
-            log_info("FIFO underflow - Aborting");
+            log_info("FIFO underflow - Aborting\n");
             shared_state->radio_transmission_finished = true;
 
             return;
