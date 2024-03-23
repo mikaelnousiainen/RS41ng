@@ -38,6 +38,18 @@ typedef struct _fsk_encoder_api {
      */
     uint32_t (*get_symbol_delay)(fsk_encoder *encoder);
 
+    /**
+     * @param encoder
+     * @return Pointer to packet data
+     */
+    uint8_t *(*get_data)(fsk_encoder *encoder);
+
+    /**
+     * @param encoder
+     * @return Length of packet data
+     */
+    uint16_t (*get_data_len)(fsk_encoder *encoder);
+
     void (*set_data)(fsk_encoder *encoder, uint16_t data_length, uint8_t *data);
 
     int8_t (*next_tone)(fsk_encoder *encoder);

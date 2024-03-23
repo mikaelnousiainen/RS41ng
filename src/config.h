@@ -188,6 +188,8 @@
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 true
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4063_TX_CATS false
+#define RADIO_SI4063_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -202,6 +204,7 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
 
 /**
  * RS41 only: External Si5351 radio chip transmission configuration
@@ -334,6 +337,31 @@
 #define HORUS_V2_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * CATS mode settings
+ */
+// CATS is a new digital mode, vaguely meant to be a better APRS (but also much more powerful)
+// While it offers a number of advantages, probably the best one for balloons is the rapid beacon rate.
+// The protocol is meant to allow for a much higher channel capacity, so beaconing every second is totally fine.
+// For more information, see here: https://cats.radio/
+#define CATS_CALLSIGN CALLSIGN
+#define CATS_SSID 29 // 0 - 255
+// Balloon. See the CATS standard for more options
+// https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf
+#define CATS_ICON 13
+#define CATS_COMMENT "I am a radiosonde. Hear me meow!"
+#define CATS_REPORTED_TX_POWER_DBM 20
+// You probably want this to be true
+// Set to false if you're using your radiosonde for something other than a balloon payload
+// We don't want non-balloons showing up as balloons on FELINET!
+#define CATS_IS_BALLOON true
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define CATS_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
+#define CATS_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * CW settings

@@ -29,6 +29,7 @@ typedef enum _radio_data_mode {
     RADIO_DATA_MODE_FSQ_3,
     RADIO_DATA_MODE_FSQ_4_5,
     RADIO_DATA_MODE_FSQ_6,
+    RADIO_DATA_MODE_CATS,
 } radio_data_mode;
 
 typedef struct _radio_transmit_entry {
@@ -70,6 +71,7 @@ typedef struct _radio_module_state {
     volatile bool radio_dma_transfer_active;
     volatile bool radio_manual_transmit_active;
     volatile bool radio_interrupt_transmit_active;
+    volatile bool radio_fifo_transmit_active;
 
     fsk_tone *radio_current_fsk_tones;
     int8_t radio_current_fsk_tone_count;

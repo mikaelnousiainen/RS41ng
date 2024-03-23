@@ -148,7 +148,17 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 * The Horus 4FSK v1 and v2 modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki).
 * Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform.
 * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
-* In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
+* In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it 
+
+#### Notes about CATS (DFM-17 only)
+
+* CATS is a [modern packet radio standard](https://cats.radio/) designed for communication and telemetry. Due to its increased efficiency over APRS, it allows for fast beacon times (1 Hz or more) without congesting the network.
+* To receive CATS, you can either use an [I-Gate board](https://www.tindie.com/products/hamcats/cats-i-gate-board/) on a Raspberry Pi, or just a standard RTL-SDR dongle.
+  * See [here](https://gitlab.scd31.com/cats/igate) for the I-Gate board software.
+  * See [here](https://gitlab.scd31.com/cats/sdr-igate) for the SDR software.
+* In either case, CATS packets that are received get forwarded to FELINET, and relayed to APRS-IS. This means your CATS packets will show up on [aprs.fi](https://aprs.fi)
+  * If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
+* For more information, be sure to check [the standard](https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf).
 
 ### External sensors (RS41 only)
 
@@ -607,6 +617,8 @@ rtl_fm -f 432500000 -M fm -s 250k -r 48000 -g 22 - | ./aprs -
 * Various authors with smaller contributions from GitHub pull requests
 * Original codebase: DF8OE and other authors of the [RS41HUP](https://github.com/df8oe/RS41HUP) project
 * Horus 4FSK code adapted from [darksidelemm fork of RS41HUP](https://github.com/darksidelemm/RS41HUP) project
+* CATS code adapted from [CATS reference implementation](https://gitlab.scd31.com/cats/ham-cats/)
+  * LDPC encoder adapted from [libCATS](https://github.com/CamK06/libCATS)
 
 # Additional documentation
 

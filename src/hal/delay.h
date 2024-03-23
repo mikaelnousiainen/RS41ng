@@ -1,6 +1,8 @@
 #ifndef __DELAY_H
 #define __DELAY_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
