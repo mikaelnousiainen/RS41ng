@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
+#define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -21,8 +21,8 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+#define SEMIHOSTING_ENABLE
+#define LOGGING_ENABLE
 
 /**
  * Global configuration
@@ -147,12 +147,14 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 true
+#define RADIO_SI4032_TX_HORUS_V2 false
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_CATS true
+#define RADIO_SI4032_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -167,6 +169,7 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4032_TX_FREQUENCY_CATS      430450000
 
 /**
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration

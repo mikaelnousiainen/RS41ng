@@ -1,11 +1,15 @@
 #include <stm32f10x_gpio.h>
 
 #include "hal/spi.h"
+#include "hal/hal.h"
+#include "hal/delay.h"
 #include "si4032.h"
+#include "log.h"
 
 #define SPI_WRITE_FLAG 0x80
 
 #define SI4032_CLOCK 26.0f
+#define EXPECTED_SI4032_CLOCK 30
 
 #define GPIO_SI4032_NSEL GPIOC
 #define GPIO_PIN_SI4032_NSEL GPIO_Pin_13
@@ -15,6 +19,7 @@
 
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
+    // log_info("write %x %x\n", reg, value);
     return spi_send_and_receive(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, ((reg | SPI_WRITE_FLAG) << 8U) | value);
 }
 
@@ -45,6 +50,89 @@ void si4032_disable_tx()
     si4032_write(0x07, 0x40);
 }
 
+// Returns number of bytes sent from *data
+// If less than len, remaining bytes will need to be used to top up the buffer
+uint16_t si4032_start_tx(uint8_t *data, int len)
+{
+    // Clear fifo underflow interrupt, along with other interrupts
+    si4032_read(0x03);
+
+    // Clear fifo
+    si4032_write(0x08, 1);
+    si4032_write(0x08, 0);
+
+    // Set packet length (max 255 bytes)
+    si4032_write(0x3E, len);
+
+    // Fill our FIFO
+    int fifo_len = len;
+    if(fifo_len > 64) {
+        fifo_len = 64;
+    }
+    for(int i = 0; i < fifo_len; i++) {
+        si4032_write(0x7F, data[i]);
+    }
+
+    // disable packet handler - just transmit whatever's in the FIFO
+    si4032_write(0x30, 0x08);
+
+    // Start transmitting
+    si4032_write(0x07, 0x09);
+
+    return fifo_len;
+}
+
+// Add additional bytes to the si4032's FIFO buffer
+// Needed for large packets that don't fit in its buffer.
+// Keep refilling it while transmitting
+// Returns number of bytes taken from *data
+// If less than len, you will need to keep calling this
+uint16_t si4032_refill_buffer(uint8_t *data, int len, bool *overflow)
+{
+    uint8_t interrupts = si4032_read(0x03);
+    int i = 0;
+    
+    // check for free buffer space
+    // TX FIFO almost full
+    while (!(interrupts & 0x40) && i < len) {
+        // check for FIFO underflow
+        if (interrupts & 0x80) {
+            *overflow = true;
+            return i;
+        }
+
+        si4032_write(0x7F, data[i]);
+
+        interrupts = si4032_read(0x03);
+        i++;
+    }
+
+    if (interrupts & 0x80) {
+        *overflow = true;
+    }
+
+    return i;
+}
+
+int si4032_wait_for_tx_complete(int timeout_ms)
+{
+    for(int i = 0; i < timeout_ms; i++) {
+        uint8_t status = si4032_read(0x03);
+
+        // ipksent is set
+        if (status & 0x04) {
+            return HAL_OK;
+        }
+
+        delay_ms(1);
+    }
+
+    // clear txon manually
+    si4032_write(0x07, 0x40);
+
+    return HAL_ERROR_TIMEOUT;
+}
+
 void si4032_use_direct_mode(bool use)
 {
     if (use) {
@@ -65,6 +153,15 @@ void si4032_set_tx_frequency(const float frequency_mhz)
     si4032_write(0x75, (uint8_t) (0b01000000 | (fb & 0b11111) | ((hbsel & 0b1) << 5)));
     si4032_write(0x76, (uint8_t) (((uint16_t) fc >> 8U) & 0xffU));
     si4032_write(0x77, (uint8_t) ((uint16_t) fc & 0xff));
+}
+
+void si4032_set_data_rate(const uint32_t rate_bps)
+{
+    uint32_t rate = (uint64_t) rate_bps * (1 << 21) * EXPECTED_SI4032_CLOCK / 1000000 / ((uint64_t) SI4032_CLOCK);
+
+    si4032_write(0x6E, rate >> 8);
+    si4032_write(0x6F, rate & 0xFF);
+    si4032_write(0x70, 0b00100000);
 }
 
 void si4032_set_tx_power(uint8_t power)
@@ -109,6 +206,10 @@ void si4032_set_modulation_type(si4032_modulation_type type)
         case SI4032_MODULATION_TYPE_FSK:
             // Direct Async Mode with FSK modulation
             value = 0b00010010;
+            break;
+        case SI4032_MODULATION_TYPE_FIFO_FSK:
+            // FIFO with FSK modulation
+            value = 0b00100010;
             break;
         default:
             return;
@@ -193,6 +294,22 @@ void si4032_init()
 
     si4032_set_frequency_offset(0);
     si4032_set_frequency_deviation(5); // Was: 5 for APRS in RS41HUP?
+
+    // No TX header
+    // Fixed packet length (don't transmit length)
+    // Synchronization word of 1 byte (not possible to select 0 bytes)
+    si4032_write(0x33, 0b00001000);
+    // 1 preamble byte (the minimum allowed)
+    // Setting this to 0 is equivalent to setting it to 1 TODO FIXME
+    si4032_write(0x34, 1);
+    // Set our sync word to 0x55, so it looks like a preamble
+    si4032_write(0x36, 0x55);
+
+    // set almost full threshold to 63 (max allowed; buffer size - 1)
+    si4032_write(0x7C, 63);
+
+    // enable interrupts
+    si4032_write(0x05, 0b11100100);
 
     si4032_set_modulation_type(SI4032_MODULATION_TYPE_NONE);
 }
