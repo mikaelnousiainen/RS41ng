@@ -164,6 +164,20 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
 #endif
+#if RADIO_SI4032_TX_CATS
+        {
+            .enabled = RADIO_SI4032_TX_CATS,
+            .radio_type = RADIO_TYPE_SI4032,
+            .data_mode = RADIO_DATA_MODE_CATS,
+            .transmit_count = RADIO_SI4032_TX_CATS_COUNT,
+            .time_sync_seconds = CATS_TIME_SYNC_SECONDS,
+            .time_sync_seconds_offset = CATS_TIME_SYNC_OFFSET_SECONDS,
+            .frequency = RADIO_SI4032_TX_FREQUENCY_CATS,
+            .tx_power = RADIO_SI4032_TX_POWER,
+            .payload_encoder = &radio_cats_payload_encoder,
+            .fsk_encoder_api = &raw_fsk_encoder_api,
+        },
+#endif
 #endif
 #endif
 
