@@ -54,27 +54,37 @@ void si4032_disable_tx()
 // If less than len, remaining bytes will need to be used to top up the buffer
 uint16_t si4032_start_tx(uint8_t *data, int len)
 {
+    // No TX header
+    // Fixed packet length (don't transmit length)
+    si4032_write(0x33, 0b00001000);
+
+    // set almost full threshold to 60
+    si4032_write(0x7C, 60);
+
+    // enable interrupts
+    si4032_write(0x05, 0b11100100);
+
     // Clear fifo underflow interrupt, along with other interrupts
     si4032_read(0x03);
+
+    // disable packet handler - just transmit whatever's in the FIFO
+    si4032_write(0x30, 0x00);
+
+    // Set packet length (max 255 bytes)
+    si4032_write(0x3E, len);
 
     // Clear fifo
     si4032_write(0x08, 1);
     si4032_write(0x08, 0);
 
-    // Set packet length (max 255 bytes)
-    si4032_write(0x3E, len);
-
     // Fill our FIFO
     int fifo_len = len;
-    if(fifo_len > 64) {
-        fifo_len = 64;
+    if(fifo_len > 48) {
+        fifo_len = 48;
     }
     for(int i = 0; i < fifo_len; i++) {
         si4032_write(0x7F, data[i]);
     }
-
-    // disable packet handler - just transmit whatever's in the FIFO
-    si4032_write(0x30, 0x08);
 
     // Start transmitting
     si4032_write(0x07, 0x09);
@@ -294,19 +304,6 @@ void si4032_init()
 
     si4032_set_frequency_offset(0);
     si4032_set_frequency_deviation(5); // Was: 5 for APRS in RS41HUP?
-
-    // No TX header
-    // Fixed packet length (don't transmit length)
-    // Synchronization word of 1 byte (not possible to select 0 bytes)
-    si4032_write(0x33, 0b00001000);
-    // 1 preamble byte (the minimum allowed)
-    // Setting this to 0 is equivalent to setting it to 1 TODO FIXME
-    si4032_write(0x34, 1);
-    // Set our sync word to 0x55, so it looks like a preamble
-    si4032_write(0x36, 0x55);
-
-    // set almost full threshold to 63 (max allowed; buffer size - 1)
-    si4032_write(0x7C, 63);
 
     // enable interrupts
     si4032_write(0x05, 0b11100100);

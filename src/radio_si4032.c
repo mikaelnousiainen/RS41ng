@@ -90,7 +90,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             modulation_type = SI4032_MODULATION_TYPE_FIFO_FSK;
             use_direct_mode = false;
             use_fifo_mode = true;
-            data_rate = 9600 * 8; // TODO why a factor of 5 here?
+            data_rate = 9600;
             break;
         default:
             return false;
@@ -246,7 +246,7 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
             }*/
     }
 
-    int err = si4032_wait_for_tx_complete(10000); // TODO FIXME
+    int err = si4032_wait_for_tx_complete(500);
     if(err != HAL_OK) {
         log_info("Error waiting for tx complete: %d\n", err);
     }
