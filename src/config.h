@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-#define RS41
+//#define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -147,13 +147,13 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS false
+#define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 false
+#define RADIO_SI4032_TX_HORUS_V2 true
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 6
-#define RADIO_SI4032_TX_CATS true
+#define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
@@ -185,13 +185,13 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS false
+#define RADIO_SI4063_TX_APRS true
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 true
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 1
-#define RADIO_SI4063_TX_CATS true
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
