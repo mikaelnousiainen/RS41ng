@@ -54,12 +54,21 @@ void si4032_disable_tx()
 // If less than len, remaining bytes will need to be used to top up the buffer
 uint16_t si4032_start_tx(uint8_t *data, int len)
 {
+    const uint8_t buffer_size = 64;
+
     // No TX header
     // Fixed packet length (don't transmit length)
     si4032_write(0x33, 0b00001000);
 
-    // set almost full threshold to 60
-    si4032_write(0x7C, 60);
+    // Clear fifo
+    si4032_write(0x08, 1);
+    si4032_write(0x08, 0);
+
+    // set almost full threshold to buffer_size
+    si4032_write(0x7C, buffer_size);
+
+    // set almost empty threshold
+    si4032_write(0x7D, 16);
 
     // enable interrupts
     si4032_write(0x05, 0b11100100);
@@ -73,14 +82,10 @@ uint16_t si4032_start_tx(uint8_t *data, int len)
     // Set packet length (max 255 bytes)
     si4032_write(0x3E, len);
 
-    // Clear fifo
-    si4032_write(0x08, 1);
-    si4032_write(0x08, 0);
-
     // Fill our FIFO
     int fifo_len = len;
-    if(fifo_len > 48) {
-        fifo_len = 48;
+    if(fifo_len > buffer_size) {
+        fifo_len = buffer_size;
     }
     for(int i = 0; i < fifo_len; i++) {
         si4032_write(0x7F, data[i]);
@@ -99,26 +104,19 @@ uint16_t si4032_start_tx(uint8_t *data, int len)
 // If less than len, you will need to keep calling this
 uint16_t si4032_refill_buffer(uint8_t *data, int len, bool *overflow)
 {
-    uint8_t interrupts = si4032_read(0x03);
+    uint8_t interrupts;
     int i = 0;
-    
-    // check for free buffer space
-    // TX FIFO almost full
-    while (!(interrupts & 0x40) && i < len) {
-        // check for FIFO underflow
-        if (interrupts & 0x80) {
-            *overflow = true;
-            return i;
-        }
 
-        si4032_write(0x7F, data[i]);
+    while(i < len){
+        do {
+            si4032_write(0x7F, data[i]);
+            i++;
+            delay_us(10);
 
-        interrupts = si4032_read(0x03);
-        i++;
-    }
+            interrupts = si4032_read(0x03);
+        } while ((interrupts & 0x20) && i < len);
 
-    if (interrupts & 0x80) {
-        *overflow = true;
+        delay_us(500);
     }
 
     return i;
@@ -167,7 +165,10 @@ void si4032_set_tx_frequency(const float frequency_mhz)
 
 void si4032_set_data_rate(const uint32_t rate_bps)
 {
-    uint32_t rate = (uint64_t) rate_bps * (1 << 21) * EXPECTED_SI4032_CLOCK / 1000000 / ((uint64_t) SI4032_CLOCK);
+    uint32_t rate = (uint64_t) rate_bps * (1 << 21) * EXPECTED_SI4032_CLOCK / 1000000 / SI4032_CLOCK;
+
+    log_info("Rate BPS:   %lu\n", rate_bps);
+    log_info("Rate (raw): %lu\n", rate);
 
     si4032_write(0x6E, rate >> 8);
     si4032_write(0x6F, rate & 0xFF);

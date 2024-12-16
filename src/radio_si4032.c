@@ -225,26 +225,13 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
     uint8_t *data = fsk_encoder_api->get_data(fsk_enc);
     uint16_t len = fsk_encoder_api->get_data_len(fsk_enc);
 
+    bool overflow = false;
+
     uint16_t written = si4032_start_tx(data, len);
     data += written;
     len -= written;
 
-    bool overflow = false;
-
-    while(len > 0) {
-        uint16_t written = si4032_refill_buffer(data, len, &overflow);
-        data += written;
-        len -= written;
-
-        // log_info("FIFO wrote %d bytes\n", written);
-
-        /*if(overflow) {
-            log_info("FIFO underflow - Aborting\n");
-            shared_state->radio_transmission_finished = true;
-
-            return;
-            }*/
-    }
+    si4032_refill_buffer(data, len, &overflow);
 
     int err = si4032_wait_for_tx_complete(500);
     if(err != HAL_OK) {
