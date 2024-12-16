@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-#define RS41
+//#define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -29,7 +29,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "KE5GDB"
+#define CALLSIGN "MYCALL"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -46,7 +46,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 100
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -147,14 +147,14 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS false
+#define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
-#define RADIO_SI4032_TX_CATS true
-#define RADIO_SI4032_TX_CATS_COUNT 2
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_CATS false
+#define RADIO_SI4032_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -327,7 +327,7 @@
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V2_PAYLOAD_ID 591
+#define HORUS_V2_PAYLOAD_ID 256
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
@@ -353,7 +353,7 @@
 // Balloon. See the CATS standard for more options
 // https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf
 #define CATS_ICON 13
-#define CATS_COMMENT "https://k5rwk.org/balloons"
+#define CATS_COMMENT "I am a radiosonde. Hear me meow!"
 #define CATS_REPORTED_TX_POWER_DBM 20
 // You probably want this to be true
 // Set to false if you're using your radiosonde for something other than a balloon payload
