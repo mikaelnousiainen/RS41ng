@@ -19,7 +19,6 @@
 
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
-    // log_info("write %x %x\n", reg, value);
     return spi_send_and_receive(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, ((reg | SPI_WRITE_FLAG) << 8U) | value);
 }
 
