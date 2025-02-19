@@ -153,6 +153,8 @@
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_CATS false
+#define RADIO_SI4032_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
@@ -167,6 +169,7 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4032_TX_FREQUENCY_CATS      430500000
 
 /**
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration

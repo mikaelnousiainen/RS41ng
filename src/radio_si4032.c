@@ -31,6 +31,7 @@ static bool si4032_use_dma = false;
 // TODO: Add support for multiple APRS baud rates
 // This delay is for RS41 radiosondes
 #define symbol_delay_bell_202_1200bps_us 823
+#define SI4032_DEVIATION_HZ_625_CATS 8 // 4800 / 625
 
 static volatile bool radio_si4032_state_change = false;
 static volatile uint32_t radio_si4032_freq = 0;
@@ -41,8 +42,11 @@ uint16_t radio_si4032_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t
 bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
     uint16_t frequency_offset;
+    uint32_t frequency_deviation = 5;
+    uint32_t data_rate = 0;
     si4032_modulation_type modulation_type;
     bool use_direct_mode;
+    bool use_fifo_mode = false;
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
@@ -80,6 +84,14 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             data_timer_init(entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder));
             break;
         }
+        case RADIO_DATA_MODE_CATS:
+            frequency_offset = 0;
+            frequency_deviation = SI4032_DEVIATION_HZ_625_CATS;
+            modulation_type = SI4032_MODULATION_TYPE_FIFO_FSK;
+            use_direct_mode = false;
+            use_fifo_mode = true;
+            data_rate = 9600;
+            break;
         default:
             return false;
     }
@@ -88,8 +100,14 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
     si4032_set_tx_power(entry->tx_power);
     si4032_set_frequency_offset(frequency_offset);
     si4032_set_modulation_type(modulation_type);
+    si4032_set_frequency_deviation(frequency_deviation);
 
-    si4032_enable_tx();
+    if(use_fifo_mode) {
+        si4032_set_data_rate(data_rate);
+    }
+    else {
+        si4032_enable_tx();
+    }
 
     if (use_direct_mode) {
         spi_uninit();
@@ -121,6 +139,9 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_HORUS_V2:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
+            break;
+        case RADIO_DATA_MODE_CATS:
+            shared_state->radio_fifo_transmit_active = true;
             break;
         default:
             break;
@@ -196,6 +217,32 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
     system_enable_tick();
 }
 
+void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *shared_state) {
+    log_debug("Start FIFO TX\n");
+    fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
+    fsk_encoder *fsk_enc = &entry->fsk_encoder;
+
+    uint8_t *data = fsk_encoder_api->get_data(fsk_enc);
+    uint16_t len = fsk_encoder_api->get_data_len(fsk_enc);
+
+    bool overflow = false;
+
+    uint16_t written = si4032_start_tx(data, len);
+    data += written;
+    len -= written;
+
+    si4032_refill_buffer(data, len, &overflow);
+
+    int err = si4032_wait_for_tx_complete(500);
+    if(err != HAL_OK) {
+        log_info("Error waiting for tx complete: %d\n", err);
+    }
+
+    log_debug("Finished FIFO TX\n");
+
+    shared_state->radio_transmission_finished = true;
+}
+
 void radio_handle_main_loop_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
     if (entry->radio_type != RADIO_TYPE_SI4032 || shared_state->radio_interrupt_transmit_active) {
@@ -204,6 +251,11 @@ void radio_handle_main_loop_si4032(radio_transmit_entry *entry, radio_module_sta
 
     if (shared_state->radio_manual_transmit_active) {
         radio_handle_main_loop_manual_si4032(entry, shared_state);
+        return;
+    }
+
+    if (shared_state->radio_fifo_transmit_active) {
+        radio_handle_fifo_si4032(entry, shared_state);
         return;
     }
 

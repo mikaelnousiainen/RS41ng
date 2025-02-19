@@ -150,7 +150,7 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 * See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
 * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it 
 
-#### Notes about CATS (DFM-17 only)
+#### Notes about CATS
 
 * CATS is a [modern packet radio standard](https://cats.radio/) designed for communication and telemetry. Due to its increased efficiency over APRS, it allows for fast beacon times (1 Hz or more) without congesting the network.
 * To receive CATS, you can either use an [I-Gate board](https://www.tindie.com/products/hamcats/cats-i-gate-board/) on a Raspberry Pi, or just a standard RTL-SDR dongle.
