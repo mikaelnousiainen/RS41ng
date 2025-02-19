@@ -69,7 +69,7 @@ static inline void cats_push_f32(cats_packet *p, float val)
 
 static inline void cats_push_u16(cats_packet *p, uint16_t val)
 {
-    for(int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         p->data[p->len++] = val >> (i * 8);
     }
 }
@@ -77,7 +77,7 @@ static inline void cats_push_u16(cats_packet *p, uint16_t val)
 static inline void cats_push_u32(cats_packet *p, uint32_t val)
 {
     
-    for(int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         p->data[p->len++] = val >> (i * 8);
     }
 }
@@ -145,7 +145,7 @@ void cats_append_node_info_whisker(cats_packet *packet, telemetry_data *data)
     d[(*l)++] = CATS_REPORTED_TX_POWER_DBM * 4.0; // TX power
     d[(*l)++] = data->battery_voltage_millivolts / 100; // voltage
     d[(*l)++] = data->internal_temperature_celsius_100 / 100; // transmitter temperature
-    if(has_altitude) {
+    if (has_altitude) {
         cats_push_f32(packet, altitude);
     }
 }

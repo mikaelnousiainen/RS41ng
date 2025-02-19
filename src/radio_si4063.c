@@ -226,7 +226,7 @@ void radio_handle_fifo_si4063(radio_transmit_entry *entry, radio_module_state *s
 
 void radio_handle_main_loop_si4063(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
-    if (entry->radio_type != RADIO_TYPE_SI4063 || shared_state->radio_interrupt_transmit_active) {
+    if (entry->radio_type != RADIO_TYPE_SI4063 || shared_state->radio_interrupt_transmit_active || shared_state->radio_transmission_finished) {
         return;
     }
 

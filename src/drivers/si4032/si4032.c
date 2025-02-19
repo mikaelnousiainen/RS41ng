@@ -83,10 +83,10 @@ uint16_t si4032_start_tx(uint8_t *data, int len)
 
     // Fill our FIFO
     int fifo_len = len;
-    if(fifo_len > buffer_size) {
+    if (fifo_len > buffer_size) {
         fifo_len = buffer_size;
     }
-    for(int i = 0; i < fifo_len; i++) {
+    for (int i = 0; i < fifo_len; i++) {
         si4032_write(0x7F, data[i]);
     }
 
@@ -106,7 +106,7 @@ uint16_t si4032_refill_buffer(uint8_t *data, int len, bool *overflow)
     uint8_t interrupts;
     int i = 0;
 
-    while(i < len){
+    while (i < len) {
         do {
             si4032_write(0x7F, data[i]);
             i++;
@@ -123,7 +123,7 @@ uint16_t si4032_refill_buffer(uint8_t *data, int len, bool *overflow)
 
 int si4032_wait_for_tx_complete(int timeout_ms)
 {
-    for(int i = 0; i < timeout_ms; i++) {
+    for (int i = 0; i < timeout_ms; i++) {
         uint8_t status = si4032_read(0x03);
 
         // ipksent is set

@@ -80,5 +80,7 @@ void telemetry_collect(telemetry_data *data)
     locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
 
+    data->data_counter++;
+
     log_info("Telemetry collected!\n");
 }

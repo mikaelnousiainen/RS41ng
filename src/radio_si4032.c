@@ -234,7 +234,7 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
     si4032_refill_buffer(data, len, &overflow);
 
     int err = si4032_wait_for_tx_complete(500);
-    if(err != HAL_OK) {
+    if (err != HAL_OK) {
         log_info("Error waiting for tx complete: %d\n", err);
     }
 
@@ -245,7 +245,7 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
 
 void radio_handle_main_loop_si4032(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
-    if (entry->radio_type != RADIO_TYPE_SI4032 || shared_state->radio_interrupt_transmit_active) {
+    if (entry->radio_type != RADIO_TYPE_SI4032 || shared_state->radio_interrupt_transmit_active || shared_state->radio_transmission_finished) {
         return;
     }
 

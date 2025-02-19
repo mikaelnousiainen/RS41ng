@@ -6,7 +6,7 @@
 // The external serial port baud rate must be higher than the GPS serial port baud rate (38400)
 #define EXTERNAL_SERIAL_PORT_BAUD_RATE 115200
 
-#define RADIO_PAYLOAD_MAX_LENGTH 256
+#define RADIO_PAYLOAD_MAX_LENGTH 320
 #define RADIO_SYMBOL_DATA_MAX_LENGTH 512
 #define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 128
 

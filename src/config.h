@@ -17,7 +17,6 @@
 #error "Please define either RS41 or DFM17."
 #endif
 
-
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
@@ -74,6 +73,35 @@
 #if (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
 #error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
 #endif
+
+/**
+ * Advanced GPS settings - Do not modify if you are not sure what you are doing!
+ * The default settings are suitable for high-altitude balloon flights.
+ */
+
+// GPS Dynamic Platform model: (default: 6 - Airborne <1g)
+// - 0 Portable
+// - 2 Stationary
+// - 3 Pedestrian
+// - 4 Automotive
+// - 5 Sea
+// - 6 Airborne with <1g Acceleration
+// - 7 Airborne with <2g Acceleration
+// - 8 Airborne with <4g Acceleration
+#define GPS_DYNAMIC_MODEL 6
+
+// GPS Position Fixing Mode: (default: 2 - 3D only)
+// - 1: 2D only
+// - 2: 3D only
+// - 3: Auto 2D/3D
+#define GPS_POSITION_FIXING_MODE 2
+
+// Measurement Rate: (default: 1000)
+// GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
+#define GPS_MEASUREMENT_RATE 1000
+
+// Rate for GPS message related to position updates (default: 1 per second)
+#define GPS_MESSAGE_RATE 1
 
 /**
  * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
@@ -163,13 +191,13 @@
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
 
 // Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW        432500000
-#define RADIO_SI4032_TX_FREQUENCY_PIP       432500000
+#define RADIO_SI4032_TX_FREQUENCY_CW        432300000
+#define RADIO_SI4032_TX_FREQUENCY_PIP       432300000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432501000
-#define RADIO_SI4032_TX_FREQUENCY_CATS      430500000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
+#define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
 
 /**
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration
@@ -280,6 +308,8 @@
 // See APRS symbol table documentation in: http://www.aprs.org/symbols/symbolsX.txt
 #define APRS_SYMBOL_TABLE '/' // '/' denotes primary and '\\' denotes alternate APRS symbol table
 #define APRS_SYMBOL 'O'
+// Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
+// Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
 #define APRS_COMMENT "RS41ng radiosonde firmware test"
 #define APRS_RELAYS "WIDE1-1,WIDE2-1" // Do not include any spaces in the APRS_RELAYS
 #define APRS_DESTINATION "APZ41N"
@@ -353,8 +383,9 @@
 // Balloon. See the CATS standard for more options
 // https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf
 #define CATS_ICON 13
-#define CATS_COMMENT "I am a radiosonde. Hear me meow!"
-#define CATS_REPORTED_TX_POWER_DBM 20
+// The maximum CATS comment length supported by RS41ng is about 100 characters. The CATS standard allows for up to 255 characters.
+#define CATS_COMMENT "RS41ng radiosonde firmware test"
+#define CATS_REPORTED_TX_POWER_DBM 17
 // You probably want this to be true
 // Set to false if you're using your radiosonde for something other than a balloon payload
 // We don't want non-balloons showing up as balloons on FELINET!

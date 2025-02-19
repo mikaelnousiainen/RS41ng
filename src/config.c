@@ -27,6 +27,8 @@
  * $he - Heading in degrees (up to 3 chars)
  * $pc - Pulse counter value (wraps to zero at 65535, 16-bit unsigned value)
  * $ri - Radiation intensity in µR/h (up to 5 chars)
+ * $dc - Data counter value, increases by one every time telemetry is read (wraps to zero at 65535, 16-bit unsigned value)
+ * $gu - GPS data update indicator, 1 if GPS data was updated since time telemetry was read, 0 otherwise
  * $ct - Clock calibration trim value (0-31, only for DFM-17)
  * $cc - Clock calibration change count (only for DFM-17)
  *
@@ -90,7 +92,15 @@ char *aprs_comment_templates[] = {
         NULL
 };
 
+/**
+ * CATS mode comment messages.
+ * The maximum CATS comment length supported by RS41ng is about 100 characters.
+ * The CATS standard allows for up to 255 characters.
+ */
 char *cats_comment_templates[] = {
+//    "$gu $dc $sv $lat $lon",
+//    "T:$teC H:$hu% P:$prmb - " CATS_COMMENT,
+//    "T:$teC H:$hu% P:$prmb PC:$pc RI:$ri uR/h - " CATS_COMMENT,
     CATS_COMMENT,
     NULL
 };

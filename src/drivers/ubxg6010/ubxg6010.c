@@ -7,6 +7,7 @@
 
 #include "ubxg6010.h"
 #include "log.h"
+#include "config.h"
 
 #define GPS_INITIAL_BAUD_RATE 9600
 
@@ -420,7 +421,7 @@ uBloxPacket msgcfgrate = {
                 .payloadSize=sizeof(uBloxCFGRATEPayload)
         },
         .data.cfgrate = {
-                .measRate=1000,
+                .measRate=GPS_MEASUREMENT_RATE,
                 .navRate=1,
                 .timeRef=0,
         }
@@ -454,8 +455,8 @@ uBloxPacket msgcfgnav5 = {
         // Notes from darksidelemm RS41HUP fork: Tweaked the PDOP limits a bit, to make it a bit more likely to report a position.
         .data.cfgnav5={
                 .mask=0b0000001111111111, // Configure all settings
-                .dynModel=6, // Dynamic model: Airborne with <1g Acceleration
-                .fixMode=2, // Fix mode: 3D only
+                .dynModel=GPS_DYNAMIC_MODEL, // Dynamic model: Airborne with <1g Acceleration
+                .fixMode=GPS_POSITION_FIXING_MODE, // Fix mode: 3D only
                 .fixedAlt=0, // Fixed altitude (mean sea level) for 2D fix mode.
                 .fixedAltVar=10000, // Fixed altitude variance for 2D mode.
                 .minElev=5, // Minimum Elevation for a GNSS satellite to be used in NAV (degrees)
@@ -561,7 +562,7 @@ bool ubxg6010_init()
 
     // Rate of 1 for message: 0x01 0x02 Geodetic Position Solution
     msgcfgmsg.data.cfgmsg.msgID = 0x02;
-    msgcfgmsg.data.cfgmsg.rate = 1;
+    msgcfgmsg.data.cfgmsg.rate = GPS_MESSAGE_RATE;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
@@ -576,7 +577,7 @@ bool ubxg6010_init()
 
     // Rate of 1 for message: 0x01 0x06 Navigation Solution Information
     msgcfgmsg.data.cfgmsg.msgID = 0x06;
-    msgcfgmsg.data.cfgmsg.rate = 1;
+    msgcfgmsg.data.cfgmsg.rate = GPS_MESSAGE_RATE;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
@@ -584,13 +585,15 @@ bool ubxg6010_init()
     }
 
     // Configure rate of 1 for message: 0x01 0x20 GPS Time Solution
-/*    msgcfgmsg.data.cfgmsg.msgID = 0x20;
+    /*
+    msgcfgmsg.data.cfgmsg.msgID = 0x20;
     msgcfgmsg.data.cfgmsg.rate = 1;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
-    }*/
+    }
+    */
 
     // Configure rate of 1 for message: 0x01 0x21 UTC Time Solution
     msgcfgmsg.data.cfgmsg.msgID = 0x21;
@@ -603,7 +606,7 @@ bool ubxg6010_init()
 
     // Configure rate of 2 for message: 0x01 0x12 Velocity Solution in NED
     msgcfgmsg.data.cfgmsg.msgID = 0x12;
-    msgcfgmsg.data.cfgmsg.rate = 2;
+    msgcfgmsg.data.cfgmsg.rate = GPS_MESSAGE_RATE;
     log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
