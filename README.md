@@ -158,11 +158,11 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 
 * CATS is a [modern packet radio standard](https://cats.radio/) designed for communication and telemetry. Due to its increased efficiency over APRS, it allows for fast beacon times (1 Hz or more) without congesting the network.
 * To receive CATS, you can either use an [I-Gate board](https://www.tindie.com/products/hamcats/cats-i-gate-board/) on a Raspberry Pi, or just a standard RTL-SDR dongle.
-  * See [here](https://gitlab.scd31.com/cats/igate) for the I-Gate board software.
-  * See [here](https://gitlab.scd31.com/cats/sdr-igate) for the SDR software.
+  * See [the CATS I-Gate board software](https://gitlab.scd31.com/cats/igate).
+  * See [the CATS SDR software](https://gitlab.scd31.com/cats/sdr-igate).
 * In either case, CATS packets that are received get forwarded to FELINET, and relayed to APRS-IS. This means your CATS packets will show up on [aprs.fi](https://aprs.fi)
   * If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
-* For more information, be sure to check [the standard](https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf).
+* For more information, be sure to check [the CATS standard](https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build).
 
 ### External sensors (RS41 only)
 

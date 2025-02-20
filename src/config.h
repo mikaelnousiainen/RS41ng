@@ -99,6 +99,7 @@
 // Measurement Rate in milliseconds (default: 1000)
 // GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
 // The UBX-G6010 in the older RS41 radiosondes (PCB revisions 4x1 and 4x2) should support rates up to 5 Hz (200 ms).
+// * Values < 200ms do not seem to work (not accepted by the GPS chip). 1000ms is a good value for most flights.
 #define GPS_MEASUREMENT_RATE 1000
 
 // Rate for GPS message updates sent by the GPS chip (default: 1, send message for every measurement done)
@@ -385,14 +386,18 @@
 // The protocol is meant to allow for a much higher channel capacity, so beaconing every second is totally fine.
 // For more information, see here: https://cats.radio/
 #define CATS_CALLSIGN CALLSIGN
-#define CATS_SSID 29 // 0 - 255
-// Balloon. See the CATS standard for more options
-// https://gitlab.scd31.com/cats/cats-standard/-/blob/master/standard.pdf
+// The CATS SSID value is a number from 0 to 255, used to differentiate between stations with the same call sign.
+// There is no special meaning for the numbers (compared to APRS SSIDs).
+// If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
+#define CATS_SSID 11
+// CATS icon.
+// Some common icons: 0 = no icon, 2 = car, 3 = house, 13 = balloon, 14 = airplane, 18 = person, 21 = satellite, 22 = compute
+// See the CATS standard for more options https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build
 #define CATS_ICON 13
 // The maximum CATS comment length supported by RS41ng is about 100 characters. The CATS standard allows for up to 255 characters.
 #define CATS_COMMENT "RS41ng radiosonde firmware test"
 #define CATS_REPORTED_TX_POWER_DBM 17
-// You probably want this to be true
+// CATS is balloon - You probably want this to be true for a balloon payload
 // Set to false if you're using your radiosonde for something other than a balloon payload
 // We don't want non-balloons showing up as balloons on FELINET!
 #define CATS_IS_BALLOON true
