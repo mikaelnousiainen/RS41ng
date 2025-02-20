@@ -98,7 +98,7 @@ char *aprs_comment_templates[] = {
  * The CATS standard allows for up to 255 characters.
  */
 char *cats_comment_templates[] = {
-//    "$gu $dc $sv $lat $lon",
+//    "$dc $gu $sv $lat $lon - $hh:$mm:$ss @ $tow ms",
 //    "T:$teC H:$hu% P:$prmb - " CATS_COMMENT,
 //    "T:$teC H:$hu% P:$prmb PC:$pc RI:$ri uR/h - " CATS_COMMENT,
     CATS_COMMENT,

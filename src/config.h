@@ -96,12 +96,18 @@
 // - 3: Auto 2D/3D
 #define GPS_POSITION_FIXING_MODE 2
 
-// Measurement Rate: (default: 1000)
+// Measurement Rate in milliseconds (default: 1000)
 // GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
+// The UBX-G6010 in the older RS41 radiosondes (PCB revisions 4x1 and 4x2) should support rates up to 5 Hz (200 ms).
 #define GPS_MEASUREMENT_RATE 1000
 
-// Rate for GPS message related to position updates (default: 1 per second)
-#define GPS_MESSAGE_RATE 1
+// Rate for GPS message updates sent by the GPS chip (default: 1, send message for every measurement done)
+// Message rate is defined as the number of measurements between messages.
+// For example:
+// * Rate of 1 will lead to updates for every measurement (e.g. every second if measurement rate is set to 1000 ms)
+// * Rate of 5 will lead to updates for every 5th measurement (e.g. every 5 seconds if measurement rate is set to 1000 ms)
+#define GPS_POSITION_MESSAGE_RATE 1
+#define GPS_TIME_MESSAGE_RATE 1
 
 /**
  * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
