@@ -390,8 +390,8 @@
 // There is no special meaning for the numbers (compared to APRS SSIDs).
 // If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
 #define CATS_SSID 11
-// CATS icon.
-// Some common icons: 0 = no icon, 2 = car, 3 = house, 13 = balloon, 14 = airplane, 18 = person, 21 = satellite, 22 = compute
+// CATS icon
+// Some common icons: 0 = no icon, 2 = car, 3 = house, 13 = balloon, 14 = airplane, 18 = person, 21 = satellite, 22 = computer
 // See the CATS standard for more options https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build
 #define CATS_ICON 13
 // The maximum CATS comment length supported by RS41ng is about 100 characters. The CATS standard allows for up to 255 characters.
