@@ -21,6 +21,7 @@
 extern bool leds_enabled;
 extern bool gps_nmea_output_enabled;
 extern bool bmp280_enabled;
+extern bool bme690_enabled;
 extern bool radsens_enabled;
 extern bool si5351_enabled;
 extern bool pulse_counter_enabled;

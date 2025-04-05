@@ -3,6 +3,7 @@
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "bme690_handler.h"
 #include "radsens_handler.h"
 #include "locator.h"
 #include "config.h"
@@ -38,7 +39,11 @@ void telemetry_collect(telemetry_data *data)
         bmp280_read_telemetry(data);
     }
 
-    if (radsens_enabled) {
+    if (bme690_enabled) {
+        bme690_read_telemetry(data);
+    }
+
+    if (SENSOR_RADSENS_ENABLE) {
         radsens_read_telemetry(data);
     }
 

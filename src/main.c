@@ -7,6 +7,7 @@
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "bme690_handler.h"
 #include "radsens_handler.h"
 #include "si5351_handler.h"
 #include "radio.h"
@@ -151,7 +152,18 @@ int main(void)
         }
     }
 
-    if (radsens_enabled) {
+    if (SENSOR_BME690_ENABLE) {
+        for (int i = 0; i < 3; i++) {
+            log_info("BME690 init\n");
+            success = bme690_handler_init();
+            if (success) {
+                break;
+            }
+            log_error("BME690 init failed, retrying...");
+        }
+    }
+
+    if (SENSOR_RADSENS_ENABLE) {
         for (int i = 0; i < 3; i++) {
             log_info("RadSens init\n");
             success = radsens_handler_init();

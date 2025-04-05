@@ -125,6 +125,11 @@
 // BMP280/BME280 I²C device address is usually 0x76 or 0x77.
 #define SENSOR_BMP280_I2C_ADDRESS 0x77
 
+// Enable use of an externally connected I²C BME690 atmospheric/gas sensor
+#define SENSOR_BME690_ENABLE false
+// BME690 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BME690_I2C_ADDRESS 0x77
+
 // Enable use of an externally connected I²C RadSens radiation sensor
 #define SENSOR_RADSENS_ENABLE false
 // Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
