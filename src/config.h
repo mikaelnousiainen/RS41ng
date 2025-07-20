@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
+#define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -28,7 +28,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+#define CALLSIGN "K5RWK"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -45,7 +45,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+#define RADIO_POST_TRANSMIT_DELAY_MS 0
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -65,7 +65,7 @@
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
-#define GPS_POWER_SAVING_ENABLE false
+#define GPS_POWER_SAVING_ENABLE true
 
 // Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
@@ -121,14 +121,16 @@
 
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
-#define SENSOR_BMP280_ENABLE false
-// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
-#define SENSOR_BMP280_I2C_ADDRESS 0x77
 
-// Enable use of an externally connected I²C BME690 atmospheric/gas sensor
+// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BMP280_ENABLE false
+#define SENSOR_BMP280_I2C_ADDRESS 0x76
+
+#define SENSOR_BME68X_ENABLE true
+#define SENSOR_BME68X_I2C_ADDRESS 0x76
+
 #define SENSOR_BME690_ENABLE false
-// BME690 I²C device address is usually 0x76 or 0x77.
-#define SENSOR_BME690_I2C_ADDRESS 0x77
+#define SENSOR_BME690_I2C_ADDRESS 0x76
 
 // Enable use of an externally connected I²C RadSens radiation sensor
 #define SENSOR_RADSENS_ENABLE false
@@ -187,12 +189,12 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
 #define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 
@@ -200,7 +202,7 @@
 // The continuous mode transmits Horus 4FSK preamble between transmissions
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
-#define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
+#define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS true
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432300000
@@ -208,8 +210,8 @@
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
-#define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432600000
+#define RADIO_SI4032_TX_FREQUENCY_CATS      432700000
 
 /**
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration
@@ -369,7 +371,7 @@
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V2_PAYLOAD_ID 256
+#define HORUS_V2_PAYLOAD_ID 833
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
@@ -400,7 +402,7 @@
 // See the CATS standard for more options https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build
 #define CATS_ICON 13
 // The maximum CATS comment length supported by RS41ng is about 100 characters. The CATS standard allows for up to 255 characters.
-#define CATS_COMMENT "RS41ng radiosonde firmware test"
+#define CATS_COMMENT "https://k5rwk.org/balloons"
 #define CATS_REPORTED_TX_POWER_DBM 17
 // CATS is balloon - You probably want this to be true for a balloon payload
 // Set to false if you're using your radiosonde for something other than a balloon payload

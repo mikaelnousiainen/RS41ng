@@ -158,7 +158,7 @@ bool bme690_handler_init(void)
     return false;
 }
 
-bool bme690_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, uint32_t *humidity_percentage_100, uint16_t *air_quality_index) {
+bool bme690_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, uint32_t *humidity_percentage_100, uint32_t *bme690_gas_r) {
     uint32_t del_period;
     struct bme69x_data data;
     uint8_t n_fields;
@@ -175,6 +175,7 @@ bool bme690_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
         *temperature_celsius_100 = data.temperature;
         *pressure_mbar_100 = data.pressure;
         *humidity_percentage_100 = data.humidity / 10;
+        *bme690_gas_r = data.gas_resistance;
     // }
     
     // *air_quality_index = data.gas_index;
@@ -198,7 +199,7 @@ bool bme690_read_telemetry(telemetry_data *data)
         }
     }
 
-    success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->air_quality_index);
+    success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->bme6xx_gas_r);
 
     if (!success) {
         log_info("BME re-init\n");
@@ -206,7 +207,7 @@ bool bme690_read_telemetry(telemetry_data *data)
         log_info("BME re-init: %d\n", success);
 
         if (success) {
-            success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->air_quality_index);
+            success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->bme6xx_gas_r);
         }
 
         if (!success) {
