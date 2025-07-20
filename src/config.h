@@ -139,10 +139,10 @@
     "comment": "BME680/688/690 + gas fields for RS41ng",
     "struct": "<LhBH",
     "fields": [
+        ["gas_resistance","none"],
         ["ext_temperature", "divide_by_10"],
         ["ext_humidity", "none"],
-        ["ext_pressure", "divide_by_10"],
-        ["gas_resistance","none"]
+        ["ext_pressure", "divide_by_10"]
     ]
 },
 */
