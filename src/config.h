@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-#define RS41
+//#define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -129,9 +129,23 @@
 #define SENSOR_BME68X_ENABLE true
 #define SENSOR_BME68X_I2C_ADDRESS 0x77
 #define SENSOR_BME690_ENABLE false
-#define SENSOR_BME690_I2C_ADDRESS 0x76
+#define SENSOR_BME690_I2C_ADDRESS 0x77
 
 // BME680/688/690 gas measurement parameters
+// NOTE: For proper display in Horus GUI and other Horus decoding utilities, you must submit a pull request to have your 
+// Horus ID / callsign use the below configuration. See https://github.com/projecthorus/horusdemodlib/blob/master/custom_field_list.json
+/*
+"MYCALL": {
+    "comment": "BME680/688/690 + gas fields for RS41ng",
+    "struct": "<LhBH",
+    "fields": [
+        ["ext_temperature", "divide_by_10"],
+        ["ext_humidity", "none"],
+        ["ext_pressure", "divide_by_10"],
+        ["gas_resistance","none"]
+    ]
+},
+*/
 #define SENSOR_BME_6XX_GAS_MEASUREMENT true
 // Gas heater duration in ms
 #define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
@@ -196,12 +210,12 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS false
+#define RADIO_SI4032_TX_APRS true
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
 #define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 

@@ -57,6 +57,10 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
         uint16_t ext_radiation_intensity_uR_h = (uint16_t) data->radiation_intensity_uR_h;
         memcpy(custom_data_pointer, &ext_radiation_intensity_uR_h, sizeof(ext_radiation_intensity_uR_h));
         custom_data_pointer += sizeof(ext_radiation_intensity_uR_h);
+    } else if(SENSOR_BME_6XX_GAS_MEASUREMENT) {
+        uint32_t ext_gas_measurement_r = (uint16_t) data->bme6xx_gas_r;
+        memcpy(custom_data_pointer, &ext_gas_measurement_r, sizeof(ext_gas_measurement_r));
+        custom_data_pointer += sizeof(ext_gas_measurement_r);
     } else {
         // Unit: cm/s
         int16_t gps_climb_cm_per_second = (int16_t) gps_data->climb_cm_per_second;

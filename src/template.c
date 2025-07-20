@@ -58,6 +58,10 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$pr", replacement);
 
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->bme6xx_gas_r);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$gas", replacement);
+
     snprintf(replacement, sizeof(replacement), "%u", (unsigned int) data->gps.time_of_week_millis);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$tow", replacement);
