@@ -20,8 +20,8 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
 
 /**
  * Global configuration
@@ -126,11 +126,20 @@
 #define SENSOR_BMP280_ENABLE false
 #define SENSOR_BMP280_I2C_ADDRESS 0x76
 
-#define SENSOR_BME68X_ENABLE true
-#define SENSOR_BME68X_I2C_ADDRESS 0x76
 
+// Enable use of a BME680/688/690 atmospheric sensor -- similar to BME280, but with Gas measurements
+#define SENSOR_BME68X_ENABLE true
+#define SENSOR_BME68X_I2C_ADDRESS 0x77
 #define SENSOR_BME690_ENABLE false
 #define SENSOR_BME690_I2C_ADDRESS 0x76
+
+// BME680/688/690 gas measurement parameters
+#define SENSOR_BME_6XX_GAS_MEASUREMENT true
+// Gas heater duration in ms
+#define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
+// Gas heater temperature in degrees C
+#define SENSOR_BME_6XX_GAS_HEATER_TEMP 300
+
 
 // Enable use of an externally connected I²C RadSens radiation sensor
 #define SENSOR_RADSENS_ENABLE false
@@ -210,7 +219,7 @@
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432600000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432700000
 #define RADIO_SI4032_TX_FREQUENCY_CATS      432700000
 
 /**
@@ -371,7 +380,7 @@
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V2_PAYLOAD_ID 833
+#define HORUS_V2_PAYLOAD_ID 591
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
