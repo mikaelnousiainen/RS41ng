@@ -1,6 +1,6 @@
 #include "pulse_counter.h"
-#include "stm32f10x_exti.h"
-#include "stm32f10x_gpio.h"
+#include "stm32f1xx_ll_exti.h"
+#include "stm32f1xx_ll_gpio.h"
 #include "stm32f10x.h"
 #include "misc.h"
 #include "config.h"
