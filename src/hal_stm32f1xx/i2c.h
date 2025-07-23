@@ -6,9 +6,9 @@
 #define I2C_GPIO GPIOB
 
 // PB10: I2C2_SCL/USART3_TX
-#define I2C_PIN_SCL GPIO_Pin_10
+#define I2C_PIN_SCL GPIO_PIN_10
 // PB11: I2C2_SDA/USART3_RX
-#define I2C_PIN_SDA GPIO_Pin_11
+#define I2C_PIN_SDA GPIO_PIN_11
 
 #include "hal.h"
 

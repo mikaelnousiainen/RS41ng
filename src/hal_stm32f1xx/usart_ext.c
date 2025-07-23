@@ -1,6 +1,4 @@
-#include <stm32f10x_rcc.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_usart.h>
+#include <stm32f1xx_hal.h>
 
 #include "usart_ext.h"
 

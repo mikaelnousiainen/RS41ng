@@ -6,12 +6,16 @@
  */
 
 #include <stdbool.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_tim.h>
 
-#include "hal/hal.h"
-#include "hal/delay.h"
-#include "hal/spi.h"
+#ifndef RS41_RSM4x4
+    #include <stm32f1xx_hal.h>
+    #include "hal_stm32f1xx/hal.h"
+    #include "hal_stm32f1xx/delay.h"
+    #include "hal_stm32f1xx/spi.h"
+#else
+    #error "TODO!"
+#endif
+
 #include "si4063.h"
 #include "gpio.h"
 #include "log.h"
@@ -19,19 +23,19 @@
 #define SI4063_CLOCK 25600000UL
 
 #define GPIO_SI4063_SDN GPIOC
-#define GPIO_PIN_SI4063_SDN GPIO_Pin_3
+#define GPIO_PIN_SI4063_SDN GPIO_PIN_3
 
 #define GPIO_SI4063_NSEL GPIOB
-#define GPIO_PIN_SI4063_NSEL GPIO_Pin_2
+#define GPIO_PIN_SI4063_NSEL GPIO_PIN_2
 
 #define GPIO_SI4063_SDI GPIOA
-#define GPIO_PIN_SI4063_SDI GPIO_Pin_7
+#define GPIO_PIN_SI4063_SDI GPIO_PIN_7
 
 #define GPIO_SI4063_GPIO2 GPIOD
-#define GPIO_PIN_SI4063_GPIO2 GPIO_Pin_0
+#define GPIO_PIN_SI4063_GPIO2 GPIO_PIN_0
 
 #define GPIO_SI4063_GPIO3 GPIOA
-#define GPIO_PIN_SI4063_GPIO3 GPIO_Pin_4
+#define GPIO_PIN_SI4063_GPIO3 GPIO_PIN_4
 
 #define SI4063_COMMAND_PART_INFO    0x01
 #define SI4063_COMMAND_POWER_UP     0x02
@@ -193,9 +197,9 @@ static int si4063_power_up()
 static void si4603_set_shutdown(bool active)
 {
     if (active) {
-        GPIO_SetBits(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN);
+        HAL_GPIO_WritePin(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN);
+        HAL_GPIO_WritePin(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN, GPIO_PIN_RESET);
     }
 }
 
@@ -554,9 +558,9 @@ uint16_t si4063_read_part_info()
 inline void si4063_set_direct_mode_pin(bool high)
 {
     if (high) {
-        GPIO_SetBits(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3);
+        HAL_GPIO_WritePin(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3);
+        HAL_GPIO_WritePin(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3, GPIO_PIN_RESET);
     }
 }
 
@@ -765,22 +769,22 @@ int si4063_init()
     GPIO_InitTypeDef gpio_init;
 
     // Si4063 shutdown pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_SDN;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_SDN, &gpio_init);
+    gpio_init.Pin = GPIO_PIN_SI4063_SDN;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIO_SI4063_SDN, &gpio_init);
 
     // Si4063 chip select pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_NSEL;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_NSEL, &gpio_init);
+    gpio_init.Pin = GPIO_PIN_SI4063_NSEL;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIO_SI4063_NSEL, &gpio_init);
 
     // Si4063 GPIO3 pin for direct mode transmission
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_GPIO3;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_GPIO3, &gpio_init);
+    gpio_init.Pin = GPIO_PIN_SI4063_GPIO3;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIO_SI4063_GPIO3, &gpio_init);
 
     si4063_set_direct_mode_pin(false);
 
@@ -830,18 +834,20 @@ int si4063_init()
     return HAL_OK;
 }
 
-void TIM1_BRK_TIM15_IRQHandler(void)
-{
-#ifdef DFM17
-    static bool pin_state = false;
-#endif
+// TODO: Fix this
+// void TIM1_BRK_TIM15_IRQHandler(void)
+// {
+// #ifdef DFM17
+//     static bool pin_state = false;
+// #endif
+//     __HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE);
 
-    if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
-        TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
-#ifdef DFM17
-        // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
-        pin_state = !pin_state;
-        si4063_set_direct_mode_pin(pin_state);
-#endif
-    }
-}
+//     if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
+//         TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+// #ifdef DFM17
+//         // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
+//         pin_state = !pin_state;
+//         si4063_set_direct_mode_pin(pin_state);
+// #endif
+//     }
+// }

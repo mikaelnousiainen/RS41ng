@@ -1,8 +1,8 @@
 #include <stddef.h>
 
-#include <stm32f10x_rcc.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_usart.h>
+#include <stm32f1xx_ll_rcc.h>
+#include <stm32f1xx_ll_gpio.h>
+#include <stm32f1xx_ll_usart.h>
 #include <misc.h>
 
 #include "usart_gps.h"

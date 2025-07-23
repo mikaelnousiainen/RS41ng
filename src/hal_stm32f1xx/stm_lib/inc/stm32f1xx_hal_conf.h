@@ -35,38 +35,38 @@ extern "C" {
   */
 #define HAL_MODULE_ENABLED
 #define HAL_ADC_MODULE_ENABLED
-#define HAL_CAN_MODULE_ENABLED
+// #define HAL_CAN_MODULE_ENABLED
 /* #define HAL_CAN_LEGACY_MODULE_ENABLED */
-#define HAL_CEC_MODULE_ENABLED
+// #define HAL_CEC_MODULE_ENABLED
 #define HAL_CORTEX_MODULE_ENABLED
-#define HAL_CRC_MODULE_ENABLED
+// #define HAL_CRC_MODULE_ENABLED
 #define HAL_DAC_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
-#define HAL_ETH_MODULE_ENABLED
+// #define HAL_ETH_MODULE_ENABLED
 #define HAL_EXTI_MODULE_ENABLED
 #define HAL_FLASH_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
-#define HAL_HCD_MODULE_ENABLED
+// #define HAL_HCD_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
-#define HAL_I2S_MODULE_ENABLED
-#define HAL_IRDA_MODULE_ENABLED
-#define HAL_IWDG_MODULE_ENABLED
-#define HAL_NAND_MODULE_ENABLED
-#define HAL_NOR_MODULE_ENABLED
-#define HAL_PCCARD_MODULE_ENABLED
-#define HAL_PCD_MODULE_ENABLED
-#define HAL_PWR_MODULE_ENABLED
+// #define HAL_I2S_MODULE_ENABLED
+// #define HAL_IRDA_MODULE_ENABLED
+// #define HAL_IWDG_MODULE_ENABLED
+// #define HAL_NAND_MODULE_ENABLED
+// #define HAL_NOR_MODULE_ENABLED
+// #define HAL_PCCARD_MODULE_ENABLED
+// #define HAL_PCD_MODULE_ENABLED
+// #define HAL_PWR_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_RTC_MODULE_ENABLED
-#define HAL_SD_MODULE_ENABLED
-#define HAL_SMARTCARD_MODULE_ENABLED
+// #define HAL_SD_MODULE_ENABLED
+// #define HAL_SMARTCARD_MODULE_ENABLED
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_SRAM_MODULE_ENABLED
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
 #define HAL_USART_MODULE_ENABLED
-#define HAL_WWDG_MODULE_ENABLED
-#define HAL_MMC_MODULE_ENABLED
+// #define HAL_WWDG_MODULE_ENABLED
+// #define HAL_MMC_MODULE_ENABLED
 
 /* ########################## Oscillator Values adaptation ####################*/
 /**
@@ -78,7 +78,7 @@ extern "C" {
 #if defined(USE_STM3210C_EVAL)
 #define HSE_VALUE    25000000U /*!< Value of the External oscillator in Hz */
 #else
-#define HSE_VALUE    8000000U /*!< Value of the External oscillator in Hz */
+#define HSE_VALUE    24000000U /*!< Value of the External oscillator in Hz */
 #endif
 #endif /* HSE_VALUE */
 
@@ -146,7 +146,7 @@ extern "C" {
 #define  USE_HAL_IRDA_REGISTER_CALLBACKS        0U /* IRDA register callback disabled      */
 #define  USE_HAL_SRAM_REGISTER_CALLBACKS        0U /* SRAM register callback disabled      */
 #define  USE_HAL_SPI_REGISTER_CALLBACKS         0U /* SPI register callback disabled       */
-#define  USE_HAL_TIM_REGISTER_CALLBACKS         0U /* TIM register callback disabled       */
+#define  USE_HAL_TIM_REGISTER_CALLBACKS         1U /* TIM register callback disabled       */
 #define  USE_HAL_UART_REGISTER_CALLBACKS        0U /* UART register callback disabled      */
 #define  USE_HAL_USART_REGISTER_CALLBACKS       0U /* USART register callback disabled     */
 #define  USE_HAL_WWDG_REGISTER_CALLBACKS        0U /* WWDG register callback disabled      */

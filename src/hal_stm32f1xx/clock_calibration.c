@@ -2,11 +2,7 @@
 
 #ifdef DFM17
 
-#include "stm32f1xx_ll_exti.h"
-#include "stm32f1xx_ll_gpio.h"
-#include "stm32f10x.h"
-#include "stm32f1xx_ll_rcc.h"
-#include "stm32f1xx_ll_bus.h"
+#include <stm32f1xx_hal.h>
 #include "misc.h"
 #include "system.h"
 #include "millis.h"

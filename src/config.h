@@ -7,8 +7,11 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
+#define RS41
 //#define DFM17
+
+// Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
+//#define RS41_RSM4x4
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -125,6 +128,34 @@
 // BMP280/BME280 I²C device address is usually 0x76 or 0x77.
 #define SENSOR_BMP280_I2C_ADDRESS 0x77
 
+// Enable use of a BME680/688/690 atmospheric sensor -- similar to BME280, but with Gas measurements
+#define SENSOR_BME68X_ENABLE false
+#define SENSOR_BME68X_I2C_ADDRESS 0x77
+#define SENSOR_BME690_ENABLE false
+#define SENSOR_BME690_I2C_ADDRESS 0x77
+
+// BME680/688/690 gas measurement parameters
+// NOTE: For proper display in Horus GUI and other Horus decoding utilities, you must submit a pull request to have your 
+// Horus ID / callsign use the below configuration. See https://github.com/projecthorus/horusdemodlib/blob/master/custom_field_list.json
+/*
+"MYCALL": {
+    "comment": "BME680/688/690 + gas fields for RS41ng",
+    "struct": "<LhBH",
+    "fields": [
+        ["gas_resistance","none"],
+        ["ext_temperature", "divide_by_10"],
+        ["ext_humidity", "none"],
+        ["ext_pressure", "divide_by_10"]
+    ]
+},
+*/
+#define SENSOR_BME_6XX_GAS_MEASUREMENT true
+// Gas heater duration in ms
+#define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
+// Gas heater temperature in degrees C
+#define SENSOR_BME_6XX_GAS_HEATER_TEMP 300
+
+
 // Enable use of an externally connected I²C RadSens radiation sensor
 #define SENSOR_RADSENS_ENABLE false
 // Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
@@ -161,7 +192,7 @@
 // Set the edge of the pulse where the interrupt is triggered: falling or rising.
 #define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
 
-#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE) || (SENSOR_BME690_ENABLE))
 #error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
 #endif
 

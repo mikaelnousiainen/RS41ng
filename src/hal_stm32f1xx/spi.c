@@ -1,115 +1,105 @@
-#include <stm32f10x_rcc.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_spi.h>
+#include <stm32f1xx_hal.h>
 
 #include "spi.h"
 #include "gpio.h"
+
+SPI_HandleTypeDef hspi2;
 
 void spi_init()
 {
     GPIO_InitTypeDef gpio_init;
 
     // SCK 
-    gpio_init.GPIO_Pin = PIN_SCK;
-    gpio_init.GPIO_Mode = GPIO_Mode_AF_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_SCK, &gpio_init);
+    gpio_init.Pin = PIN_SCK;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_SCK, &gpio_init);
 
     // MOSI
-    gpio_init.GPIO_Pin = PIN_MOSI;
-    gpio_init.GPIO_Mode = GPIO_Mode_AF_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_MOSI, &gpio_init);
+    gpio_init.Pin = PIN_MOSI;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 
     // MISO
-    gpio_init.GPIO_Pin = PIN_MISO;
+    gpio_init.Pin = PIN_MISO;
+    gpio_init.Mode = GPIO_MODE_INPUT;
+#ifdef DFM17
+    gpio_init.Pull = GPIO_PULLUP;
+#endif
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_MISO, &gpio_init);
+
+    __HAL_RCC_SPI2_CLK_ENABLE();
+
+    hspi2.Instance = SPI2;
+
+    hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi2.Init.Mode = SPI_MODE_MASTER;
 #ifdef RS41
-    gpio_init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    hspi2.Init.DataSize = SPI_DATASIZE_16BIT;
 #endif
 #ifdef DFM17
-    gpio_init.GPIO_Mode = GPIO_Mode_IPU;
+    hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
 #endif
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_MISO, &gpio_init);
-
-    RCC_SPIPeriphClockCmd(APBPERIPHERAL_SPI, ENABLE);
-
-    SPI_InitTypeDef spi_init;
-    SPI_StructInit(&spi_init);
-
-    spi_init.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-    spi_init.SPI_Mode = SPI_Mode_Master;
+    hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
 #ifdef RS41
-    spi_init.SPI_DataSize = SPI_DataSize_16b;
+    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
 #endif
 #ifdef DFM17
-    spi_init.SPI_DataSize = SPI_DataSize_8b;
+    hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
 #endif
-    spi_init.SPI_CPOL = SPI_CPOL_Low;
-    spi_init.SPI_CPHA = SPI_CPHA_1Edge;
+    hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
 #ifdef RS41
-    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+    hspi2.Init.CRCPolynomial = 7;
+    hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
 #endif
 #ifdef DFM17
-    spi_init.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;
+    hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    hspi2.Init.CRCPolynomial = 10;
+    hspi2.Init.NSS = SPI_NSS_SOFT;
 #endif
-    spi_init.SPI_FirstBit = SPI_FirstBit_MSB;
-#ifdef RS41
-    spi_init.SPI_CRCPolynomial = 7;
-#endif
-#ifdef DFM17
-    spi_init.SPI_CRCPolynomial = 10;
-    spi_init.SPI_NSS = SPI_NSS_Soft;
-#endif
-    SPI_Init(PERIPHERAL_SPI, &spi_init);
+    HAL_SPI_Init(&hspi2);
 
-#ifdef RS41
-    SPI_SSOutputCmd(PERIPHERAL_SPI, ENABLE);
-#endif
-#ifdef DFM17
-    SPI_CalculateCRC(PERIPHERAL_SPI, DISABLE);
-#endif
-
-    SPI_Cmd(PERIPHERAL_SPI, ENABLE);
-#ifdef RS41
-    // TODO: Why is this call even here?
-    SPI_Init(PERIPHERAL_SPI, &spi_init);
-#endif
+// #ifdef RS41
+//     // TODO: Why is this call even here?
+//     SPI_Init(&hspi2, &spi_init);
+// #endif
 }
 
 void spi_uninit()
 {
-    SPI_I2S_DeInit(PERIPHERAL_SPI);
-    SPI_Cmd(PERIPHERAL_SPI, DISABLE);
-    SPI_SSOutputCmd(PERIPHERAL_SPI, DISABLE);
-    RCC_SPIPeriphClockCmd(APBPERIPHERAL_SPI, DISABLE);
+    HAL_SPI_DeInit(&hspi2);
+
+    __HAL_RCC_SPI2_CLK_DISABLE();
 
     GPIO_InitTypeDef gpio_init;
 
-    gpio_init.GPIO_Pin = PIN_MISO;
-    gpio_init.GPIO_Mode = GPIO_Mode_AF_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_MISO, &gpio_init);
+    gpio_init.Pin = PIN_MISO;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_MISO, &gpio_init);
 
-    gpio_init.GPIO_Pin = PIN_MOSI;
-    gpio_init.GPIO_Mode = GPIO_Mode_AF_PP; // was: GPIO_Mode_Out_PP; // GPIO_Mode_AF_PP
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(BANK_MOSI, &gpio_init);
+    gpio_init.Pin = PIN_MOSI;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 }
 
-void spi_send(uint16_t data)
+void spi_send(uint8_t data)
 {
     // Wait for TX buffer
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
-    SPI_I2S_SendData(PERIPHERAL_SPI, data);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_TXE) == RESET);
+    HAL_SPI_Transmit(&hspi2, &data, 1, 10);
 #ifdef DFM17
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_TXE) == RESET);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_BSY) == SET);
 
     // Reset the overrun error by reading the data and status registers
     // NOTE: It seems this sequence is required to make Si4063 SPI communication work on DFM17 radiosondes
-    SPI_I2S_ReceiveData(PERIPHERAL_SPI);
-    SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_OVR);
+    HAL_SPI_Receive(&hspi2, NULL, 1, 10);
+    __HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_OVR);
 #endif
 }
 
@@ -117,38 +107,48 @@ uint8_t spi_receive()
 {
     // Wait for data in RX buffer
 #ifdef DFM17
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_BSY) == SET);
 #endif
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-    return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_RXNE) == RESET);
+    uint8_t data;
+    HAL_SPI_Receive(&hspi2, &data, 1, 10);
+    return data;
 }
 
 uint8_t spi_read()
 {
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_BSY) == SET);
+    uint8_t data = 0xFF;
+
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_BSY) == SET);
     // Send dummy data to read in bidirectional mode
-    SPI_I2S_SendData(PERIPHERAL_SPI, 0xFF);
+    HAL_SPI_Transmit(&hspi2, &data, 1, 10);
     // Wait for data in RX buffer
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-    return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_RXNE) == RESET);
+    HAL_SPI_Receive(&hspi2, &data, 1, 10);
+    return data;
 }
 
 void spi_set_chip_select(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, bool select)
 {
     if (select) {
-        GPIO_ResetBits(gpio_cs, pin_cs);
+        HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_SET);
     } else {
-        GPIO_SetBits(gpio_cs, pin_cs);
+        HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_RESET);
     }
 }
 
 uint8_t spi_send_and_receive(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, uint16_t data) {
-    GPIO_ResetBits(gpio_cs, pin_cs);
+    uint8_t pData[2];
+    pData[0] = (uint8_t)(data & 0xFF);
+    pData[1] = (uint8_t)(data >> 8);
 
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_TXE) == RESET);
-    SPI_I2S_SendData(PERIPHERAL_SPI, data);
+    HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_RESET);
 
-    while (SPI_I2S_GetFlagStatus(PERIPHERAL_SPI, SPI_I2S_FLAG_RXNE) == RESET);
-    GPIO_SetBits(gpio_cs, pin_cs);
-    return (uint8_t) SPI_I2S_ReceiveData(PERIPHERAL_SPI);
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_TXE) == RESET);
+    HAL_SPI_Transmit(&hspi2, pData, 2, 10);
+
+    while (__HAL_SPI_GET_FLAG(&hspi2, SPI_FLAG_RXNE) == RESET);
+    HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_RESET);
+    HAL_SPI_Receive(&hspi2, pData, 1, 10);
+    return (uint8_t) pData[0];
 }

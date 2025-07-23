@@ -21,9 +21,9 @@ else ()
   set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy.exe)
 endif ()
 
-add_definitions(-DSTM32F100C8)
-add_definitions(-DSTM32F10X_MD_VL)
-add_definitions(-DUSE_STDPERIPH_DRIVER)
+add_definitions(-DSTM32F100xB)
+#add_definitions(-DSTM32F10X_MD_VL)
+add_definitions(-DUSE_FULL_LL_DRIVER)
 add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
@@ -39,9 +39,9 @@ file(GLOB_RECURSE USER_SOURCES "*.c")
 file(GLOB_RECURSE USER_SOURCES_CXX "*.cpp")
 file(GLOB_RECURSE USER_HEADERS "*.h")
 
-include_directories(hal/cmsis
-    hal/cmsis_boot
-    hal/stm_lib/inc
+include_directories(hal_stm32f1xx/cmsis
+    hal_stm32f1xx/cmsis_boot
+    hal_stm32f1xx/stm_lib/inc
     ..)
 
 add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})

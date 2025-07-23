@@ -1,9 +1,14 @@
 #include <string.h>
 
-#include "hal/system.h"
-#include "hal/usart_gps.h"
-#include "hal/usart_ext.h"
-#include "hal/delay.h"
+#ifndef RS41_RSM4x4
+    #include "hal_stm32f1xx/system.h"
+    #include "hal_stm32f1xx/usart_gps.h"
+    #include "hal_stm32f1xx/usart_ext.h"
+    #include "hal_stm32f1xx/delay.h"
+#else
+    #error "TODO!"
+#endif
+
 
 #include "ubxg6010.h"
 #include "log.h"

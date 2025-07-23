@@ -1,8 +1,12 @@
-#include <stm32f10x_gpio.h>
+#ifndef RS41_RSM4x4
+    #include <stm32f1xx_hal.h>
+    #include "hal_stm32f1xx/spi.h"
+    #include "hal_stm32f1xx/hal.h"
+    #include "hal_stm32f1xx/delay.h"
+#else
+    #error "TODO!"
+#endif
 
-#include "hal/spi.h"
-#include "hal/hal.h"
-#include "hal/delay.h"
 #include "si4032.h"
 #include "log.h"
 
@@ -12,10 +16,10 @@
 #define EXPECTED_SI4032_CLOCK 30
 
 #define GPIO_SI4032_NSEL GPIOC
-#define GPIO_PIN_SI4032_NSEL GPIO_Pin_13
+#define GPIO_PIN_SI4032_NSEL GPIO_PIN_13
 
 #define GPIO_SI4032_SDI GPIOB
-#define GPIO_PIN_SI4032_SDI GPIO_Pin_15
+#define GPIO_PIN_SI4032_SDI GPIO_PIN_15
 
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
@@ -143,9 +147,9 @@ int si4032_wait_for_tx_complete(int timeout_ms)
 void si4032_use_direct_mode(bool use)
 {
     if (use) {
-        GPIO_SetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
+        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
+        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_RESET);
     }
 }
 
@@ -250,31 +254,30 @@ int32_t si4032_read_temperature_celsius_100()
 static void si4032_set_nsel_pin(bool high)
 {
     if (high) {
-        GPIO_SetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
+        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
+        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_RESET);
     }
 }
 
 void si4032_set_sdi_pin(bool high)
 {
     if (high) {
-        GPIO_SetBits(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI);
+        HAL_GPIO_WritePin(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI);
+        HAL_GPIO_WritePin(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI, GPIO_PIN_RESET);
     }
 }
 
 void si4032_use_sdi_pin(bool use)
 {
-    GPIO_InitTypeDef gpio_init;
-
     si4032_set_nsel_pin(true);
 
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4032_SDI;
-    gpio_init.GPIO_Mode = use ? GPIO_Mode_Out_PP : GPIO_Mode_AF_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4032_SDI, &gpio_init);
+    GPIO_InitTypeDef gpio_init;
+    gpio_init.Pin = GPIO_PIN_SI4032_SDI;
+    gpio_init.Mode = use ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &gpio_init);
 
     si4032_set_sdi_pin(false);
 }
@@ -284,10 +287,10 @@ void si4032_init()
     GPIO_InitTypeDef gpio_init;
 
     // Si4032 chip select pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4032_NSEL;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4032_NSEL, &gpio_init);
+    gpio_init.Pin = GPIO_PIN_SI4032_NSEL;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOC, &gpio_init);
 
     si4032_set_nsel_pin(true);
 

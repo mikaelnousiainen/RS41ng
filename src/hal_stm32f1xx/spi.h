@@ -3,13 +3,12 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stm32f10x.h>
 
 void spi_init();
 
 void spi_uninit();
 
-void spi_send(uint16_t data);
+void spi_send(uint8_t data);
 
 uint8_t spi_receive();
 
