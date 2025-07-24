@@ -41,7 +41,7 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
     cats_append_node_info_whisker(&packet, telemetry_data); // 16
 
     size_t len = cats_fully_encode(packet, cur);
-    log_info("CATS packet length: %ld\n", len + CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH);
+    log_info("CATS packet length: %d\n", len + CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH);
     free(data);
 
     return (uint16_t)(CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH + len);

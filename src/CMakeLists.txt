@@ -1,4 +1,4 @@
-project(RS41ng C CXX)
+project(RS41ng C CXX ASM)
 
 set(CMAKE_FIND_ROOT_PATH /usr/arm-none-eabi)
 
@@ -12,39 +12,42 @@ set(COLLECT_GCC ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
 if (UNIX)
   set(TOOLCHAIN_PATH /usr/bin)
   set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
+  set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
   set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-g++)
   set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy)
 else ()
   set(TOOLCHAIN_PATH C:\\)
   set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc.exe)
+  set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc.exe)
   set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-g++.exe)
   set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy.exe)
 endif ()
 
 add_definitions(-DSTM32F100xB)
-#add_definitions(-DSTM32F10X_MD_VL)
-add_definitions(-DUSE_FULL_LL_DRIVER)
 add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
-SET(LINKER_SCRIPT arm-gcc-link.ld)
-SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3 -nostartfiles")
+SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
+SET(COMMON_FLAGS " -mcpu=cortex-m3 -Wall -ffunction-sections -fdata-sections -O3 -nostartfiles")
 SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=nano.specs -T ${LINKER_SCRIPT}")
+SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -T ${LINKER_SCRIPT}")
 # -u _printf_float
 #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
 
 file(GLOB_RECURSE USER_SOURCES "*.c")
+file(GLOB_RECURSE USER_SOURCES_ASM "*.s")
 file(GLOB_RECURSE USER_SOURCES_CXX "*.cpp")
 file(GLOB_RECURSE USER_HEADERS "*.h")
 
 include_directories(hal_stm32f1xx/cmsis
+    hal_stm32f1xx/cmsis_boot/startup
     hal_stm32f1xx/cmsis_boot
     hal_stm32f1xx/stm_lib/inc
     ..)
 
-add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_ASM} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})
 
 set(HEX_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin)

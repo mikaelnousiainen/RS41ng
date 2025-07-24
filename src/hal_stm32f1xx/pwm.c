@@ -224,12 +224,12 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
 //     pwm_data_timer_dma_request_enable(true);
 // }
 
-// void pwm_dma_stop()
-// {
+void pwm_dma_stop()
+{
 //     pwm_data_timer_dma_request_enable(false);
 //     DMA_Cmd(pwm_dma_channel, DISABLE);
 //     //pwm_dma_interrupt_enable(false);
-// }
+}
 
 // void pwm_data_timer_dma_request_enable(bool enabled)
 // {
