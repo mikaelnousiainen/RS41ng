@@ -3,6 +3,8 @@
 #include <stm32f1xx_hal.h>
 
 #include "system.h"
+#include "timers.h"
+#include "i2c.h"
 #include "delay.h"
 #include "log.h"
 #include "gpio.h"
@@ -47,7 +49,7 @@ static void rcc_init()
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
     // If HSE fails to start up, the application will have incorrect clock configuration.
-    while (__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY) == FALSE);
+    while (!__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY));
     
 #endif
 #ifdef DFM17
@@ -63,7 +65,7 @@ static void rcc_init()
 
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-    while (__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) == FALSE);
+    while (!__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY));
 #endif
 
     //SystemInit();
@@ -83,13 +85,13 @@ static void rcc_init()
     // Use the 24 MHz external clock as SYSCLK
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    while (__HAL_RCC_GET_SYSCLK_SOURCE(); != 0x04);
+    while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x04);
 #endif
 #ifdef DFM17
     // Use the 24 MHz PLL as SYSCLK
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    while (__HAL_RCC_GET_SYSCLK_SOURCE(); != 0x08);
+    while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x08);
 #endif
 }
 
@@ -153,70 +155,78 @@ static void gpio_init()
  */
 static void dma_adc_init()
 {
-    DMA_DeInit(DMA1_Channel1);
+    DMA_HandleTypeDef dma_channel1;
 
-    DMA_InitTypeDef dma_init;
+    dma_channel1.Instance = DMA1_Channel1;
 
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+    HAL_DMA_DeInit(&dma_channel1);
 
+    __HAL_RCC_DMA1_CLK_ENABLE();
+// #ifdef RS41
+//     dma_channel1.Init.BufferSize = 2;
+// #endif
+// #ifdef DFM17
+//     dma_init.DMA_BufferSize = 1;
+// #endif
+
+    dma_channel1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    dma_channel1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
+    dma_channel1.Init.MemInc  = DMA_MINC_ENABLE;
+    dma_channel1.Init.Mode = DMA_CIRCULAR;
+    dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
+    dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
+    dma_channel1.Init.Priority = DMA_PRIORITY_HIGH;
+
+    HAL_DMA_Init(&dma_channel1);
+
+    __HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
+    __HAL_RCC_ADC1_CLK_ENABLE();
+
+    __HAL_DMA_ENABLE(&dma_channel1);
+
+    ADC_HandleTypeDef adc1;
+    adc1.Init.ScanConvMode = ENABLE;
+    adc1.Init.ContinuousConvMode = ENABLE;
+    adc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    adc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 #ifdef RS41
-    dma_init.DMA_BufferSize = 2;
+    adc1.Init.NbrOfConversion = 2;
 #endif
 #ifdef DFM17
-    dma_init.DMA_BufferSize = 1;
+    adc1.Init.NbrOfConversion = 1;
 #endif
-    dma_init.DMA_DIR = DMA_DIR_PeripheralSRC;
-    dma_init.DMA_M2M = DMA_M2M_Disable;
-    dma_init.DMA_MemoryBaseAddr = (uint32_t) &dma_buffer_adc;
-    dma_init.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-    dma_init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    dma_init.DMA_Mode = DMA_Mode_Circular;
-    dma_init.DMA_PeripheralBaseAddr = ADC1_DR_Address;
-    dma_init.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    dma_init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    dma_init.DMA_Priority = DMA_Priority_High;
-    DMA_Init(DMA1_Channel1, &dma_init);
 
-    DMA_Cmd(DMA1_Channel1, ENABLE);
+    HAL_ADC_Init(&adc1);
 
-    RCC_ADCCLKConfig(RCC_PCLK2_Div2);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+    ADC_ChannelConfTypeDef adc_channel;
 
-    ADC_InitTypeDef adc_init;
-    adc_init.ADC_Mode = ADC_Mode_Independent;
-    adc_init.ADC_ScanConvMode = ENABLE;
-    adc_init.ADC_ContinuousConvMode = ENABLE;
-    adc_init.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-    adc_init.ADC_DataAlign = ADC_DataAlign_Right;
+    adc_channel.Channel = CHANNEL_VOLTAGE;
+    adc_channel.Rank = ADC_REGULAR_RANK_1;
+    adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+
+    HAL_ADC_ConfigChannel(&adc1, &adc_channel);
 #ifdef RS41
-    adc_init.ADC_NbrOfChannel = 2;
-#endif
-#ifdef DFM17
-    adc_init.ADC_NbrOfChannel = 1;
-#endif
-    ADC_Init(ADC1, &adc_init);
+    adc_channel.Channel = CHANNEL_BUTTON;
+    adc_channel.Rank = ADC_REGULAR_RANK_2;
+    adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
-    ADC_RegularChannelConfig(ADC1, CHANNEL_VOLTAGE, 1, ADC_SampleTime_28Cycles5);
-#ifdef RS41
-    ADC_RegularChannelConfig(ADC1, CHANNEL_BUTTON, 2, ADC_SampleTime_28Cycles5);
+    HAL_ADC_ConfigChannel(&adc1, &adc_channel);
 #endif
 #ifdef DFM17
 // Not using ADC for button on DFM17
 #endif
+    __HAL_LINKDMA(&adc1, DMA_Handle, dma_channel1);
 
-    // ADC1 DMA requests are routed to DMA1 Channel1
-    ADC_DMACmd(ADC1, ENABLE);
-    ADC_Cmd(ADC1, ENABLE);
+    HAL_ADCEx_Calibration_Start(&adc1);
 
-    ADC_ResetCalibration(ADC1);
-    while (ADC_GetResetCalibrationStatus(ADC1));
+#ifdef DFM17
+    HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1);
+#endif
+#ifdef RS41
+    HAL_ADC_Start_DMA(&adc1, (uint32_t *)dma_buffer_adc, 2);
+#endif
 
-    // Start new calibration (ADC must be off at that time)
-    ADC_StartCalibration(ADC1);
-    while (ADC_GetCalibrationStatus(ADC1));
 
-    // Start conversion (will be endless as we are in continuous mode)
-    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -245,10 +255,10 @@ uint16_t system_get_button_adc_value()
 void system_shutdown()
 {
 #ifdef RS41
-    GPIO_SetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
+    HAL_GPIO_WritePin(BANK_SHUTDOWN, PIN_SHUTDOWN, GPIO_PIN_SET);
 #endif
 #ifdef DFM17
-    GPIO_ResetBits(BANK_SHUTDOWN, PIN_SHUTDOWN);
+    HAL_GPIO_WritePin(BANK_SHUTDOWN, PIN_SHUTDOWN, GPIO_PIN_RESET);
 #endif
 }
 
@@ -290,82 +300,61 @@ void system_scheduler_timer_init()
     // TIM_CLK =
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
-    TIM_DeInit(TIM4);
 
-    TIM_TimeBaseInitTypeDef tim_init;
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-    RCC_APB1PeriphResetCmd(RCC_APB1Periph_TIM4, DISABLE);
+    HAL_TIM_Base_DeInit(&htim4);
 
-    tim_init.TIM_Prescaler = 24 - 1; // tick every 1/1000000 s
-    tim_init.TIM_CounterMode = TIM_CounterMode_Up;
-    tim_init.TIM_Period = 100 - 1; // update every 1/10000 s
-    tim_init.TIM_ClockDivision = TIM_CKD_DIV1;
-    tim_init.TIM_RepetitionCounter = 0;
+    // The data timer assumes a 24 MHz clock source
+    htim4.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
+    htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim4.Init.Period = 100 - 1;
+    htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim4.Init.RepetitionCounter = 0;
 
-    TIM_TimeBaseInit(TIM4, &tim_init);
+    HAL_TIM_Base_Init(&htim4);
 
-    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+    // No interrupts necessary for data timer, as it is only used for triggering DMA transfers
+    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+    __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
 
-    NVIC_InitTypeDef nvic_init;
-    nvic_init.NVIC_IRQChannel = TIM4_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 3;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
-    nvic_init.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&nvic_init);
+    HAL_NVIC_SetPriority(TIM4_IRQn, 3, 3);
+    HAL_NVIC_EnableIRQ(TIM4_IRQn);
 
-    TIM_Cmd(TIM4, ENABLE);
+    HAL_TIM_Base_Start_IT(&htim4);
 }
 
 void system_disable_tick()
 {
-    TIM_Cmd(TIM4, DISABLE);
-    NVIC_DisableIRQ(TIM4_IRQn);
-    TIM_ITConfig(TIM4, TIM_IT_Update, DISABLE);
-    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+    HAL_TIM_Base_Stop_IT(&htim4);
+    HAL_NVIC_DisableIRQ(TIM4_IRQn);
+    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+    __HAL_TIM_DISABLE_IT(&htim4, TIM_IT_UPDATE);
 }
 
 void system_enable_tick()
 {
-    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
-    NVIC_EnableIRQ(TIM4_IRQn);
-    TIM_Cmd(TIM4, ENABLE);
+    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+    __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
+    HAL_TIM_Base_Start_IT(&htim4);
+    HAL_NVIC_EnableIRQ(TIM4_IRQn);
 }
 
 void system_set_green_led(bool enabled)
 {
 #ifdef RS41
-    if (enabled) {
-        GPIO_ResetBits(BANK_GREEN_LED, PIN_GREEN_LED);
-    } else {
-        GPIO_SetBits(BANK_GREEN_LED, PIN_GREEN_LED);
-    }
+    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_GREEN_LED, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
 #endif
 #ifdef DFM17
-    if (enabled) {
-        GPIO_SetBits(BANK_GREEN_LED, PIN_GREEN_LED);
-    } else {
-        GPIO_ResetBits(BANK_GREEN_LED, PIN_GREEN_LED);
-    }
+    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_GREEN_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
 #endif
 }
 
 void system_set_red_led(bool enabled)
 {
 #ifdef RS41
-    if (enabled) {
-        GPIO_ResetBits(BANK_RED_LED, PIN_RED_LED);
-    } else {
-        GPIO_SetBits(BANK_RED_LED, PIN_RED_LED);
-    }
+    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_RED_LED, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
 #endif
 #ifdef DFM17
-    if (enabled) {
-        GPIO_SetBits(BANK_RED_LED, PIN_RED_LED);
-    } else {
-        GPIO_ResetBits(BANK_RED_LED, PIN_RED_LED);
-    }
+    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_RED_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
 #endif
 }
 
@@ -373,11 +362,8 @@ void system_set_yellow_led(bool enabled)
 {
 #ifdef DFM17
     // Only DFM-17 has a yellow LED
-    if (enabled) {
-        GPIO_SetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
-    } else {
-        GPIO_ResetBits(BANK_YELLOW_LED, PIN_YELLOW_LED);
-    }
+    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_YELLOW_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
 #endif
 }
 
@@ -404,11 +390,8 @@ void system_init()
 #endif
     system_scheduler_timer_init();
 
-    RCC_ClocksTypeDef RCC_Clocks;
-    RCC_GetClocksFreq(&RCC_Clocks);
-
-    log_info("HCLK: %ld\n", RCC_Clocks.HCLK_Frequency);
-    log_info("SYSCLK: %ld\n", RCC_Clocks.SYSCLK_Frequency);
+    log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
+    log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
     log_info("SystemCoreClock: %ld\n", SystemCoreClock);
 
     delay_ms(100);
@@ -428,11 +411,10 @@ void SysTick_Handler()
 
 void TIM4_IRQHandler(void)
 {
-    if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) {
-        TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-
+    if (__HAL_TIM_GET_IT_SOURCE(&htim4, TIM_IT_UPDATE) != RESET)
+    {
         system_handle_timer_tick();
-
+        __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
 #if ALLOW_POWER_OFF
         system_handle_button();
 #endif

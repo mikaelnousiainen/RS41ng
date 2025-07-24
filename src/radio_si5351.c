@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#include "hal/system.h"
-#include "hal/datatimer.h"
+#include "hal_stm32f1xx/system.h"
+#include "hal_stm32f1xx/datatimer.h"
 #include "si5351_handler.h"
 #include "radio_si5351.h"
 #include "log.h"

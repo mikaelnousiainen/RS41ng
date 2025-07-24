@@ -1,11 +1,11 @@
 #include "config.h"
 
 #ifdef DFM17
-#include "hal/system.h"
-#include "hal/spi.h"
-#include "hal/pwm.h"
-#include "hal/delay.h"
-#include "hal/datatimer.h"
+#include "hal_stm32f1xx/system.h"
+#include "hal_stm32f1xx/spi.h"
+#include "hal_stm32f1xx/pwm.h"
+#include "hal_stm32f1xx/delay.h"
+#include "hal_stm32f1xx/datatimer.h"
 #include "drivers/si4063/si4063.h"
 #include "log.h"
 

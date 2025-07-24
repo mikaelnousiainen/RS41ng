@@ -6,7 +6,7 @@
  */
 
 #include "radsens.h"
-#include "../../hal/delay.h"
+#include "hal_stm32f1xx/delay.h"
 
 RadSens::RadSens(i2c_port *port, uint8_t sensor_address)
 {

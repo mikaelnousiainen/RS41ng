@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "gpio.h"
+
 void spi_init();
 
 void spi_uninit();

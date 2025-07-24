@@ -1,9 +1,9 @@
-#include "hal/system.h"
-#include "hal/spi.h"
-#include "hal/usart_gps.h"
-#include "hal/usart_ext.h"
-#include "hal/delay.h"
-#include "hal/datatimer.h"
+#include "hal_stm32f1xx/system.h"
+#include "hal_stm32f1xx/spi.h"
+#include "hal_stm32f1xx/usart_gps.h"
+#include "hal_stm32f1xx/usart_ext.h"
+#include "hal_stm32f1xx/delay.h"
+#include "hal_stm32f1xx/datatimer.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
@@ -14,12 +14,12 @@
 #include "log.h"
 
 #ifdef RS41
-#include "hal/i2c.h"
+#include "hal_stm32f1xx/i2c.h"
 #include "drivers/si4032/si4032.h"
 #endif
 
 #ifdef DFM17
-#include "hal/clock_calibration.h"
+#include "hal_stm32f1xx/clock_calibration.h"
 #include "drivers/si4063/si4063.h"
 #endif
 
