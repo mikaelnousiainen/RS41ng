@@ -28,7 +28,7 @@ add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
 SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
-SET(COMMON_FLAGS " -mcpu=cortex-m3 -Wall -ffunction-sections -fdata-sections -O3")
+SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
 SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
 SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")

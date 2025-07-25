@@ -156,13 +156,14 @@ static void gpio_init()
  */
 static void dma_adc_init()
 {
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
     DMA_HandleTypeDef dma_channel1;
 
     dma_channel1.Instance = DMA1_Channel1;
 
-    HAL_DMA_DeInit(&dma_channel1);
+    // HAL_DMA_DeInit(&dma_channel1);
 
-    __HAL_RCC_DMA1_CLK_ENABLE();
 // #ifdef RS41
 //     dma_channel1.Init.BufferSize = 2;
 // #endif
@@ -176,9 +177,11 @@ static void dma_adc_init()
     dma_channel1.Init.Mode = DMA_CIRCULAR;
     dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
     dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
-    dma_channel1.Init.Priority = DMA_PRIORITY_HIGH;
+    dma_channel1.Init.Priority = DMA_PRIORITY_LOW;
 
     HAL_DMA_Init(&dma_channel1);
+
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
 
     __HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
     __HAL_RCC_ADC1_CLK_ENABLE();
@@ -216,9 +219,7 @@ static void dma_adc_init()
 #ifdef DFM17
 // Not using ADC for button on DFM17
 #endif
-    __HAL_LINKDMA(&adc1, DMA_Handle, dma_channel1);
-
-    HAL_ADCEx_Calibration_Start(&adc1);
+    // HAL_ADCEx_Calibration_Start(&adc1);
 
 #ifdef DFM17
     HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1);
@@ -226,8 +227,6 @@ static void dma_adc_init()
 #ifdef RS41
     HAL_ADC_Start_DMA(&adc1, (uint32_t *)dma_buffer_adc, 2);
 #endif
-
-
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -390,6 +389,7 @@ void system_init()
     dma_adc_init();
     log_info("Delay Init\n");
     delay_init();
+
 #ifdef DFM17
     // The millis timer is used for clock calibration on DFM-17 only
     millis_timer_init();

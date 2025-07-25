@@ -9,9 +9,9 @@ volatile bool done;
 
 void delay_init()
 {
-    HAL_TIM_Base_DeInit(&htim3);
+    //HAL_TIM_Base_DeInit(&htim3);
 
-    __HAL_RCC_TIM3_CLK_ENABLE();
+    // __HAL_RCC_TIM3_CLK_ENABLE();
 
     // The data timer assumes a 24 MHz clock source
     htim2.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
