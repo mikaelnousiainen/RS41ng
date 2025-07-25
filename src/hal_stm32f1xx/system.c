@@ -35,7 +35,8 @@ static void nvic_init()
 
 static void rcc_init()
 {
-    HAL_RCC_DeInit();
+    log_info("RCC init");
+    // HAL_RCC_DeInit();
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
 
@@ -49,7 +50,7 @@ static void rcc_init()
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
     // If HSE fails to start up, the application will have incorrect clock configuration.
-    while (!__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY));
+    //while (!__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY));
     
 #endif
 #ifdef DFM17
@@ -65,7 +66,7 @@ static void rcc_init()
 
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-    while (!__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY));
+    // while (!__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY));
 #endif
 
     //SystemInit();
@@ -83,15 +84,15 @@ static void rcc_init()
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 #ifdef RS41
     // Use the 24 MHz external clock as SYSCLK
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x04);
+    // while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x04);
 #endif
 #ifdef DFM17
     // Use the 24 MHz PLL as SYSCLK
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x08);
+    // while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x08);
 #endif
 }
 
@@ -379,10 +380,15 @@ void system_enable_irq()
 
 void system_init()
 {
+    log_info("RCC Init\n");
     rcc_init();
+    log_info("NVIC Init\n");
     nvic_init();
+    log_info("GPIO Init\n");
     gpio_init();
+    log_info("DMA Init\n");
     dma_adc_init();
+    log_info("Delay Init\n");
     delay_init();
 #ifdef DFM17
     // The millis timer is used for clock calibration on DFM-17 only
