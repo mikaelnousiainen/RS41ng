@@ -35,7 +35,6 @@ static void nvic_init()
 
 static void rcc_init()
 {
-    log_info("RCC init");
     // HAL_RCC_DeInit();
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -78,7 +77,7 @@ static void rcc_init()
 
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -94,6 +93,11 @@ static void rcc_init()
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
     // while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x08);
 #endif
+
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 }
 
 static void gpio_init()
@@ -178,15 +182,12 @@ static void dma_adc_init()
     dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
     dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
     dma_channel1.Init.Priority = DMA_PRIORITY_LOW;
-
     HAL_DMA_Init(&dma_channel1);
 
-    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
-
-    __HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
-    __HAL_RCC_ADC1_CLK_ENABLE();
-
     __HAL_DMA_ENABLE(&dma_channel1);
+
+    
+    __HAL_RCC_ADC1_CLK_ENABLE();
 
     ADC_HandleTypeDef adc1;
     adc1.Init.ScanConvMode = ENABLE;
@@ -200,15 +201,16 @@ static void dma_adc_init()
     adc1.Init.NbrOfConversion = 1;
 #endif
 
+    __HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
+
     HAL_ADC_Init(&adc1);
 
     ADC_ChannelConfTypeDef adc_channel;
-
     adc_channel.Channel = CHANNEL_VOLTAGE;
     adc_channel.Rank = ADC_REGULAR_RANK_1;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
-
     HAL_ADC_ConfigChannel(&adc1, &adc_channel);
+
 #ifdef RS41
     adc_channel.Channel = CHANNEL_BUTTON;
     adc_channel.Rank = ADC_REGULAR_RANK_2;
@@ -227,6 +229,8 @@ static void dma_adc_init()
 #ifdef RS41
     HAL_ADC_Start_DMA(&adc1, (uint32_t *)dma_buffer_adc, 2);
 #endif
+
+    __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -301,20 +305,22 @@ void system_scheduler_timer_init()
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
 
-    HAL_TIM_Base_DeInit(&htim4);
+    // HAL_TIM_Base_DeInit(&htim4);
 
     // The data timer assumes a 24 MHz clock source
     htim4.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
     htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim4.Init.Period = 100 - 1;
+    htim4.Init.Period = 100 - 1; // update every 1/10000 s
     htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim4.Init.RepetitionCounter = 0;
+    htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
     HAL_TIM_Base_Init(&htim4);
 
-    // No interrupts necessary for data timer, as it is only used for triggering DMA transfers
-    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
-    __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
+    // __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+    // __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
+
+    HAL_TIM_RegisterCallback(&htim4, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM4_IRQHandler);
 
     HAL_NVIC_SetPriority(TIM4_IRQn, 3, 3);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
@@ -379,22 +385,29 @@ void system_enable_irq()
 
 void system_init()
 {
+    HAL_Init();
+
     log_info("RCC Init\n");
     rcc_init();
+
     log_info("NVIC Init\n");
-    nvic_init();
+    //nvic_init();
+
     log_info("GPIO Init\n");
     gpio_init();
-    log_info("DMA Init\n");
-    dma_adc_init();
-    log_info("Delay Init\n");
-    delay_init();
 
 #ifdef DFM17
     // The millis timer is used for clock calibration on DFM-17 only
     millis_timer_init();
 #endif
+    log_info("Systick init\n");
     system_scheduler_timer_init();
+
+    log_info("DMA Init\n");
+    dma_adc_init();
+
+    log_info("Delay Init\n");
+    delay_init();
 
     log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
     log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
@@ -415,12 +428,11 @@ void SysTick_Handler()
     systick_counter++;
 }
 
-void TIM4_IRQHandler(void)
+void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim)
 {
-    if (__HAL_TIM_GET_IT_SOURCE(&htim4, TIM_IT_UPDATE) != RESET)
+    if (htim->Instance == TIM4)
     {
         system_handle_timer_tick();
-        __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
 #if ALLOW_POWER_OFF
         system_handle_button();
 #endif

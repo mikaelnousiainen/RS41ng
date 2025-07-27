@@ -33,6 +33,8 @@ void data_timer_init(uint32_t baud_rate)
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
 
     HAL_TIM_Base_Start_IT(&htim2);
+
+    HAL_TIM_RegisterCallback(&htim2, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM2_IRQHandler);
 }
 
 void data_timer_uninit()
@@ -45,12 +47,10 @@ void data_timer_uninit()
     __HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
 }
 
-void TIM2_IRQHandler(void)
+void User_TIM2_IRQHandler(TIM_HandleTypeDef *htim)
 {
-    if (__HAL_TIM_GET_IT_SOURCE(&htim2, TIM_IT_UPDATE) != RESET)
+    if (htim->Instance == TIM2)
     {
         system_handle_data_timer_tick();
-        __HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
     }
-    // HAL_TIM_IRQHandler(&htim2);
 }

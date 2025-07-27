@@ -26,6 +26,8 @@ void millis_timer_init(void)
 
     HAL_NVIC_SetPriority(TIM7_IRQn, 0, 1);
     HAL_NVIC_EnableIRQ(TIM7_IRQn);
+
+    HAL_TIM_RegisterCallback(&htim7, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM7_IRQHandler);
 }
 
 void millis_timer_uninit()
@@ -33,11 +35,10 @@ void millis_timer_uninit()
     HAL_TIM_Base_Stop_IT(&htim7);
 }
 
-void TIM7_IRQHandler(void)
+void User_TIM7_IRQHandler(TIM_HandleTypeDef *htim)
 {
-    if (__HAL_TIM_GET_IT_SOURCE(&htim7, TIM_IT_UPDATE) != RESET)
+    if (htim->Instance == TIM7)
     {
-        __HAL_TIM_CLEAR_IT(&htim7, TIM_IT_UPDATE);
         millis_counter++;
     }
 }

@@ -30,6 +30,8 @@ void delay_init()
     HAL_NVIC_EnableIRQ(TIM3_IRQn);
 
     HAL_TIM_Base_Stop_IT(&htim3);
+
+    HAL_TIM_RegisterCallback(&htim3, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM3_IRQHandler);
 }
 
 void delay_us(uint16_t us)
@@ -52,11 +54,10 @@ inline void delay_ms(uint32_t ms)
     }
 }
 
-void TIM3_IRQHandler(void)
+void User_TIM3_IRQHandler(TIM_HandleTypeDef *htim)
 {
-    if (__HAL_TIM_GET_IT_SOURCE(&htim3, TIM_IT_UPDATE) != RESET)
+    if (htim->Instance == TIM3)
     {
         done = true;
-        __HAL_TIM_CLEAR_IT(&htim3, TIM_IT_UPDATE);
     }
 }
