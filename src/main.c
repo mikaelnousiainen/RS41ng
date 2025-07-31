@@ -30,7 +30,7 @@ gps_data current_gps_data;
 
 void handle_timer_tick()
 {
-    if (!system_initialized) {
+    if (!system_initialized) {		// Timer may pop before everything fully initialized
         return;
     }
 

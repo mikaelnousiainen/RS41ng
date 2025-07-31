@@ -308,6 +308,7 @@ void system_scheduler_timer_init()
     // HAL_TIM_Base_DeInit(&htim4);
 
     // The data timer assumes a 24 MHz clock source
+    htim4.Instance = TIM4;
     htim4.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
     htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim4.Init.Period = 100 - 1; // update every 1/10000 s
@@ -315,17 +316,28 @@ void system_scheduler_timer_init()
     htim4.Init.RepetitionCounter = 0;
     htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-    HAL_TIM_Base_Init(&htim4);
+    __TIM4_CLK_ENABLE();
 
-    // __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
-    // __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
+    if (HAL_TIM_Base_Init(&htim4) != HAL_OK) {
+      log_info("HAL Base Init Error\n");
+      while (1) ;
+    } else {
+      //log_info("HAL Base Init Success\n");
+    }
+
+     __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+     __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
 
     HAL_TIM_RegisterCallback(&htim4, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM4_IRQHandler);
 
+    if (HAL_TIM_Base_Start_IT(&htim4) != HAL_OK) {
+      log_info("HAL Base Init IT Error\n");
+      while (1) ;
+    } else {
+      //log_info("HAL Base Init IT Success\n");
+    }
     HAL_NVIC_SetPriority(TIM4_IRQn, 3, 3);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
-
-    HAL_TIM_Base_Start_IT(&htim4);
 }
 
 void system_disable_tick()
@@ -406,6 +418,8 @@ void system_init()
     log_info("DMA Init\n");
     dma_adc_init();
 
+    log_info("Infinite loop now\n"); while (1) ;			// Debug to minimize confusion
+
     log_info("Delay Init\n");
     delay_init();
 
@@ -428,13 +442,16 @@ void SysTick_Handler()
     systick_counter++;
 }
 
+// Provide our own stub that just calls the standard HAL IRQ Handler.  It will call our PeriodElapsedCallback routine  - User_TIM4_IRQHandler
+extern void TIM4_IRQHandler()
+{
+    HAL_TIM_IRQHandler(&htim4);
+}
+
 void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim)
 {
-    if (htim->Instance == TIM4)
-    {
         system_handle_timer_tick();
 #if ALLOW_POWER_OFF
         system_handle_button();
 #endif
-    }
 }
