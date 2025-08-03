@@ -14,7 +14,7 @@
 
 #define ADC1_DR_Address ((uint32_t) 0x4001244C)
 
-__IO uint16_t dma_buffer_adc[2];
+__IO uint32_t dma_buffer_adc[2];
 
 volatile uint32_t button_pressed = 0;
 
@@ -160,13 +160,23 @@ static void gpio_init()
  */
 static void dma_adc_init()
 {
-    __HAL_RCC_DMA1_CLK_ENABLE();
+    int rc;
+
+    //__HAL_RCC_DMA1_CLK_ENABLE();
 
     DMA_HandleTypeDef dma_channel1;
 
-    dma_channel1.Instance = DMA1_Channel1;
 
     // HAL_DMA_DeInit(&dma_channel1);
+
+    dma_channel1.Instance = DMA1_Channel1;
+    dma_channel1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
+    dma_channel1.Init.MemInc  = DMA_MINC_ENABLE;
+    dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
+    dma_channel1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
+    dma_channel1.Init.Mode = DMA_CIRCULAR;			// Normal or Circular??
+    dma_channel1.Init.Priority = DMA_PRIORITY_LOW;
 
 // #ifdef RS41
 //     dma_channel1.Init.BufferSize = 2;
@@ -175,21 +185,21 @@ static void dma_adc_init()
 //     dma_init.DMA_BufferSize = 1;
 // #endif
 
-    dma_channel1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    dma_channel1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
-    dma_channel1.Init.MemInc  = DMA_MINC_ENABLE;
-    dma_channel1.Init.Mode = DMA_CIRCULAR;
-    dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
-    dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
-    dma_channel1.Init.Priority = DMA_PRIORITY_LOW;
-    HAL_DMA_Init(&dma_channel1);
+    if (HAL_DMA_Init(&dma_channel1) != HAL_OK) {
+      log_info("HAL_DMA_Init fail\n");
+       while (1);
+    } else {
+      log_info("HAL_DMA_Init successful\n");
+    }
 
-    __HAL_DMA_ENABLE(&dma_channel1);
+    //__HAL_DMA_ENABLE(&dma_channel1);
 
     
     __HAL_RCC_ADC1_CLK_ENABLE();
+    //__HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
 
     ADC_HandleTypeDef adc1;
+    adc1.Instance = ADC1;
     adc1.Init.ScanConvMode = ENABLE;
     adc1.Init.ContinuousConvMode = ENABLE;
     adc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
@@ -201,33 +211,59 @@ static void dma_adc_init()
     adc1.Init.NbrOfConversion = 1;
 #endif
 
-    __HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
 
-    HAL_ADC_Init(&adc1);
+    if ((rc = HAL_ADC_Init(&adc1)) != HAL_OK) {
+      log_info("HAL_ADC_Init fail:  RC: %d, State: %d, ErrorCode: %d\n", rc, (int) adc1.State, (int) adc1.ErrorCode);
+      while (1);
+    } else {
+      log_info("HAL_ADC_Init successful\n");
+    }
 
     ADC_ChannelConfTypeDef adc_channel;
     adc_channel.Channel = CHANNEL_VOLTAGE;
     adc_channel.Rank = ADC_REGULAR_RANK_1;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
-    HAL_ADC_ConfigChannel(&adc1, &adc_channel);
+    if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
+      log_info("HAL_ADC_ConfigChannel for VOLTAGE fail\n");
+      while (1);
+    } else {
+      log_info("HAL_ADC_ConfigChannel for VOLTAGE successful\n");
+    }
 
 #ifdef RS41
     adc_channel.Channel = CHANNEL_BUTTON;
     adc_channel.Rank = ADC_REGULAR_RANK_2;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
-    HAL_ADC_ConfigChannel(&adc1, &adc_channel);
+    if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
+      log_info("HAL_ADC_ConfigChannel for BUTTON fail\n");
+      while (1);
+    } else {
+      log_info("HAL_ADC_ConfigChannel for BUTTON successful\n");
+    }
 #endif
+
 #ifdef DFM17
 // Not using ADC for button on DFM17
 #endif
+
     // HAL_ADCEx_Calibration_Start(&adc1);
 
 #ifdef DFM17
-    HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1);
+    if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) != HAL_OK) {
+      log_info("HAL_Start_DMA fail\n");
+      while (1);
+    } else {
+      log_info("HAL_Start_DMA successful\n");
+    }
 #endif
 #ifdef RS41
-    HAL_ADC_Start_DMA(&adc1, (uint32_t *)dma_buffer_adc, 2);
+    if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 2) != HAL_OK) {
+      log_info("HAL_Start_DMA fail\n");
+      while (1);
+    } else {
+      log_info("HAL_Start_DMA successful\n");
+    }
 #endif
 
     __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
