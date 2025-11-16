@@ -22,6 +22,9 @@ void (*system_handle_timer_tick)() = NULL;
 
 static volatile uint32_t systick_counter = 0;
 
+DMA_HandleTypeDef dma_channel1;
+ADC_HandleTypeDef adc1;
+
 static void nvic_init()
 {
 #ifdef  VECT_TAB_RAM
@@ -162,10 +165,8 @@ static void dma_adc_init()
 {
     int rc;
 
-    //__HAL_RCC_DMA1_CLK_ENABLE();
-
-    DMA_HandleTypeDef dma_channel1;
-
+    __HAL_RCC_ADC1_CLK_ENABLE();
+    __HAL_RCC_DMA1_CLK_ENABLE();
 
     // HAL_DMA_DeInit(&dma_channel1);
 
@@ -192,13 +193,15 @@ static void dma_adc_init()
       log_info("HAL_DMA_Init successful\n");
     }
 
+    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
     //__HAL_DMA_ENABLE(&dma_channel1);
 
     
-    __HAL_RCC_ADC1_CLK_ENABLE();
+    // __HAL_RCC_ADC1_CLK_ENABLE();
     //__HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
 
-    ADC_HandleTypeDef adc1;
     adc1.Instance = ADC1;
     adc1.Init.ScanConvMode = ENABLE;
     adc1.Init.ContinuousConvMode = ENABLE;
@@ -249,6 +252,8 @@ static void dma_adc_init()
 
     // HAL_ADCEx_Calibration_Start(&adc1);
 
+    __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
+
 #ifdef DFM17
     if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) != HAL_OK) {
       log_info("HAL_Start_DMA fail\n");
@@ -265,8 +270,6 @@ static void dma_adc_init()
       log_info("HAL_Start_DMA successful\n");
     }
 #endif
-
-    __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -490,4 +493,9 @@ void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim)
 #if ALLOW_POWER_OFF
         system_handle_button();
 #endif
+}
+
+void DMA1_Channel1_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(&dma_channel1);
 }
