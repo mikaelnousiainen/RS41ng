@@ -193,14 +193,8 @@ static void dma_adc_init()
       log_info("HAL_DMA_Init successful\n");
     }
 
-    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
-    //__HAL_DMA_ENABLE(&dma_channel1);
-
-    
-    // __HAL_RCC_ADC1_CLK_ENABLE();
-    //__HAL_RCC_ADC_CONFIG(RCC_ADCPCLK2_DIV2);
+    // HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+    // HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
     adc1.Instance = ADC1;
     adc1.Init.ScanConvMode = ENABLE;
@@ -457,8 +451,6 @@ void system_init()
     log_info("DMA Init\n");
     dma_adc_init();
 
-    log_info("Infinite loop now\n"); while (1) ;			// Debug to minimize confusion
-
     log_info("Delay Init\n");
     delay_init();
 
@@ -468,6 +460,7 @@ void system_init()
 
     delay_ms(100);
 
+    log_info("Configuring SysTick\n");
     SysTick_Config(SystemCoreClock / 10000);
 }
 
