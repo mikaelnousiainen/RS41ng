@@ -34,17 +34,17 @@ void telemetry_collect(telemetry_data *data)
     data->internal_temperature_celsius_100 = si4063_read_temperature_celsius_100();
 #endif
 
-    if (bmp280_enabled) {
-        bmp280_read_telemetry(data);
-    }
+#if SENSOR_BMP280_ENABLE
+    bmp280_read_telemetry(data);
+#endif
 
-    if (radsens_enabled) {
-        radsens_read_telemetry(data);
-    }
+#if SENSOR_RADSENS_ENABLE
+    radsens_read_telemetry(data);
+#endif
 
-    if (pulse_counter_enabled) {
-        data->pulse_count = pulse_counter_get_count();
-    }
+#if PULSE_COUNTER_ENABLE
+    data->pulse_count = pulse_counter_get_count();
+#endif
 
     ubxg6010_get_current_gps_data(&data->gps);
 

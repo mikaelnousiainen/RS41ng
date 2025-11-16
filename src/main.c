@@ -140,38 +140,38 @@ int main(void)
     si4063_init();
 #endif
 
-    if (bmp280_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("BMP280 init\n");
-            success = bmp280_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("BMP280 init failed, retrying...");
+#if SENSOR_BMP280_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("BMP280 init\n");
+        success = bmp280_handler_init();
+        if (success) {
+            break;
         }
+        log_error("BMP280 init failed, retrying...");
     }
+#endif
 
-    if (radsens_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("RadSens init\n");
-            success = radsens_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("RadSens init failed, retrying...");
+#if SENSOR_RADSENS_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("RadSens init\n");
+        success = radsens_handler_init();
+        if (success) {
+            break;
         }
+        log_error("RadSens init failed, retrying...");
     }
+#endif
 
-    if (si5351_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("Si5351 init\n");
-            success = si5351_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("Si5351 init failed, retrying...");
+#if RADIO_SI5351_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("Si5351 init\n");
+        success = si5351_handler_init();
+        if (success) {
+            break;
         }
+        log_error("Si5351 init failed, retrying...");
     }
+#endif
 
     log_info("Radio module init\n");
     radio_init();
