@@ -340,6 +340,8 @@ void system_scheduler_timer_init()
 
     // HAL_TIM_Base_DeInit(&htim4);
 
+    __TIM4_CLK_ENABLE();
+
     // The data timer assumes a 24 MHz clock source
     htim4.Instance = TIM4;
     htim4.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
@@ -348,8 +350,6 @@ void system_scheduler_timer_init()
     htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim4.Init.RepetitionCounter = 0;
     htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-
-    __TIM4_CLK_ENABLE();
 
     if (HAL_TIM_Base_Init(&htim4) != HAL_OK) {
       log_info("HAL Base Init Error\n");

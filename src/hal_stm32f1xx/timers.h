@@ -3,10 +3,10 @@
 
 #include <stm32f1xx_hal.h>
 
-extern TIM_HandleTypeDef htim2;
-extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim4;
-extern TIM_HandleTypeDef htim7;
-extern TIM_HandleTypeDef htim15;
+extern TIM_HandleTypeDef htim2; // Data timer
+extern TIM_HandleTypeDef htim3; // Delay() timer
+extern TIM_HandleTypeDef htim4; // System scheduler timer
+extern TIM_HandleTypeDef htim7; // Millisecond counter timer
+extern TIM_HandleTypeDef htim15; // PWM timer
 
 #endif

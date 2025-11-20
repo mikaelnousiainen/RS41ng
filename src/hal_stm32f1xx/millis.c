@@ -7,16 +7,16 @@ static uint32_t	millis_counter;
 
 void millis_timer_init(void)
 {
-    HAL_TIM_Base_DeInit(&htim7);
-
     __HAL_RCC_TIM7_CLK_ENABLE();
 
-    // The data timer assumes a 24 MHz clock source
-    htim2.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
-    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = (uint16_t) (1000 - 1); // set up period of 1 millisecond
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim2.Init.RepetitionCounter = 0;
+    htim7.Instance = TIM7;
+
+    // The millis timer assumes a 24 MHz clock source
+    htim7.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
+    htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim7.Init.Period = (uint16_t) (1000 - 1); // set up period of 1 millisecond
+    htim7.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim7.Init.RepetitionCounter = 0;
 
     HAL_TIM_Base_Init(&htim7);
 

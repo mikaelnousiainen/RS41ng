@@ -21,6 +21,7 @@ void pwm_data_timer_init()
     __HAL_RCC_TIM2_CLK_ENABLE();
 
     htim2.Instance = TIM2;
+    
     HAL_TIM_Base_DeInit(&htim2);
 
     htim2.Init.Prescaler = 2 - 1; // tick every 1/12000000 s
@@ -56,15 +57,12 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 {
     htim15.Instance = TIM15;
 
+    __HAL_RCC_TIM15_CLK_ENABLE();
+
     HAL_TIM_Base_DeInit(&htim15);
 // #ifdef RS41
 //     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
 // #endif
-    // Not needed: AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
-
-    __HAL_RCC_TIM15_CLK_ENABLE();
-
-    // Not needed: TIM_InternalClockConfig(TIM15);
 
     htim15.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
     htim15.Init.CounterMode = TIM_COUNTERMODE_UP;

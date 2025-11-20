@@ -12,9 +12,11 @@ void data_timer_init(uint32_t baud_rate)
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
 
-    HAL_TIM_Base_DeInit(&htim2);
-
     __HAL_RCC_TIM2_CLK_ENABLE();
+
+    htim2.Instance = TIM2;
+
+    HAL_TIM_Base_DeInit(&htim2);
 
     // The data timer assumes a 24 MHz clock source
     htim2.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
