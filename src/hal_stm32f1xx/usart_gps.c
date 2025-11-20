@@ -13,21 +13,31 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 {
     GPIO_InitTypeDef gpio_init;
 
+    usart1.Instance = USART1;
+
+        __HAL_RCC_USART1_CLK_ENABLE();
+
+    // Deinit sequence for purpose of baudrate change
+    HAL_NVIC_DisableIRQ(USART1_IRQn);
+    __HAL_USART_DISABLE_IT(&usart1, USART_IT_TC | USART_IT_TXE | USART_IT_RXNE | USART_IT_ERR);
+    if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U)
+    {
+        while((usart1.Instance->SR & USART_SR_TC) == 0) { __NOP(); }
+    }
+    __HAL_USART_DISABLE(&usart1);
+    HAL_USART_DeInit(&usart1);
+
     // USART TX
     gpio_init.Pin = PIN_USART_TX;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(BANK_USART_TX, &gpio_init);
 
-    // USART3 RX
+    // USART RX
     gpio_init.Pin = PIN_USART_RX;
     gpio_init.Mode = GPIO_MODE_INPUT;
     gpio_init.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(BANK_USART_RX, &gpio_init);
-
-    __HAL_RCC_USART1_CLK_ENABLE();
-
-    usart1.Instance = USART1;
 
     HAL_NVIC_DisableIRQ(USART1_IRQn);
     __HAL_USART_DISABLE_IT(&usart1, USART_IT_RXNE);
@@ -83,7 +93,11 @@ void usart_gps_enable(bool enabled)
 
 void usart_gps_send_byte(uint8_t data)
 {
-    HAL_USART_Transmit(&usart1, &data, 1, 10);
+    while ((__HAL_USART_GET_FLAG(&usart1, USART_FLAG_TXE)) == RESET) {}
+    usart1.Instance->DR = data;
+    // optional: wait for TC if absolutely needed
+    // while ((__HAL_USART_GET_FLAG(&usart1, USART_FLAG_TC)) == RESET) {}
+    // HAL_USART_Transmit(&usart1, &data, 1, 10);
 }
 
 void USART1_IRQHandler(void)

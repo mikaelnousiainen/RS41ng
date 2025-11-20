@@ -146,11 +146,7 @@ int si4032_wait_for_tx_complete(int timeout_ms)
 
 void si4032_use_direct_mode(bool use)
 {
-    if (use) {
-        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_SET);
-    } else {
-        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_RESET);
-    }
+    HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, use ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_set_tx_frequency(const float frequency_mhz)
@@ -253,20 +249,12 @@ int32_t si4032_read_temperature_celsius_100()
 
 static void si4032_set_nsel_pin(bool high)
 {
-    if (high) {
-        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_SET);
-    } else {
-        HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, GPIO_PIN_RESET);
-    }
+    HAL_GPIO_WritePin(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_set_sdi_pin(bool high)
 {
-    if (high) {
-        HAL_GPIO_WritePin(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI, GPIO_PIN_SET);
-    } else {
-        HAL_GPIO_WritePin(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI, GPIO_PIN_RESET);
-    }
+    HAL_GPIO_WritePin(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_use_sdi_pin(bool use)

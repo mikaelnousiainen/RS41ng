@@ -678,6 +678,7 @@ void ubxg6010_request_gpstime()
 
 static void ubxg6010_handle_packet(uBloxPacket *pkt)
 {
+    log_info("Handling GPS packet\n");
     uBloxChecksum cksum = ubxg6010_calculate_checksum(pkt->header.messageClass, pkt->header.messageId,
             (const uint8_t *) &pkt->data, pkt->header.payloadSize);
     uBloxChecksum *checksum = (uBloxChecksum *) (((uint8_t *) &pkt->data) + pkt->header.payloadSize);
