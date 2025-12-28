@@ -193,8 +193,8 @@ static void dma_adc_init()
       log_info("HAL_DMA_Init successful\n");
     }
 
-    // HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-    // HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+//    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+//    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
     adc1.Instance = ADC1;
     adc1.Init.ScanConvMode = ENABLE;
@@ -210,10 +210,10 @@ static void dma_adc_init()
 
 
     if ((rc = HAL_ADC_Init(&adc1)) != HAL_OK) {
-      log_info("HAL_ADC_Init fail:  RC: %d, State: %d, ErrorCode: %d\n", rc, (int) adc1.State, (int) adc1.ErrorCode);
+      //log_info("HAL_ADC_Init fail:  RC: %d, State: %d, ErrorCode: %d\n", rc, (int) adc1.State, (int) adc1.ErrorCode);
       while (1);
     } else {
-      log_info("HAL_ADC_Init successful\n");
+      //log_info("HAL_ADC_Init successful\n");
     }
 
     ADC_ChannelConfTypeDef adc_channel;
@@ -221,10 +221,10 @@ static void dma_adc_init()
     adc_channel.Rank = ADC_REGULAR_RANK_1;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
     if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
-      log_info("HAL_ADC_ConfigChannel for VOLTAGE fail\n");
+//      log_info("HAL_ADC_ConfigChannel for VOLTAGE fail\n");
       while (1);
     } else {
-      log_info("HAL_ADC_ConfigChannel for VOLTAGE successful\n");
+//      log_info("HAL_ADC_ConfigChannel for VOLTAGE successful\n");
     }
 
 #ifdef RS41
@@ -233,10 +233,10 @@ static void dma_adc_init()
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
     if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
-      log_info("HAL_ADC_ConfigChannel for BUTTON fail\n");
+//      log_info("HAL_ADC_ConfigChannel for BUTTON fail\n");
       while (1);
     } else {
-      log_info("HAL_ADC_ConfigChannel for BUTTON successful\n");
+//      log_info("HAL_ADC_ConfigChannel for BUTTON successful\n");
     }
 #endif
 
@@ -250,18 +250,18 @@ static void dma_adc_init()
 
 #ifdef DFM17
     if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) != HAL_OK) {
-      log_info("HAL_Start_DMA fail\n");
+      //log_info("HAL_Start_DMA fail\n");
       while (1);
     } else {
-      log_info("HAL_Start_DMA successful\n");
+      //log_info("HAL_Start_DMA successful\n");
     }
 #endif
 #ifdef RS41
     if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 2) != HAL_OK) {
-      log_info("HAL_Start_DMA fail\n");
+      //log_info("HAL_Start_DMA fail\n");
       while (1);
     } else {
-      log_info("HAL_Start_DMA successful\n");
+      //log_info("HAL_Start_DMA successful\n");
     }
 #endif
 }
@@ -269,7 +269,12 @@ static void dma_adc_init()
 uint16_t system_get_battery_voltage_millivolts()
 {
 #ifdef RS41
-    return (uint16_t) (((float) dma_buffer_adc[0]) * 10.0f * 600.0f / 4096.0f);
+    uint16_t temp = dma_buffer_adc[0];
+    uint16_t return_val = (uint16_t) (((float) temp) * 10.0f * 650.0f / 4096.0f);
+    log_info("Raw battery voltage is: %d\n", temp);
+    log_info("Computed battery voltage is: %d\n", return_val);
+    //return (uint16_t) (((float) dma_buffer_adc[0]) * 10.0f * 600.0f / 4096.0f);
+    return return_val;
 #else  //DFM17
     // Kludge:  DFM17 voltage is more than 5 volts, so cut the value in half.
     // Changed 600 to 690 to try and get it more accurate to actual voltage
@@ -492,3 +497,4 @@ void DMA1_Channel1_IRQHandler(void)
 {
     HAL_DMA_IRQHandler(&dma_channel1);
 }
+

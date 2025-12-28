@@ -2,6 +2,7 @@
 
 #include "spi.h"
 #include "gpio.h"
+#include "log.h"
 
 SPI_HandleTypeDef hspi;
 
@@ -13,6 +14,7 @@ void spi_init()
     gpio_init.Pin = PIN_SCK;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio_init.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(BANK_SCK, &gpio_init);
 
     // MOSI
@@ -24,19 +26,20 @@ void spi_init()
     // MISO
     gpio_init.Pin = PIN_MISO;
     gpio_init.Mode = GPIO_MODE_INPUT;
+    gpio_init.Pull = GPIO_NOPULL;
 #ifdef DFM17
     gpio_init.Pull = GPIO_PULLUP;
 #endif
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(BANK_MISO, &gpio_init);
 
-    __HAL_RCC_SPI2_CLK_ENABLE();
-
 
 #ifdef RS41
+    __HAL_RCC_SPI2_CLK_ENABLE();
     hspi.Instance = SPI2;
 #endif
 #ifdef DFM17
+    __HAL_RCC_SPI1_CLK_ENABLE();
     hspi.Instance = SPI1;
 #endif
 
@@ -66,7 +69,13 @@ void spi_init()
     hspi.Init.CRCPolynomial = 10;
     hspi.Init.NSS = SPI_NSS_SOFT;
 #endif
-    HAL_SPI_Init(&hspi);
+    if (HAL_SPI_Init(&hspi) != HAL_OK) {
+      log_info("HAL_SPI_Init fail\n");
+       while (1);
+    } else {
+      log_info("HAL_SPI_Init successful\n");
+    }
+
 
 // #ifdef RS41
 //     // TODO: Why is this call even here?
