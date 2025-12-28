@@ -294,6 +294,9 @@ void si4032_init()
     // ADC configuration
     si4032_write(0x0f, 0x80);
 
+    // Disable onboard reference heater (drive GPIO_1 low)
+    si4032_write(0x0C, 0b11111);
+
     si4032_set_frequency_offset(0);
     si4032_set_frequency_deviation(5); // Was: 5 for APRS in RS41HUP?
 
