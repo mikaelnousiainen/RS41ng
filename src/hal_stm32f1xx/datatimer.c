@@ -32,9 +32,10 @@ void data_timer_init(uint32_t baud_rate)
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
       log_info("HAL Base Init Error for TIM2 Datatimer\n");
       while (1) ;
-    } else {
-      log_info("HAL Base Init Success for TIM2 Datatimer\n");
     }
+    //  else {
+    //   log_info("HAL Base Init Success for TIM2 Datatimer\n");
+    // }
 
 
     // No interrupts necessary for data timer, as it is only used for triggering DMA transfers
@@ -46,9 +47,10 @@ void data_timer_init(uint32_t baud_rate)
     if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
       log_info("HAL Base Init IT Error for TIM2 Datatimer\n");
       while (1) ;
-    } else {
-      log_info("HAL Base Init IT Success for TIM2 Datatimer\n");
     }
+    // else {
+    //   log_info("HAL Base Init IT Success for TIM2 Datatimer\n");
+    // }
 
     HAL_NVIC_SetPriority(TIM2_IRQn, 2, 2);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
@@ -57,12 +59,12 @@ void data_timer_init(uint32_t baud_rate)
 
 void data_timer_uninit()
 {
-    HAL_TIM_Base_Stop(&htim2);
-
-    HAL_NVIC_DisableIRQ(TIM2_IRQn);
+    HAL_TIM_Base_Stop_IT(&htim2);
 
     __HAL_TIM_DISABLE_IT(&htim2, TIM_IT_UPDATE);
     __HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
+
+    HAL_NVIC_DisableIRQ(TIM2_IRQn);
 }
 
 // Provide our own stub that just calls the standard HAL IRQ Handler.  

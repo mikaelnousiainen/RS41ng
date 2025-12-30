@@ -149,7 +149,7 @@
     ]
 },
 */
-#define SENSOR_BME_6XX_GAS_MEASUREMENT true
+#define SENSOR_BME_6XX_GAS_MEASUREMENT false
 // Gas heater duration in ms
 #define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
 // Gas heater temperature in degrees C
@@ -218,7 +218,7 @@
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 1
 #define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 

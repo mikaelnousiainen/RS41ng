@@ -25,7 +25,7 @@ void spi_init()
 
     // MISO
     gpio_init.Pin = PIN_MISO;
-    gpio_init.Mode = GPIO_MODE_INPUT;
+    gpio_init.Mode = GPIO_MODE_AF_INPUT;
     gpio_init.Pull = GPIO_NOPULL;
 #ifdef DFM17
     gpio_init.Pull = GPIO_PULLUP;
@@ -45,49 +45,49 @@ void spi_init()
 
     hspi.Init.Direction = SPI_DIRECTION_2LINES;
     hspi.Init.Mode = SPI_MODE_MASTER;
+
 #ifdef RS41
-    hspi.Init.DataSize = SPI_DATASIZE_16BIT;
+    hspi.Init.DataSize = SPI_DATASIZE_8BIT;
 #endif
 #ifdef DFM17
     hspi.Init.DataSize = SPI_DATASIZE_8BIT;
 #endif
     hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
     hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
+
 #ifdef RS41
     hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
 #endif
 #ifdef DFM17
     hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
 #endif
+
     hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
-#ifdef RS41
-    hspi.Init.CRCPolynomial = 7;
-    hspi.Init.NSS = SPI_NSS_HARD_OUTPUT;
-#endif
+    hspi.Init.NSS = SPI_NSS_SOFT;
+
 #ifdef DFM17
     hspi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     hspi.Init.CRCPolynomial = 10;
-    hspi.Init.NSS = SPI_NSS_SOFT;
 #endif
+
     if (HAL_SPI_Init(&hspi) != HAL_OK) {
       log_info("HAL_SPI_Init fail\n");
        while (1);
     } else {
       log_info("HAL_SPI_Init successful\n");
     }
-
-
-// #ifdef RS41
-//     // TODO: Why is this call even here?
-//     SPI_Init(&hspi, &spi_init);
-// #endif
 }
 
 void spi_uninit()
 {
     HAL_SPI_DeInit(&hspi);
 
+#ifdef RS41
     __HAL_RCC_SPI2_CLK_DISABLE();
+#endif
+#ifdef DFM17
+    __HAL_RCC_SPI1_CLK_DISABLE();
+#endif
 
     GPIO_InitTypeDef gpio_init;
 
@@ -145,13 +145,13 @@ uint8_t spi_read()
 
 void spi_set_chip_select(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, bool select)
 {
-    HAL_GPIO_WritePin(gpio_cs, pin_cs, select ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(gpio_cs, pin_cs, select ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
 uint8_t spi_send_and_receive(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, uint16_t data) {
     uint8_t tx[2], rx[2];
-    tx[0] = (uint8_t)(data & 0xFF);
-    tx[1] = (uint8_t)(data >> 8);
+    tx[0] = (uint8_t)(data >> 8);
+    tx[1] = (uint8_t)(data & 0xFF);
 
     HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_RESET);
 
@@ -160,9 +160,7 @@ uint8_t spi_send_and_receive(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, uint16_t da
         return 0xFF;
     }
 
-    while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_BSY)) { __NOP(); }
-
     HAL_GPIO_WritePin(gpio_cs, pin_cs, GPIO_PIN_SET);
 
-    return rx[0];
+    return rx[1];
 }
