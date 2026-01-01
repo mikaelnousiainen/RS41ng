@@ -692,10 +692,10 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             return false;
     }
 
-    // usart_gps_enable(enable_gps_during_transmit);
-    // if (!enable_gps_during_transmit) {
-    //     ubxg6010_reset_parser();
-    // }
+    usart_gps_enable(enable_gps_during_transmit);
+    if (!enable_gps_during_transmit) {
+        ubxg6010_reset_parser();
+    }
 
     switch (entry->radio_type) {
 #ifdef RS41
@@ -716,7 +716,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     }
 
     if (!success) {
-        // usart_gps_enable(true);
+        usart_gps_enable(true);
         // TODO: stop transmit here
         return false;
     }
@@ -808,7 +808,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
             return false;
     }
 
-    // usart_gps_enable(true);
+    usart_gps_enable(true);
     if (leds_enabled) {
         set_red_led(false);
     }

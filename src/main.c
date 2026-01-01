@@ -118,14 +118,14 @@ int main(void)
     log_info("SPI init\n");
     spi_init();
 
-    // gps_init:
-    // log_info("GPS init\n");
-    // success = ubxg6010_init();
-    // if (!success) {
-    //     log_error("GPS initialization failed, retrying...\n");
-    //     delay_ms(1000);
-    //     goto gps_init;
-    // }
+    gps_init:
+    log_info("GPS init\n");
+    success = ubxg6010_init();
+    if (!success) {
+        log_error("GPS initialization failed, retrying...\n");
+        delay_ms(1000);
+        goto gps_init;
+    }
 
 #ifdef DFM17
     log_info("Timepulse init\n");

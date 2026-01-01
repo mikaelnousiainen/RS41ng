@@ -529,15 +529,15 @@ bool ubxg6010_init()
     usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
     delay_ms(100);
 
-    log_info("GPS: Resetting GPS chip\n");
+    log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
     log_info("GPS: Initializing USART with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
-    usart_gps_init(GPS_INITIAL_BAUD_RATE, true);
+    usart_gps_set_baud_rate(GPS_INITIAL_BAUD_RATE);
     delay_ms(100);
-
-    log_info("GPS: Resetting GPS chip\n");
+    
+    log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
@@ -556,7 +556,7 @@ bool ubxg6010_init()
     delay_ms(100);
 
     log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
-    usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
+    usart_gps_set_baud_rate(GPS_SERIAL_PORT_BAUD_RATE);
     delay_ms(100);
 
     log_info("GPS: Setting GPS chip power mode\n");

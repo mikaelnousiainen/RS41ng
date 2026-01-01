@@ -4,10 +4,11 @@
 
 #include "usart_gps.h"
 #include "gpio.h"
+#include "log.h"
 
 void (*usart_gps_handle_incoming_byte)(uint8_t data) = NULL;
 
-USART_HandleTypeDef usart1;
+UART_HandleTypeDef usart1;
 
 void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 {
@@ -15,17 +16,18 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 
     usart1.Instance = USART1;
 
-        __HAL_RCC_USART1_CLK_ENABLE();
+    __HAL_RCC_USART1_CLK_ENABLE();
 
     // Deinit sequence for purpose of baudrate change
     HAL_NVIC_DisableIRQ(USART1_IRQn);
-    __HAL_USART_DISABLE_IT(&usart1, USART_IT_TC | USART_IT_TXE | USART_IT_RXNE | USART_IT_ERR);
+    NVIC_ClearPendingIRQ(USART1_IRQn);
+    __HAL_UART_DISABLE_IT(&usart1, USART_IT_TC | USART_IT_TXE | USART_IT_RXNE | USART_IT_ERR);
     if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U)
     {
         while((usart1.Instance->SR & USART_SR_TC) == 0) { __NOP(); }
     }
-    __HAL_USART_DISABLE(&usart1);
-    HAL_USART_DeInit(&usart1);
+    __HAL_UART_DISABLE(&usart1);
+    HAL_UART_DeInit(&usart1);
 
     // USART TX
     gpio_init.Pin = PIN_USART_TX;
@@ -40,44 +42,54 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     HAL_GPIO_Init(BANK_USART_RX, &gpio_init);
 
     HAL_NVIC_DisableIRQ(USART1_IRQn);
-    __HAL_USART_DISABLE_IT(&usart1, USART_IT_RXNE);
-    __HAL_USART_CLEAR_FLAG(&usart1, USART_FLAG_RXNE); 
-    __HAL_USART_CLEAR_OREFLAG(&usart1);
+    NVIC_ClearPendingIRQ(USART1_IRQn);
+    __HAL_UART_DISABLE_IT(&usart1, USART_IT_RXNE);
+    __HAL_UART_CLEAR_OREFLAG(&usart1);
 
-    __HAL_USART_DISABLE(&usart1);
+    __HAL_UART_DISABLE(&usart1);
 
     usart1.Init.BaudRate = baud_rate;
-    usart1.Init.WordLength = USART_WORDLENGTH_8B;
-    usart1.Init.StopBits = USART_STOPBITS_1;
-    usart1.Init.Parity = USART_PARITY_NONE;
+    usart1.Init.WordLength = UART_WORDLENGTH_8B;
+    usart1.Init.StopBits = UART_STOPBITS_1;
+    usart1.Init.Parity = UART_PARITY_NONE;
     usart1.Init.Mode = USART_MODE_TX_RX; // Enable only transmit for now | USART_Mode_Rx;
-    HAL_USART_Init(&usart1);
+    HAL_UART_Init(&usart1);
 
-    HAL_NVIC_SetPriority(USART1_IRQn, 3, 2);
+    HAL_NVIC_SetPriority(USART1_IRQn, 1, 2);
+
+    HAL_UART_RegisterCallback(&usart1, HAL_UART_RX_COMPLETE_CB_ID, USART1_IRQHandler);
 
     if (enable_irq) {
         HAL_NVIC_EnableIRQ(USART1_IRQn);
-        __HAL_USART_ENABLE_IT(&usart1, USART_IT_RXNE);
+        __HAL_UART_ENABLE_IT(&usart1, UART_IT_RXNE);
     }
+
+}
+
+void usart_gps_set_baud_rate(uint32_t baud_rate) {
+    __HAL_UART_DISABLE(&usart1);
+    usart1.Instance->BRR = UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), baud_rate);
+    __HAL_UART_ENABLE(&usart1);
 }
 
 static void usart_gps_enable_irq(bool enabled) {
     if (enabled) {
         HAL_NVIC_EnableIRQ(USART1_IRQn);
-        __HAL_USART_ENABLE_IT(&usart1, USART_IT_RXNE);
+        __HAL_UART_ENABLE_IT(&usart1, USART_IT_RXNE);
     } else {
         HAL_NVIC_DisableIRQ(USART1_IRQn);
-        __HAL_USART_DISABLE_IT(&usart1, USART_IT_RXNE);
+        NVIC_ClearPendingIRQ(USART1_IRQn);
+        __HAL_UART_DISABLE_IT(&usart1, USART_IT_RXNE);
     }
-    __HAL_USART_CLEAR_FLAG(&usart1, USART_FLAG_RXNE); 
-    __HAL_USART_CLEAR_OREFLAG(&usart1);
+    __HAL_UART_CLEAR_OREFLAG(&usart1);
 }
 
 void usart_gps_uninit()
 {
     usart_gps_enable_irq(false);
-    __HAL_USART_DISABLE(&usart1);
-    HAL_USART_DeInit(&usart1);
+    __HAL_UART_DISABLE(&usart1);
+    HAL_UART_DeInit(&usart1);
+    NVIC_ClearPendingIRQ(USART1_IRQn);
     __HAL_RCC_USART1_CLK_DISABLE();
 }
 
@@ -85,24 +97,31 @@ void usart_gps_enable(bool enabled)
 {
     usart_gps_enable_irq(enabled);
     if(enabled) {
-        __HAL_USART_ENABLE(&usart1);
+        __HAL_UART_ENABLE(&usart1);
     } else {
-        __HAL_USART_DISABLE(&usart1);
+        __HAL_UART_DISABLE(&usart1);
     }
 }
 
 void usart_gps_send_byte(uint8_t data)
 {
-    while ((__HAL_USART_GET_FLAG(&usart1, USART_FLAG_TXE)) == RESET) {}
+    while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TXE)) == RESET) {}
     usart1.Instance->DR = data;
     // optional: wait for TC if absolutely needed
-    // while ((__HAL_USART_GET_FLAG(&usart1, USART_FLAG_TC)) == RESET) {}
-    // HAL_USART_Transmit(&usart1, &data, 1, 10);
+    while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TC)) == RESET) {}
 }
 
-void USART1_IRQHandler(void)
+void USART1_IRQHandler(UART_HandleTypeDef *huart)
 {
     uint32_t sr = READ_REG(usart1.Instance->SR);
+
+    /* Overrun error: clear by reading SR then DR (we already read SR) */
+    if (sr & USART_SR_ORE) 
+    {
+        volatile uint32_t tmp = usart1.Instance->DR; (void)tmp; // read DR to clear ORE
+        // log_info("ORE\n");
+        return;
+    }
 
     /* RX not empty */
     if (sr & USART_SR_RXNE) 
@@ -114,27 +133,4 @@ void USART1_IRQHandler(void)
         }
         return;
     }
-
-    /* Overrun error: clear by reading SR then DR (we already read SR) */
-    if (sr & USART_SR_ORE) 
-    {
-        volatile uint32_t tmp = usart1.Instance->DR; (void)tmp; // read DR to clear ORE
-        __HAL_USART_CLEAR_OREFLAG(&usart1); // optional helper
-        return;
-    }
-
-    /* For other events (TXE, TC, ERR), either call HAL IRQ handler or handle explicitly */
-    // HAL_USART_IRQHandler(&usart1); // safe for other flags (non-blocking)
-
-    // uint8_t data;
-    // if (__HAL_USART_GET_FLAG(&usart1, USART_FLAG_RXNE) != RESET) {
-    //     __HAL_USART_CLEAR_FLAG(&usart1, USART_FLAG_RXNE); 
-    //     HAL_USART_Receive(&usart1, &data, 1, 10);
-    //     usart_gps_handle_incoming_byte(data);
-    // } else if (__HAL_USART_GET_FLAG(&usart1, USART_FLAG_ORE) != RESET) {
-    //     __HAL_USART_CLEAR_OREFLAG(&usart1);
-    //     HAL_USART_Receive(&usart1, &data, 1, 10);
-    // } else {
-    //     HAL_USART_Receive(&usart1, &data, 1, 10);
-    // }
 }

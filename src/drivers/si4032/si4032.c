@@ -287,8 +287,8 @@ void si4032_init()
 
     si4032_soft_reset();
 
-    uint8_t version = si4032_read(0x01);
-    log_info("Si4032 version: %u\n", version);
+    // uint8_t version = si4032_read(0x01);
+    // log_info("Si4032 version: %u\n", version);
 
     si4032_set_tx_power(0);
 
