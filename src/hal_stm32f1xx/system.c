@@ -464,7 +464,7 @@ void system_init()
     log_info("SystemCoreClock: %ld\n", SystemCoreClock);
 
     log_info("Configuring SysTick\n");
-    HAL_SYSTICK_Config(SystemCoreClock / 10000U);
+    HAL_SYSTICK_Config(SystemCoreClock / 1000U);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0U);
 }
 
