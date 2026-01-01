@@ -463,20 +463,14 @@ void system_init()
     log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
     log_info("SystemCoreClock: %ld\n", SystemCoreClock);
 
-    delay_ms(100);
-
     log_info("Configuring SysTick\n");
-    SysTick_Config(SystemCoreClock / 10000);
+    HAL_SYSTICK_Config(SystemCoreClock / 10000U);
+    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0U);
 }
 
-uint32_t system_get_tick()
+void SysTick_Handler(void)
 {
-    return systick_counter;
-}
-
-void SysTick_Handler()
-{
-    systick_counter++;
+    HAL_IncTick();
 }
 
 // Provide our own stub that just calls the standard HAL IRQ Handler.  It will call our PeriodElapsedCallback routine  - User_TIM4_IRQHandler

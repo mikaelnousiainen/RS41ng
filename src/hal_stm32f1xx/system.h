@@ -29,4 +29,6 @@ void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim);
 
 void DMA1_Channel1_IRQHandler(void);
 
+void SysTick_Handler(void);
+
 #endif

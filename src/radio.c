@@ -1014,7 +1014,7 @@ void radio_handle_main_loop()
     if (radio_start_transmit_entry != NULL) {
         log_info("Start transmit\n");
         bool success = radio_start_transmit(radio_start_transmit_entry);
-        start_tick = system_get_tick();
+        start_tick = HAL_GetTick();
 
         radio_start_transmit_entry = NULL;
         if (!success) {
@@ -1046,7 +1046,7 @@ void radio_handle_main_loop()
     }
 
     if (radio_shared_state.radio_transmission_finished) {
-        end_tick = system_get_tick();
+        end_tick = HAL_GetTick();
         radio_stop_transmit(radio_current_transmit_entry);
         radio_shared_state.radio_transmission_finished = false;
 
