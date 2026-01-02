@@ -1,3 +1,5 @@
+#include <stm32f1xx_hal.h>
+
 #include "log.h"
 
 void log_bytes(int length, char *data)
@@ -17,4 +19,14 @@ void log_bytes_hex(int length, char *data)
     for (int i = 0; i < length; i++) {
         log_info("%02X ", data[i]);
     }
+}
+
+void hang_if_bad(char *routine_name, int hal_ok)
+{
+   if (hal_ok != HAL_OK) {
+      log_info("%s failed\n",routine_name);
+      while(1);
+   } else {
+      log_info("%s succeeded\n", routine_name);
+   }
 }

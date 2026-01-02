@@ -186,12 +186,10 @@ static void dma_adc_init()
 //     dma_init.DMA_BufferSize = 1;
 // #endif
 
-    if (HAL_DMA_Init(&dma_channel1) != HAL_OK) {
-      log_info("HAL_DMA_Init fail\n");
-       while (1);
-    } else {
-      log_info("HAL_DMA_Init successful\n");
-    }
+    hang_if_bad("HAL_DMA_Init",
+                HAL_DMA_Init(&dma_channel1)
+               );
+
 
 //    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
 //    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
@@ -208,36 +206,26 @@ static void dma_adc_init()
     adc1.Init.NbrOfConversion = 1;
 #endif
 
-
-    if ((rc = HAL_ADC_Init(&adc1)) != HAL_OK) {
-      //log_info("HAL_ADC_Init fail:  RC: %d, State: %d, ErrorCode: %d\n", rc, (int) adc1.State, (int) adc1.ErrorCode);
-      while (1);
-    } else {
-      //log_info("HAL_ADC_Init successful\n");
-    }
+    hang_if_bad("HAL_ADC_Init",
+                HAL_ADC_Init(&adc1)
+               );
 
     ADC_ChannelConfTypeDef adc_channel;
     adc_channel.Channel = CHANNEL_VOLTAGE;
     adc_channel.Rank = ADC_REGULAR_RANK_1;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
-    if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
-//      log_info("HAL_ADC_ConfigChannel for VOLTAGE fail\n");
-      while (1);
-    } else {
-//      log_info("HAL_ADC_ConfigChannel for VOLTAGE successful\n");
-    }
+    hang_if_bad("HAL_ADC_ConfigChannel - 1",
+                HAL_ADC_ConfigChannel(&adc1, &adc_channel)
+               );
 
 #ifdef RS41
     adc_channel.Channel = CHANNEL_BUTTON;
     adc_channel.Rank = ADC_REGULAR_RANK_2;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
-    if (HAL_ADC_ConfigChannel(&adc1, &adc_channel) != HAL_OK) {
-//      log_info("HAL_ADC_ConfigChannel for BUTTON fail\n");
-      while (1);
-    } else {
-//      log_info("HAL_ADC_ConfigChannel for BUTTON successful\n");
-    }
+    hang_if_bad("HAL_ADC_ConfigChannel - 2",
+                HAL_ADC_ConfigChannel(&adc1, &adc_channel)
+               );
 #endif
 
 #ifdef DFM17
@@ -249,20 +237,14 @@ static void dma_adc_init()
     __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
 
 #ifdef DFM17
-    if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) != HAL_OK) {
-      //log_info("HAL_Start_DMA fail\n");
-      while (1);
-    } else {
-      //log_info("HAL_Start_DMA successful\n");
-    }
+    hang_if_bad("HAL_ADC_Start_DMA",
+                HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) 
+               );
 #endif
 #ifdef RS41
-    if (HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 2) != HAL_OK) {
-      //log_info("HAL_Start_DMA fail\n");
-      while (1);
-    } else {
-      //log_info("HAL_Start_DMA successful\n");
-    }
+    hang_if_bad("HAL_ADC_Start_DMA",
+                HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 2) 
+               );
 #endif
 }
 
@@ -271,8 +253,8 @@ uint16_t system_get_battery_voltage_millivolts()
 #ifdef RS41
     uint16_t temp = dma_buffer_adc[0];
     uint16_t return_val = (uint16_t) (((float) temp) * 10.0f * 650.0f / 4096.0f);
-    log_info("Raw battery voltage is: %d\n", temp);
-    log_info("Computed battery voltage is: %d\n", return_val);
+    //log_info("Raw battery voltage is: %d\n", temp);
+    //log_info("Computed battery voltage is: %d\n", return_val);
     //return (uint16_t) (((float) dma_buffer_adc[0]) * 10.0f * 600.0f / 4096.0f);
     return return_val;
 #else  //DFM17
@@ -356,24 +338,18 @@ void system_scheduler_timer_init()
     htim4.Init.RepetitionCounter = 0;
     htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-    if (HAL_TIM_Base_Init(&htim4) != HAL_OK) {
-      log_info("HAL Base Init Error\n");
-      while (1) ;
-    } else {
-      //log_info("HAL Base Init Success\n");
-    }
+    hang_if_bad("HAL_TIM_Base_Init",
+                HAL_TIM_Base_Init(&htim4)
+               );
 
      __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
      __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
 
     HAL_TIM_RegisterCallback(&htim4, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM4_IRQHandler);
 
-    if (HAL_TIM_Base_Start_IT(&htim4) != HAL_OK) {
-      log_info("HAL Base Init IT Error\n");
-      while (1) ;
-    } else {
-      //log_info("HAL Base Init IT Success\n");
-    }
+    hang_if_bad("HAL_TIM_Base_Start_IT",
+                HAL_TIM_Base_Start_IT(&htim4)
+               );
     HAL_NVIC_SetPriority(TIM4_IRQn, 3, 3);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
 }

@@ -29,14 +29,9 @@ void data_timer_init(uint32_t baud_rate)
     htim2.Init.RepetitionCounter = 0;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
-    if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
-      log_info("HAL Base Init Error for TIM2 Datatimer\n");
-      while (1) ;
-    }
-    //  else {
-    //   log_info("HAL Base Init Success for TIM2 Datatimer\n");
-    // }
-
+    hang_if_bad("HAL_TIM_Base_Init",
+                HAL_TIM_Base_Init(&htim2)
+               );
 
     // No interrupts necessary for data timer, as it is only used for triggering DMA transfers
     __HAL_TIM_CLEAR_IT(&htim2, TIM_IT_UPDATE);
@@ -44,13 +39,9 @@ void data_timer_init(uint32_t baud_rate)
 
     HAL_TIM_RegisterCallback(&htim2, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM2_IRQHandler);
 
-    if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
-      log_info("HAL Base Init IT Error for TIM2 Datatimer\n");
-      while (1) ;
-    }
-    // else {
-    //   log_info("HAL Base Init IT Success for TIM2 Datatimer\n");
-    // }
+    hang_if_bad("HAL_TIM_Base_Start_IT",
+                HAL_TIM_Base_Start_IT(&htim2)
+               );
 
     HAL_NVIC_SetPriority(TIM2_IRQn, 2, 2);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);

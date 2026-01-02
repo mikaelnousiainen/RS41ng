@@ -55,7 +55,10 @@ void pwm_data_timer_uninit()
 
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
     htim15.Instance = TIM15;
+    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
 
     __HAL_RCC_TIM15_CLK_ENABLE();
 
@@ -71,7 +74,14 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     htim15.Init.RepetitionCounter = 0;
     htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
-    HAL_TIM_Base_Init(&htim15);
+    //HAL_TIM_Base_Init(&htim15);
+    hang_if_bad("HAL_TIM_PWM_Init", (HAL_TIM_PWM_Init(&htim15)));
+
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    hang_if_bad("HAL_TIMEx_MasterConfigSynchronization", 
+                HAL_TIMEx_MasterConfigSynchronization(&htim15, &sMasterConfig)
+               );
 
 #ifdef RS41
     TIM_OC_InitTypeDef TIM15_OCInitStruct;
@@ -80,16 +90,31 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM15_OCInitStruct.OCMode = TIM_OCMODE_TOGGLE; // Was: TIM_OCMode_PWM1
     TIM15_OCInitStruct.OCPolarity = TIM_OCPOLARITY_HIGH;
     TIM15_OCInitStruct.OCFastMode = TIM_OCFAST_ENABLE;
+    TIM15_OCInitStruct.OCIdleState = TIM_OCIDLESTATE_RESET;
+    TIM15_OCInitStruct.OCNIdleState = TIM_OCNIDLESTATE_RESET;
 
     // TIM15 channel 2 can be used to drive pin PB15, which is connected to RS41 Si4032 SDI pin for direct modulation
-    HAL_TIM_OC_ConfigChannel(&htim15, &TIM15_OCInitStruct, TIM_CHANNEL_2);
+    hang_if_bad("HAL_TIM_OC_ConfigChannel", 
+                HAL_TIM_OC_ConfigChannel(&htim15, &TIM15_OCInitStruct, TIM_CHANNEL_2)
+               );
+
+    sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+    sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+    sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+    sBreakDeadTimeConfig.DeadTime = 0;
+    sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+    sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+    hang_if_bad("HAL_TIMEx_ConfigBreakDeadTim", 
+                HAL_TIMEx_ConfigBreakDeadTime(&htim15, &sBreakDeadTimeConfig)
+               );
 
     // These are not needed?
     // TIM_SelectOCxM(TIM15, TIM_Channel_2, TIM_OCMode_PWM1);
     // TIM_CCxCmd(TIM15, TIM_Channel_2, TIM_CCx_Enable);
 
     // The following settings make transitions between generated frequencies smooth
-    __HAL_TIM_ENABLE_OCxPRELOAD(&htim15, TIM_CHANNEL_2);
+    //__HAL_TIM_ENABLE_OCxPRELOAD(&htim15, TIM_CHANNEL_2);
 
 
     // __HAL_TIM_MOE_DISABLE(&htim15);
@@ -107,7 +132,10 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     NVIC_Init(&nvic_init);
 #endif
 
-    __HAL_TIM_ENABLE(&htim15);
+//    __HAL_TIM_ENABLE(&htim15);
+    hang_if_bad("HAL_TIM_PWM_Start", 
+                HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2) != HAL_OK
+               );
 }
 
 void pwm_timer_pwm_enable(bool enabled)

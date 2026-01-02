@@ -525,24 +525,24 @@ bool ubxg6010_init()
 
     gps_initialized = false;
 
-    log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
+    //log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
     usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
     delay_ms(100);
 
-    log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
+    //log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
-    log_info("GPS: Initializing USART with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
+    //log_info("GPS: Initializing USART with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     usart_gps_set_baud_rate(GPS_INITIAL_BAUD_RATE);
     delay_ms(100);
     
-    log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
+    //log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
 
     if (gps_nmea_output_enabled) {
-        log_info("GPS: Configuring GPS NMEA output settings\n");
+        //log_info("GPS: Configuring GPS NMEA output settings\n");
         ubxg6010_send_packet(&msgcfgnmea);
         delay_ms(100);
     }
@@ -555,11 +555,11 @@ bool ubxg6010_init()
     ubxg6010_send_packet(&msgcfgprt);
     delay_ms(100);
 
-    log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
+    //log_info("GPS: Initializing USART with baud rate %d\n", GPS_SERIAL_PORT_BAUD_RATE);
     usart_gps_set_baud_rate(GPS_SERIAL_PORT_BAUD_RATE);
     delay_ms(100);
 
-    log_info("GPS: Setting GPS chip power mode\n");
+    //log_info("GPS: Setting GPS chip power mode\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgrxm);
     if (!success) {
         return false;

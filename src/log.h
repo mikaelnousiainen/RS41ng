@@ -25,5 +25,7 @@
 
 void log_bytes(int length, char *data);
 void log_bytes_hex(int length, char *data);
+void hang_if_bad(char *routine_name, int hal_ok);
+
 
 #endif
