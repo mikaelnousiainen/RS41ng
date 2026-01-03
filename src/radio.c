@@ -985,6 +985,7 @@ void radio_handle_main_loop()
         telemetry_collect(&current_telemetry_data);
         log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
         log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
+        log_info("Button State: %ld\n", current_telemetry_data.button_adc_value);
         log_info("Time: %02d:%02d:%02d\n",
                 current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
                 current_telemetry_data.gps.seconds);

@@ -300,12 +300,12 @@ void system_handle_button()
         button_pressed++;
         if (button_pressed >= BUTTON_PRESS_LONG_COUNT) {
             shutdown = true;
-        }
-    } else {
-        if (shutdown) {
             system_shutdown();
         }
-        button_pressed = 0;
+    } else {
+        if (!shutdown) {
+           button_pressed = 0;		// Reset if we are not actually shutting down (accidental short press)
+        }
     }
 
     if (button_pressed == 0) {

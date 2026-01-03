@@ -547,7 +547,7 @@ bool ubxg6010_init()
         delay_ms(100);
     }
 
-    log_info("GPS: Configuring GPS chip I/O port settings\n");
+    //log_info("GPS: Configuring GPS chip I/O port settings\n");
     if (gps_nmea_output_enabled) {
         // Enable both UBX and NMEA protocols
         msgcfgprt.data.cfgprt.outProtoMask = 0x03;
@@ -568,13 +568,13 @@ bool ubxg6010_init()
     // Rate of 1 for message: 0x01 0x02 Geodetic Position Solution
     msgcfgmsg.data.cfgmsg.msgID = 0x02;
     msgcfgmsg.data.cfgmsg.rate = GPS_POSITION_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
     }
 
-    log_info("GPS: Setting Navigation/Measurement rate settings in GPS chip\n");
+    //log_info("GPS: Setting Navigation/Measurement rate settings in GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgrate);
     if (!success) {
         return false;
@@ -583,7 +583,7 @@ bool ubxg6010_init()
     // Rate of 1 for message: 0x01 0x06 Navigation Solution Information
     msgcfgmsg.data.cfgmsg.msgID = 0x06;
     msgcfgmsg.data.cfgmsg.rate = GPS_POSITION_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -593,7 +593,7 @@ bool ubxg6010_init()
     /*
     msgcfgmsg.data.cfgmsg.msgID = 0x20;
     msgcfgmsg.data.cfgmsg.rate = 1;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -603,7 +603,7 @@ bool ubxg6010_init()
     // Configure rate of 1 for message: 0x01 0x21 UTC Time Solution
     msgcfgmsg.data.cfgmsg.msgID = 0x21;
     msgcfgmsg.data.cfgmsg.rate = GPS_TIME_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -612,7 +612,7 @@ bool ubxg6010_init()
     // Configure rate of 2 for message: 0x01 0x12 Velocity Solution in NED
     msgcfgmsg.data.cfgmsg.msgID = 0x12;
     msgcfgmsg.data.cfgmsg.rate = GPS_POSITION_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -621,7 +621,7 @@ bool ubxg6010_init()
     // Configure rate of 2 for message: 0x01 0x03 Receiver Navigation Status
     msgcfgmsg.data.cfgmsg.msgID = 0x03;
     msgcfgmsg.data.cfgmsg.rate = 1;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    //log_info("GPS: Requesting update messages from GPS chip\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -634,7 +634,7 @@ bool ubxg6010_init()
         return false;
     }*/
 
-    log_info("GPS: Configuring navigation engine settings\n");
+    //log_info("GPS: Configuring navigation engine settings\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgnav5);
     if (!success) {
         return false;

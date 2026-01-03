@@ -168,8 +168,13 @@ void pwm_timer_uninit()
 {
     __HAL_TIM_MOE_DISABLE(&htim15);
     __HAL_TIM_DISABLE(&htim15);
-
-    HAL_TIM_Base_DeInit(&htim15);
+    hang_if_bad("HAL_TIM_PWM_Stop",
+                HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2) != HAL_OK
+               );
+    hang_if_bad("HAL_TIM_PWM_DeInit",
+                HAL_TIM_PWM_DeInit(&htim15) != HAL_OK
+               );
+    //HAL_TIM_Base_DeInit(&htim15);
 
 #ifdef RS41
     __HAL_AFIO_REMAP_TIM15_DISABLE();

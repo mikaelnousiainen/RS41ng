@@ -157,7 +157,7 @@ void si4032_set_tx_frequency(const float frequency_mhz)
                             (1 + hbsel));
     uint8_t gen_div = 3;  // constant - not possible to change!
     uint16_t fc = (uint16_t) (((frequency_mhz / ((SI4032_CLOCK / gen_div) * (hbsel + 1))) - fb - 24) * 64000);
-    log_info("Setting tx frequency to %ld\n", (uint32_t) (1000000 * frequency_mhz));
+    //log_info("Setting tx frequency to %ld\n", (uint32_t) (1000000 * frequency_mhz));
     si4032_write(0x75, (uint8_t) (0b01000000 | (fb & 0b11111) | ((hbsel & 0b1) << 5)));
     si4032_write(0x76, (uint8_t) (((uint16_t) fc >> 8U) & 0xffU));
     si4032_write(0x77, (uint8_t) ((uint16_t) fc & 0xff));
@@ -167,8 +167,8 @@ void si4032_set_data_rate(const uint32_t rate_bps)
 {
     uint32_t rate = (uint64_t) rate_bps * (1 << 21) * EXPECTED_SI4032_CLOCK / 1000000 / SI4032_CLOCK;
 
-    log_info("Rate BPS:   %lu\n", rate_bps);
-    log_info("Rate (raw): %lu\n", rate);
+    //log_info("Rate BPS:   %lu\n", rate_bps);
+    //log_info("Rate (raw): %lu\n", rate);
 
     si4032_write(0x6E, rate >> 8);
     si4032_write(0x6F, rate & 0xFF);
@@ -243,7 +243,7 @@ int32_t si4032_read_temperature_celsius_100()
     // Read temperature value—Read contents of "Register 11h. ADC Value"
     int32_t raw_value = (int32_t) si4032_read(0x11);
 
-    log_info("Raw temp: %li\n", raw_value);
+    //log_info("Raw temp: %li\n", raw_value);
 
     int32_t temperature = (int32_t) (-6400 + (raw_value * 100 * 500 / 1000));
 
