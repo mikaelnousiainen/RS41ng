@@ -22,8 +22,8 @@ void (*system_handle_timer_tick)() = NULL;
 
 static volatile uint32_t systick_counter = 0;
 
-DMA_HandleTypeDef dma_channel1;
-ADC_HandleTypeDef adc1;
+DMA_HandleTypeDef hdma_adc1;
+ADC_HandleTypeDef hadc1;
 
 static void nvic_init()
 {
@@ -168,46 +168,43 @@ static void dma_adc_init()
     __HAL_RCC_ADC1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
 
-    // HAL_DMA_DeInit(&dma_channel1);
+    // HAL_DMA_DeInit(&hdma_adc1);
 
-    dma_channel1.Instance = DMA1_Channel1;
-    dma_channel1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    dma_channel1.Init.PeriphInc  = DMA_PINC_DISABLE;
-    dma_channel1.Init.MemInc  = DMA_MINC_ENABLE;
-    dma_channel1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
-    dma_channel1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
-    dma_channel1.Init.Mode = DMA_CIRCULAR;			// Normal or Circular??
-    dma_channel1.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc1.Instance = DMA1_Channel1;
+    hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc1.Init.PeriphInc  = DMA_PINC_DISABLE;
+    hdma_adc1.Init.MemInc  = DMA_MINC_ENABLE;
+    hdma_adc1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc1.Init.Mode = DMA_CIRCULAR;			// Normal or Circular??
+    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
 
 // #ifdef RS41
-//     dma_channel1.Init.BufferSize = 2;
+//     hdma_adc1.Init.BufferSize = 2;
 // #endif
 // #ifdef DFM17
 //     dma_init.DMA_BufferSize = 1;
 // #endif
 
     hang_if_bad("HAL_DMA_Init",
-                HAL_DMA_Init(&dma_channel1)
+                HAL_DMA_Init(&hdma_adc1)
                );
 
 
-//    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-//    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
-    adc1.Instance = ADC1;
-    adc1.Init.ScanConvMode = ENABLE;
-    adc1.Init.ContinuousConvMode = ENABLE;
-    adc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    adc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    hadc1.Instance = ADC1;
+    hadc1.Init.ScanConvMode = ENABLE;
+    hadc1.Init.ContinuousConvMode = ENABLE;
+    hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 #ifdef RS41
-    adc1.Init.NbrOfConversion = 2;
+    hadc1.Init.NbrOfConversion = 2;
 #endif
 #ifdef DFM17
-    adc1.Init.NbrOfConversion = 1;
+    hadc1.Init.NbrOfConversion = 1;
 #endif
 
     hang_if_bad("HAL_ADC_Init",
-                HAL_ADC_Init(&adc1)
+                HAL_ADC_Init(&hadc1)
                );
 
     ADC_ChannelConfTypeDef adc_channel;
@@ -215,7 +212,7 @@ static void dma_adc_init()
     adc_channel.Rank = ADC_REGULAR_RANK_1;
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
     hang_if_bad("HAL_ADC_ConfigChannel - 1",
-                HAL_ADC_ConfigChannel(&adc1, &adc_channel)
+                HAL_ADC_ConfigChannel(&hadc1, &adc_channel)
                );
 
 #ifdef RS41
@@ -224,7 +221,7 @@ static void dma_adc_init()
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 
     hang_if_bad("HAL_ADC_ConfigChannel - 2",
-                HAL_ADC_ConfigChannel(&adc1, &adc_channel)
+                HAL_ADC_ConfigChannel(&hadc1, &adc_channel)
                );
 #endif
 
@@ -232,20 +229,25 @@ static void dma_adc_init()
 // Not using ADC for button on DFM17
 #endif
 
-    // HAL_ADCEx_Calibration_Start(&adc1);
+    // HAL_ADCEx_Calibration_Start(&hadc1);
 
-    __HAL_LINKDMA(&adc1,DMA_Handle,dma_channel1);
+    __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
 
 #ifdef DFM17
     hang_if_bad("HAL_ADC_Start_DMA",
-                HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 1) 
+                HAL_ADC_Start_DMA(&hadc1, dma_buffer_adc, 1) 
                );
 #endif
 #ifdef RS41
     hang_if_bad("HAL_ADC_Start_DMA",
-                HAL_ADC_Start_DMA(&adc1, dma_buffer_adc, 2) 
+                HAL_ADC_Start_DMA(&hadc1, dma_buffer_adc, 2) 
                );
 #endif
+    //HAL_NVIC_SetPriority(ADC1_IRQn, 1, 0);
+    //HAL_NVIC_EnableIRQ(ADC1_IRQn);
+    //HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+    //HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -413,33 +415,33 @@ void system_init()
 {
     HAL_Init();
 
-    log_info("RCC Init\n");
+    //log_info("RCC Init\n");
     rcc_init();
 
-    log_info("NVIC Init\n");
+    //log_info("NVIC Init\n");
     //nvic_init();
 
-    log_info("GPIO Init\n");
+    //log_info("GPIO Init\n");
     gpio_init();
 
 #ifdef DFM17
     // The millis timer is used for clock calibration on DFM-17 only
     millis_timer_init();
 #endif
-    log_info("Systick init\n");
+    //log_info("Systick init\n");
     system_scheduler_timer_init();
 
-    log_info("DMA Init\n");
+    //log_info("DMA Init\n");
     dma_adc_init();
 
-    log_info("Delay Init\n");
+    //log_info("Delay Init\n");
     delay_init();
 
-    log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
-    log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
-    log_info("SystemCoreClock: %ld\n", SystemCoreClock);
+    //log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
+    //log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
+    //log_info("SystemCoreClock: %ld\n", SystemCoreClock);
 
-    log_info("Configuring SysTick\n");
+    //log_info("Configuring SysTick\n");
     HAL_SYSTICK_Config(SystemCoreClock / 1000U);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0U);
 }
@@ -465,6 +467,10 @@ void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim)
 
 void DMA1_Channel1_IRQHandler(void)
 {
-    HAL_DMA_IRQHandler(&dma_channel1);
+    HAL_DMA_IRQHandler(&hdma_adc1);
 }
 
+void ADC1_IRQHandler(void)
+{
+  HAL_ADC_IRQHandler(&hadc1);
+}

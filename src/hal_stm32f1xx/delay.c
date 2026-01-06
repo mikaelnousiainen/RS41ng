@@ -22,10 +22,9 @@ void delay_init()
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.RepetitionCounter = 0;
 
-    if(HAL_TIM_Base_Init(&htim3) != HAL_OK) {
-        log_info("HAL Timer 3 Init Error\n");
-        return;
-    }
+    hang_if_bad("HAL_TIM_Base_Init",
+               HAL_TIM_Base_Init(&htim3)
+               );
 
     HAL_TIM_Base_Stop_IT(&htim3);
 }

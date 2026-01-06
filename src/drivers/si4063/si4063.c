@@ -205,19 +205,19 @@ static void si4603_set_shutdown(bool active)
 
 static void si4063_set_state(uint8_t state)
 {
-    log_debug("Si4063: Set state %02x\n", state);
+    //log_debug("Si4063: Set state %02x\n", state);
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
 void si4063_enable_tx()
 {
-    log_debug("Si4063: Enable TX\n");
+    //log_debug("Si4063: Enable TX\n");
     si4063_set_state(SI4063_STATE_TX);
 }
 
 void si4063_inhibit_tx()
 {
-    log_debug("Si4063: Inhibit TX\n");
+    //log_debug("Si4063: Inhibit TX\n");
     si4063_set_state(SI4063_STATE_READY);
 }
 
@@ -361,7 +361,7 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     uint32_t f_pfd, n, m;
     float ratio, rest;
 
-    log_debug("Si4063: Set frequency %lu\n", frequency_hz);
+    //log_debug("Si4063: Set frequency %lu\n", frequency_hz);
 
     outdiv = si4063_get_outdiv(frequency_hz);
     band = si4063_get_band(frequency_hz);
@@ -438,7 +438,7 @@ void si4063_set_tx_power(uint8_t power)
             power & 0x7F // Power level from 00..7F
     };
 
-    log_debug("Si4063: Set TX power %02x\n", power);
+    //log_debug("Si4063: Set TX power %02x\n", power);
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
@@ -495,7 +495,7 @@ void si4063_set_modulation_type(si4063_modulation_type type)
             0x08 // 0x08 = Direct modulation source (MCU-controlled)
     };
 
-    log_debug("Si4063: Set modulation type %d\n", type);
+    //log_debug("Si4063: Set modulation type %d\n", type);
 
     switch (type) {
         case SI4063_MODULATION_TYPE_CW:

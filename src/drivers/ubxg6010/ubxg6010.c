@@ -688,7 +688,7 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
         return;
     }
 
-    log_debug("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
+    //log_debug("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
         // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this

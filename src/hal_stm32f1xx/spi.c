@@ -70,12 +70,9 @@ void spi_init()
     hspi.Init.CRCPolynomial = 10;
 #endif
 
-    if (HAL_SPI_Init(&hspi) != HAL_OK) {
-      log_info("HAL_SPI_Init fail\n");
-       while (1);
-    } else {
-      log_info("HAL_SPI_Init successful\n");
-    }
+    hang_if_bad("HAL_SPI_Init",
+              HAL_SPI_Init(&hspi) 
+               );
 }
 
 void spi_uninit()
