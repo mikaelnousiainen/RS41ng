@@ -9,12 +9,13 @@
 
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
-    #include "hal_stm32f1xx/hal.h"
-    #include "hal_stm32f1xx/delay.h"
-    #include "hal_stm32f1xx/spi.h"
 #else
     #error "TODO!"
 #endif
+
+#include "drivers/hal/hal.h"
+#include "drivers/hal/delay.h"
+#include "drivers/hal/spi.h"
 
 #include "si4063.h"
 #include "gpio.h"

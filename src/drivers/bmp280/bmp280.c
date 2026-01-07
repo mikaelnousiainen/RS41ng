@@ -23,11 +23,7 @@
  * THE SOFTWARE.
  */
 
-#ifndef RS41_RSM4x4
-    #include "hal_stm32f1xx/i2c.h"
-#else
-    #include "hal_stm32l4xx/i2c.h"
-#endif
+#include "drivers/hal/i2c.h"
 
 #include "bmp280.h"
 

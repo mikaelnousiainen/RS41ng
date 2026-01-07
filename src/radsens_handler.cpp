@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "drivers/radsens/radsens.h"
 #include "radsens_handler.h"
-#include "hal_stm32f1xx/delay.h"
+#include "drivers/hal/delay.h"
 #include "log.h"
 
 RadSens *radsens = NULL;

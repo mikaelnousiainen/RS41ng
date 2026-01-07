@@ -24,6 +24,7 @@ else ()
 endif ()
 
 add_definitions(-DSTM32F100xB)
+add_definitions(-DSTM32L412xx)
 add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
@@ -45,6 +46,10 @@ include_directories(hal_stm32f1xx/cmsis
     hal_stm32f1xx/cmsis_boot/startup
     hal_stm32f1xx/cmsis_boot
     hal_stm32f1xx/stm_lib/inc
+    hal_stm32l4xx/cmsis
+    hal_stm32l4xx/cmsis_boot/startup
+    hal_stm32l4xx/cmsis_boot
+    hal_stm32l4xx/stm_lib/inc
     ..)
 
 add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_ASM} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})

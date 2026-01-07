@@ -1,8 +1,8 @@
+#include "drivers/hal/spi.h"
+#include "drivers/hal/hal.h"
+#include "drivers/hal/delay.h"
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
-    #include "hal_stm32f1xx/spi.h"
-    #include "hal_stm32f1xx/hal.h"
-    #include "hal_stm32f1xx/delay.h"
 #else
     #error "TODO!"
 #endif

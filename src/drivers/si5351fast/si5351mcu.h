@@ -51,7 +51,7 @@
 #define SI5351MCU_H
 
 #include <cstdint>
-#include "hal_stm32f1xx/i2c.h"
+#include "drivers/hal/i2c.h"
 
 // default I2C address of the Si5351A - other variants may differ
 #define SIADDR 0x60

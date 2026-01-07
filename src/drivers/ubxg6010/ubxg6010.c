@@ -1,13 +1,9 @@
 #include <string.h>
 
-#ifndef RS41_RSM4x4
-    #include "hal_stm32f1xx/system.h"
-    #include "hal_stm32f1xx/usart_gps.h"
-    #include "hal_stm32f1xx/usart_ext.h"
-    #include "hal_stm32f1xx/delay.h"
-#else
-    #error "TODO!"
-#endif
+#include "drivers/hal/system.h"
+#include "drivers/hal/usart_gps.h"
+#include "drivers/hal/usart_ext.h"
+#include "drivers/hal/delay.h"
 
 
 #include "ubxg6010.h"

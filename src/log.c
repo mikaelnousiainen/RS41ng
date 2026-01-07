@@ -1,4 +1,9 @@
-#include <stm32f1xx_hal.h>
+
+#ifndef RS41_RSM4x4
+    #include <stm32f1xx_hal.h>
+#else
+    #include <stm32l4xx_hal.h>
+#endif
 
 #include "log.h"
 

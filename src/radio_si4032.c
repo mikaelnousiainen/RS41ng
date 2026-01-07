@@ -3,11 +3,11 @@
 #ifdef RS41
 #include <string.h>
 
-#include "hal_stm32f1xx/system.h"
-#include "hal_stm32f1xx/spi.h"
-#include "hal_stm32f1xx/pwm.h"
-#include "hal_stm32f1xx/delay.h"
-#include "hal_stm32f1xx/datatimer.h"
+#include "drivers/hal/system.h"
+#include "drivers/hal/spi.h"
+#include "drivers/hal/pwm.h"
+#include "drivers/hal/delay.h"
+#include "drivers/hal/datatimer.h"
 #include "drivers/si4032/si4032.h"
 #include "log.h"
 

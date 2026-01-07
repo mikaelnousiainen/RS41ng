@@ -1,5 +1,5 @@
 #include "telemetry.h"
-#include "hal_stm32f1xx/system.h"
+#include "drivers/hal/system.h"
 #include "drivers/ubxg6010/ubxg6010.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
