@@ -1,4 +1,5 @@
 #include "pulse_counter.h"
+#include "gpio.h"
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
 #else
@@ -16,7 +17,7 @@ void pulse_counter_init(int pin_mode, int edge)
 {
     // Initialize pin PB11 with optional internal pull-up resistor
     GPIO_InitTypeDef gpio_init;
-    gpio_init.Pin = GPIO_PIN_11;
+    gpio_init.Pin = PIN_PULSE;
     gpio_init.Mode = GPIO_MODE_INPUT;
     gpio_init.Pull = (pin_mode == PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP)
                           ? GPIO_PULLUP :
@@ -24,21 +25,21 @@ void pulse_counter_init(int pin_mode, int edge)
                            ? GPIO_PULLDOWN
                            : GPIO_NOPULL);
     gpio_init.Speed = GPIO_SPEED_FREQ_MEDIUM;
-    HAL_GPIO_Init(GPIOB, &gpio_init);
+    HAL_GPIO_Init(BANK_PULSE, &gpio_init);
 
     // PB11 is connected to interrupt line 11, set trigger on the configured edge and enable the interrupt
     EXTI_ConfigTypeDef exti_config;
-    exti_config.Line = EXTI_LINE_11;
+    exti_config.Line = EXTI_LINE_PULSE;
     exti_config.Mode = EXTI_MODE_INTERRUPT;
     exti_config.Trigger = (edge == PULSE_COUNTER_INTERRUPT_EDGE_FALLING)
                              ? EXTI_TRIGGER_FALLING
                              : EXTI_TRIGGER_RISING;
-    exti_config.GPIOSel = EXTI_GPIOB;
+    exti_config.GPIOSel = EXTI_BANK_PULSE;
     HAL_EXTI_SetConfigLine(&hexti, &exti_config);
 
     // PB11 is connected to EXTI_Line11, which has EXTI15_10_IRQn vector. Use priority 0 for now.
-    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
-    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+    HAL_NVIC_SetPriority(EXTI_VECTOR_PULSE, 2, 0);
+    HAL_NVIC_EnableIRQ(EXTI_VECTOR_PULSE);
 }
 
 uint16_t pulse_counter_get_count()
@@ -48,9 +49,9 @@ uint16_t pulse_counter_get_count()
 
 void HAL_EXTI_Callback(void)
 {
-    if (hexti.Line == EXTI_LINE_11)
+    if (hexti.Line == EXTI_LINE_PULSE)
     {
-        __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_11);
+        __HAL_GPIO_EXTI_CLEAR_IT(PIN_PULSE);
         pulse_count = pulse_count + 1;
     }
 }

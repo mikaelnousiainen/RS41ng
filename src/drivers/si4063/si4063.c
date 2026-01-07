@@ -22,21 +22,6 @@
 
 #define SI4063_CLOCK 25600000UL
 
-#define GPIO_SI4063_SDN GPIOC
-#define GPIO_PIN_SI4063_SDN GPIO_PIN_3
-
-#define GPIO_SI4063_NSEL GPIOB
-#define GPIO_PIN_SI4063_NSEL GPIO_PIN_2
-
-#define GPIO_SI4063_SDI GPIOA
-#define GPIO_PIN_SI4063_SDI GPIO_PIN_7
-
-#define GPIO_SI4063_GPIO2 GPIOD
-#define GPIO_PIN_SI4063_GPIO2 GPIO_PIN_0
-
-#define GPIO_SI4063_GPIO3 GPIOA
-#define GPIO_PIN_SI4063_GPIO3 GPIO_PIN_4
-
 #define SI4063_COMMAND_PART_INFO    0x01
 #define SI4063_COMMAND_POWER_UP     0x02
 #define SI4063_COMMAND_SET_PROPERTY 0x11
@@ -100,7 +85,7 @@ uint32_t current_deviation_hz = 0;
 
 static inline void si4063_set_chip_select(bool select)
 {
-    spi_set_chip_select(GPIO_SI4063_NSEL, GPIO_PIN_SI4063_NSEL, select);
+    spi_set_chip_select(BANK_NSEL, PIN_NSEL, select);
 
     // Output enable time, 20ns
     for (uint32_t i = 0; i < 0xFFFF; i++);
@@ -197,9 +182,9 @@ static int si4063_power_up()
 static void si4603_set_shutdown(bool active)
 {
     if (active) {
-        HAL_GPIO_WritePin(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BANK_SDN, PIN_SDN, GPIO_PIN_SET);
     } else {
-        HAL_GPIO_WritePin(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BANK_SDN, PIN_SDN, GPIO_PIN_RESET);
     }
 }
 
@@ -558,9 +543,9 @@ uint16_t si4063_read_part_info()
 inline void si4063_set_direct_mode_pin(bool high)
 {
     if (high) {
-        HAL_GPIO_WritePin(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BANK_SI4063_GPIO3, PIN_SI4063_GPIO3, GPIO_PIN_SET);
     } else {
-        HAL_GPIO_WritePin(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BANK_SI4063_GPIO3, PIN_SI4063_GPIO3, GPIO_PIN_RESET);
     }
 }
 
@@ -769,22 +754,22 @@ int si4063_init()
     GPIO_InitTypeDef gpio_init;
 
     // Si4063 shutdown pin
-    gpio_init.Pin = GPIO_PIN_SI4063_SDN;
+    gpio_init.Pin = PIN_SDN;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIO_SI4063_SDN, &gpio_init);
+    HAL_GPIO_Init(BANK_SDN, &gpio_init);
 
     // Si4063 chip select pin
-    gpio_init.Pin = GPIO_PIN_SI4063_NSEL;
+    gpio_init.Pin = PIN_NSEL;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIO_SI4063_NSEL, &gpio_init);
+    HAL_GPIO_Init(BANK_NSEL, &gpio_init);
 
     // Si4063 GPIO3 pin for direct mode transmission
-    gpio_init.Pin = GPIO_PIN_SI4063_GPIO3;
+    gpio_init.Pin = PIN_SI4063_GPIO3;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIO_SI4063_GPIO3, &gpio_init);
+    HAL_GPIO_Init(BANK_SI4063_GPIO3, &gpio_init);
 
     si4063_set_direct_mode_pin(false);
 
