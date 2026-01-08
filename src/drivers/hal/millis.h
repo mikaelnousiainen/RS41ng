@@ -16,7 +16,7 @@ extern void millis_timer_uninit();
 
 extern uint32_t millis();
 
-void User_TIM7_IRQHandler(TIM_HandleTypeDef *htim);
+void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim);
 
 #endif
 

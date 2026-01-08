@@ -168,8 +168,6 @@ static void gpio_init()
  */
 static void dma_adc_init()
 {
-    int rc;
-
     __HAL_RCC_ADC1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
 
@@ -240,12 +238,12 @@ static void dma_adc_init()
 
 #ifdef DFM17
     hang_if_bad("HAL_ADC_Start_DMA",
-                HAL_ADC_Start_DMA(&hadc1, dma_buffer_adc, 1) 
+                HAL_ADC_Start_DMA(&hadc1, (uint32_t *) dma_buffer_adc, 1) 
                );
 #endif
 #ifdef RS41
     hang_if_bad("HAL_ADC_Start_DMA",
-                HAL_ADC_Start_DMA(&hadc1, dma_buffer_adc, 2) 
+                HAL_ADC_Start_DMA(&hadc1, (uint32_t *) dma_buffer_adc, 2) 
                );
 #endif
     //HAL_NVIC_SetPriority(ADC1_IRQn, 1, 0);

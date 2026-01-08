@@ -1,6 +1,3 @@
-#include "datatimer.h"
-#include "timers.h"
-#include "log.h"
 #include "config.h"
 
 #ifdef RS41_RSM4x4
@@ -8,6 +5,10 @@
 #else
 #include <stm32f1xx_hal.h>
 #endif
+
+#include "datatimer.h"
+#include "timers.h"
+#include "log.h"
 
 
 void (*system_handle_data_timer_tick)() = NULL;

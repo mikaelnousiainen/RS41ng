@@ -20,7 +20,7 @@ void delay_us(uint16_t us);
 
 void delay_ms(uint32_t ms);
 
-void User_TIM3_IRQHandler(TIM_HandleTypeDef *htim);
+void User_TIM1_IRQHandler(TIM_HandleTypeDef *htim);
 
 #ifdef __cplusplus
 }

@@ -32,7 +32,7 @@ void spi_init()
 
     // MISO
     gpio_init.Pin = PIN_MISO;
-    gpio_init.Mode = GPIO_MODE_AF_INPUT;
+    gpio_init.Mode = GPIO_MODE_INPUT;
     gpio_init.Pull = GPIO_NOPULL;
 #ifdef DFM17
     gpio_init.Pull = GPIO_PULLUP;

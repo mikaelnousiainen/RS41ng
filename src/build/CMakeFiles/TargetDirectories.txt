@@ -1,4 +1,0 @@
-/usr/local/src/RS41ng/build/CMakeFiles/RS41ng.elf.dir
-/usr/local/src/RS41ng/build/CMakeFiles/program.dir
-/usr/local/src/RS41ng/build/CMakeFiles/edit_cache.dir
-/usr/local/src/RS41ng/build/CMakeFiles/rebuild_cache.dir
