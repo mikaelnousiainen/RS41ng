@@ -1,12 +1,12 @@
+#include "config.h"
 #include "pulse_counter.h"
 #include "gpio.h"
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
 #else
-    #error "TODO!"
+    #include <stm32l4xx_hal.h>
 #endif
 
-#include "config.h"
 
 EXTI_HandleTypeDef hexti;
 

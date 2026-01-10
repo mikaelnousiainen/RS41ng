@@ -159,7 +159,7 @@ void pwm_timer_pwm_enable(bool enabled)
 
 void pwm_timer_use(bool use)
 {
-#ifdef RS41
+#if defined(RS41) && !defined(RS41_RSM4x4)			// rsm4x4 does this on the GPIO pin in the spi routine directly
     // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
     // which is connected to RS41 Si4032 SDI pin for direct modulation
     if(use)
@@ -183,7 +183,7 @@ void pwm_timer_uninit()
                );
     //HAL_TIM_Base_DeInit(&htim15);
 
-#ifdef RS41
+#if defined(RS41) && !defined(RS41_RSM4x4)                      // rsm4x4 does this on the GPIO pin in the spi routine directly
     __HAL_AFIO_REMAP_TIM15_DISABLE();
 #endif
 

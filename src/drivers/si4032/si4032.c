@@ -4,7 +4,7 @@
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
 #else
-    #error "TODO!"
+    #include <stm32l4xx_hal.h>
 #endif
 
 #include "gpio.h"
@@ -15,9 +15,6 @@
 
 #define SI4032_CLOCK 26.0f
 #define EXPECTED_SI4032_CLOCK 30
-
-#define BANK_MOSI GPIOB
-#define PIN_MOSI GPIO_PIN_15
 
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
@@ -255,7 +252,7 @@ static void si4032_set_nsel_pin(bool high)
 
 void si4032_set_sdi_pin(bool high)
 {
-    HAL_GPIO_WritePin(BANK_MOSI, GPIO_PIN_15, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(BANK_MOSI, PIN_MOSI, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_use_sdi_pin(bool use)
@@ -266,6 +263,9 @@ void si4032_use_sdi_pin(bool use)
     gpio_init.Pin = GPIO_PIN_15;
     gpio_init.Mode = use ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    if (!use) {  // Using the alternate function
+       gpio.Alternate = GPIO_AF14_TIM15;
+    }
     HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 
     si4032_set_sdi_pin(false);

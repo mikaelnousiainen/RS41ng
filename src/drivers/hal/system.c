@@ -30,14 +30,15 @@ static volatile uint32_t systick_counter = 0;
 DMA_HandleTypeDef hdma_adc1;
 ADC_HandleTypeDef hadc1;
 
-static void nvic_init()
-{
-#ifdef  VECT_TAB_RAM
-    SCB->VTOR = SRAM_BASE;
-#else  // VECT_TAB_FLASH
-    SCB->VTOR = FLASH_BASE;
-#endif
-}
+// Removed with LL conversion.  This is not defined in any of our compiles, so this code would never trigger anyway.
+//static void nvic_init()
+//{
+//#ifdef  VECT_TAB_RAM
+    //SCB->VTOR = SRAM_BASE;
+//#else  // VECT_TAB_FLASH
+    //SCB->VTOR = FLASH_BASE;
+//#endif
+//}
 
 // TODO: Find out how to configure watchdog!
 
@@ -104,15 +105,25 @@ static void rcc_init()
 
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+#ifndef RS41_RSM4x4
+  // STM32L412xx does not have a choice here.  Just define it for the non-L4 processors.
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+#endif //RS41_RSM4x4
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 }
 
 static void gpio_init()
 {
+
+#ifndef RS41_RSM4x4
     __HAL_RCC_AFIO_CLK_ENABLE();
     __HAL_RCC_AFIO_FORCE_RESET();
     __HAL_RCC_AFIO_RELEASE_RESET();
+#else // RS41_RSM4x4
+// According to the googles, AFIO has been deprecated for the L4 series:
+	//No SYSCFG Clock Needed for Basic AF: While you might see __HAL_RCC_SYSCFG_CLK_ENABLE(), this is only required for 
+	//external interrupts (EXTI), VREFBUF, or memory remaps—not for standard alternate functions like SPI or UART. 
+#endif
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -168,7 +179,12 @@ static void gpio_init()
  */
 static void dma_adc_init()
 {
+#ifdef RS41_RSM4x4    // L4 processor
+    __HAL_RCC_ADC_CLK_ENABLE();
+#else	// F1 processor
     __HAL_RCC_ADC1_CLK_ENABLE();
+#endif // Clock specific enable
+
     __HAL_RCC_DMA1_CLK_ENABLE();
 
     // HAL_DMA_DeInit(&hdma_adc1);

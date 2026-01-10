@@ -7,10 +7,11 @@
 
 #include <stdbool.h>
 
+#include "config.h"
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>
 #else
-    #error "TODO!"
+    #include <stm32l4xx_hal.h>
 #endif
 
 #include "drivers/hal/hal.h"

@@ -27,10 +27,16 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     HAL_NVIC_DisableIRQ(USART1_IRQn);
     NVIC_ClearPendingIRQ(USART1_IRQn);
     __HAL_UART_DISABLE_IT(&usart1, USART_IT_TC | USART_IT_TXE | USART_IT_RXNE | USART_IT_ERR);
-    if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U)
-    {
+
+#ifdef RS41_RSM4x4   // L4
+    if ((HAL_UART_GetState(&usart1) & USART_CR1_UE) != 0U) {
+        while(__HAL_UART_GET_FLAG(&usart1,USART_ISR_TC) == 0) { __NOP(); }
+    }
+#else // F100
+    if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U) {
         while((usart1.Instance->SR & USART_SR_TC) == 0) { __NOP(); }
     }
+#endif
     __HAL_UART_DISABLE(&usart1);
     HAL_UART_DeInit(&usart1);
 
