@@ -263,9 +263,11 @@ void si4032_use_sdi_pin(bool use)
     gpio_init.Pin = GPIO_PIN_15;
     gpio_init.Mode = use ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+#ifdef RS41_RSM4x4
     if (!use) {  // Using the alternate function
-       gpio.Alternate = GPIO_AF14_TIM15;
+       gpio_init.Alternate = GPIO_AF14_TIM15;
     }
+#endif // RSM4x4
     HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 
     si4032_set_sdi_pin(false);

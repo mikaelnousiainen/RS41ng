@@ -229,7 +229,12 @@ static void dma_adc_init()
     ADC_ChannelConfTypeDef adc_channel;
     adc_channel.Channel = CHANNEL_VOLTAGE;
     adc_channel.Rank = ADC_REGULAR_RANK_1;
+#ifndef RS41_RSM4x4
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+#else // Different constants available on L4
+    adc_channel.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+#endif
+
     hang_if_bad("HAL_ADC_ConfigChannel - 1",
                 HAL_ADC_ConfigChannel(&hadc1, &adc_channel)
                );
@@ -237,7 +242,11 @@ static void dma_adc_init()
 #ifdef RS41
     adc_channel.Channel = CHANNEL_BUTTON;
     adc_channel.Rank = ADC_REGULAR_RANK_2;
+#ifndef RS41_RSM4x4
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+#else // Different constants available on L4
+    adc_channel.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+#endif
 
     hang_if_bad("HAL_ADC_ConfigChannel - 2",
                 HAL_ADC_ConfigChannel(&hadc1, &adc_channel)

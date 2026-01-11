@@ -79,7 +79,11 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 
 void usart_gps_set_baud_rate(uint32_t baud_rate) {
     __HAL_UART_DISABLE(&usart1);
+#ifndef RS41_RSM4x4
     usart1.Instance->BRR = UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), baud_rate);
+#else // Calculated differently for L4
+    usart1.Instance->BRR = (uint32_t) HAL_RCC_GetPCLK2Freq() / baud_rate;
+#endif // RSM4x4
     __HAL_UART_ENABLE(&usart1);
 }
 
