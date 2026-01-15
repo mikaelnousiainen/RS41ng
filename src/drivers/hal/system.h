@@ -30,7 +30,7 @@ uint16_t system_get_button_adc_value();
 
 extern void (*system_handle_timer_tick)();
 
-void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim);
+void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim);
 
 void DMA1_Channel1_IRQHandler(void);
 

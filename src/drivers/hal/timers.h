@@ -12,8 +12,7 @@
 
 extern TIM_HandleTypeDef htim2; // Data timer
 extern TIM_HandleTypeDef htim1; // Delay() timer
-extern TIM_HandleTypeDef htim4; // System scheduler timer
-extern TIM_HandleTypeDef htim6; // Millisecond counter timer
+extern TIM_HandleTypeDef htim6; // System scheduler timer
 extern TIM_HandleTypeDef htim15; // PWM timer
 
 #endif

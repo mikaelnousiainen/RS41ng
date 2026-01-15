@@ -13,7 +13,6 @@
 #include "delay.h"
 #include "log.h"
 #include "gpio.h"
-#include "millis.h"
 
 #define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND
 
@@ -355,49 +354,49 @@ void system_scheduler_timer_init()
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
 
-    // HAL_TIM_Base_DeInit(&htim4);
+    // HAL_TIM_Base_DeInit(&htim6);
 
-    __TIM4_CLK_ENABLE();
+    __TIM6_CLK_ENABLE();
 
     // The data timer assumes a 24 MHz clock source
-    htim4.Instance = TIM4;
-    htim4.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
-    htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim4.Init.Period = 100 - 1; // update every 1/10000 s
-    htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim4.Init.RepetitionCounter = 0;
-    htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    htim6.Instance = TIM6;
+    htim6.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
+    htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim6.Init.Period = 100 - 1; // update every 1/10000 s
+    htim6.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim6.Init.RepetitionCounter = 0;
+    htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 
     hang_if_bad("HAL_TIM_Base_Init",
-                HAL_TIM_Base_Init(&htim4)
+                HAL_TIM_Base_Init(&htim6)
                );
 
-     __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
-     __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
+     __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+     __HAL_TIM_ENABLE_IT(&htim6, TIM_IT_UPDATE);
 
-    HAL_TIM_RegisterCallback(&htim4, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM4_IRQHandler);
+    HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, User_TIM6_IRQHandler);
 
     hang_if_bad("HAL_TIM_Base_Start_IT",
-                HAL_TIM_Base_Start_IT(&htim4)
+                HAL_TIM_Base_Start_IT(&htim6)
                );
-    HAL_NVIC_SetPriority(TIM4_IRQn, 3, 3);
-    HAL_NVIC_EnableIRQ(TIM4_IRQn);
+    HAL_NVIC_SetPriority(TIM6_IRQn, 3, 3);
+    HAL_NVIC_EnableIRQ(TIM6_IRQn);
 }
 
 void system_disable_tick()
 {
-    HAL_TIM_Base_Stop_IT(&htim4);
-    HAL_NVIC_DisableIRQ(TIM4_IRQn);
-    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
-    __HAL_TIM_DISABLE_IT(&htim4, TIM_IT_UPDATE);
+    HAL_TIM_Base_Stop_IT(&htim6);
+    HAL_NVIC_DisableIRQ(TIM6_IRQn);
+    __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+    __HAL_TIM_DISABLE_IT(&htim6, TIM_IT_UPDATE);
 }
 
 void system_enable_tick()
 {
-    __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
-    __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE);
-    HAL_TIM_Base_Start_IT(&htim4);
-    HAL_NVIC_EnableIRQ(TIM4_IRQn);
+    __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
+    __HAL_TIM_ENABLE_IT(&htim6, TIM_IT_UPDATE);
+    HAL_TIM_Base_Start_IT(&htim6);
+    HAL_NVIC_EnableIRQ(TIM6_IRQn);
 }
 
 void system_set_green_led(bool enabled)
@@ -452,10 +451,6 @@ void system_init()
     //log_info("GPIO Init\n");
     gpio_init();
 
-#ifdef DFM17
-    // The millis timer is used for clock calibration on DFM-17 only
-    millis_timer_init();
-#endif
     //log_info("Systick init\n");
     system_scheduler_timer_init();
 
@@ -479,13 +474,13 @@ void SysTick_Handler(void)
     HAL_IncTick();
 }
 
-// Provide our own stub that just calls the standard HAL IRQ Handler.  It will call our PeriodElapsedCallback routine  - User_TIM4_IRQHandler
-extern void TIM4_IRQHandler()
+// Provide our own stub that just calls the standard HAL IRQ Handler.  It will call our PeriodElapsedCallback routine  - User_TIM6_IRQHandler
+extern void TIM6_IRQHandler()
 {
-    HAL_TIM_IRQHandler(&htim4);
+    HAL_TIM_IRQHandler(&htim6);
 }
 
-void User_TIM4_IRQHandler(TIM_HandleTypeDef *htim)
+void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim)
 {
         system_handle_timer_tick();
 #if ALLOW_POWER_OFF

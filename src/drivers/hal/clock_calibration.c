@@ -5,7 +5,6 @@
 #include <stm32f1xx_hal.h>
 #include "misc.h"
 #include "system.h"
-#include "millis.h"
 #include "clock_calibration.h"
 
 // The HSI (internal oscillator) trim register mask, copied from stm_lib/src/stm32f10x_rcc.c
@@ -100,7 +99,7 @@ void timepulse_init()
 
 void EXTI9_5_IRQHandler(void)
 {
-    uint32_t current_millis = millis();
+    uint32_t current_millis = Hal_GetTick();
 
     EXTI_ClearITPendingBit(EXTI_Line8);
 

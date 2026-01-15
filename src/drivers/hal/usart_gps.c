@@ -121,7 +121,11 @@ void usart_gps_enable(bool enabled)
 void usart_gps_send_byte(uint8_t data)
 {
     while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TXE)) == RESET) {}
+#ifdef RS41_RSM4x4
+    usart1.Instance->RDR = data;
+#else
     usart1.Instance->DR = data;
+#endif
     // optional: wait for TC if absolutely needed
     while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TC)) == RESET) {}
 }
