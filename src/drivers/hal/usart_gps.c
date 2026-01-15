@@ -130,6 +130,31 @@ void usart_gps_send_byte(uint8_t data)
     while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TC)) == RESET) {}
 }
 
+#ifdef RS41_RSM4x4
+void USART1_IRQHandler(UART_HandleTypeDef *huart)
+{
+    uint32_t isr = READ_REG(usart1.Instance->ISR);
+
+    /* Overrun error: clear by reading SR then DR (we already read SR) */
+    if (isr & USART_ISR_ORE) 
+    {
+        volatile uint32_t tmp = usart1.Instance->RDR; (void)tmp; // read RDR to clear ORE
+        // log_info("ORE\n");
+        return;
+    }
+
+    /* RX not empty */
+    if (isr & USART_ISR_RXNE) 
+    {
+        uint8_t byte = (uint8_t)(READ_REG(usart1.Instance->RDR) & 0xFF); // reading DR clears RXNE
+        if(usart_gps_handle_incoming_byte) 
+        {
+            usart_gps_handle_incoming_byte(byte);
+        }
+        return;
+    }
+}
+#else
 void USART1_IRQHandler(UART_HandleTypeDef *huart)
 {
     uint32_t sr = READ_REG(usart1.Instance->SR);
@@ -153,3 +178,4 @@ void USART1_IRQHandler(UART_HandleTypeDef *huart)
         return;
     }
 }
+#endif
