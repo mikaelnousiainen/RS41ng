@@ -64,7 +64,9 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     usart1.Init.StopBits = UART_STOPBITS_1;
     usart1.Init.Parity = UART_PARITY_NONE;
     usart1.Init.Mode = USART_MODE_TX_RX; // Enable only transmit for now | USART_Mode_Rx;
-    HAL_UART_Init(&usart1);
+    if (HAL_UART_Init(&usart1) != HAL_OK) {
+      log_info("HAL_UART_INIT fail\n");
+    }
 
     HAL_NVIC_SetPriority(USART1_IRQn, 1, 2);
 
@@ -154,7 +156,7 @@ void USART1_IRQHandler(UART_HandleTypeDef *huart)
         return;
     }
 }
-#else
+#else // stm32f1xx
 void USART1_IRQHandler(UART_HandleTypeDef *huart)
 {
     uint32_t sr = READ_REG(usart1.Instance->SR);

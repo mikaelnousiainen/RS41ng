@@ -47,7 +47,7 @@ static void rcc_init()
 
 #ifdef RS41
 #ifdef RS41_RSM4x4
-   log_info("PWREx\n");
+   //log_info("PWREx\n");
    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
      while(1);
    }
@@ -58,7 +58,7 @@ static void rcc_init()
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
 
-   log_info("OscC\n");
+    //log_info("OscC\n");
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
       while(1);
     }
@@ -91,7 +91,7 @@ static void rcc_init()
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
 #ifdef RS41_RSM4x4
    log_info("RCC_Clock\n");
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
       while(1);
     }
 #else // RS41
@@ -104,31 +104,30 @@ static void rcc_init()
     // Use the 24 MHz PLL as SYSCLK
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-#endif
+#endif //DFM17
 
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
 #ifndef RS41_RSM4x4
-  // STM32L412xx does not have a choice here.  Just define it for the non-L4 processors.
+  // STM32L412xx does not have this AdcClockSelecdtion option.  Just define it for the non-L4 processors.
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
 #endif //RS41_RSM4x4
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
-}
-
-static void gpio_init()
-{
 
 #ifndef RS41_RSM4x4
     __HAL_RCC_AFIO_CLK_ENABLE();
     __HAL_RCC_AFIO_FORCE_RESET();
     __HAL_RCC_AFIO_RELEASE_RESET();
+    __HAL_RCC_PWR_CLK_ENABLE();
 #else // RS41_RSM4x4
-// According to the googles, AFIO has been deprecated for the L4 series:
-	//No SYSCFG Clock Needed for Basic AF: While you might see __HAL_RCC_SYSCFG_CLK_ENABLE(), this is only required for 
-	//external interrupts (EXTI), VREFBUF, or memory remaps—not for standard alternate functions like SPI or UART. 
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    __HAL_RCC_PWR_CLK_ENABLE();
 #endif
+}
 
-    log_info("Starting clocks\n");
+static void gpio_init()
+{
+    //log_info("Starting GPIO clocks\n");
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -137,7 +136,7 @@ static void gpio_init()
     GPIO_InitTypeDef gpio_init = {0};
 
     // Shutdown request
-    log_info("shutdown pin\n");
+    //log_info("shutdown pin\n");
     gpio_init.Pin = PIN_SHUTDOWN;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -147,28 +146,28 @@ static void gpio_init()
 #endif
 
     // Battery voltage (analog)
-    log_info("battery pin\n");
+    //log_info("battery pin\n");
     gpio_init.Pin = PIN_VOLTAGE;
     gpio_init.Mode = GPIO_MODE_ANALOG;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_VOLTAGE, &gpio_init);
 
     // Button state (analog)
-    log_info("button pin\n");
+    //log_info("button pin\n");
     gpio_init.Pin = PIN_BUTTON;
     gpio_init.Mode = GPIO_MODE_ANALOG;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_BUTTON, &gpio_init);
 
     // Green LED
-    log_info("green pin\n");
+    //log_info("green pin\n");
     gpio_init.Pin = PIN_GREEN_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(BANK_GREEN_LED, &gpio_init);
 
     // Red LED
-    log_info("red pin\n");
+    //log_info("red pin\n");
     gpio_init.Pin = PIN_RED_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -176,7 +175,7 @@ static void gpio_init()
 
 #ifdef DFM17
     // Yellow LED (only in DFM-17)
-    log_info("yellow pin\n");
+    //log_info("yellow pin\n");
     gpio_init.Pin = PIN_YELLOW_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;

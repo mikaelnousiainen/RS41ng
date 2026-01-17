@@ -119,7 +119,7 @@ int main(void)
     spi_init();
 
     gps_init:
-    //log_info("GPS init\n");
+    log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {
         log_error("GPS initialization failed, retrying...\n");
