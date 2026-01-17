@@ -43,22 +43,26 @@ ADC_HandleTypeDef hadc1;
 
 static void rcc_init()
 {
-    // HAL_RCC_DeInit();
-
-    RCC_OscInitTypeDef RCC_OscInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 
 #ifdef RS41
+#ifdef RS41_RSM4x4
+   log_info("PWREx\n");
+   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
+     while(1);
+   }
+#endif //RS41_RSM4x4
     // The RS41 hardware uses an external clock at 24 MHz
 
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
 
-    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+   log_info("OscC\n");
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+      while(1);
+    }
 
-    // If HSE fails to start up, the application will have incorrect clock configuration.
-    //while (!__HAL_RCC_GET_FLAG(RCC_FLAG_HSERDY));
-    
 #endif
 #ifdef DFM17
     // The DFM17 hardware uses the internal clock
@@ -71,19 +75,12 @@ static void rcc_init()
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
     RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
 
-    HAL_RCC_OscConfig(&RCC_OscInitStruct);
-
-    // while (!__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY));
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+      while(1);
+    }
 #endif
 
-    //SystemInit();
-
-    // FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable);
-    // FLASH_SetLatency(FLASH_Latency_0);
-
-    // TODO: Check what the delay timer TIM3 settings really should be and WTF the clock tick really is!?!?!?
-
-    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
@@ -92,14 +89,21 @@ static void rcc_init()
 #ifdef RS41
     // Use the 24 MHz external clock as SYSCLK
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
-    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    // while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x04);
-#endif
+#ifdef RS41_RSM4x4
+   log_info("RCC_Clock\n");
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+      while(1);
+    }
+#else // RS41
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+      while(1);
+    }
+#endif //RS41_RSM4x4
+#endif // RS41
 #ifdef DFM17
     // Use the 24 MHz PLL as SYSCLK
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-    // while (__HAL_RCC_GET_SYSCLK_SOURCE() != 0x08);
 #endif
 
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
@@ -124,13 +128,16 @@ static void gpio_init()
 	//external interrupts (EXTI), VREFBUF, or memory remaps—not for standard alternate functions like SPI or UART. 
 #endif
 
+    log_info("Starting clocks\n");
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
 
-    GPIO_InitTypeDef gpio_init;
+    GPIO_InitTypeDef gpio_init = {0};
 
     // Shutdown request
+    log_info("shutdown pin\n");
     gpio_init.Pin = PIN_SHUTDOWN;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -140,24 +147,28 @@ static void gpio_init()
 #endif
 
     // Battery voltage (analog)
+    log_info("battery pin\n");
     gpio_init.Pin = PIN_VOLTAGE;
     gpio_init.Mode = GPIO_MODE_ANALOG;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_VOLTAGE, &gpio_init);
 
     // Button state (analog)
+    log_info("button pin\n");
     gpio_init.Pin = PIN_BUTTON;
     gpio_init.Mode = GPIO_MODE_ANALOG;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_BUTTON, &gpio_init);
 
     // Green LED
+    log_info("green pin\n");
     gpio_init.Pin = PIN_GREEN_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(BANK_GREEN_LED, &gpio_init);
 
     // Red LED
+    log_info("red pin\n");
     gpio_init.Pin = PIN_RED_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -165,6 +176,7 @@ static void gpio_init()
 
 #ifdef DFM17
     // Yellow LED (only in DFM-17)
+    log_info("yellow pin\n");
     gpio_init.Pin = PIN_YELLOW_LED;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -442,29 +454,26 @@ void system_init()
 {
     HAL_Init();
 
-    //log_info("RCC Init\n");
+    log_info("RCC Init\n");
     rcc_init();
 
-    //log_info("NVIC Init\n");
-    //nvic_init();
-
-    //log_info("GPIO Init\n");
+    log_info("GPIO Init\n");
     gpio_init();
 
-    //log_info("Systick init\n");
+    log_info("Systick init\n");
     system_scheduler_timer_init();
 
-    //log_info("DMA Init\n");
+    log_info("DMA Init\n");
     dma_adc_init();
 
-    //log_info("Delay Init\n");
+    log_info("Delay Init\n");
     delay_init();
 
-    //log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
-    //log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
-    //log_info("SystemCoreClock: %ld\n", SystemCoreClock);
+    log_info("HCLK: %ld\n", HAL_RCC_GetHCLKFreq());
+    log_info("SYSCLK: %ld\n", HAL_RCC_GetSysClockFreq());
+    log_info("SystemCoreClock: %ld\n", SystemCoreClock);
 
-    //log_info("Configuring SysTick\n");
+    log_info("Configuring SysTick\n");
     HAL_SYSTICK_Config(SystemCoreClock / 1000U);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0U);
 }

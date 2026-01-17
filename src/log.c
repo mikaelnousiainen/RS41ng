@@ -1,3 +1,4 @@
+#include "config.h"
 
 #ifndef RS41_RSM4x4
     #include <stm32f1xx_hal.h>

@@ -235,7 +235,7 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
 
     int err = si4032_wait_for_tx_complete(500);
     if (err != HAL_OK) {
-        log_info("Error waiting for tx complete: %d\n", err);
+        //log_info("Error waiting for tx complete: %d\n", err);
     }
 
     //log_debug("Finished FIFO TX\n");
@@ -420,7 +420,7 @@ uint16_t radio_si4032_handle_pwm_transfer_half(uint16_t buffer_size, uint16_t *b
         return 0;
     }
     if (radio_shared_state.radio_transmission_finished) {
-        log_info("Should not be here, half-transfer!\n");
+        //log_info("Should not be here, half-transfer!\n");
     }
 
     uint16_t length = radio_si4032_fill_pwm_buffer(0, buffer_size / 2, buffer);
@@ -437,7 +437,7 @@ uint16_t radio_si4032_handle_pwm_transfer_full(uint16_t buffer_size, uint16_t *b
         return 0;
     }
     if (radio_shared_state.radio_transmission_finished) {
-        log_info("Should not be here, transfer complete!\n");
+        //log_info("Should not be here, transfer complete!\n");
     }
 
     uint16_t length = radio_si4032_fill_pwm_buffer(buffer_size / 2, buffer_size / 2, buffer);

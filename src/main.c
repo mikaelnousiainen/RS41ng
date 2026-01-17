@@ -95,31 +95,31 @@ int main(void)
     system_handle_data_timer_tick = radio_handle_data_timer_tick;
     usart_gps_handle_incoming_byte = ubxg6010_handle_incoming_byte;
 
-    log_info("System init\n");
+    //log_info("System init\n");
     system_init();
 
     set_green_led(false);
     set_red_led(true);
 
     if (gps_nmea_output_enabled) {
-        log_info("External USART init\n");
+        //log_info("External USART init\n");
         usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
     } else if (pulse_counter_enabled) {
-        log_info("Pulse counter init\n");
+        //log_info("Pulse counter init\n");
         pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
     } else {
 #ifdef RS41
         // Only RS41 uses the I2C bus
-        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+        //log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
         i2c_init(I2C_BUS_CLOCK_SPEED);
 #endif
     }
 
-    log_info("SPI init\n");
+    //log_info("SPI init\n");
     spi_init();
 
     gps_init:
-    log_info("GPS init\n");
+    //log_info("GPS init\n");
     success = ubxg6010_init();
     if (!success) {
         log_error("GPS initialization failed, retrying...\n");
@@ -133,7 +133,7 @@ int main(void)
 #endif
 
 #if defined(RS41)
-    log_info("Si4032 init\n");
+    //log_info("Si4032 init\n");
     si4032_init();
 #elif defined(DFM17)
     log_info("Si4063 init\n");
@@ -142,7 +142,7 @@ int main(void)
 
 #if SENSOR_BMP280_ENABLE
     for (int i = 0; i < 3; i++) {
-        log_info("BMP280 init\n");
+        //log_info("BMP280 init\n");
         success = bmp280_handler_init();
         if (success) {
             break;
@@ -153,7 +153,7 @@ int main(void)
 
 #if SENSOR_RADSENS_ENABLE
     for (int i = 0; i < 3; i++) {
-        log_info("RadSens init\n");
+        //log_info("RadSens init\n");
         success = radsens_handler_init();
         if (success) {
             break;
@@ -164,7 +164,7 @@ int main(void)
 
 #if RADIO_SI5351_ENABLE
     for (int i = 0; i < 3; i++) {
-        log_info("Si5351 init\n");
+        //log_info("Si5351 init\n");
         success = si5351_handler_init();
         if (success) {
             break;
@@ -173,7 +173,7 @@ int main(void)
     }
 #endif
 
-    log_info("Radio module init\n");
+    //log_info("Radio module init\n");
     radio_init();
 
     delay_ms(100);

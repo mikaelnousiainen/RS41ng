@@ -24,11 +24,12 @@ else ()
 endif ()
 
 add_definitions(-DSTM32F100xB)
-add_definitions(-DSTM32L412xx)
+#add_definitions(-DSTM32L412xx)
 add_definitions(-DSUPPORT_CPLUSPLUS)
 add_definitions(-D__ASSEMBLY__)
 
 SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
+#SET(LINKER_SCRIPT STM32L412RBTX_FLASH.ld)
 SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
 SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
