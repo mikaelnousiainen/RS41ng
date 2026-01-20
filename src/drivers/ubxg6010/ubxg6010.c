@@ -10,7 +10,11 @@
 #include "log.h"
 #include "config.h"
 
+#ifdef RS41_RSM4x4
+#define GPS_INITIAL_BAUD_RATE 38400
+#else // DMF or RSM4x2
 #define GPS_INITIAL_BAUD_RATE 9600
+#endif // initial GPS baud rate
 
 typedef struct __attribute__((packed)) {
     uint8_t sc1; // 0xB5
@@ -555,7 +559,7 @@ bool ubxg6010_init()
     usart_gps_set_baud_rate(GPS_SERIAL_PORT_BAUD_RATE);
     delay_ms(100);
 
-    log_info("GPS: Setting GPS chip power mode\n");
+    log_info("GPS: Setting GPS chip power mode.  ints=%ld\n",gps_ints);
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgrxm);
     if (!success) {
         return false;

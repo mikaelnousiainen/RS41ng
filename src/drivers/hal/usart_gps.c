@@ -11,6 +11,8 @@
 #include "gpio.h"
 #include "log.h"
 
+volatile uint32_t gps_ints = 0;
+
 void (*usart_gps_handle_incoming_byte)(uint8_t data) = NULL;
 
 UART_HandleTypeDef usart1;
@@ -42,15 +44,33 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 
     // USART TX
     gpio_init.Pin = PIN_USART_TX;
-    gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+#ifdef RS41_RSM4x4
+    gpio_init.Alternate = GPIO_AF7_USART1;
+#endif //RS41_RSM4x4
     HAL_GPIO_Init(BANK_USART_TX, &gpio_init);
 
     // USART RX
     gpio_init.Pin = PIN_USART_RX;
-    gpio_init.Mode = GPIO_MODE_INPUT;
     gpio_init.Pull = GPIO_NOPULL;
+    gpio_init.Mode = GPIO_MODE_INPUT;
+#ifdef RS41_RSM4x4
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Alternate = GPIO_AF7_USART1;
+#endif //RS41_RSM4x4
     HAL_GPIO_Init(BANK_USART_RX, &gpio_init);
+
+#ifdef RS41  // both models of RS41 have a GPS power pin.  Unclear whether it's needed.
+    // USART PWR
+    gpio_init.Pin = PIN_USART_PWR;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(BANK_USART_PWR, &gpio_init);
+
+    // Enable GPS
+    HAL_GPIO_WritePin(BANK_USART_PWR, PIN_USART_PWR, GPIO_PIN_SET);
+#endif //RS41 power pin
 
     HAL_NVIC_DisableIRQ(USART1_IRQn);
     NVIC_ClearPendingIRQ(USART1_IRQn);
@@ -64,6 +84,11 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     usart1.Init.StopBits = UART_STOPBITS_1;
     usart1.Init.Parity = UART_PARITY_NONE;
     usart1.Init.Mode = USART_MODE_TX_RX; // Enable only transmit for now | USART_Mode_Rx;
+    usart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    usart1.Init.OverSampling = UART_OVERSAMPLING_16;
+    usart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+    usart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+
     if (HAL_UART_Init(&usart1) != HAL_OK) {
       log_info("HAL_UART_INIT fail\n");
     }
@@ -80,11 +105,12 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 }
 
 void usart_gps_set_baud_rate(uint32_t baud_rate) {
+    //log_info("Setting baud to %ld, clock freq is %ld\n",(uint32_t) baud_rate,(uint32_t) HAL_RCC_GetPCLK2Freq());
     __HAL_UART_DISABLE(&usart1);
 #ifndef RS41_RSM4x4
     usart1.Instance->BRR = UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), baud_rate);
 #else // Calculated differently for L4
-    usart1.Instance->BRR = (uint32_t) HAL_RCC_GetPCLK2Freq() / baud_rate;
+    usart1.Instance->BRR = (uint32_t) (HAL_RCC_GetPCLK2Freq() / baud_rate);
 #endif // RSM4x4
     __HAL_UART_ENABLE(&usart1);
 }
@@ -108,6 +134,12 @@ void usart_gps_uninit()
     HAL_UART_DeInit(&usart1);
     NVIC_ClearPendingIRQ(USART1_IRQn);
     __HAL_RCC_USART1_CLK_DISABLE();
+
+#ifdef RS41  // both models of RS41 have a GPS power pin
+    // Disable GPS
+    HAL_GPIO_WritePin(BANK_USART_PWR, PIN_USART_PWR, GPIO_PIN_RESET);
+#endif //RS41 power pin
+
 }
 
 void usart_gps_enable(bool enabled)
@@ -135,6 +167,7 @@ void usart_gps_send_byte(uint8_t data)
 #ifdef RS41_RSM4x4
 void USART1_IRQHandler(UART_HandleTypeDef *huart)
 {
+    gps_ints++;		// Bump the global counter
     uint32_t isr = READ_REG(usart1.Instance->ISR);
 
     /* Overrun error: clear by reading SR then DR (we already read SR) */
@@ -159,6 +192,7 @@ void USART1_IRQHandler(UART_HandleTypeDef *huart)
 #else // stm32f1xx
 void USART1_IRQHandler(UART_HandleTypeDef *huart)
 {
+    gps_ints++;		// Bump the global counter
     uint32_t sr = READ_REG(usart1.Instance->SR);
 
     /* Overrun error: clear by reading SR then DR (we already read SR) */
