@@ -10,6 +10,7 @@
 #include "usart_gps.h"
 #include "gpio.h"
 #include "log.h"
+#include "delay.h"
 
 volatile uint32_t gps_ints = 0;
 
@@ -105,7 +106,8 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 }
 
 void usart_gps_set_baud_rate(uint32_t baud_rate) {
-    //log_info("Setting baud to %ld, clock freq is %ld\n",(uint32_t) baud_rate,(uint32_t) HAL_RCC_GetPCLK2Freq());
+    log_info("Setting baud to %ld, clock freq is %ld\n",(uint32_t) baud_rate,(uint32_t) HAL_RCC_GetPCLK2Freq());
+    delay_ms(1000);
     __HAL_UART_DISABLE(&usart1);
 #ifndef RS41_RSM4x4
     usart1.Instance->BRR = UART_BRR_SAMPLING16(HAL_RCC_GetPCLK2Freq(), baud_rate);
@@ -156,7 +158,7 @@ void usart_gps_send_byte(uint8_t data)
 {
     while ((__HAL_UART_GET_FLAG(&usart1, USART_FLAG_TXE)) == RESET) {}
 #ifdef RS41_RSM4x4
-    usart1.Instance->RDR = data;
+    usart1.Instance->TDR = data;
 #else
     usart1.Instance->DR = data;
 #endif

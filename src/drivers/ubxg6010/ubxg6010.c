@@ -537,6 +537,7 @@ bool ubxg6010_init()
     usart_gps_set_baud_rate(GPS_INITIAL_BAUD_RATE);
     delay_ms(100);
     
+  delay_ms(1000);
     log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
@@ -548,6 +549,7 @@ bool ubxg6010_init()
     }
 
     log_info("GPS: Configuring GPS chip I/O port settings\n");
+  delay_ms(1000);
     if (gps_nmea_output_enabled) {
         // Enable both UBX and NMEA protocols
         msgcfgprt.data.cfgprt.outProtoMask = 0x03;
