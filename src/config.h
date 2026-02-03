@@ -45,7 +45,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+#define RADIO_POST_TRANSMIT_DELAY_MS 0
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
