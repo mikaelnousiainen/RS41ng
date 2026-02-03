@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include <string.h>
 #include "codecs/horus/horus_packet_v3.h"
 #include "codecs/horus/horus_l2.h"
 #include "config.h"
@@ -14,13 +14,15 @@
 
 uint16_t radio_horus_v3_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data, char *message)
 {
-    horusTelemetry horus_packet;
+    char buffer[HORUS_UNCODED_BUFFER_SIZE];
 
-    size_t packet_length = horus_packet_v3_create((uint8_t *) &horus_packet, telemetry_data);
+    memset(buffer, 0, HORUS_UNCODED_BUFFER_SIZE);
+
+    size_t packet_length = horus_packet_v3_create((uint8_t *) &buffer, telemetry_data);
 
 #ifdef SEMIHOSTING_ENABLE
     log_info("Horus V3 packet: ");
-    log_bytes_hex((int) packet_length, (char *) &horus_packet);
+    log_bytes_hex((int) packet_length, (char *) &buffer);
     log_info("\n");
 #endif
 
@@ -32,7 +34,7 @@ uint16_t radio_horus_v3_encode(uint8_t *payload, uint16_t length, telemetry_data
     // Encode the packet, and write into the mfsk buffer.
     int encoded_length = horus_l2_encode_tx_packet(
             (unsigned char *) payload + HORUS_V3_PREAMBLE_LENGTH,
-            (unsigned char *) &horus_packet, (int) packet_length);
+            (unsigned char *) &buffer, (int) packet_length);
 
     return encoded_length + HORUS_V3_PREAMBLE_LENGTH;
 }

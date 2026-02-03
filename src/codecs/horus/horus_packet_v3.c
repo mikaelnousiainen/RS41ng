@@ -11,10 +11,6 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     // of sizes 32, 48, 64, 96 or 128 bytes (before coding)
     // The CRC16 for these packets is located at the *start* of the packet, still little-endian encoded
 
-    // Erase the uncoded buffer
-    // This has the effect of padding out the unused bytes in the packet with zeros
-    memset(payload, 0, HORUS_UNCODED_BUFFER_SIZE);
-
     // Increment packet count
     horus_v3_packet_counter++;
 
@@ -154,10 +150,10 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         // Not at this error helps that much in a flight, but it helps
         // us when debugging!   
         if(errCode > 0) {
-            log_error("[error]: HORUS v3 Encoding Failed: %i", errCode);
+            log_error("[error]: HORUS v3 Encoding Failed: %i\n", errCode);
         }
         if(assert_value != 0){
-            log_error("[error]: HORUS v3 Assert Failure, maybe hit buffer size limit");
+            log_error("[error]: HORUS v3 Assert Failure, maybe hit buffer size limit\n");
         }
         // Need to check what happens here.
         return 0;
@@ -187,7 +183,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         // Write CRC into bytes 0–1 of the packet
         memcpy(payload, &packetCrc, sizeof(packetCrc));  // little‑endian on STM32
 
-        log_info("HORUS v3 ASN1: %i Frame: %i", encodedSize, frameSize);
+        log_info("HORUS v3 ASN1: %i Frame: %i\n", encodedSize, frameSize);
 
         return frameSize;
     }

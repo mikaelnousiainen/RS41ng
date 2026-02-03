@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-#define RS41
+// #define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -20,8 +20,8 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-#define SEMIHOSTING_ENABLE
-#define LOGGING_ENABLE
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
 
 /**
  * Global configuration
@@ -178,7 +178,7 @@
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
 // The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI4032_TX_CW true
+#define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
@@ -187,7 +187,7 @@
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 false
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 5
 #define RADIO_SI4032_TX_HORUS_V3 true
 #define RADIO_SI4032_TX_HORUS_V3_COUNT 5
 #define RADIO_SI4032_TX_CATS false
@@ -198,7 +198,7 @@
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS false
+#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS true
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432300000
@@ -220,7 +220,7 @@
 
 // Which modes to transmit using the built-in Si4063 transmitter chip
 // The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI4063_TX_CW true
+#define RADIO_SI4063_TX_CW false
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
@@ -229,7 +229,7 @@
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 false
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 5
 #define RADIO_SI4063_TX_HORUS_V3 true
 #define RADIO_SI4063_TX_HORUS_V3_COUNT 5
 #define RADIO_SI4063_TX_CATS false
@@ -240,7 +240,7 @@
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS false
+#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS true
 
 // Transmit frequencies for the Si4063 transmitter modes
 #define RADIO_SI4063_TX_FREQUENCY_CW        432500000
