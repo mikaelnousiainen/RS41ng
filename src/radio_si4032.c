@@ -72,7 +72,8 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             }
             break;
         case RADIO_DATA_MODE_HORUS_V1:
-        case RADIO_DATA_MODE_HORUS_V2: {
+        case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
             frequency_offset = (uint16_t) idle_tone->index + HORUS_FREQUENCY_OFFSET_SI4032;
             // Report from Mark VK5QI: https://github.com/mikaelnousiainen/RS41ng/issues/49
@@ -137,6 +138,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             break;
@@ -304,7 +306,8 @@ inline void radio_handle_data_timer_si4032()
             break;
         }
         case RADIO_DATA_MODE_HORUS_V1:
-        case RADIO_DATA_MODE_HORUS_V2: {
+        case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
             fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
             int8_t tone_index;
@@ -342,6 +345,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
         case RADIO_DATA_MODE_RTTY:
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             data_timer_uninit();
             break;
         case RADIO_DATA_MODE_APRS_1200:
@@ -374,6 +378,7 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             system_enable_tick();
             break;
         default:
