@@ -5,6 +5,8 @@
 #include "log.h"
 
 volatile uint16_t horus_v3_packet_counter = 0;
+static horusTelemetry asnMessage;
+static BitStream encodedMessage;
 
 size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     // Horus v3 packets are encoded using ASN1, and are encapsulated in packets
@@ -14,20 +16,23 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     // Increment packet count
     horus_v3_packet_counter++;
 
-    gps_data *gps_data = &data->gps;
 
-    horusTelemetry asnMessage = {
+    uint32_t velocity_horizontal = (data->gps.ground_speed_cm_per_second * 36) / 1000;
+
+    memset(&asnMessage, 0, sizeof(asnMessage));
+
+    asnMessage = (horusTelemetry){
         .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN,
         .sequenceNumber = horus_v3_packet_counter,
-        .timeOfDaySeconds  = gps_data->hours*3600 + gps_data->minutes*60 + gps_data->seconds,
-        .latitude = (int)(gps_data->latitude_degrees_1000000),
-        .longitude = (int)(gps_data->longitude_degrees_1000000),
-        .altitudeMeters = ((gps_data->altitude_mm > 0 ? gps_data->altitude_mm : 0) / 1000),
-        .velocityHorizontalKilometersPerHour = (uint8_t) ((float) gps_data->ground_speed_cm_per_second * 0.036),
-        .gnssSatellitesVisible = gps_data->satellites_visible,
-        .ascentRateCentimetersPerSecond = (int16_t) gps_data->climb_cm_per_second, // m/s -> cm/s
+        .timeOfDaySeconds  = data->gps.hours*3600 + data->gps.minutes*60 + data->gps.seconds,
+        .latitude = (int)(data->gps.latitude_degrees_1000000),
+        .longitude = (int)(data->gps.longitude_degrees_1000000),
+        .altitudeMeters = ((data->gps.altitude_mm > 0 ? data->gps.altitude_mm : 0) / 1000),
+        .velocityHorizontalKilometersPerHour = (velocity_horizontal > 255) ? 255 : (uint8_t)velocity_horizontal,
+        .gnssSatellitesVisible = data->gps.satellites_visible,
+        .ascentRateCentimetersPerSecond = (int16_t) data->gps.climb_cm_per_second, // m/s -> cm/s
         .temperatureCelsius_x10 = {
-            .internal = (int16_t) ((float) data->internal_temperature_celsius_100 / 10.0f),
+            .internal = (int16_t) (data->internal_temperature_celsius_100 / 10),
             .exist = {
                 .internal = true,
                 .external = false,
@@ -66,15 +71,15 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 
     // External temperature & humidity sensors (typically BMP280 -- can expand to others)
     if (data->temperature_celsius_100 != 0 && data->humidity_percentage_100 != 0) {
-        asnMessage.temperatureCelsius_x10.external = (int16_t) (data->temperature_celsius_100 / 10.0f);
+        asnMessage.temperatureCelsius_x10.external = (int16_t) (data->temperature_celsius_100 / 10);
         asnMessage.temperatureCelsius_x10.exist.external = true;
 
-        asnMessage.humidityPercentage = (uint8_t) (data->humidity_percentage_100 / 100.0f);
+        asnMessage.humidityPercentage = (uint8_t) (data->humidity_percentage_100 / 100);
         asnMessage.exist.humidityPercentage = true;
     }
 
     if (data->pressure_mbar_100 > 0) {
-        asnMessage.pressurehPa_x10 = (uint16_t) (data->pressure_mbar_100 / 10.0f);
+        asnMessage.pressurehPa_x10 = (uint16_t) (data->pressure_mbar_100 / 10);
         asnMessage.exist.pressurehPa_x10 = true;
     }
 
@@ -104,7 +109,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         // Unit: pulse count
         asnMessage.exist.extraSensors = true;
         horusAdditionalSensorType pulse_count_struct = {
-            .name = "radsens",
+            .name = "pulse",
             .exist = true,
             .values = {
                 .kind = horusInt_PRESENT,
@@ -118,22 +123,16 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
-    // The encoder needs a data structure for the serialization
-    // Again - how much memory is allocated here?
-    BitStream encodedMessage;
+    memset(&encodedMessage, 0, sizeof(encodedMessage));
 
     // The Encoder may fail and update an error code
     int errCode;
 
     // Initialization associates the buffer to the bit stream
     // We want to write the uncoded message starting at 2 bytes into the message.
-
     BitStream_Init (&encodedMessage,
                     (unsigned char*)(payload+2),
-                    HORUS_UNCODED_BUFFER_SIZE-1
-    );
-    // Originally this function call used a MUCH larger value for count
-    //horusTelemetry_REQUIRED_BYTES_FOR_ENCODING);
+                    HORUS_UNCODED_BUFFER_SIZE-2);
     
     // Encode the message using uPER encoding rule
 
