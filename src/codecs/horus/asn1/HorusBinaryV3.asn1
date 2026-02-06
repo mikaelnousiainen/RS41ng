@@ -1,0 +1,99 @@
+-- auto tags because this will be used in uper anyway where tags don't get used (order is important though)
+HorusBinaryV3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
+
+BitFlags ::= SEQUENCE {
+  b0  BOOLEAN,
+  b1  BOOLEAN,
+  b2  BOOLEAN,
+  b3  BOOLEAN,
+  b4  BOOLEAN,
+  b5  BOOLEAN,
+  b6  BOOLEAN,
+  b7  BOOLEAN
+}
+
+CustomFieldValues ::= CHOICE {
+  -- prefixed with horus otherwise c codegen is bad
+
+  -- allows base64 - if you were crazy enough, but really you should use customData instead
+  horusStr   IA5String (FROM("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ +/=-.")^SIZE (0..255)), 
+  horusInt   SEQUENCE(SIZE(1..4)) OF INTEGER,
+  horusReal  SEQUENCE(SIZE(1..4)) OF REAL,
+
+  -- we could use a bit string here, but it packs down the same so we may as well make it easier on ourselves to process
+  horusBool  BitFlags
+}
+
+AdditionalSensorType ::= SEQUENCE {
+  -- adding a name will add 
+  -- overhead but means anyone can find out what the sensor does
+  name    IA5String (FROM("abcdefghijklmnopqrstuvwxyz0123456789-")^SIZE (1..20)) OPTIONAL, 
+  
+  -- values are optional as we may want to send a packet without values and only names
+  values  CustomFieldValues OPTIONAL
+}
+
+-- we limit to 4 additional sensor types to lower our used bits
+AdditionalSensors ::= SEQUENCE(SIZE(1..4)) OF AdditionalSensorType
+
+TemperatureSensors ::= SEQUENCE {
+  internal   INTEGER (-1023..1023) OPTIONAL,  -- tenths C
+  external   INTEGER (-1023..1023) OPTIONAL,  -- tenths C
+  custom1    INTEGER (-1023..1023) OPTIONAL, -- tenths C
+  custom2    INTEGER (-1023..1023) OPTIONAL  -- tenths C
+}
+
+MilliVoltSensors ::= SEQUENCE {
+  battery    INTEGER (0..16383) OPTIONAL, -- millivolts
+  solar      INTEGER (0..16383) OPTIONAL, -- millivolts
+  custom1    INTEGER (0..16383) OPTIONAL, -- millivolts
+  custom2    INTEGER (0..16383) OPTIONAL -- millivolts
+}
+
+-- u-blox power save state
+GnssPowerSaveState   ::= ENUMERATED {
+  psmNotActive    (0),
+  enabled         (1),
+  acquisition     (2),
+  tracking        (3),
+  optimised       (4),
+  inactive        (5)
+}
+
+Telemetry ::= SEQUENCE {
+  extensionMarkerForASN1CC BOOLEAN OPTIONAL,
+  -- required fields
+  payloadCallsign     IA5String (FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15)),
+  sequenceNumber      INTEGER (0..65535),
+
+  -- these are common fields that are required to transmit
+  -- however if the data is missing, transmit 0,0 for lat/lon and timeofdayseconds -1
+  timeOfDaySeconds    INTEGER (-1..86400), -- seconds since
+                                                              -- 00:00 UTC - highly recommended to have time of day seconds in every transmission
+  latitude            INTEGER (-9000000..9000000),    -- fixed point, x100000
+  longitude           INTEGER (-18000000..18000000),  -- fixed point, x100000
+
+  -- highly recommended field
+  altitudeMeters      INTEGER (-1000..50000), -- meters - set to -1000 if invalid
+
+  -- additional extra sensors
+  extraSensors        AdditionalSensors OPTIONAL,
+
+  -- additional fields that would be unlikely to need to be sequences
+  velocityHorizontalKilometersPerHour  INTEGER (0..512)         OPTIONAL, -- km/hr
+  gnssSatellitesVisible                INTEGER (0..31)          OPTIONAL,
+  ascentRateCentimetersPerSecond       INTEGER (-32767..32767)  OPTIONAL, -- cm/s
+  pressurehPa-x10                      INTEGER (0..12000)        OPTIONAL, -- hPa * 10
+
+
+  -- additional but fairly common fields so we make them explicit
+  temperatureCelsius-x10 TemperatureSensors              OPTIONAL, -- C
+  humidityPercentage     INTEGER (0..100)                OPTIONAL, -- %
+  milliVolts             MilliVoltSensors                OPTIONAL, -- 
+  counts                 SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
+  gnssPowerSaveState     GnssPowerSaveState              OPTIONAL,
+
+  -- binary data
+  customData           OCTET STRING(SIZE (0..255)) OPTIONAL
+}
+END

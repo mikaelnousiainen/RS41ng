@@ -41,20 +41,20 @@ void handle_timer_tick()
         ubxg6010_get_current_gps_data(&current_gps_data);
     }
 
-    if (leds_enabled) {
-        // Blink fast until GPS fix is acquired
-        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
-            if (GPS_HAS_FIX(current_gps_data)) {
-                if (counter == 0) {
-                    led_state = !led_state;
-                    set_green_led(led_state);
-                }
-            } else {
+#if LEDS_ENABLE
+    // Blink fast until GPS fix is acquired
+    if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
+        if (GPS_HAS_FIX(current_gps_data)) {
+            if (counter == 0) {
                 led_state = !led_state;
                 set_green_led(led_state);
             }
+        } else {
+            led_state = !led_state;
+            set_green_led(led_state);
         }
     }
+#endif
 }
 
 void set_green_led(bool enabled)
@@ -101,19 +101,19 @@ int main(void)
     set_green_led(false);
     set_red_led(true);
 
-    if (gps_nmea_output_enabled) {
-        log_info("External USART init\n");
-        usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
-    } else if (pulse_counter_enabled) {
-        log_info("Pulse counter init\n");
-        pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
-    } else {
-#ifdef RS41
-        // Only RS41 uses the I2C bus
-        log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
-        i2c_init(I2C_BUS_CLOCK_SPEED);
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE 
+    log_info("External USART init\n");
+    usart_ext_init(EXTERNAL_SERIAL_PORT_BAUD_RATE);
+#elif PULSE_COUNTER_ENABLE
+    log_info("Pulse counter init\n");
+    pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
+#else
+#ifdef RS41 
+    // Only RS41 uses the I2C bus
+    log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+    i2c_init(I2C_BUS_CLOCK_SPEED);
 #endif
-    }
+#endif
 
     log_info("SPI init\n");
     spi_init();
@@ -140,38 +140,38 @@ int main(void)
     si4063_init();
 #endif
 
-    if (bmp280_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("BMP280 init\n");
-            success = bmp280_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("BMP280 init failed, retrying...");
+#if SENSOR_BMP280_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("BMP280 init\n");
+        success = bmp280_handler_init();
+        if (success) {
+            break;
         }
+        log_error("BMP280 init failed, retrying...");
     }
+#endif
 
-    if (radsens_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("RadSens init\n");
-            success = radsens_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("RadSens init failed, retrying...");
+#if SENSOR_RADSENS_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("RadSens init\n");
+        success = radsens_handler_init();
+        if (success) {
+            break;
         }
+        log_error("RadSens init failed, retrying...");
     }
+#endif
 
-    if (si5351_enabled) {
-        for (int i = 0; i < 3; i++) {
-            log_info("Si5351 init\n");
-            success = si5351_handler_init();
-            if (success) {
-                break;
-            }
-            log_error("Si5351 init failed, retrying...");
+#if RADIO_SI5351_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("Si5351 init\n");
+        success = si5351_handler_init();
+        if (success) {
+            break;
         }
+        log_error("Si5351 init failed, retrying...");
     }
+#endif
 
     log_info("Radio module init\n");
     radio_init();
@@ -180,13 +180,13 @@ int main(void)
 
     log_info("System initialized!\n");
 
-    if (leds_enabled) {
-        set_green_led(true);
-        set_red_led(false);
-    } else {
-        set_green_led(false);
-        set_red_led(false);
-    }
+#if LEDS_ENABLE
+    set_green_led(true);
+    set_red_led(false);
+#else
+    set_green_led(false);
+    set_red_led(false);
+#endif
 
     system_initialized = true;
 

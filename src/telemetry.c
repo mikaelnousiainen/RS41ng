@@ -34,17 +34,17 @@ void telemetry_collect(telemetry_data *data)
     data->internal_temperature_celsius_100 = si4063_read_temperature_celsius_100();
 #endif
 
-    if (bmp280_enabled) {
-        bmp280_read_telemetry(data);
-    }
+#if SENSOR_BMP280_ENABLE
+    bmp280_read_telemetry(data);
+#endif
 
-    if (radsens_enabled) {
-        radsens_read_telemetry(data);
-    }
+#if SENSOR_RADSENS_ENABLE
+    radsens_read_telemetry(data);
+#endif
 
-    if (pulse_counter_enabled) {
-        data->pulse_count = pulse_counter_get_count();
-    }
+#if PULSE_COUNTER_ENABLE
+    data->pulse_count = pulse_counter_get_count();
+#endif
 
     ubxg6010_get_current_gps_data(&data->gps);
 
@@ -64,8 +64,8 @@ void telemetry_collect(telemetry_data *data)
     } else {
         // Zero out position data if we don't have a valid GPS fix.
         // This is done to avoid transmitting invalid position information.
-        data->gps.latitude_degrees_1000000 = 0;
-        data->gps.longitude_degrees_1000000 = 0;
+        data->gps.latitude_degrees_10000000 = 0;
+        data->gps.longitude_degrees_10000000 = 0;
         data->gps.altitude_mm = 0;
         data->gps.ground_speed_cm_per_second = 0;
         data->gps.heading_degrees_100000 = 0;
@@ -77,7 +77,7 @@ void telemetry_collect(telemetry_data *data)
     data->clock_calibration_count = clock_calibration_get_change_count();
 #endif
 
-    locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
+    locator_from_lonlat(data->gps.longitude_degrees_10000000, data->gps.latitude_degrees_10000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
 
     data->data_counter++;

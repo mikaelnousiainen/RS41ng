@@ -46,13 +46,6 @@
 #include <stdlib.h>
 #include "config.h"
 
-bool leds_enabled = LEDS_ENABLE;
-bool bmp280_enabled = SENSOR_BMP280_ENABLE;
-bool radsens_enabled = SENSOR_RADSENS_ENABLE;
-bool si5351_enabled = RADIO_SI5351_ENABLE;
-bool gps_nmea_output_enabled = GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE;
-bool pulse_counter_enabled = PULSE_COUNTER_ENABLE;
-
 volatile bool system_initialized = false;
 
 /**

@@ -7,7 +7,7 @@
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
+// #define RS41
 //#define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
@@ -20,8 +20,8 @@
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
 
 /**
  * Global configuration
@@ -45,7 +45,7 @@
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+#define RADIO_POST_TRANSMIT_DELAY_MS 0
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -182,20 +182,23 @@
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
 #define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
+#define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
 #define RADIO_SI4032_TX_HORUS_V1 false
 #define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4032_TX_HORUS_V2 false
+#define RADIO_SI4032_TX_HORUS_V2_COUNT 5
+#define RADIO_SI4032_TX_HORUS_V3 true
+#define RADIO_SI4032_TX_HORUS_V3_COUNT 5
 #define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 
-// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+// Continuous transmit mode can be enabled for *either* Horus V1, V2, or V3, but not all. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
+#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS true
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432300000
@@ -204,6 +207,7 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
+#define RADIO_SI4032_TX_FREQUENCY_HORUS_V3  432301000
 #define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
 
 /**
@@ -220,20 +224,23 @@
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
 #define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS true
+#define RADIO_SI4063_TX_APRS false
 #define RADIO_SI4063_TX_APRS_COUNT 2
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4063_TX_HORUS_V2 true
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
+#define RADIO_SI4063_TX_HORUS_V2 false
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 5
+#define RADIO_SI4063_TX_HORUS_V3 true
+#define RADIO_SI4063_TX_HORUS_V3_COUNT 5
 #define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
 
-// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
+// Continuous transmit mode can be enabled for *either* Horus V1, V2, or V3, but not all. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
+#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS true
 
 // Transmit frequencies for the Si4063 transmitter modes
 #define RADIO_SI4063_TX_FREQUENCY_CW        432500000
@@ -242,6 +249,7 @@
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
 
 /**
@@ -260,8 +268,10 @@
 #define RADIO_SI5351_TX_PIP_COUNT 6
 #define RADIO_SI5351_TX_HORUS_V1 false
 #define RADIO_SI5351_TX_HORUS_V1_COUNT 1
-#define RADIO_SI5351_TX_HORUS_V2 true
+#define RADIO_SI5351_TX_HORUS_V2 false
 #define RADIO_SI5351_TX_HORUS_V2_COUNT 4
+#define RADIO_SI5351_TX_HORUS_V3 true
+#define RADIO_SI5351_TX_HORUS_V3_COUNT 4
 #define RADIO_SI5351_TX_JT9 false
 #define RADIO_SI5351_TX_JT9_COUNT 1
 #define RADIO_SI5351_TX_JT65 false
@@ -280,6 +290,7 @@
 #define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V3   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
 #define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
 #define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
@@ -377,6 +388,26 @@
 #define HORUS_V2_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * Horus V2 4FSK mode settings
+ */
+
+// NOTE: Every character adds 6 bits to your packet size! Try and limit the callsign to 5-8 characters. 
+// This value is set by the callsign above, but can be overridden here. 
+#define HORUS_V3_PAYLOAD_CALLSIGN CALLSIGN
+#define HORUS_V3_BAUD_RATE_SI4032 100
+#define HORUS_V3_BAUD_RATE_SI4063 100
+#define HORUS_V3_BAUD_RATE_SI5351 50
+#define HORUS_V3_PREAMBLE_LENGTH 16
+#define HORUS_V3_IDLE_PREAMBLE_LENGTH 32
+#define HORUS_V3_TONE_SPACING_HZ_SI5351 270
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define HORUS_V3_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
+#define HORUS_V3_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * CATS mode settings

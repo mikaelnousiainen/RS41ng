@@ -13,8 +13,8 @@ size_t aprs_generate_weather_report(uint8_t *payload, size_t length, telemetry_d
     int16_t la_degrees, lo_degrees;
     uint8_t la_minutes, la_h_minutes, lo_minutes, lo_h_minutes;
 
-    convert_degrees_to_dmh(data->gps.latitude_degrees_1000000 / 10, &la_degrees, &la_minutes, &la_h_minutes);
-    convert_degrees_to_dmh(data->gps.longitude_degrees_1000000 / 10, &lo_degrees, &lo_minutes, &lo_h_minutes);
+    convert_degrees_to_dmh(data->gps.latitude_degrees_10000000 / 10, &la_degrees, &la_minutes, &la_h_minutes);
+    convert_degrees_to_dmh(data->gps.longitude_degrees_10000000 / 10, &lo_degrees, &lo_minutes, &lo_h_minutes);
 
     if (include_timestamp) {
         aprs_generate_timestamp(timestamp, sizeof(timestamp), data);
