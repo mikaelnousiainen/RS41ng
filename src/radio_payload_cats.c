@@ -33,8 +33,8 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
     cats_append_comment_whisker(&packet, message); // 102
 
     if (GPS_HAS_FIX(telemetry_data->gps) &&
-       (telemetry_data->gps.latitude_degrees_1000000 != 0 ||
-        telemetry_data->gps.longitude_degrees_1000000 != 0)) {
+       (telemetry_data->gps.latitude_degrees_10000000 != 0 ||
+        telemetry_data->gps.longitude_degrees_10000000 != 0)) {
         cats_append_gps_whisker(&packet, telemetry_data->gps); // 16
     }
 

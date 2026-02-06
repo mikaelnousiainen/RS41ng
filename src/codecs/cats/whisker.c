@@ -98,8 +98,8 @@ void cats_append_gps_whisker(cats_packet *packet, gps_data gps)
 {
     packet->data[packet->len++] = CATS_GPS_TYPE;
     packet->data[packet->len++] = 14; // len
-    int32_t lat_converted = gps.latitude_degrees_1000000 * (1LL<<31) / 90LL / 10000000LL;
-    int32_t lon_converted = gps.longitude_degrees_1000000 * (1LL<<31) / 180LL / 10000000LL;
+    int32_t lat_converted = gps.latitude_degrees_10000000 * (1LL<<31) / 90LL / 10000000LL;
+    int32_t lon_converted = gps.longitude_degrees_10000000 * (1LL<<31) / 180LL / 10000000LL;
     cats_push_u32(packet, lat_converted); // lat
     cats_push_u32(packet, lon_converted); // lon
     cats_push_f16(packet, gps.altitude_mm / 1000.0); // alt

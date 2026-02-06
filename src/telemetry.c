@@ -64,8 +64,8 @@ void telemetry_collect(telemetry_data *data)
     } else {
         // Zero out position data if we don't have a valid GPS fix.
         // This is done to avoid transmitting invalid position information.
-        data->gps.latitude_degrees_1000000 = 0;
-        data->gps.longitude_degrees_1000000 = 0;
+        data->gps.latitude_degrees_10000000 = 0;
+        data->gps.longitude_degrees_10000000 = 0;
         data->gps.altitude_mm = 0;
         data->gps.ground_speed_cm_per_second = 0;
         data->gps.heading_degrees_100000 = 0;
@@ -77,7 +77,7 @@ void telemetry_collect(telemetry_data *data)
     data->clock_calibration_count = clock_calibration_get_change_count();
 #endif
 
-    locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
+    locator_from_lonlat(data->gps.longitude_degrees_10000000, data->gps.latitude_degrees_10000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
 
     data->data_counter++;

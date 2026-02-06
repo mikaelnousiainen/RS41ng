@@ -1,4 +1,5 @@
 #include <string.h>
+
 #include "horus_packet_v3.h"
 #include "horus_l2.h"
 #include "config.h"
@@ -16,7 +17,6 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     // Increment packet count
     horus_v3_packet_counter++;
 
-
     uint32_t velocity_horizontal = (data->gps.ground_speed_cm_per_second * 36) / 1000;
 
     memset(&asnMessage, 0, sizeof(asnMessage));
@@ -25,8 +25,8 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN,
         .sequenceNumber = horus_v3_packet_counter,
         .timeOfDaySeconds  = data->gps.hours*3600 + data->gps.minutes*60 + data->gps.seconds,
-        .latitude = (int)(data->gps.latitude_degrees_1000000),
-        .longitude = (int)(data->gps.longitude_degrees_1000000),
+        .latitude = (int32_t)(data->gps.latitude_degrees_10000000 / 100),
+        .longitude = (int32_t)(data->gps.longitude_degrees_10000000 / 100),
         .altitudeMeters = ((data->gps.altitude_mm > 0 ? data->gps.altitude_mm : 0) / 1000),
         .velocityHorizontalKilometersPerHour = (velocity_horizontal > 255) ? 255 : (uint8_t)velocity_horizontal,
         .gnssSatellitesVisible = data->gps.satellites_visible,

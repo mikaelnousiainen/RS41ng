@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 #include "codecs/horus/horus_packet_v3.h"
 #include "codecs/horus/horus_l2.h"

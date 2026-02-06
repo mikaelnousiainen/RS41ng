@@ -1110,8 +1110,8 @@ void radio_handle_main_loop()
                 current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
                 current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
         log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
-                current_telemetry_data.gps.latitude_degrees_1000000 / 10,
-                current_telemetry_data.gps.longitude_degrees_1000000 / 10,
+                current_telemetry_data.gps.latitude_degrees_10000000 / 10,
+                current_telemetry_data.gps.longitude_degrees_10000000 / 10,
                 (current_telemetry_data.gps.altitude_mm / 1000));
         #endif
 

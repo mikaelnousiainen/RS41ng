@@ -13,8 +13,8 @@ size_t horus_packet_v2_create(uint8_t *payload, size_t length, telemetry_data *d
 
     gps_data *gps_data = &data->gps;
 
-    float float_lat = (float) gps_data->latitude_degrees_1000000 / 10000000.0f;
-    float float_lon = (float) gps_data->longitude_degrees_1000000 / 10000000.0f;
+    float float_lat = (float) gps_data->latitude_degrees_10000000 / 10000000.0f;
+    float float_lon = (float) gps_data->longitude_degrees_10000000 / 10000000.0f;
 
     uint8_t volts_scaled = (uint8_t) (255 * (float) data->battery_voltage_millivolts / 5000.0f);
 

@@ -696,8 +696,8 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
         ubxg6010_current_gps_data.seconds = pkt->data.navpvt.sec;
 
         ubxg6010_current_gps_data.fix = pkt->data.navpvt.fixType;
-        ubxg6010_current_gps_data.latitude_degrees_1000000 = pkt->data.navpvt.lat;
-        ubxg6010_current_gps_data.longitude_degrees_1000000 = pkt->data.navpvt.lon;
+        ubxg6010_current_gps_data.latitude_degrees_10000000 = pkt->data.navpvt.lat;
+        ubxg6010_current_gps_data.longitude_degrees_10000000 = pkt->data.navpvt.lon;
         ubxg6010_current_gps_data.altitude_mm = pkt->data.navpvt.hMSL;
         ubxg6010_current_gps_data.satellites_visible = pkt->data.navpvt.numSV;
         ubxg6010_current_gps_data.ground_speed_cm_per_second = pkt->data.navpvt.gSpeed;
@@ -716,8 +716,8 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x02) {
         ubxg6010_current_gps_data.ok_packets += 1;
         ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navposllh.iTOW;
-        ubxg6010_current_gps_data.latitude_degrees_1000000 = pkt->data.navposllh.lat;
-        ubxg6010_current_gps_data.longitude_degrees_1000000 = pkt->data.navposllh.lon;
+        ubxg6010_current_gps_data.latitude_degrees_10000000 = pkt->data.navposllh.lat;
+        ubxg6010_current_gps_data.longitude_degrees_10000000 = pkt->data.navposllh.lon;
         ubxg6010_current_gps_data.altitude_mm = pkt->data.navposllh.hMSL;
 
         ubxg6010_current_gps_data.updated = true;
