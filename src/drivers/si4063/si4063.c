@@ -560,6 +560,18 @@ inline void si4063_set_direct_mode_pin(bool high)
     }
 }
 
+void si4063_set_crystal_capacitance(uint8_t c_count)
+{
+        uint8_t data[] = {
+                0x00, // 0x00 = Group GLOBAL
+                0x01, // Set 1 property
+                0x00, // 0x00 = GLOBAL_XO_TUNE
+                c_count  // Value of 62 standard determined for DFM17 radiosondes
+        };
+
+        si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
+}
+
 void si4063_configure()
 {
     {
