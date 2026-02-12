@@ -8,7 +8,7 @@
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 // #define RS41
-#define DFM17
+// #define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -28,7 +28,7 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "KE5GDB"
+#define CALLSIGN "MYCALL"
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -229,9 +229,9 @@
 #define RADIO_SI4063_TX_HORUS_V1 false
 #define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 false
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 1
+#define RADIO_SI4063_TX_HORUS_V2_COUNT 5
 #define RADIO_SI4063_TX_HORUS_V3 true
-#define RADIO_SI4063_TX_HORUS_V3_COUNT 1
+#define RADIO_SI4063_TX_HORUS_V3_COUNT 5
 #define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
 
@@ -248,8 +248,8 @@
 #define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432701000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432701000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
 
 // Use crystal capacitance LUT to better maintain frequency stability over temperature. 
@@ -379,7 +379,7 @@
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
 // Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V2_PAYLOAD_ID 591
+#define HORUS_V2_PAYLOAD_ID 256
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
@@ -404,7 +404,7 @@
 #define HORUS_V3_BAUD_RATE_SI4063 100
 #define HORUS_V3_BAUD_RATE_SI5351 50
 #define HORUS_V3_PREAMBLE_LENGTH 16
-#define HORUS_V3_IDLE_PREAMBLE_LENGTH 16
+#define HORUS_V3_IDLE_PREAMBLE_LENGTH 32
 #define HORUS_V3_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
