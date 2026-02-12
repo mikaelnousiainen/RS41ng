@@ -8,7 +8,7 @@
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 // #define RS41
-//#define DFM17
+// #define DFM17
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -251,6 +251,10 @@
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
+
+// Use crystal capacitance LUT to better maintain frequency stability over temperature. 
+// Recommended for temperature below 0C
+#define RADIO_SI4063_TX_CORRECT true
 
 /**
  * RS41 only: External Si5351 radio chip transmission configuration

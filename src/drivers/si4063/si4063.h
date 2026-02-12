@@ -26,6 +26,7 @@ void si4063_set_frequency_deviation(uint32_t deviation);
 void si4063_set_modulation_type(si4063_modulation_type type);
 int32_t si4063_read_temperature_celsius_100();
 void si4063_set_direct_mode_pin(bool high);
+void si4063_set_crystal_capacitance(uint8_t c_count);
 int si4063_init();
 
 #endif
