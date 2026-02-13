@@ -178,6 +178,9 @@
 
 // Which modes to transmit using the built-in Si4032 transmitter chip
 // The COUNT settings define the number of times that each type of transmission is repeated
+
+// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
+
 #define RADIO_SI4032_TX_CW false
 #define RADIO_SI4032_TX_CW_COUNT 1
 #define RADIO_SI4032_TX_PIP false
@@ -198,7 +201,7 @@
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS true
+#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS false
 
 // Transmit frequencies for the Si4032 transmitter modes
 #define RADIO_SI4032_TX_FREQUENCY_CW        432300000
@@ -220,6 +223,9 @@
 
 // Which modes to transmit using the built-in Si4063 transmitter chip
 // The COUNT settings define the number of times that each type of transmission is repeated
+
+// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
+
 #define RADIO_SI4063_TX_CW false
 #define RADIO_SI4063_TX_CW_COUNT 1
 #define RADIO_SI4063_TX_PIP false
@@ -240,7 +246,7 @@
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS true
+#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS false
 
 // Transmit frequencies for the Si4063 transmitter modes
 #define RADIO_SI4063_TX_FREQUENCY_CW        432500000
@@ -394,7 +400,7 @@
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
- * Horus V2 4FSK mode settings
+ * Horus V3 4FSK mode settings
  */
 
 // NOTE: Every character adds 6 bits to your packet size! Try and limit the callsign to 5-8 characters. 
