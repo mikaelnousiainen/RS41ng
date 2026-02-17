@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "config.h"
 
 #ifdef RS41_RSM4x4
@@ -47,12 +48,15 @@ static void rcc_init()
 
 #ifdef RS41
 #ifdef RS41_RSM4x4
-   //log_info("PWREx\n");
-   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
-     while(1);
-   }
+    //log_info("PWREx\n");
+    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
+        while(1);
+    }
 
-   while (__HAL_PWR_GET_FLAG(PWR_FLAG_VOSF));
+    while (__HAL_PWR_GET_FLAG(PWR_FLAG_VOSF))
+    {
+        __NOP();
+    }
 #endif //RS41_RSM4x4
     // The RS41 hardware uses an external clock at 24 MHz
 
@@ -64,7 +68,7 @@ static void rcc_init()
 
     //log_info("OscC\n");
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
-      while(1);
+        while(1);
     }
 
 #endif
@@ -80,7 +84,7 @@ static void rcc_init()
     RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
-      while(1);
+        while(1);
     }
 #endif
 
@@ -235,6 +239,15 @@ static void dma_adc_init()
 #ifdef RS41
     hadc1.Init.NbrOfConversion = 2;
 #endif
+#ifdef RS41_RSM4x4
+    hadc1.Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;   // 24MHz/4 = 6MHz ADC clock
+    hadc1.Init.Resolution            = ADC_RESOLUTION_12B;
+    hadc1.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;
+    hadc1.Init.LowPowerAutoWait      = DISABLE;
+    hadc1.Init.DMAContinuousRequests = ENABLE;
+    hadc1.Init.Overrun               = ADC_OVR_DATA_OVERWRITTEN;
+    hadc1.Init.OversamplingMode      = DISABLE;
+#endif
 #ifdef DFM17
     hadc1.Init.NbrOfConversion = 1;
 #endif
@@ -243,13 +256,17 @@ static void dma_adc_init()
                 HAL_ADC_Init(&hadc1)
                );
 
-    ADC_ChannelConfTypeDef adc_channel;
+
+    ADC_ChannelConfTypeDef adc_channel = {0};   // zero the whole struct first
     adc_channel.Channel = CHANNEL_VOLTAGE;
     adc_channel.Rank = ADC_REGULAR_RANK_1;
 #ifndef RS41_RSM4x4
     adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
-#else // Different constants available on L4
+#else
     adc_channel.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+    adc_channel.SingleDiff   = ADC_SINGLE_ENDED;   // L4 required
+    adc_channel.OffsetNumber = ADC_OFFSET_NONE;    // L4 required — THIS is what crashes
+    adc_channel.Offset       = 0;                  // L4 required
 #endif
 
     hang_if_bad("HAL_ADC_ConfigChannel - 1",
@@ -257,13 +274,17 @@ static void dma_adc_init()
                );
 
 #ifdef RS41
+    memset(&adc_channel, 0, sizeof(adc_channel));
     adc_channel.Channel = CHANNEL_BUTTON;
-    adc_channel.Rank = ADC_REGULAR_RANK_2;
-#ifndef RS41_RSM4x4
-    adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
-#else // Different constants available on L4
-    adc_channel.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
-#endif
+    adc_channel.Rank = ADC_REGULAR_RANK_1;
+    #ifndef RS41_RSM4x4
+        adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+    #else
+        adc_channel.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
+        adc_channel.SingleDiff   = ADC_SINGLE_ENDED;   // L4 required
+        adc_channel.OffsetNumber = ADC_OFFSET_NONE;    // L4 required — THIS is what crashes
+        adc_channel.Offset       = 0;                  // L4 required
+    #endif
 
     hang_if_bad("HAL_ADC_ConfigChannel - 2",
                 HAL_ADC_ConfigChannel(&hadc1, &adc_channel)
