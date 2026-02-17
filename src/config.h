@@ -1,8 +1,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-// Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
-// WARNING: Using a DFM-17 as a primary flight tracker is NOT recommended yet!
 // NOTE: DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
 // DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
@@ -11,7 +9,7 @@
 //#define DFM17
 
 // Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
-//#define RS41_RSM4x4
+#define RS41_RSM4x4
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."

@@ -1,6 +1,6 @@
 #include "telemetry.h"
 #include "drivers/hal/system.h"
-#include "drivers/ubxg6010/ubxg6010.h"
+#include "drivers/gps/gps_driver.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
 #include "radsens_handler.h"
@@ -46,13 +46,13 @@ void telemetry_collect(telemetry_data *data)
     data->pulse_count = pulse_counter_get_count();
 #endif
 
-    ubxg6010_get_current_gps_data(&data->gps);
+    gps_driver_get_current_gps_data(&data->gps);
 
     if (GPS_HAS_FIX(data->gps)) {
         // If we have a good fix, we can enter power-saving mode
         if ((data->gps.satellites_visible >= 6) && !gps_power_saving_enabled) {
             #if GPS_POWER_SAVING_ENABLE
-            ubxg6010_enable_power_save_mode();
+            gps_driver_enable_power_save_mode();
             gps_power_saving_enabled = true;
             #endif
         }

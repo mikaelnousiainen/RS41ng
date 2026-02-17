@@ -4,7 +4,7 @@
 #include "drivers/hal/usart_ext.h"
 #include "drivers/hal/delay.h"
 #include "drivers/hal/datatimer.h"
-#include "drivers/ubxg6010/ubxg6010.h"
+#include "drivers/gps/gps_driver.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
 #include "radsens_handler.h"
@@ -38,7 +38,7 @@ void handle_timer_tick()
 
     counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
-        ubxg6010_get_current_gps_data(&current_gps_data);
+        gps_driver_get_current_gps_data(&current_gps_data);
     }
 
     if (leds_enabled) {
@@ -93,7 +93,7 @@ int main(void)
     // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
     system_handle_data_timer_tick = radio_handle_data_timer_tick;
-    usart_gps_handle_incoming_byte = ubxg6010_handle_incoming_byte;
+    usart_gps_handle_incoming_byte = gps_driver_handle_incoming_byte;
 
     //log_info("System init\n");
     system_init();
@@ -120,7 +120,7 @@ int main(void)
 
     gps_init:
     log_info("GPS init\n");
-    success = ubxg6010_init();
+    success = gps_driver_init();
     if (!success) {
         log_error("GPS initialization failed, retrying...\n");
         delay_ms(1000);

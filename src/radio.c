@@ -12,7 +12,7 @@
 #include "codecs/mfsk/mfsk.h"
 #include "codecs/raw/raw.h"
 #include "codecs/jtencode/jtencode.h"
-#include "drivers/ubxg6010/ubxg6010.h"
+#include "drivers/gps/gps_driver.h"
 #include "radio_internal.h"
 #ifdef RS41
 #include "radio_si4032.h"
@@ -694,7 +694,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     usart_gps_enable(enable_gps_during_transmit);
     if (!enable_gps_during_transmit) {
-        ubxg6010_reset_parser();
+        gps_driver_reset_parser();
     }
 
     switch (entry->radio_type) {
@@ -909,10 +909,10 @@ bool radio_handle_time_sync()
 {
     // TODO: How to poll GPS time?
     // TODO: Get time at millisecond precision!
-    // ubxg6010_request_gpstime();
+    // gps_driver_request_gpstime();
 
     gps_data gps;
-    ubxg6010_get_current_gps_data(&gps);
+    gps_driver_get_current_gps_data(&gps);
 
     if (!gps.updated) {
         // The GPS data has not been updated yet
