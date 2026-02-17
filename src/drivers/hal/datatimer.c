@@ -20,8 +20,11 @@ void data_timer_init(uint32_t baud_rate)
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
 
-    //__HAL_RCC_TIM2_CLK_ENABLE();
+#ifdef RS41_RSM4x4
+    __HAL_RCC_TIM2_CLK_ENABLE();
+#else
     __TIM2_CLK_ENABLE();
+#endif
 
     htim2.Instance = TIM2;
 

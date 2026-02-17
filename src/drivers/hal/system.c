@@ -41,50 +41,6 @@ ADC_HandleTypeDef hadc1;
 
 // TODO: Find out how to configure watchdog!
 
-// static void rcc_init() {
-//     HAL_StatusTypeDef ret_val; 
-
-//     __HAL_RCC_PWR_CLK_ENABLE();
-
-//     /* Set voltage scaling to Range 1 */
-//     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2);
-
-//     /* Wait until voltage scaling ready */
-//     while (__HAL_PWR_GET_FLAG(PWR_FLAG_VOSF));
-
-//     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-
-//     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-//     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-//     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
-
-//     ret_val = HAL_RCC_OscConfig(&RCC_OscInitStruct);
-//     if (ret_val != HAL_OK) {
-//       log_info("HAL_RCC_OscConfig ret_val: %i\n", ret_val);
-//       log_info("SYSCLK: %lu\n", HAL_RCC_GetSysClockFreq());
-//       while(1);
-//     }
-
-//     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-//     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-//     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-//     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-//     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-//     // Use the 24 MHz external clock as SYSCLK
-//     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
-
-//     /* Then switch SYSCLK */
-//     log_info("RCC_Clock\n");
-//     ret_val = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
-//     if (ret_val != HAL_OK) {
-//       log_info("HAL_RCC_ClockConfig ret_val: %i\n", ret_val);
-//       log_info("SYSCLK: %lu\n", HAL_RCC_GetSysClockFreq());
-//       while(1);
-//     }
-// }
-
 static void rcc_init()
 {
     __HAL_RCC_PWR_CLK_ENABLE();
@@ -188,7 +144,7 @@ static void gpio_init()
     gpio_init.Pin = PIN_SHUTDOWN;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(I2C_GPIO, &gpio_init);
+    HAL_GPIO_Init(BANK_SHUTDOWN, &gpio_init);
 #ifdef DFM17
     HAL_GPIO_WritePin(BANK_SHUTDOWN, PIN_SHUTDOWN, GPIO_PIN_SET);		// Pull high to keep BMS from removing battery power after startup
 #endif
@@ -248,6 +204,9 @@ static void dma_adc_init()
     // HAL_DMA_DeInit(&hdma_adc1);
 
     hdma_adc1.Instance = DMA1_Channel1;
+#ifdef RS41_RSM4x4
+    hdma_adc1.Init.Request = DMA_REQUEST_0;  // L4 requires DMA request source
+#endif
     hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc1.Init.PeriphInc  = DMA_PINC_DISABLE;
     hdma_adc1.Init.MemInc  = DMA_MINC_ENABLE;
@@ -415,7 +374,11 @@ void system_scheduler_timer_init()
 
     // HAL_TIM_Base_DeInit(&htim6);
 
-    __TIM6_CLK_ENABLE();
+#ifdef RS41_RSM4x4
+    __HAL_RCC_TIM6_CLK_ENABLE();  // L4 style
+#else
+    __TIM6_CLK_ENABLE();           // F1 style  
+#endif
 
     // The data timer assumes a 24 MHz clock source
     htim6.Instance = TIM6;
@@ -471,7 +434,7 @@ void system_set_green_led(bool enabled)
 void system_set_red_led(bool enabled)
 {
 #ifdef RS41
-    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_RED_LED, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
+    HAL_GPIO_WritePin(BANK_RED_LED, PIN_RED_LED, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
 #endif
 #ifdef DFM17
     HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_RED_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
@@ -538,7 +501,9 @@ extern void TIM6_IRQHandler()
 
 void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim)
 {
+    if (system_handle_timer_tick != NULL) {
         system_handle_timer_tick();
+    }
 #if ALLOW_POWER_OFF
         system_handle_button();
 #endif

@@ -229,8 +229,8 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
 //     DMA_ITConfig(pwm_dma_channel, DMA_IT_HT | DMA_IT_TC | DMA_IT_TE, enabled ? ENABLE : DISABLE);
 // }
 
-// void pwm_dma_init()
-// {
+void pwm_dma_init()
+{
 //     DMA_DeInit(pwm_dma_channel);
 
 //     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -247,10 +247,10 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
 //     nvic_init.NVIC_IRQChannelSubPriority = 0;
 //     nvic_init.NVIC_IRQChannelCmd = ENABLE;
 //     NVIC_Init(&nvic_init);
-// }
+}
 
-// void pwm_dma_start()
-// {
+void pwm_dma_start()
+{
 //     //pwm_dma_init_channel();
 //     //pwm_dma_interrupt_enable(true);
 //     // TODO: Why doesn't timer DMA request restart without reinitializing the timer?
@@ -260,7 +260,7 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
 //     DMA_SetCurrDataCounter(pwm_dma_channel, PWM_TIMER_DMA_BUFFER_SIZE);
 //     DMA_Cmd(pwm_dma_channel, ENABLE);
 //     pwm_data_timer_dma_request_enable(true);
-// }
+}
 
 void pwm_dma_stop()
 {

@@ -35,13 +35,13 @@ if(STM32F1)
   add_definitions(-D__ASSEMBLY__)
 
   SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
-  SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
+  SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -g -O0")
   SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
   SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
   SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
-  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
+  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -g -O0 -mcpu=cortex-m3 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
   # -u _printf_float
-  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
+  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -g -O0 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
 
   include_directories(
       hal_stm32f1xx/cmsis
@@ -64,13 +64,13 @@ else() # STM32L4
   add_definitions(-D__ASSEMBLY__)
 
   SET(LINKER_SCRIPT STM32L412RBTX_FLASH.ld)
-  SET(COMMON_FLAGS " -mcpu=cortex-m4 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
+  SET(COMMON_FLAGS " -mcpu=cortex-m4 -mthumb -Wall -ffunction-sections -fdata-sections -g -O0")
   SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
   SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
   SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
-  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m4 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
+  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -g -O0 -mcpu=cortex-m4 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
   # -u _printf_float
-  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
+  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -g -O0 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
   
   include_directories(
       hal_stm32l4xx/cmsis
