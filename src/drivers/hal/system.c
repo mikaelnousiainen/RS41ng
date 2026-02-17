@@ -41,9 +41,53 @@ ADC_HandleTypeDef hadc1;
 
 // TODO: Find out how to configure watchdog!
 
+// static void rcc_init() {
+//     HAL_StatusTypeDef ret_val; 
+
+//     __HAL_RCC_PWR_CLK_ENABLE();
+
+//     /* Set voltage scaling to Range 1 */
+//     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2);
+
+//     /* Wait until voltage scaling ready */
+//     while (__HAL_PWR_GET_FLAG(PWR_FLAG_VOSF));
+
+//     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+
+//     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+//     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+//     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
+
+//     ret_val = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+//     if (ret_val != HAL_OK) {
+//       log_info("HAL_RCC_OscConfig ret_val: %i\n", ret_val);
+//       log_info("SYSCLK: %lu\n", HAL_RCC_GetSysClockFreq());
+//       while(1);
+//     }
+
+//     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+//     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+//     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+//     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+//     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+//     // Use the 24 MHz external clock as SYSCLK
+//     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+
+//     /* Then switch SYSCLK */
+//     log_info("RCC_Clock\n");
+//     ret_val = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
+//     if (ret_val != HAL_OK) {
+//       log_info("HAL_RCC_ClockConfig ret_val: %i\n", ret_val);
+//       log_info("SYSCLK: %lu\n", HAL_RCC_GetSysClockFreq());
+//       while(1);
+//     }
+// }
+
 static void rcc_init()
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    __HAL_RCC_PWR_CLK_ENABLE();
 
 #ifdef RS41
 #ifdef RS41_RSM4x4
@@ -51,8 +95,12 @@ static void rcc_init()
    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
      while(1);
    }
+
+   while (__HAL_PWR_GET_FLAG(PWR_FLAG_VOSF));
 #endif //RS41_RSM4x4
     // The RS41 hardware uses an external clock at 24 MHz
+
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;

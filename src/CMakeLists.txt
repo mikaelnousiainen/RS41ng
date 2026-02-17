@@ -23,35 +23,71 @@ else ()
   set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy.exe)
 endif ()
 
-add_definitions(-DSTM32F100xB)
-#add_definitions(-DSTM32L412xx)
-add_definitions(-DSUPPORT_CPLUSPLUS)
-add_definitions(-D__ASSEMBLY__)
-
-SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
-#SET(LINKER_SCRIPT STM32L412RBTX_FLASH.ld)
-SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
-SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
-SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
-SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
-# -u _printf_float
-#SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
-
 file(GLOB_RECURSE USER_SOURCES "*.c")
 file(GLOB_RECURSE USER_SOURCES_ASM "*.s")
 file(GLOB_RECURSE USER_SOURCES_CXX "*.cpp")
 file(GLOB_RECURSE USER_HEADERS "*.h")
 
-include_directories(hal_stm32f1xx/cmsis
-    hal_stm32f1xx/cmsis_boot/startup
-    hal_stm32f1xx/cmsis_boot
-    hal_stm32f1xx/stm_lib/inc
-    hal_stm32l4xx/cmsis
-    hal_stm32l4xx/cmsis_boot/startup
-    hal_stm32l4xx/cmsis_boot
-    hal_stm32l4xx/stm_lib/inc
-    ..)
+if(STM32F1)
+  message("Compiling for STM32F1 processor -- RS41 (old) or DFM-17")
+  add_definitions(-DSTM32F100xB)
+  add_definitions(-DSUPPORT_CPLUSPLUS)
+  add_definitions(-D__ASSEMBLY__)
+
+  SET(LINKER_SCRIPT STM32F100XB_FLASH.ld)
+  SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
+  SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
+  SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
+  SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
+  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
+  # -u _printf_float
+  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
+
+  include_directories(
+      hal_stm32f1xx/cmsis
+      hal_stm32f1xx/cmsis_boot/startup
+      hal_stm32f1xx/cmsis_boot
+      hal_stm32f1xx/stm_lib/inc
+      drivers
+      codecs
+      syscals
+      ..)
+
+  list(FILTER USER_SOURCES EXCLUDE REGEX "hal_stm32l4xx/.*")
+  list(FILTER USER_SOURCES_ASM EXCLUDE REGEX "hal_stm32l4xx/.*")
+  list(FILTER USER_SOURCES_CXX EXCLUDE REGEX "hal_stm32l4xx/.*")
+  list(FILTER USER_HEADERS EXCLUDE REGEX "hal_stm32l4xx/.*")
+else() # STM32L4
+  message("Compiling for STM32L4 -- RS41 (RSM4x4 series)")
+  add_definitions(-DSTM32L412xx)
+  add_definitions(-DSUPPORT_CPLUSPLUS)
+  add_definitions(-D__ASSEMBLY__)
+
+  SET(LINKER_SCRIPT STM32L412RBTX_FLASH.ld)
+  SET(COMMON_FLAGS " -mcpu=cortex-m4 -mthumb -Wall -ffunction-sections -fdata-sections -O3")
+  SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
+  SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
+  SET(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp")
+  SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m4 -Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -z muldefs -T ${LINKER_SCRIPT}")
+  # -u _printf_float
+  #SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
+  
+  include_directories(
+      hal_stm32l4xx/cmsis
+      hal_stm32l4xx/cmsis_boot/startup
+      hal_stm32l4xx/cmsis_boot
+      hal_stm32l4xx/stm_lib/inc
+      drivers
+      codecs
+      syscals
+      ..
+  )
+
+  list(FILTER USER_SOURCES EXCLUDE REGEX "hal_stm32f1xx/.*")
+  list(FILTER USER_SOURCES_ASM EXCLUDE REGEX "hal_stm32f1xx/.*")
+  list(FILTER USER_SOURCES_CXX EXCLUDE REGEX "hal_stm32f1xx/.*")
+  list(FILTER USER_HEADERS EXCLUDE REGEX "hal_stm32f1xx/.*")
+endif()
 
 add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_ASM} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})
 
