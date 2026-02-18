@@ -190,6 +190,15 @@ static uint8_t  parse_sync     = 0;
 static uint8_t  parse_buf[256 + sizeof(UbxHeader) + sizeof(UbxChecksum)];
 static uint16_t parse_pos      = 0;
 
+/* Raw-byte capture: filled by ubxm10050_handle_incoming_byte before
+ * the parser runs, so we can log exactly what the GPS chip sends us. */
+#define RAW_CAPTURE_SIZE 80
+static uint8_t  raw_capture_buf[RAW_CAPTURE_SIZE];
+static volatile uint16_t raw_capture_pos = 0;
+
+/* Count of NAV-PVT packets received (reset on init) */
+static uint16_t pvt_packet_count = 0;
+
 /* -------------------------------------------------------------------------
  * Checksum
  * ------------------------------------------------------------------------- */
@@ -246,7 +255,10 @@ static bool ubxm10050_wait_for_ack(void)
         if (nack_received) return false;
     }
 
-    log_info("GPS M10: ACK timeout\n");
+    log_info("GPS M10: ACK timeout (gps_ints=%lu ok=%u bad=%u)\n",
+             gps_ints,
+             m10_current_gps_data.ok_packets,
+             m10_current_gps_data.bad_packets);
     return false;
 }
 
@@ -343,6 +355,23 @@ static void ubxm10050_cold_reset(void)
 }
 
 /* -------------------------------------------------------------------------
+ * Debug helpers
+ * ------------------------------------------------------------------------- */
+
+static const char *fix_type_str(uint8_t fix)
+{
+    switch (fix) {
+        case 0:  return "NONE";
+        case 1:  return "DR";
+        case 2:  return "2D";
+        case 3:  return "3D";
+        case 4:  return "GNSS+DR";
+        case 5:  return "TIME";
+        default: return "???";
+    }
+}
+
+/* -------------------------------------------------------------------------
  * Packet handler (called from parser when a complete valid packet arrives)
  * ------------------------------------------------------------------------- */
 
@@ -359,6 +388,7 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
         const UbxNavPvtPayload *pvt = (const UbxNavPvtPayload *)payload;
 
         m10_current_gps_data.ok_packets++;
+        pvt_packet_count++;
         m10_current_gps_data.time_of_week_millis          = pvt->iTOW;
         m10_current_gps_data.year                         = pvt->year;
         m10_current_gps_data.month                        = pvt->month;
@@ -369,6 +399,8 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
         m10_current_gps_data.fix                          = pvt->fixType;
         m10_current_gps_data.fix_ok                       = (pvt->flags & 0x01) != 0;
         m10_current_gps_data.satellites_visible           = pvt->numSV;
+        m10_current_gps_data.time_valid_flags             = pvt->valid;
+        m10_current_gps_data.time_accuracy_ns             = pvt->tAcc;
         m10_current_gps_data.latitude_degrees_1000000     = pvt->lat;
         m10_current_gps_data.longitude_degrees_1000000    = pvt->lon;
         m10_current_gps_data.altitude_mm                  = pvt->hMSL;
@@ -377,6 +409,24 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
         m10_current_gps_data.climb_cm_per_second          = -(pvt->velD / 10);
         m10_current_gps_data.position_dilution_of_precision = pvt->pDOP;
         m10_current_gps_data.updated                      = true;
+
+        /* Debug: log every PVT packet so we can see communication, fix, time,
+         * and satellite status in real time.
+         *   valid bits: bit0=date valid  bit1=time valid  bit2=fully resolved
+         *   fix types:  0=none 2=2D 3=3D 4=GNSS+DR 5=time-only
+         */
+        log_info("GPS PVT #%u: fix=%s fixOK=%d sats=%u "
+                 "%04u-%02u-%02u %02u:%02u:%02u valid=0x%02X tAcc=%luus "
+                 "ok=%u bad=%u\n",
+                 pvt_packet_count,
+                 fix_type_str(pvt->fixType), (pvt->flags & 0x01),
+                 pvt->numSV,
+                 pvt->year, pvt->month, pvt->day,
+                 pvt->hour, pvt->min, pvt->sec,
+                 pvt->valid,
+                 (unsigned long)(pvt->tAcc / 1000),  /* ns -> us for readability */
+                 m10_current_gps_data.ok_packets,
+                 m10_current_gps_data.bad_packets);
         return;
     }
 
@@ -390,6 +440,13 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
             m10_current_gps_data.leap_seconds    = t->leapS;
         }
         m10_current_gps_data.updated = true;
+
+        /* Debug: log GPS time info - leapS valid is bit2 of valid byte.
+         * When leapS becomes valid, UTC = GPS_time - leapS is accurate. */
+        log_info("GPS TIMEGPS: iTOW=%lu week=%d leapS=%d leapValid=%d tAcc=%luns\n",
+                 (unsigned long)t->iTOW, t->week, t->leapS,
+                 (t->valid & 0x04) ? 1 : 0,
+                 (unsigned long)t->tAcc);
         return;
     }
 
@@ -417,6 +474,10 @@ void ubxm10050_reset_parser(void)
 
 void ubxm10050_handle_incoming_byte(uint8_t data)
 {
+    if (raw_capture_pos < RAW_CAPTURE_SIZE) {
+        raw_capture_buf[raw_capture_pos++] = data;
+    }
+
     if (parse_sync == 0) {
         if (data == UBX_SYNC1) { parse_sync = 1; parse_pos = 0; }
         return;
@@ -474,10 +535,10 @@ void ubxm10050_handle_incoming_byte(uint8_t data)
 
 bool ubxm10050_get_current_gps_data(gps_data *data)
 {
-    if (!m10_current_gps_data.updated) return false;
+    bool was_updated = m10_current_gps_data.updated;
     *data = m10_current_gps_data;
     m10_current_gps_data.updated = false;
-    return true;
+    return was_updated;
 }
 
 void ubxm10050_request_gpstime(void)
@@ -513,9 +574,11 @@ bool ubxm10050_init(void)
     bool success;
 
     memset(&m10_current_gps_data, 0, sizeof(gps_data));
-    m10_initialized = false;
-    ack_received    = false;
-    nack_received   = false;
+    m10_initialized  = false;
+    ack_received     = false;
+    nack_received    = false;
+    raw_capture_pos  = 0;
+    pvt_packet_count = 0;
 
     log_info("GPS M10: Init UART at %d baud\n", GPS_SERIAL_PORT_BAUD_RATE);
     usart_gps_init(GPS_SERIAL_PORT_BAUD_RATE, true);
@@ -525,6 +588,17 @@ bool ubxm10050_init(void)
     log_info("GPS M10: Cold reset\n");
     ubxm10050_cold_reset();
     delay_ms(2000);    /* M10 takes ~1.5s to restart after reset */
+
+    /* Diagnostic: report how many bytes arrived during the reset wait.
+     * Expected: ~hundreds of NMEA bytes if GPS RX is alive.
+     * Zero means no bytes received - UART RX or GPS power is broken. */
+    log_info("GPS M10: Post-reset gps_ints=%lu, captured %u bytes: ",
+             gps_ints, (unsigned)raw_capture_pos);
+    uint16_t dump_len = raw_capture_pos < RAW_CAPTURE_SIZE ? raw_capture_pos : RAW_CAPTURE_SIZE;
+    for (uint16_t i = 0; i < dump_len; i++) {
+        log_info("%02X ", raw_capture_buf[i]);
+    }
+    log_info("\n");
 
     /* Step 1: Set baud rate via CFG-VALSET.
      * The chip resets to 38400 by default. If GPS_SERIAL_PORT_BAUD_RATE

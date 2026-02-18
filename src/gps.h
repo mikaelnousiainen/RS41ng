@@ -45,6 +45,11 @@ typedef struct _gps_data {
     uint8_t hours;
     int8_t leap_seconds;
 
+    /* NAV-PVT validity flags: bit0=validDate, bit1=validTime, bit2=fullyResolved */
+    uint8_t time_valid_flags;
+    /* Time accuracy estimate from NAV-PVT [ns] */
+    uint32_t time_accuracy_ns;
+
     int32_t latitude_degrees_1000000;
     int32_t longitude_degrees_1000000;
     int32_t altitude_mm;
