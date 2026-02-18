@@ -90,11 +90,17 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         asnMessage.exist.extraSensors = true;
         horusAdditionalSensorType radsens_struct = {
             .name = "radsens",
-            .exist = true,
+            .exist = { 
+                .name = 1, 
+                .values = 1 
+            },
             .values = {
                 .kind = horusInt_PRESENT,
                 .u = {
-                    .horusInt = (uint16_t) data->radiation_intensity_uR_h,
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = (uint16_t) data->radiation_intensity_uR_h
+                    }   
                 }
             }
         };
@@ -110,17 +116,46 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         asnMessage.exist.extraSensors = true;
         horusAdditionalSensorType pulse_count_struct = {
             .name = "pulse",
-            .exist = true,
+            .exist = { 
+                .name = 1, 
+                .values = 1 
+            },
             .values = {
                 .kind = horusInt_PRESENT,
                 .u = {
-                    .horusInt = (uint16_t) data->pulse_count,
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = (uint16_t) data->pulse_count
+                    }   
                 }
             }
         };
         asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = pulse_count_struct;
         asnMessage.extraSensors.nCount += 1;
     }
+#endif
+
+#if 0
+    // Unit: raw ADC
+    asnMessage.exist.extraSensors = true;
+    horusAdditionalSensorType button_adc_struct = {
+        .name = "button",
+        .exist = { 
+            .name = 1, 
+            .values = 1 
+        },
+        .values = {
+            .kind = horusInt_PRESENT,
+            .u = {
+                .horusInt = {
+                    .nCount = 1,
+                    .arr[0] = (uint16_t) data->button_adc_value
+                }   
+            }
+        }
+    };
+    asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = button_adc_struct;
+    asnMessage.extraSensors.nCount += 1;
 #endif
 
     memset(&encodedMessage, 0, sizeof(encodedMessage));

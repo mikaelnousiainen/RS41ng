@@ -19,7 +19,7 @@
 
 #define ADC1_DR_Address ((uint32_t) 0x4001244C)
 
-__IO uint32_t dma_buffer_adc[2];
+__IO uint16_t dma_buffer_adc[2];
 
 volatile uint32_t button_pressed = 0;
 
@@ -232,7 +232,11 @@ static void dma_adc_init()
 
 
     hadc1.Instance = ADC1;
+#ifdef RS41_RSM4x4
+    hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+#else
     hadc1.Init.ScanConvMode = ENABLE;
+#endif
     hadc1.Init.ContinuousConvMode = ENABLE;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
@@ -276,7 +280,7 @@ static void dma_adc_init()
 #ifdef RS41
     memset(&adc_channel, 0, sizeof(adc_channel));
     adc_channel.Channel = CHANNEL_BUTTON;
-    adc_channel.Rank = ADC_REGULAR_RANK_1;
+    adc_channel.Rank = ADC_REGULAR_RANK_2;
     #ifndef RS41_RSM4x4
         adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
     #else
@@ -295,7 +299,9 @@ static void dma_adc_init()
 // Not using ADC for button on DFM17
 #endif
 
-    // HAL_ADCEx_Calibration_Start(&hadc1);
+#ifdef RS41_RSM4x4
+    HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+#endif
 
     __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
 
@@ -355,11 +361,22 @@ void system_shutdown()
 
 void system_handle_button()
 {
+
+// #TODO fix this on the RS41 RSM_4x4
+#ifndef RS41_RSM4x4
     static uint16_t button_pressed_threshold = 2000;
+#else
+    static uint16_t button_pressed_threshold = 1500;
+#endif
     static bool shutdown = false;
 
+    // RS41 (RSM412) & DFM17
     // ~1650-1850 - button up
     // ~2000-2200 - button down
+
+    // RS41 RSM4x4
+    // ~1300 - button up
+    // ~1565 - button down
 
     uint16_t current_value = system_get_button_adc_value();
 
