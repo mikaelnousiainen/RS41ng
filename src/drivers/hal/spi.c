@@ -17,22 +17,34 @@ void spi_init()
 {
     GPIO_InitTypeDef gpio_init;
 
-    // SCK 
+    // SCK
     gpio_init.Pin = PIN_SCK;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     gpio_init.Pull = GPIO_NOPULL;
+#ifdef RS41_RSM4x4
+    gpio_init.Alternate = GPIO_AF5_SPI2;
+#endif
     HAL_GPIO_Init(BANK_SCK, &gpio_init);
 
     // MOSI
     gpio_init.Pin = PIN_MOSI;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+#ifdef RS41_RSM4x4
+    gpio_init.Alternate = GPIO_AF5_SPI2;
+#endif
     HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 
     // MISO
     gpio_init.Pin = PIN_MISO;
+#ifdef RS41_RSM4x4
+    // STM32L4 requires AF mode and explicit alternate function for MISO
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Alternate = GPIO_AF5_SPI2;
+#else
     gpio_init.Mode = GPIO_MODE_INPUT;
+#endif
     gpio_init.Pull = GPIO_NOPULL;
 #ifdef DFM17
     gpio_init.Pull = GPIO_PULLUP;
