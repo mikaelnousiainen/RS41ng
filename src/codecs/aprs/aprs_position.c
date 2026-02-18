@@ -13,8 +13,8 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
     int16_t la_degrees, lo_degrees;
     uint8_t la_minutes, la_h_minutes, lo_minutes, lo_h_minutes;
 
-    convert_degrees_to_dmh(data->gps.latitude_degrees_1000000 / 10, &la_degrees, &la_minutes, &la_h_minutes);
-    convert_degrees_to_dmh(data->gps.longitude_degrees_1000000 / 10, &lo_degrees, &lo_minutes, &lo_h_minutes);
+    convert_degrees_to_dmh(data->gps.latitude_degrees_10000000 / 10, &la_degrees, &la_minutes, &la_h_minutes);
+    convert_degrees_to_dmh(data->gps.longitude_degrees_10000000 / 10, &lo_degrees, &lo_minutes, &lo_h_minutes);
 
     int16_t heading_degrees = (int16_t) ((float) data->gps.heading_degrees_100000 / 100000.0f);
     int16_t ground_speed_knots = (int16_t) (((float) data->gps.ground_speed_cm_per_second / 100.0f) * 3.6f / 1.852f);

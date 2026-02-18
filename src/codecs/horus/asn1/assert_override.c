@@ -1,0 +1,1 @@
+int assert_value=0;

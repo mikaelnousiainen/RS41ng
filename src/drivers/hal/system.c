@@ -319,18 +319,17 @@ static void dma_adc_init()
 uint16_t system_get_battery_voltage_millivolts()
 {
 #ifdef RS41
-    uint16_t temp = dma_buffer_adc[0];
-    uint16_t return_val = (uint16_t) (((float) temp) * 10.0f * 650.0f / 4096.0f);
-    //log_info("Raw battery voltage is: %d\n", temp);
-    //log_info("Computed battery voltage is: %d\n", return_val);
-    //return (uint16_t) (((float) dma_buffer_adc[0]) * 10.0f * 600.0f / 4096.0f);
-    return return_val;
+    uint16_t voltage = (uint16_t)((uint32_t)dma_buffer_adc[0] * 6500UL / 4096UL);
 #else  //DFM17
-    // Kludge:  DFM17 voltage is more than 5 volts, so cut the value in half.
     // Changed 600 to 690 to try and get it more accurate to actual voltage
     // 690 yields fairly linear, accurate results between 5v6 and 6v6
-    return (uint16_t) ( ((float) dma_buffer_adc[0]) * 10.0f * 690.0f / 8192.0f );
+    uint16_t voltage = (uint16_t)((uint32_t)dma_buffer_adc[0] * 6900UL / 4096UL);
 #endif 
+    if(voltage > 16383) {
+        return 16383;
+    } else {
+        return voltage;
+    }
 }
 
 uint16_t system_get_button_adc_value()

@@ -78,11 +78,11 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$sv", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.latitude_degrees_1000000 / 10000);
+    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.latitude_degrees_10000000 / 10000);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$lat", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.longitude_degrees_1000000 / 10000);
+    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.longitude_degrees_10000000 / 10000);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$lon", replacement);
 

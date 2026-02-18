@@ -56,7 +56,8 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             use_direct_mode = true;
             break;
         case RADIO_DATA_MODE_HORUS_V1:
-        case RADIO_DATA_MODE_HORUS_V2: {
+        case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
             frequency_offset = (uint16_t) idle_tone->index + HORUS_FREQUENCY_OFFSET_SI4063;
             modulation_type = SI4063_MODULATION_TYPE_CW;
@@ -109,6 +110,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             break;
@@ -285,7 +287,8 @@ inline void radio_handle_data_timer_si4063()
             break;
         }
         case RADIO_DATA_MODE_HORUS_V1:
-        case RADIO_DATA_MODE_HORUS_V2: {
+        case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
             fsk_encoder *fsk_enc = &radio_current_transmit_entry->fsk_encoder;
             int8_t tone_index;
@@ -323,6 +326,7 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
         case RADIO_DATA_MODE_RTTY:
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             data_timer_uninit();
             break;
         case RADIO_DATA_MODE_CATS:
@@ -352,6 +356,7 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
+        case RADIO_DATA_MODE_HORUS_V3:
             system_enable_tick();
             break;
         case RADIO_DATA_MODE_CATS:

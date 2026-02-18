@@ -358,7 +358,7 @@ static void ubxm10050_cold_reset(void)
  * Debug helpers
  * ------------------------------------------------------------------------- */
 
-static const char *fix_type_str(uint8_t fix)
+__attribute__((unused)) static const char *fix_type_str(uint8_t fix)
 {
     switch (fix) {
         case 0:  return "NONE";
@@ -401,8 +401,8 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
         m10_current_gps_data.satellites_visible           = pvt->numSV;
         m10_current_gps_data.time_valid_flags             = pvt->valid;
         m10_current_gps_data.time_accuracy_ns             = pvt->tAcc;
-        m10_current_gps_data.latitude_degrees_1000000     = pvt->lat;
-        m10_current_gps_data.longitude_degrees_1000000    = pvt->lon;
+        m10_current_gps_data.latitude_degrees_10000000     = pvt->lat;
+        m10_current_gps_data.longitude_degrees_10000000    = pvt->lon;
         m10_current_gps_data.altitude_mm                  = pvt->hMSL;
         m10_current_gps_data.ground_speed_cm_per_second   = pvt->gSpeed / 10;
         m10_current_gps_data.heading_degrees_100000       = pvt->headMot;
@@ -415,18 +415,18 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
          *   valid bits: bit0=date valid  bit1=time valid  bit2=fully resolved
          *   fix types:  0=none 2=2D 3=3D 4=GNSS+DR 5=time-only
          */
-        log_info("GPS PVT #%u: fix=%s fixOK=%d sats=%u "
-                 "%04u-%02u-%02u %02u:%02u:%02u valid=0x%02X tAcc=%luus "
-                 "ok=%u bad=%u\n",
-                 pvt_packet_count,
-                 fix_type_str(pvt->fixType), (pvt->flags & 0x01),
-                 pvt->numSV,
-                 pvt->year, pvt->month, pvt->day,
-                 pvt->hour, pvt->min, pvt->sec,
-                 pvt->valid,
-                 (unsigned long)(pvt->tAcc / 1000),  /* ns -> us for readability */
-                 m10_current_gps_data.ok_packets,
-                 m10_current_gps_data.bad_packets);
+        // log_info("GPS PVT #%u: fix=%s fixOK=%d sats=%u "
+        //          "%04u-%02u-%02u %02u:%02u:%02u valid=0x%02X tAcc=%luus "
+        //          "ok=%u bad=%u\n",
+        //          pvt_packet_count,
+        //          fix_type_str(pvt->fixType), (pvt->flags & 0x01),
+        //          pvt->numSV,
+        //          pvt->year, pvt->month, pvt->day,
+        //          pvt->hour, pvt->min, pvt->sec,
+        //          pvt->valid,
+        //          (unsigned long)(pvt->tAcc / 1000),  /* ns -> us for readability */
+        //          m10_current_gps_data.ok_packets,
+        //          m10_current_gps_data.bad_packets);
         return;
     }
 
@@ -443,10 +443,10 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
 
         /* Debug: log GPS time info - leapS valid is bit2 of valid byte.
          * When leapS becomes valid, UTC = GPS_time - leapS is accurate. */
-        log_info("GPS TIMEGPS: iTOW=%lu week=%d leapS=%d leapValid=%d tAcc=%luns\n",
-                 (unsigned long)t->iTOW, t->week, t->leapS,
-                 (t->valid & 0x04) ? 1 : 0,
-                 (unsigned long)t->tAcc);
+        // log_info("GPS TIMEGPS: iTOW=%lu week=%d leapS=%d leapValid=%d tAcc=%luns\n",
+        //          (unsigned long)t->iTOW, t->week, t->leapS,
+        //          (t->valid & 0x04) ? 1 : 0,
+        //          (unsigned long)t->tAcc);
         return;
     }
 

@@ -14,6 +14,10 @@
 #ifdef DFM17
 #include "hal/clock_calibration.h"
 #include "drivers/si4063/si4063.h"
+#include "drivers/si4063/dfm_cap_lut.h"
+uint8_t clock_crystal_calibration_capacitance;
+uint8_t c_t_look;
+int t_look;
 #endif
 
 // Initialize leap seconds with a known good value
@@ -27,6 +31,7 @@ void telemetry_collect(telemetry_data *data)
 
     data->button_adc_value = system_get_button_adc_value();
     data->battery_voltage_millivolts = system_get_battery_voltage_millivolts();
+    log_info("Battery voltage: %u mV\n", data->battery_voltage_millivolts);
 #ifdef RS41
     data->internal_temperature_celsius_100 = si4032_read_temperature_celsius_100();
 #endif
@@ -64,8 +69,8 @@ void telemetry_collect(telemetry_data *data)
     } else {
         // Zero out position data if we don't have a valid GPS fix.
         // This is done to avoid transmitting invalid position information.
-        data->gps.latitude_degrees_1000000 = 0;
-        data->gps.longitude_degrees_1000000 = 0;
+        data->gps.latitude_degrees_10000000 = 0;
+        data->gps.longitude_degrees_10000000 = 0;
         data->gps.altitude_mm = 0;
         data->gps.ground_speed_cm_per_second = 0;
         data->gps.heading_degrees_100000 = 0;
@@ -75,9 +80,21 @@ void telemetry_collect(telemetry_data *data)
 #ifdef DFM17
     data->clock_calibration_trim = clock_calibration_get_trim();
     data->clock_calibration_count = clock_calibration_get_change_count();
+    
+    #if RADIO_SI4063_TX_CORRECT
+    t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
+    if (t_look < 0 ){
+        t_look = 39;
+    }
+    if (t_look >49 ){
+        t_look = 49;
+    }
+
+    si4063_set_crystal_capacitance(c_value[t_look]);
+    #endif
 #endif
 
-    locator_from_lonlat(data->gps.longitude_degrees_1000000, data->gps.latitude_degrees_1000000,
+    locator_from_lonlat(data->gps.longitude_degrees_10000000, data->gps.latitude_degrees_10000000,
             LOCATOR_PAIR_COUNT_FULL, data->locator);
 
     data->data_counter++;

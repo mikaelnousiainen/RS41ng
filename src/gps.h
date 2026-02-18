@@ -50,8 +50,8 @@ typedef struct _gps_data {
     /* Time accuracy estimate from NAV-PVT [ns] */
     uint32_t time_accuracy_ns;
 
-    int32_t latitude_degrees_1000000;
-    int32_t longitude_degrees_1000000;
+    int32_t latitude_degrees_10000000;
+    int32_t longitude_degrees_10000000;
     int32_t altitude_mm;
     uint32_t ground_speed_cm_per_second;
     int32_t heading_degrees_100000;
