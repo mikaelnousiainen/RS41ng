@@ -1,7 +1,5 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues! **Using a DFM-17 as a primary flight tracker is NOT recommended yet!**
-
 **NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
 DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
@@ -94,7 +92,7 @@ The main features the RS41ng firmware are:
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
     * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
-  * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+  * [Horus 4FSK v1, v2, and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
     * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
   * [CATS - Communication And Telemetry System](https://cats.radio/) packet radio standard, which has a modulation much more efficient than APRS
@@ -149,10 +147,12 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 
 #### Notes about Horus 4FSK
 
-* The Horus 4FSK v1 and v2 modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki).
-* Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform.
-* See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
-* In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it 
+* The Horus 4FSK modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki). Horus Binary v1 will soon be removed from RS41ng, but support for Horus Binary v2 and v3 will continue. No additional v2 IDs are being issued, in favor of using Horus Binary v3.
+  
+* There are 3 methods to decode Horus 4FSK modes:
+  * Use [webhorus](https://horus.sondehub.org/), SSB audio input or an RTL-SDR, 
+  * Use the [horus-gui](https://github.com/projecthorus/horus-gui) application, 
+  * Use [horusdemodlib](https://github.com/projecthorus/horusdemodlib) on a Raspberry Pi with an RTL-SDR
 
 #### Notes about CATS
 
@@ -198,7 +198,6 @@ Sensor driver code contributions are welcome!
         * `CALLSIGN`
         * For RS41, the settings beginning with `RADIO_SI4032_` to select transmit power and the modes to transmit
         * For DFM-17, the settings beginning with `RADIO_SI4063_` to select transmit power and the modes to transmit
-        * `HORUS_V2_PAYLOAD_ID` if you transmit Horus 4FSK
         * At least `APRS_SSID`, `APRS_SYMBOL` and `APRS_COMMENT` if you transmit APRS
         * At least `CATS_SSID`, `CATS_ICON` and `CATS_COMMENT` if you transmit CATS
 2. Set up transmitted message templates in `config.c`, depending on the modes you use.
