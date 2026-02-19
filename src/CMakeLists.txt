@@ -4,6 +4,19 @@ file(GLOB_RECURSE SOURCES_ASM CONFIGURE_DEPENDS "*.s")
 file(GLOB_RECURSE SOURCES_CXX CONFIGURE_DEPENDS "*.cpp")
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "*.h")
 
+if(DFM17)
+    set(STM32F1 1)
+    set(HW_DEFINES DFM17)
+elseif(RS41)
+    set(STM32F1 1)
+    set(HW_DEFINES RS41)
+elseif(RS41_RSM4X4)
+    set(STM32L4 1)
+    set(HW_DEFINES RS41 RS41_RSM4x4)
+else()
+    message(FATAL_ERROR "You must define a target type (-DDFM17=1 or -DRS41=1 or -DRS41_RSM4X4=1)")
+endif()
+
 # --- Per-target configuration ---
 if(STM32F1)
     message(STATUS "Target: STM32F1 (RS41 old / DFM-17)")
@@ -45,6 +58,7 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     ${MCU_DEFINE}
+    ${HW_DEFINES}
     SUPPORT_CPLUSPLUS
     __ASSEMBLY__
 )

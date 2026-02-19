@@ -2,7 +2,7 @@
 #define __CONFIG_H
 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-#define RS41
+// #define RS41
 // #define DFM17
 
 // Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
@@ -20,10 +20,10 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "KE5GDB"
+#define CALLSIGN "4FSKTEST-V3"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary.
-#define RADIO_POST_TRANSMIT_DELAY_MS 0
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 /**
  * RS41 only: Built-in Si4032 radio chip transmission configuration
