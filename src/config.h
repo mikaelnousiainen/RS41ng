@@ -6,7 +6,7 @@
 // #define DFM17
 
 // Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
-#define RS41_RSM4x4
+// #define RS41_RSM4x4
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."

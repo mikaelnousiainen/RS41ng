@@ -293,7 +293,7 @@ static bool ubxg6010_wait_for_ack()
     return ack_received;
 }
 
-void ubxg6010_send_command(uint8_t msgClass, uint8_t msgId, uint8_t *payload, uint16_t payloadSize)
+void ubxg6010_send_command(uint8_t msgClass, uint8_t msgId, const uint8_t *payload, uint16_t payloadSize)
 {
     ubxg6010_clear_ack();
 
@@ -314,13 +314,13 @@ void ubxg6010_send_command(uint8_t msgClass, uint8_t msgId, uint8_t *payload, ui
     usart_gps_send_byte(chksum.ck_b);
 }
 
-void ubxg6010_send_packet(uBloxPacket *packet)
+void ubxg6010_send_packet(const uBloxPacket *packet)
 {
-    ubxg6010_send_command(packet->header.messageClass, packet->header.messageId, (uint8_t *) &packet->data,
+    ubxg6010_send_command(packet->header.messageClass, packet->header.messageId, (const uint8_t *) &packet->data,
             packet->header.payloadSize);
 }
 
-bool ubxg6010_send_packet_and_wait_for_ack(uBloxPacket *packet)
+bool ubxg6010_send_packet_and_wait_for_ack(const uBloxPacket *packet)
 {
     int retries = 3;
     bool success;
@@ -343,7 +343,7 @@ bool ubxg6010_get_current_gps_data(gps_data *data)
     return data->updated;
 }
 
-uBloxPacket msgcfgrst = {
+const uBloxPacket msgcfgrst = {
         .header = {
                 0xb5,
                 0x62,
@@ -387,7 +387,7 @@ uBloxPacket msgcfgprt = {
  * 4: Eco mode
  * 5-255: reserved
  */
-uBloxPacket msgcfgrxm = {
+const uBloxPacket msgcfgrxm = {
         .header = {
                 0xb5,
                 0x62,
@@ -417,7 +417,7 @@ uBloxPacket msgcfgmsg = {
         }
 };
 
-uBloxPacket msgcfgrate = {
+const uBloxPacket msgcfgrate = {
         .header = {
                 0xb5,
                 0x62,
@@ -448,7 +448,7 @@ uBloxPacket msgcfgrate = {
  * - 2: 3D only
  * - 3: Auto 2D/3D
  */
-uBloxPacket msgcfgnav5 = {
+const uBloxPacket msgcfgnav5 = {
         .header = {
                 0xb5,
                 0x62,
@@ -479,7 +479,7 @@ uBloxPacket msgcfgnav5 = {
 };
 
 // Configure NMEA protocol version 2.3
-uBloxPacket msgcfgnmea = {
+const uBloxPacket msgcfgnmea = {
         .header = {
                 0xb5,
                 0x62,
@@ -647,7 +647,7 @@ bool ubxg6010_init()
 }
 
 // Poll request for message: 0x01 0x20 GPS Time Solution
-uBloxPacket msgnavgpstime = {
+const uBloxPacket msgnavgpstime = {
         .header = {
                 0xb5,
                 0x62,
@@ -657,7 +657,7 @@ uBloxPacket msgnavgpstime = {
         }
 };
 
-uBloxPacket msgcfgmsgpoll = {
+const uBloxPacket msgcfgmsgpoll = {
         .header = {
                 0xb5,
                 0x62,
