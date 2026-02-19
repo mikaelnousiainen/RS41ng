@@ -90,8 +90,10 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     usart1.Init.Mode = USART_MODE_TX_RX; // Enable only transmit for now | USART_Mode_Rx;
     usart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     usart1.Init.OverSampling = UART_OVERSAMPLING_16;
+#ifdef RS41_RSM4x4
     usart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
     usart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+#endif
 
     if (HAL_UART_Init(&usart1) != HAL_OK) {
       log_info("HAL_UART_INIT fail\n");
