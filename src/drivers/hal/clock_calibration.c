@@ -3,16 +3,12 @@
 #ifdef DFM17
 
 #include <stm32f1xx_hal.h>
-#include "misc.h"
 #include "system.h"
 #include "clock_calibration.h"
 
-// The HSI (internal oscillator) trim register mask, copied from stm_lib/src/stm32f10x_rcc.c
-#define CR_HSITRIM_Mask           ((uint32_t)0xFFFFFF07)
-
 // Register definition for reading the HSI current trim out of the Calibration Register (CR).
 // Resulting value will be between 0-31.
-#define CURRENT_TRIM    ((RCC->CR & ~CR_HSITRIM_Mask) >>3)
+#define CURRENT_TRIM    ((RCC->CR & RCC_CR_HSITRIM) >> RCC_CR_HSITRIM_Pos)
 
 /**
  * On the DFM-17, GPIO PB8 is wired to the GPS Timepulse. We take advantage of this to do a
@@ -49,7 +45,7 @@ void clock_calibration_adjust()
         return;
     }
 
-    RCC_AdjustHSICalibrationValue(trim_suggestion);
+    __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(trim_suggestion);
     trim_current = trim_suggestion;
 
     calibration_change_count++;
@@ -60,31 +56,17 @@ void clock_calibration_adjust()
 
 void timepulse_init()
 {
-    // Initialize pin PB8 as floating input
-    GPIO_InitTypeDef gpio_init;
-    gpio_init.GPIO_Pin = GPIO_Pin_8;
-    gpio_init.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    gpio_init.GPIO_Speed = GPIO_Speed_10MHz;
-    GPIO_Init(GPIOB, &gpio_init);
-
-    // PB8 is connected to interrupt line 8, set trigger on the configured edge and enable the interrupt
-    EXTI_InitTypeDef exti_init;
-    exti_init.EXTI_Line = EXTI_Line8;
-    exti_init.EXTI_Mode = EXTI_Mode_Interrupt;
-    exti_init.EXTI_Trigger = EXTI_Trigger_Rising;
-    exti_init.EXTI_LineCmd = ENABLE;
-    EXTI_Init(&exti_init);
-
-    // Attach interrupt line to port B
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource8);
+    // Initialize pin PB8 as floating input with rising-edge EXTI interrupt
+    GPIO_InitTypeDef gpio_init = {0};
+    gpio_init.Pin = GPIO_PIN_8;
+    gpio_init.Mode = GPIO_MODE_IT_RISING;
+    gpio_init.Pull = GPIO_NOPULL;
+    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &gpio_init);
 
     // PB8 is connected to EXTI_Line8, which has EXTI9_5_IRQn vector. Use priority 0 for now.
-    NVIC_InitTypeDef NVIC_InitStruct;
-    NVIC_InitStruct.NVIC_IRQChannel = EXTI9_5_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
     // Pull the current calibration to start
     trim_current = CURRENT_TRIM;
@@ -99,9 +81,16 @@ void timepulse_init()
 
 void EXTI9_5_IRQHandler(void)
 {
-    uint32_t current_millis = Hal_GetTick();
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+}
 
-    EXTI_ClearITPendingBit(EXTI_Line8);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin != GPIO_PIN_8) {
+        return;
+    }
+
+    uint32_t current_millis = Hal_GetTick();
 
     if (old_millis == 0) {
         // First timepulse. Just store millis.
