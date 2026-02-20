@@ -64,8 +64,9 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     htim15.Instance = TIM15;
+#ifdef RS41
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
+#endif
 
     __HAL_RCC_TIM15_CLK_ENABLE();
 
@@ -128,20 +129,16 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 #endif
 #ifdef DFM17
     // For DFM17 we don't have a PWM pin in the right place, so we manually toggle the pin in the ISR
-    TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
-    TIM_ITConfig(TIM15, TIM_IT_Update, ENABLE);
+    __HAL_TIM_CLEAR_IT(&htim15, TIM_IT_UPDATE);
+    __HAL_TIM_ENABLE_IT(&htim15, TIM_IT_UPDATE);
 
-    NVIC_InitTypeDef nvic_init;
-    nvic_init.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
-    nvic_init.NVIC_IRQChannelPreemptionPriority = 2;
-    nvic_init.NVIC_IRQChannelSubPriority = 1;
-    nvic_init.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&nvic_init);
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 2, 1);
+    HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
 #endif
 
 //    __HAL_TIM_ENABLE(&htim15);
-    hang_if_bad("HAL_TIM_PWM_Start", 
-                HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2) != HAL_OK
+    hang_if_bad("HAL_TIM_PWM_Start",
+                HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2)
                );
 }
 
@@ -176,10 +173,10 @@ void pwm_timer_uninit()
     __HAL_TIM_MOE_DISABLE(&htim15);
     __HAL_TIM_DISABLE(&htim15);
     hang_if_bad("HAL_TIM_PWM_Stop",
-                HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2) != HAL_OK
+                HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2)
                );
     hang_if_bad("HAL_TIM_PWM_DeInit",
-                HAL_TIM_PWM_DeInit(&htim15) != HAL_OK
+                HAL_TIM_PWM_DeInit(&htim15)
                );
     //HAL_TIM_Base_DeInit(&htim15);
 

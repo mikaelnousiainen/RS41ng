@@ -1,4 +1,8 @@
 #include "config.h"
+
+// Only entertain this file if using an RS41
+#ifdef RS41
+
 #include "pulse_counter.h"
 #include "gpio.h"
 #ifndef RS41_RSM4x4
@@ -55,3 +59,5 @@ void HAL_EXTI_Callback(void)
         pulse_count = pulse_count + 1;
     }
 }
+
+#endif

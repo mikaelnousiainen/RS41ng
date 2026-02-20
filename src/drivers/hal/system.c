@@ -46,6 +46,8 @@ static void rcc_init()
 {
     __HAL_RCC_PWR_CLK_ENABLE();
 
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+
 #ifdef RS41
 #ifdef RS41_RSM4x4
     //log_info("PWREx\n");
@@ -58,10 +60,8 @@ static void rcc_init()
         __NOP();
     }
 #endif //RS41_RSM4x4
+
     // The RS41 hardware uses an external clock at 24 MHz
-
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
@@ -345,7 +345,7 @@ uint16_t system_get_button_adc_value()
 #endif
 #ifdef DFM17
     // Fake being an ADC.  Take the binary value and if non-zero, make it trigger button-down
-    return ( ((int) GPIO_ReadInputDataBit(BANK_BUTTON,PIN_BUTTON)) * 2100);
+    return ( ((int) HAL_GPIO_ReadPin(BANK_BUTTON, PIN_BUTTON)) * 2100);
 #endif
 }
 
