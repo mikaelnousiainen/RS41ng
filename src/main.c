@@ -113,7 +113,7 @@ int main(void)
     #ifdef RS41 
         // Only RS41 uses the I2C bus
         // log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
-        i2c_init(I2C_BUS_CLOCK_SPEED);
+        i2c_init();
     #endif
 #endif
 

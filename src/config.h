@@ -289,10 +289,22 @@ Setting, measured RF output power, relative DC power draw
  * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
  */
 
-// Define the I²C bus clock speed in Hz.
+// Define the I²C bus clock speed in Hz. (old RS41 only)
 // The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
 // Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
 #define I2C_BUS_CLOCK_SPEED 100000
+
+// The STM32L4 on the RSM4x4 series uses a timing configuration register: 
+// 0x20422727 = 100KHz
+// 0x90427777 = 10KHz
+#define I2C_BUS_TIMING 0x20422727
+
+// I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
+// PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
+// 0x20422727
+// I2C timing for 24 MHz PCLK1, 10 kHz standard mode (I2C2)
+// PRESC=9, SCLDEL=4, SDADEL=2, SCLH=0x77(5us), SCLL=0x77(5us)
+// 0x90427777
 
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.

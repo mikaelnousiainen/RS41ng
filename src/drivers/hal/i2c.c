@@ -24,7 +24,7 @@ i2c_port DEFAULT_I2C_PORT = {
         .i2c = I2C_PORT,
 };
 
-void i2c_init(uint32_t clock_speed)
+void i2c_init()
 {
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_I2C2_CLK_ENABLE();
@@ -65,10 +65,10 @@ void i2c_init(uint32_t clock_speed)
 #ifdef RS41_RSM4x4
     // I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
     // PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
-    hi2c.Init.Timing = 0x20422727;
+    hi2c.Init.Timing = I2C_BUS_TIMING;
     hi2c.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
 #else  // F100 processor
-    hi2c.Init.ClockSpeed = clock_speed;
+    hi2c.Init.ClockSpeed = I2C_BUS_CLOCK_SPEED;
     hi2c.Init.DutyCycle = I2C_DUTYCYCLE_2;
 #endif // Processor type
 
