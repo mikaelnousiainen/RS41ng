@@ -47,8 +47,6 @@
 #define RADIO_SI4032_TX_PIP_COUNT 6
 #define RADIO_SI4032_TX_APRS false
 #define RADIO_SI4032_TX_APRS_COUNT 2
-#define RADIO_SI4032_TX_HORUS_V1 false
-#define RADIO_SI4032_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4032_TX_HORUS_V2 false
 #define RADIO_SI4032_TX_HORUS_V2_COUNT 5
 #define RADIO_SI4032_TX_HORUS_V3 true
@@ -56,10 +54,9 @@
 #define RADIO_SI4032_TX_CATS false
 #define RADIO_SI4032_TX_CATS_COUNT 1
 
-// Continuous transmit mode can be enabled for *either* Horus V1, V2, or V3, but not all. This disables all other transmission modes.
+// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
 #define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS false
 
@@ -68,7 +65,6 @@
 #define RADIO_SI4032_TX_FREQUENCY_PIP       432300000
 #define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
 #define RADIO_SI4032_TX_FREQUENCY_HORUS_V3  432301000
 #define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
@@ -106,8 +102,6 @@ Setting, measured RF output power, relative DC power draw
 #define RADIO_SI4063_TX_PIP_COUNT 6
 #define RADIO_SI4063_TX_APRS false
 #define RADIO_SI4063_TX_APRS_COUNT 2
-#define RADIO_SI4063_TX_HORUS_V1 false
-#define RADIO_SI4063_TX_HORUS_V1_COUNT 1
 #define RADIO_SI4063_TX_HORUS_V2 false
 #define RADIO_SI4063_TX_HORUS_V2_COUNT 5
 #define RADIO_SI4063_TX_HORUS_V3 true
@@ -115,10 +109,9 @@ Setting, measured RF output power, relative DC power draw
 #define RADIO_SI4063_TX_CATS false
 #define RADIO_SI4063_TX_CATS_COUNT 1
 
-// Continuous transmit mode can be enabled for *either* Horus V1, V2, or V3, but not all. This disables all other transmission modes.
+// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
 // The continuous mode transmits Horus 4FSK preamble between transmissions
 // to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
 #define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
 #define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS false
 
@@ -127,7 +120,6 @@ Setting, measured RF output power, relative DC power draw
 #define RADIO_SI4063_TX_FREQUENCY_PIP       432500000
 #define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
 #define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
@@ -232,28 +224,7 @@ Setting, measured RF output power, relative DC power draw
 #define HORUS_FREQUENCY_OFFSET_SI4063 0
 
 /**
- * Horus V1 4FSK mode settings (deprecated, please use Horus V2 mode)
- */
-
-// NOTE: Horus 4FSK V1 mode is deprecated in favor of Horus 4FSK V2 mode. All new Horus 4FSK payload IDs are allocated for V2 mode.
-// NOTE: Payload ID 0 (4FSKTEST) is for testing purposes only, and should not be used on an actual flight.
-// Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V1_PAYLOAD_ID 0
-#define HORUS_V1_BAUD_RATE_SI4032 100
-#define HORUS_V1_BAUD_RATE_SI4063 100
-#define HORUS_V1_BAUD_RATE_SI5351 50
-#define HORUS_V1_PREAMBLE_LENGTH 16
-#define HORUS_V1_IDLE_PREAMBLE_LENGTH 32
-#define HORUS_V1_TONE_SPACING_HZ_SI5351 270
-
-// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
-// See the README file for more detailed documentation about time sync and its offset setting
-#define HORUS_V1_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define HORUS_V1_TIME_SYNC_OFFSET_SECONDS 0
-
-/**
- * Horus V2 4FSK mode settings
+ * Horus V2 4FSK mode settings -- Horus V2 has been deprecated in favor of V3. Please use V3 whenever possible. 
  */
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
@@ -446,8 +417,6 @@ Setting, measured RF output power, relative DC power draw
 #define RADIO_SI5351_TX_CW_COUNT 1
 #define RADIO_SI5351_TX_PIP false
 #define RADIO_SI5351_TX_PIP_COUNT 6
-#define RADIO_SI5351_TX_HORUS_V1 false
-#define RADIO_SI5351_TX_HORUS_V1_COUNT 1
 #define RADIO_SI5351_TX_HORUS_V2 false
 #define RADIO_SI5351_TX_HORUS_V2_COUNT 4
 #define RADIO_SI5351_TX_HORUS_V3 true
@@ -468,7 +437,6 @@ Setting, measured RF output power, relative DC power draw
 // Transmit frequencies for the Si5351 transmitter modes
 #define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
 #define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
-#define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_HORUS_V3   3608000UL
 #define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
