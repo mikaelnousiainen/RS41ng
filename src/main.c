@@ -7,6 +7,8 @@
 #include "drivers/gps/gps_driver.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "bme68x_handler.h"
+#include "bme690_handler.h"
 #include "radsens_handler.h"
 #include "si5351_handler.h"
 #include "radio.h"
@@ -151,6 +153,28 @@ int main(void)
     }
 #endif
 
+#if SENSOR_BME68X_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("BME68X init\n");
+        success = bme68x_handler_init();
+        if (success) {
+            break;
+        }
+        log_error("BME690 init failed, retrying...");
+    }
+#endif
+
+#if SENSOR_BME690_ENABLE
+    for (int i = 0; i < 3; i++) {
+        log_info("BME690 init\n");
+        success = bme690_handler_init();
+        if (success) {
+            break;
+        }
+        log_error("BME690 init failed, retrying...");
+    }
+#endif
+
 #if SENSOR_RADSENS_ENABLE
     for (int i = 0; i < 3; i++) {
         log_info("RadSens init\n");
@@ -171,7 +195,7 @@ int main(void)
         }
         log_error("Si5351 init failed, retrying...");
     }
-#endif
+#endif 
 
     //log_info("Radio module init\n");
     radio_init();

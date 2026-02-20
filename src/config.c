@@ -14,6 +14,7 @@
  * $ti - Internal temperature in C (up to 3 chars)
  * $hu - Humidity percentage (up to 3 chars)
  * $pr - Atmospheric pressure in millibars (up to 4 chars)
+ * $gas - Gas measurement resistance in Ohms from BME680/688/690 sensor
  * $tow - GPS time of week in milliseconds
  * $hh - Current hour (2 chars)
  * $mm - Current minute (2 chars)

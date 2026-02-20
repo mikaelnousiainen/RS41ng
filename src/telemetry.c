@@ -3,6 +3,8 @@
 #include "drivers/gps/gps_driver.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "bme68x_handler.h"
+#include "bme690_handler.h"
 #include "radsens_handler.h"
 #include "locator.h"
 #include "config.h"
@@ -41,6 +43,14 @@ void telemetry_collect(telemetry_data *data)
 
 #if SENSOR_BMP280_ENABLE
     bmp280_read_telemetry(data);
+#endif
+
+#if SENSOR_BME68X_ENABLE
+    bme68x_read_telemetry(data);
+#endif
+
+#if SENSOR_BME690_ENABLE
+    bme690_read_telemetry(data);
 #endif
 
 #if SENSOR_RADSENS_ENABLE
