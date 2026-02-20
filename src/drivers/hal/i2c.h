@@ -1,15 +1,6 @@
 #ifndef __HAL_I2C_H
 #define __HAL_I2C_H
 
-#ifdef RS41_RSM4x4
-// STM32L412 has I2C1 and I2C3 only (no I2C2). PB10/PB11 AF4 = I2C3.
-#define I2C_PORT I2C3
-#define I2C_GPIO GPIOB
-// PB10: I2C3_SCL (AF4)
-#define I2C_PIN_SCL GPIO_PIN_10
-// PB11: I2C3_SDA (AF4)
-#define I2C_PIN_SDA GPIO_PIN_11
-#else
 #define I2C_PORT I2C2
 #define I2C_PORT_RCC_PERIPH RCC_APB1Periph_I2C2
 #define I2C_GPIO GPIOB
@@ -17,7 +8,6 @@
 #define I2C_PIN_SCL GPIO_PIN_10
 // PB11: I2C2_SDA/USART3_RX
 #define I2C_PIN_SDA GPIO_PIN_11
-#endif
 
 #include "hal.h"
 

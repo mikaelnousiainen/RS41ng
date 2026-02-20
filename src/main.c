@@ -149,7 +149,7 @@ int main(void)
         if (success) {
             break;
         }
-        log_error("BMP280 init failed, retrying...");
+        log_error("BMP280 init failed, retrying...\n");
     }
 #endif
 
@@ -160,7 +160,7 @@ int main(void)
         if (success) {
             break;
         }
-        log_error("BME690 init failed, retrying...");
+        log_error("BME68X init failed, retrying...\n");
     }
 #endif
 
@@ -171,7 +171,7 @@ int main(void)
         if (success) {
             break;
         }
-        log_error("BME690 init failed, retrying...");
+        log_error("BME690 init failed, retrying...\n");
     }
 #endif
 
@@ -182,7 +182,7 @@ int main(void)
         if (success) {
             break;
         }
-        log_error("RadSens init failed, retrying...");
+        log_error("RadSens init failed, retrying...\n");
     }
 #endif
 
@@ -193,7 +193,7 @@ int main(void)
         if (success) {
             break;
         }
-        log_error("Si5351 init failed, retrying...");
+        log_error("Si5351 init failed, retrying...\n");
     }
 #endif 
 

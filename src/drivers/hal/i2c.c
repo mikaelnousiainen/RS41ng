@@ -27,11 +27,7 @@ i2c_port DEFAULT_I2C_PORT = {
 void i2c_init(uint32_t clock_speed)
 {
     __HAL_RCC_GPIOB_CLK_ENABLE();
-#ifdef RS41_RSM4x4
-    __HAL_RCC_I2C3_CLK_ENABLE();
-#else
     __HAL_RCC_I2C2_CLK_ENABLE();
-#endif
 
     GPIO_InitTypeDef gpio_init;
 
@@ -40,7 +36,7 @@ void i2c_init(uint32_t clock_speed)
     gpio_init.Pull = GPIO_PULLUP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
 #ifdef RS41_RSM4x4
-    gpio_init.Alternate = GPIO_AF4_I2C3;
+    gpio_init.Alternate = GPIO_AF4_I2C2;
 #endif
     HAL_GPIO_Init(I2C_GPIO, &gpio_init);
 
@@ -49,20 +45,14 @@ void i2c_init(uint32_t clock_speed)
     gpio_init.Pull = GPIO_PULLUP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
 #ifdef RS41_RSM4x4
-    gpio_init.Alternate = GPIO_AF4_I2C3;
+    gpio_init.Alternate = GPIO_AF4_I2C2;
 #endif
     HAL_GPIO_Init(I2C_GPIO, &gpio_init);
 
     // NOTE: I2C chip reset is necessary here!
-#ifdef RS41_RSM4x4
-    __HAL_RCC_I2C3_FORCE_RESET();
-    delay_ms(2);
-    __HAL_RCC_I2C3_RELEASE_RESET();
-#else
     __HAL_RCC_I2C2_FORCE_RESET();
     delay_ms(2);
     __HAL_RCC_I2C2_RELEASE_RESET();
-#endif
     delay_ms(2);
 
     hi2c.Instance = I2C_PORT;
@@ -73,7 +63,9 @@ void i2c_init(uint32_t clock_speed)
     hi2c.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
     hi2c.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;
 #ifdef RS41_RSM4x4
-    hi2c.Init.Timing = 0x00400BD8;
+    // I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
+    // PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
+    hi2c.Init.Timing = 0x20422727;
     hi2c.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
 #else  // F100 processor
     hi2c.Init.ClockSpeed = clock_speed;
@@ -106,15 +98,9 @@ void i2c_init(uint32_t clock_speed)
 void i2c_uninit()
 {
     HAL_I2C_DeInit(&hi2c);
-#ifdef RS41_RSM4x4
-    __HAL_RCC_I2C3_FORCE_RESET();
-    delay_ms(2);
-    __HAL_RCC_I2C3_RELEASE_RESET();
-#else
     __HAL_RCC_I2C2_FORCE_RESET();
     delay_ms(2);
     __HAL_RCC_I2C2_RELEASE_RESET();
-#endif
 }
 
 
