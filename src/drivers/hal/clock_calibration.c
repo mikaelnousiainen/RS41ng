@@ -90,7 +90,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         return;
     }
 
-    uint32_t current_millis = Hal_GetTick();
+    uint32_t current_millis = HAL_GetTick();
 
     if (old_millis == 0) {
         // First timepulse. Just store millis.

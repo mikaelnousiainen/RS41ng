@@ -130,7 +130,7 @@ void spi_send(uint8_t data)
     // Reset the overrun error by reading the data and status registers
     // NOTE: It seems this sequence is required to make Si4063 SPI communication work on DFM17 radiosondes
     HAL_SPI_Receive(&hspi, NULL, 1, 10);
-    __HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_OVR);
+    __HAL_SPI_CLEAR_OVRFLAG(&hspi);
 #endif
 }
 

@@ -17,6 +17,7 @@
 #include "drivers/hal/hal.h"
 #include "drivers/hal/delay.h"
 #include "drivers/hal/spi.h"
+#include "drivers/hal/timers.h"
 
 #include "si4063.h"
 #include "gpio.h"
@@ -833,20 +834,18 @@ int si4063_init()
     return HAL_OK;
 }
 
-// TODO: Fix this
-// void TIM1_BRK_TIM15_IRQHandler(void)
-// {
-// #ifdef DFM17
-//     static bool pin_state = false;
-// #endif
-//     __HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE);
+void TIM1_BRK_TIM15_IRQHandler(void)
+{
+#ifdef DFM17
+    static bool pin_state = false;
+#endif
 
-//     if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
-//         TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
-// #ifdef DFM17
-//         // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
-//         pin_state = !pin_state;
-//         si4063_set_direct_mode_pin(pin_state);
-// #endif
-//     }
-// }
+    if (__HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE) && __HAL_TIM_GET_IT_SOURCE(&htim15, TIM_IT_UPDATE)) {
+        __HAL_TIM_CLEAR_IT(&htim15, TIM_IT_UPDATE);
+#ifdef DFM17
+        // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
+        pin_state = !pin_state;
+        si4063_set_direct_mode_pin(pin_state);
+#endif
+    }
+}
