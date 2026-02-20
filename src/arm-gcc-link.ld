@@ -7,7 +7,7 @@ MEMORY
 }
 
 _eram = 0x20000000 + 0x00002000;
-__HeapSize = 0x800;
+__HeapSize = 0x000;
 SECTIONS
 {
     .text :

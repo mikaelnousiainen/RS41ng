@@ -1,7 +1,8 @@
 #include <stdint.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
+#include "config_internal.h"
 #include "telemetry.h"
 #include "payload.h"
 #include "log.h"
@@ -27,7 +28,8 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
         *(cur++) = (CATS_SYNC_WORD >> (i * 8));
     }
 
-    uint8_t *data = malloc(length);
+    static uint8_t data[RADIO_PAYLOAD_MAX_LENGTH];
+    memset(data, 0, sizeof(data));
     cats_packet packet = cats_create(data);
     cats_append_identification_whisker(&packet, CATS_CALLSIGN, CATS_SSID, CATS_ICON); // 11
     cats_append_comment_whisker(&packet, message); // 102
@@ -42,7 +44,6 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
 
     size_t len = cats_fully_encode(packet, cur);
     log_info("CATS packet length: %i\n", (int)(len + CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH));
-    free(data);
 
     return (uint16_t)(CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH + len);
 }

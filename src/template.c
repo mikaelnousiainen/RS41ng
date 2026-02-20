@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "utils.h"
 #include "config.h"
 #include "strlcpy.h"
@@ -7,11 +6,7 @@
 
 size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *data)
 {
-    char *temp = malloc(dest_len);
-    if (temp == NULL) {
-        return 0;
-    }
-
+    char temp[dest_len];
     char replacement[32];
 
     strlcpy(replacement, CALLSIGN, sizeof(replacement));
@@ -130,8 +125,6 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     snprintf(replacement, sizeof(replacement), "%d", (int) data->clock_calibration_count);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$cc", replacement);
-
-    free(temp);
 
     return len;
 }

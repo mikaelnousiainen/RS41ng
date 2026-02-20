@@ -38,11 +38,13 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     __HAL_RCC_USART1_RELEASE_RESET();
     __NOP(); __NOP(); __NOP(); __NOP();
 #else
-    if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U) {
-        while((usart1.Instance->SR & USART_SR_TC) == 0) { __NOP(); }
+    if (usart1.Instance != NULL) {
+        if ((usart1.Instance->CR1 & USART_CR1_UE) != 0U) {
+            while((usart1.Instance->SR & USART_SR_TC) == 0) { __NOP(); }
+        }
+        __HAL_UART_DISABLE(&usart1);
+        HAL_UART_DeInit(&usart1);
     }
-    __HAL_UART_DISABLE(&usart1);
-    HAL_UART_DeInit(&usart1);
 #endif
 
     /* Step 3: Enable clock and proceed */

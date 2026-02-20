@@ -560,7 +560,7 @@ bool ubxg6010_init()
     usart_gps_set_baud_rate(GPS_SERIAL_PORT_BAUD_RATE);
     delay_ms(100);
 
-    log_info("GPS: Setting GPS chip power mode.  ints=%ld\n",gps_ints);
+    log_info("GPS: Setting GPS chip power mode.\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgrxm);
     if (!success) {
         return false;
@@ -679,7 +679,7 @@ void ubxg6010_request_gpstime()
 
 static void ubxg6010_handle_packet(uBloxPacket *pkt)
 {
-    log_info("Handling GPS packet\n");
+    // log_info("Handling GPS packet\n");
     uBloxChecksum cksum = ubxg6010_calculate_checksum(pkt->header.messageClass, pkt->header.messageId,
             (const uint8_t *) &pkt->data, pkt->header.payloadSize);
     uBloxChecksum *checksum = (uBloxChecksum *) (((uint8_t *) &pkt->data) + pkt->header.payloadSize);

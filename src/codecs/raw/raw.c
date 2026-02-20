@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <string.h>
 
 #include "raw.h"
 
@@ -9,15 +9,14 @@ typedef struct _raw_encoder {
 
 void raw_encoder_new(fsk_encoder *encoder)
 {
-    encoder->priv = malloc(sizeof(raw_encoder));
+    static raw_encoder raw_instance;
+    memset(&raw_instance, 0, sizeof(raw_encoder));
+    encoder->priv = &raw_instance;
 }
 
 void raw_encoder_destroy(fsk_encoder *encoder)
 {
-    if (encoder->priv != NULL) {
-        free(encoder->priv);
-        encoder->priv = NULL;
-    }
+    encoder->priv = NULL;
 }
 
 void raw_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8_t *data)
