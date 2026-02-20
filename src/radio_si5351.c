@@ -24,7 +24,6 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
             data_timer_init(entry->symbol_rate * CW_SYMBOL_RATE_MULTIPLIER);
             set_frequency_early = false;
             break;
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             data_timer_init(entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder));
@@ -48,7 +47,6 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
             // Setting the frequency turns on the output
             radio_si5351_frequency_not_set = true;
             break;
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             system_disable_tick();
@@ -66,7 +64,6 @@ bool radio_transmit_symbol_si5351(radio_transmit_entry *entry, radio_module_stat
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             return false;
@@ -146,7 +143,6 @@ inline void radio_handle_data_timer_si5351()
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
         }
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
@@ -182,7 +178,6 @@ bool radio_stop_transmit_si5351(radio_transmit_entry *entry, radio_module_state 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             data_timer_uninit();

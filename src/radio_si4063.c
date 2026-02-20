@@ -55,7 +55,6 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             modulation_type = SI4063_MODULATION_TYPE_FSK;
             use_direct_mode = true;
             break;
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3: {
             fsk_tone *idle_tone = mfsk_get_idle_tone(&entry->fsk_encoder);
@@ -108,7 +107,6 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_APRS_1200:
             shared_state->radio_manual_transmit_active = true;
             break;
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             system_disable_tick();
@@ -286,7 +284,6 @@ inline void radio_handle_data_timer_si4063()
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
         }
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3: {
             fsk_encoder_api *fsk_encoder_api = radio_current_transmit_entry->fsk_encoder_api;
@@ -324,7 +321,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             spi_init();
             break;
         case RADIO_DATA_MODE_RTTY:
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             data_timer_uninit();
@@ -354,7 +350,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_APRS_1200:
             break;
-        case RADIO_DATA_MODE_HORUS_V1:
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             system_enable_tick();
