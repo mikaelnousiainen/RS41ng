@@ -49,12 +49,12 @@
 #define RADIO_TX_HORUS_V3_CONTINUOUS false
 
 // Transmit frequencies for the transmitter modes
-#define RADIO_TX_FREQUENCY_CW        432300000
-#define RADIO_TX_FREQUENCY_PIP       432300000
+#define RADIO_TX_FREQUENCY_CW        432501000
+#define RADIO_TX_FREQUENCY_PIP       432501000
 #define RADIO_TX_FREQUENCY_APRS_1200 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_TX_FREQUENCY_HORUS_V2  432301000
-#define RADIO_TX_FREQUENCY_HORUS_V3  432301000
+#define RADIO_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_TX_FREQUENCY_CATS      434100000
 
 // RS41 only: Built-in Si4032 radio chip transmission configuration
@@ -167,8 +167,8 @@ Setting, measured RF output power, relative DC power draw
 #define APRS_SYMBOL 'O'
 // Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
 // Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
-#define APRS_COMMENT "RS41ng radiosonde firmware test"
-#define APRS_RELAYS "WIDE1-1,WIDE2-1" // Do not include any spaces in the APRS_RELAYS
+#define APRS_COMMENT "RS41ng radiosonde firmware"
+#define APRS_RELAYS "" // No spaces. This is where you can define "WIDE1-1,WIDE2-1" etc, but it is highly discouraged for balloons.
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
 // Generate an APRS weather report instead of a position report. This will override the APRS symbol with the weather station symbol.
@@ -306,20 +306,6 @@ Setting, measured RF output power, relative DC power draw
 #define SENSOR_BME690_I2C_ADDRESS 0x77
 
 // BME680/688/690 gas measurement parameters
-// NOTE: For proper display in Horus GUI and other Horus decoding utilities, you must submit a pull request to have your 
-// Horus ID / callsign use the below configuration. See https://github.com/projecthorus/horusdemodlib/blob/master/custom_field_list.json
-/*
-"MYCALL": {
-    "comment": "BME680/688/690 + gas fields for RS41ng",
-    "struct": "<LhBH",
-    "fields": [
-        ["gas_resistance","none"],
-        ["ext_temperature", "divide_by_10"],
-        ["ext_humidity", "none"],
-        ["ext_pressure", "divide_by_10"]
-    ]
-},
-*/
 #define SENSOR_BME_6XX_GAS_MEASUREMENT false
 // Gas heater duration in ms
 #define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
@@ -336,9 +322,6 @@ Setting, measured RF output power, relative DC power draw
 // Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
 // The value is stored in the non-volatile memory of the microcontroller.
 #define SENSOR_RADSENS_SENSITIVITY 105
-
-// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
-#define RADIO_SI5351_ENABLE false
 
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
@@ -363,13 +346,12 @@ Setting, measured RF output power, relative DC power draw
 // Set the edge of the pulse where the interrupt is triggered: falling or rising.
 #define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
 
-#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE) || (SENSOR_BME690_ENABLE))
-#error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
-#endif
-
 /**
  * RS41 only: External Si5351 radio chip transmission configuration
  */
+
+// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
+#define RADIO_SI5351_ENABLE false
 
 // Si5351 transmit power: 0..3
 // Si5351 drive strength: 0 = 2mA, 1 = 4mA, 2 = 6mA, 3 = 8mA
@@ -499,6 +481,10 @@ Setting, measured RF output power, relative DC power draw
 // * Rate of 5 will lead to updates for every 5th measurement (e.g. every 5 seconds if measurement rate is set to 1000 ms)
 #define GPS_POSITION_MESSAGE_RATE 1
 #define GPS_TIME_MESSAGE_RATE 1
+
+#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE) || (SENSOR_BME690_ENABLE))
+#error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
+#endif
 
 /* Debug settings */
 
