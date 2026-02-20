@@ -25,10 +25,39 @@
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary.
 #define RADIO_POST_TRANSMIT_DELAY_MS 0
 
-/**
- * RS41 only: Built-in Si4032 radio chip transmission configuration
- */
+// The COUNT settings define the number of times that each type of transmission is repeated
 
+// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
+
+#define RADIO_TX_CW false
+#define RADIO_TX_CW_COUNT 1
+#define RADIO_TX_PIP false
+#define RADIO_TX_PIP_COUNT 6
+#define RADIO_TX_APRS false
+#define RADIO_TX_APRS_COUNT 2
+#define RADIO_TX_HORUS_V2 false
+#define RADIO_TX_HORUS_V2_COUNT 5
+#define RADIO_TX_HORUS_V3 true
+#define RADIO_TX_HORUS_V3_COUNT 5
+#define RADIO_TX_CATS false
+#define RADIO_TX_CATS_COUNT 1
+
+// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
+// The continuous mode transmits Horus 4FSK preamble between transmissions
+// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
+#define RADIO_TX_HORUS_V2_CONTINUOUS false
+#define RADIO_TX_HORUS_V3_CONTINUOUS false
+
+// Transmit frequencies for the transmitter modes
+#define RADIO_TX_FREQUENCY_CW        432300000
+#define RADIO_TX_FREQUENCY_PIP       432300000
+#define RADIO_TX_FREQUENCY_APRS_1200 432500000
+// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
+#define RADIO_TX_FREQUENCY_HORUS_V2  432301000
+#define RADIO_TX_FREQUENCY_HORUS_V3  432301000
+#define RADIO_TX_FREQUENCY_CATS      434100000
+
+// RS41 only: Built-in Si4032 radio chip transmission configuration
 // Si4032 transmit power: 0..7
 // 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
 // This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
@@ -36,97 +65,32 @@
 // See the README for details about power consumption.
 #define RADIO_SI4032_TX_POWER 5
 
-// Which modes to transmit using the built-in Si4032 transmitter chip
-// The COUNT settings define the number of times that each type of transmission is repeated
-
-// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
-
-#define RADIO_SI4032_TX_CW false
-#define RADIO_SI4032_TX_CW_COUNT 1
-#define RADIO_SI4032_TX_PIP false
-#define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS false
-#define RADIO_SI4032_TX_APRS_COUNT 2
-#define RADIO_SI4032_TX_HORUS_V2 false
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 5
-#define RADIO_SI4032_TX_HORUS_V3 true
-#define RADIO_SI4032_TX_HORUS_V3_COUNT 5
-#define RADIO_SI4032_TX_CATS false
-#define RADIO_SI4032_TX_CATS_COUNT 1
-
-// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
-// The continuous mode transmits Horus 4FSK preamble between transmissions
-// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4032_TX_HORUS_V3_CONTINUOUS false
-
-// Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW        432300000
-#define RADIO_SI4032_TX_FREQUENCY_PIP       432300000
-#define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
-// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V3  432301000
-#define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
 
 /**
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration
  */
 
 // NOTE: DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
-// DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
+// DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated with GPS lock. 
 
 // Si4063 transmit power: 0..127
 /*
 Setting, measured RF output power, relative DC power draw
-7, 0 dBm (0mW), 0 mW DC
-10, 3.3 dBm (2mW), 26 mW DC
-14, 6.2 dBm (4mW), 54 mW DC
-22, 10.2 dBm (10mW), 114 mW DC
-32, 13.2 dBm (20mW), 186 mW DC <-- Recommended
-48, 16.7 dBm (47mW), 294 mW DC
-80, 20.1 dBm (100mW), 462 mW DC
-127, 21.5 dBm (141mW), 558 mW DC
+7, 0 dBm (~0mW), 0 mW DC
+10, 3.3 dBm (~2mW), 26 mW DC
+14, 6.2 dBm (~4mW), 54 mW DC
+22, 10.2 dBm (~10mW), 114 mW DC
+32, 13.2 dBm (~20mW), 186 mW DC <-- Recommended
+48, 16.7 dBm (~47mW), 294 mW DC
+80, 20.1 dBm (~100mW), 462 mW DC
+127, 21.5 dBm (~141mW), 558 mW DC
 */
-
 #define RADIO_SI4063_TX_POWER 32
-
-// Which modes to transmit using the built-in Si4063 transmitter chip
-// The COUNT settings define the number of times that each type of transmission is repeated
-
-// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
-
-#define RADIO_SI4063_TX_CW false
-#define RADIO_SI4063_TX_CW_COUNT 1
-#define RADIO_SI4063_TX_PIP false
-#define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS false
-#define RADIO_SI4063_TX_APRS_COUNT 2
-#define RADIO_SI4063_TX_HORUS_V2 false
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 5
-#define RADIO_SI4063_TX_HORUS_V3 true
-#define RADIO_SI4063_TX_HORUS_V3_COUNT 5
-#define RADIO_SI4063_TX_CATS false
-#define RADIO_SI4063_TX_CATS_COUNT 1
-
-// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
-// The continuous mode transmits Horus 4FSK preamble between transmissions
-// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_SI4063_TX_HORUS_V3_CONTINUOUS false
-
-// Transmit frequencies for the Si4063 transmitter modes
-#define RADIO_SI4063_TX_FREQUENCY_CW        432500000
-#define RADIO_SI4063_TX_FREQUENCY_PIP       432500000
-#define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
-// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V3  432501000
-#define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
 
 // Use crystal capacitance LUT to better maintain frequency stability over temperature. 
 // Recommended for temperature below 0C
 #define RADIO_SI4063_TX_CORRECT true
+
 
 /* General Settings */
 
