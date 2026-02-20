@@ -1,6 +1,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+// NOTE: These options may be selected as define flags in the compiler! See the README for more info.
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 // #define RS41
 // #define DFM17
