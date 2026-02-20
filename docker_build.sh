@@ -20,7 +20,7 @@ cd "${SOURCE_PATH}"
 rm -rf build
 mkdir -p build
 cd build
-cmake ..
+cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/arm-none-eabi-gcc.cmake .. $@
 make -j$(nproc)
 
 echo "RS41ng build complete"

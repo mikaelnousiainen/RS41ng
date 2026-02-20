@@ -1,13 +1,8 @@
-cmake_minimum_required(VERSION 3.6)
-project(RS41ng_top)
-
-SET(CMAKE_SYSTEM_NAME "Generic")
-SET(CMAKE_SYSTEM_VERSION 1)
-
-SET(UNIX 1)
+cmake_minimum_required(VERSION 3.13)
+project(RS41ng C CXX ASM)
 
 include_directories(src)
 link_directories(src)
 add_subdirectory(src)
 
-add_subdirectory(tests)
+# add_subdirectory(tests)

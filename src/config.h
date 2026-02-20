@@ -6,7 +6,7 @@
 // #define DFM17
 
 // Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
-#define RS41_RSM4x4
+// #define RS41_RSM4x4
 
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
@@ -20,10 +20,10 @@
  */
 
 // Set the tracker amateur radio call sign here
-#define CALLSIGN "KE5GDB"
+#define CALLSIGN "4FSKTEST-V3"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary.
-#define RADIO_POST_TRANSMIT_DELAY_MS 0
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // The COUNT settings define the number of times that each type of transmission is repeated
 
