@@ -69,8 +69,8 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -Wall
     -ffunction-sections
     -fdata-sections
-    -g
-    -O3
+    # -g
+    -Os
 )
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
@@ -87,8 +87,8 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
 target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=${MCU_CPU}
     -mthumb
-    -g
-    -O3
+    # -g
+    -Os
     -Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map
     -Wl,--gc-sections
     --specs=nano.specs

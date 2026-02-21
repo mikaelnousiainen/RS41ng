@@ -325,7 +325,7 @@ static void dma_adc_init()
 uint16_t system_get_battery_voltage_millivolts()
 {
 #ifdef RS41
-    uint16_t voltage = (uint16_t)((uint32_t)dma_buffer_adc[0] * 6500UL / 4096UL);
+    uint16_t voltage = (uint16_t)((uint32_t)dma_buffer_adc[0] * 6000UL / 4096UL);
 #else  //DFM17
     // Changed 600 to 690 to try and get it more accurate to actual voltage
     // 690 yields fairly linear, accurate results between 5v6 and 6v6
