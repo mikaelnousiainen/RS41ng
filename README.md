@@ -1,5 +1,64 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
+## Quickstart Guide
+
+### RS41 with STM32L4 (new version)
+
+1. Install Docker. Configure a container for the compiler: 
+   * `docker build -t rs41ng_compiler .`
+2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
+3. Compile the image: 
+   * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41_RSM4X4=1`
+4. Unlock the STM32L4:
+   1. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
+   2. Issue unlock flash command:
+      * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; stm32l4x unlock 0; reset halt; exit"`
+   3. There should be a message that includes `Info : RDP level 1 (0x00)`. This verifies that some protections were enabled. 
+   4. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to dischage. Fidgeting with the power switch may expedite this step.
+   5. **Reconnect the RS41**.
+   6. Disable additional protections:
+        * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; flash protect 0 0 last off; exit"`
+   7. We NOW expect to see the message `Info : RDP level 0 (0xAA)`.  This means the board was unlocked by the first command, and that this command is likely to succeed in unlocking the individual pages. If this message is not present, repeat the previous steps. 
+   8. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to dischage. Fidgeting with the power switch may expedite this step.
+   9.  Normal flashing should now work -- **reconnect the RS41**. If flashing does not work, repeat the unlock process. 
+5.  Flash the firmware:
+    * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg  -c "program build/src/RS41ng.elf verify reset exit"`
+6.  Verify functionality.
+
+### RS41 with STM32F1 (old version)
+
+1. Install Docker. Configure a container for the compiler: 
+   * `docker build -t rs41ng_compiler .`
+2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
+3. Compile the image: 
+   * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41=1`
+4. Unlock the STM32F1:
+5. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
+6. Issue unlock flash command:
+   * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+7. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+8. Flash the firmware:
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+9.  Verify functionality.
+
+### DFM17
+
+1. Install Docker. Configure a container for the compiler: 
+   * `docker build -t rs41ng_compiler .`
+2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
+3. Compile the image: 
+   * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41=1`
+4. Unlock the STM32F1:
+5. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
+   * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+6. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+7. Flash the firmware:
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+8.  Verify functionality.
+
+
 **NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
 DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
 
