@@ -48,7 +48,7 @@
    * `docker build -t rs41ng_compiler .`
 2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
 3. Compile the image: 
-   * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41=1`
+   * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DDFM17=1`
 4. Unlock the STM32F1:
 5. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
