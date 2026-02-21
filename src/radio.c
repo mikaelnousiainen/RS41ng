@@ -830,7 +830,11 @@ static bool radio_transmit_symbol(radio_transmit_entry *entry)
 
 static void radio_reset_transmit_delay_counter()
 {
+#if RADIO_TX_HORUS_V2_CONTINUOUS || RADIO_TX_HORUS_V3_CONTINUOUS
+    radio_post_transmit_delay_counter = 0;
+#else
     radio_post_transmit_delay_counter = RADIO_POST_TRANSMIT_DELAY_MS * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 1000;
+#endif
 }
 
 static void radio_next_transmit_entry()
