@@ -43,7 +43,3 @@ uint16_t radio_horus_v3_encode(uint8_t *payload, uint16_t length, telemetry_data
 payload_encoder radio_horus_v3_payload_encoder = {
         .encode = radio_horus_v3_encode,
 };
-
-payload_encoder radio_horus_v3_idle_encoder = {
-        .encode = radio_horus_v3_idle_encode,
-};
