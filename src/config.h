@@ -218,8 +218,7 @@ Setting, measured RF output power, relative DC power draw
 #define HORUS_V3_BAUD_RATE_SI4032 100
 #define HORUS_V3_BAUD_RATE_SI4063 100
 #define HORUS_V3_BAUD_RATE_SI5351 50
-#define HORUS_V3_PREAMBLE_LENGTH 16
-#define HORUS_V3_IDLE_PREAMBLE_LENGTH 32
+#define HORUS_V3_PREAMBLE_LENGTH 4
 #define HORUS_V3_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.

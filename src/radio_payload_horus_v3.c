@@ -40,16 +40,6 @@ uint16_t radio_horus_v3_encode(uint8_t *payload, uint16_t length, telemetry_data
     return encoded_length + HORUS_V3_PREAMBLE_LENGTH;
 }
 
-uint16_t radio_horus_v3_idle_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data, char *message)
-{
-    // Use the preamble for idle tones during continuous transmit mode
-    for (int i = 0; i < HORUS_V3_IDLE_PREAMBLE_LENGTH; i++) {
-        payload[i] = HORUS_V3_PREAMBLE_BYTE;
-    }
-
-    return HORUS_V3_IDLE_PREAMBLE_LENGTH;
-}
-
 payload_encoder radio_horus_v3_payload_encoder = {
         .encode = radio_horus_v3_encode,
 };
