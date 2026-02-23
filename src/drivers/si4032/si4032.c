@@ -260,7 +260,7 @@ void si4032_use_sdi_pin(bool use)
     si4032_set_nsel_pin(true);
 
     GPIO_InitTypeDef gpio_init;
-    gpio_init.Pin = GPIO_PIN_15;
+    gpio_init.Pin = PIN_MOSI;
     gpio_init.Mode = use ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
 #ifdef RS41_RSM4x4
