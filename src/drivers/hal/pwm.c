@@ -10,6 +10,7 @@
 #include "pwm.h"
 #include "timers.h"
 #include "log.h"
+#include "gpio.h"
 
 uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 
@@ -63,6 +64,7 @@ void pwm_data_timer_uninit()
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_MasterConfigTypeDef sMasterConfig = {0};
+    GPIO_InitTypeDef gpio_init = {0};
     htim15.Instance = TIM15;
 #ifdef RS41
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
@@ -70,10 +72,19 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 
     __HAL_RCC_TIM15_CLK_ENABLE();
 
+#if defined(RS41_RSM4x4)   //L4 only - we need to use the Alternate Function to put PWM on PB15
+    gpio_init.Pin = PIN_MOSI;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+    gpio_init.Alternate = GPIO_AF14_TIM15;
+    HAL_GPIO_Init(BANK_MOSI, &gpio_init);
+#endif  // L4
+
+
     HAL_TIM_Base_DeInit(&htim15);
-// #ifdef RS41
-//     GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
-// #endif
+//#ifdef RS41
+    //GPIO_PinRemapConfig(GPIO_Remap_TIM15, DISABLE);
+//#endif
 
     htim15.Init.Prescaler = 24 - 1; // tick every 1/1000000 s
     htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -81,8 +92,6 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim15.Init.RepetitionCounter = 0;
     htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-
-    //HAL_TIM_Base_Init(&htim15);
     hang_if_bad("HAL_TIM_PWM_Init", (HAL_TIM_PWM_Init(&htim15)));
 
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
@@ -97,13 +106,14 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     TIM15_OCInitStruct.Pulse = 0; // Was: tim_init.TIM_Period / 2
     TIM15_OCInitStruct.OCMode = TIM_OCMODE_TOGGLE; // Was: TIM_OCMode_PWM1
     TIM15_OCInitStruct.OCPolarity = TIM_OCPOLARITY_HIGH;
+    TIM15_OCInitStruct.OCNPolarity = TIM_OCPOLARITY_HIGH;
     TIM15_OCInitStruct.OCFastMode = TIM_OCFAST_ENABLE;
     TIM15_OCInitStruct.OCIdleState = TIM_OCIDLESTATE_RESET;
     TIM15_OCInitStruct.OCNIdleState = TIM_OCNIDLESTATE_RESET;
 
     // TIM15 channel 2 can be used to drive pin PB15, which is connected to RS41 Si4032 SDI pin for direct modulation
-    hang_if_bad("HAL_TIM_OC_ConfigChannel", 
-                HAL_TIM_OC_ConfigChannel(&htim15, &TIM15_OCInitStruct, TIM_CHANNEL_2)
+    hang_if_bad("HAL_TIM_PWM_ConfigChannel", 
+                HAL_TIM_PWM_ConfigChannel(&htim15, &TIM15_OCInitStruct, TIM_CHANNEL_2)
                );
 
     sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
@@ -156,7 +166,7 @@ void pwm_timer_pwm_enable(bool enabled)
 
 void pwm_timer_use(bool use)
 {
-#if defined(RS41) && !defined(RS41_RSM4x4)			// rsm4x4 does this on the GPIO pin in the spi routine directly
+#if defined(RS41) && !defined(RS41_RSM4x4)	// rsm4x4 does this on the GPIO pin in the spi routine directly
     // Remapping the TIM15 outputs will allow TIM15 channel 2 can be used to drive pin PB15,
     // which is connected to RS41 Si4032 SDI pin for direct modulation
     if(use)
@@ -170,6 +180,8 @@ void pwm_timer_use(bool use)
 
 void pwm_timer_uninit()
 {
+    GPIO_InitTypeDef gpio_init = {0};
+
     __HAL_TIM_MOE_DISABLE(&htim15);
     __HAL_TIM_DISABLE(&htim15);
     hang_if_bad("HAL_TIM_PWM_Stop",
@@ -180,11 +192,21 @@ void pwm_timer_uninit()
                );
     //HAL_TIM_Base_DeInit(&htim15);
 
-#if defined(RS41) && !defined(RS41_RSM4x4)                      // rsm4x4 does this on the GPIO pin in the spi routine directly
+#if defined(RS41) && !defined(RS41_RSM4x4)  // rsm4x4 does this on the GPIO pin in the spi routine directly
     __HAL_AFIO_REMAP_TIM15_DISABLE();
 #endif
 
+#if defined(RS41_RSM4x4)   //L4 only - Restore the GPIO pin to how spi.c sets it up
+    // MOSI
+    gpio_init.Pin = PIN_MOSI;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio_init.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(BANK_MOSI, &gpio_init);
+#endif  // L4
+
     __HAL_RCC_TIM15_CLK_DISABLE();
+
 }
 
 inline uint16_t pwm_calculate_period(uint32_t frequency_hz_100)
