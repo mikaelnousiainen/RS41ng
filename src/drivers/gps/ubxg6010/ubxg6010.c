@@ -517,6 +517,22 @@ bool ubxg6010_enable_power_save_mode()
     return success;
 }
 
+void ubxg6010_sleep(void)
+{
+    /* Send RXM-PMREQ to enter backup (deep sleep) mode.
+     * The receiver shuts down almost entirely; wakes on UART1 activity.
+     * No ACK is sent - the device goes to sleep immediately.
+     * Payload: duration(4) + flags(4) = 8 bytes (Gen6/7/8 version). */
+    uint8_t pmreq[8];
+    memset(pmreq, 0, sizeof(pmreq));
+    pmreq[4] = 0x02;  /* flags bit1 = backup */
+
+    log_info("GPS: Entering backup (sleep) mode\n");
+    ubxg6010_send_command(0x02, 0x41, pmreq, sizeof(pmreq));
+
+    ubxg6010_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_INACTIVE;
+}
+
 bool ubxg6010_init()
 {
     bool success;
