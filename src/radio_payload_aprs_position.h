@@ -4,5 +4,6 @@
 #include "payload.h"
 
 extern payload_encoder radio_aprs_position_payload_encoder;
+extern payload_encoder radio_aprs_9600_position_payload_encoder;
 
 #endif

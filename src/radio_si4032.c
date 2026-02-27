@@ -32,6 +32,7 @@ static bool si4032_use_dma = false;
 // This delay is for RS41 radiosondes
 #define symbol_delay_bell_202_1200bps_us 823
 #define SI4032_DEVIATION_HZ_625_CATS 8 // 4800 / 625
+#define SI4032_DEVIATION_HZ_625_APRS_9600 5 // 3125 / 625 (~3 kHz standard G3RUH deviation)
 
 static volatile bool radio_si4032_state_change = false;
 static volatile uint32_t radio_si4032_freq = 0;
@@ -92,6 +93,14 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             use_fifo_mode = true;
             data_rate = 9600;
             break;
+        case RADIO_DATA_MODE_APRS_9600:
+            frequency_offset = 0;
+            frequency_deviation = SI4032_DEVIATION_HZ_625_APRS_9600;
+            modulation_type = SI4032_MODULATION_TYPE_FIFO_FSK;
+            use_direct_mode = false;
+            use_fifo_mode = true;
+            data_rate = 9600;
+            break;
         default:
             return false;
     }
@@ -141,6 +150,7 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_CATS:
+        case RADIO_DATA_MODE_APRS_9600:
             shared_state->radio_fifo_transmit_active = true;
             break;
         default:

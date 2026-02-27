@@ -36,6 +36,8 @@
 #define RADIO_TX_PIP_COUNT 6
 #define RADIO_TX_APRS false
 #define RADIO_TX_APRS_COUNT 2
+#define RADIO_TX_APRS_9600 false
+#define RADIO_TX_APRS_9600_COUNT 1
 #define RADIO_TX_HORUS_V2 false
 #define RADIO_TX_HORUS_V2_COUNT 5
 #define RADIO_TX_HORUS_V3 true
@@ -51,6 +53,7 @@
 #define RADIO_TX_FREQUENCY_CW        432501000
 #define RADIO_TX_FREQUENCY_PIP       432501000
 #define RADIO_TX_FREQUENCY_APRS_1200 432500000
+#define RADIO_TX_FREQUENCY_APRS_9600 432500000
 // Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
 #define RADIO_TX_FREQUENCY_HORUS_V2  432501000
 #define RADIO_TX_FREQUENCY_HORUS_V3  432501000
@@ -180,8 +183,10 @@ Setting, measured RF output power, relative DC power draw
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
 #define APRS_TIME_SYNC_SECONDS 0
+#define APRS_9600_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define APRS_TIME_SYNC_OFFSET_SECONDS 0
+#define APRS_9600_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * Common Horus 4FSK mode settings

@@ -183,6 +183,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .fsk_encoder_api = &raw_fsk_encoder_api,
                 },
         #endif
+        #if RADIO_TX_APRS_9600
+                {
+                    .enabled = RADIO_TX_APRS_9600,
+                    .radio_type = RADIO_TYPE_SI4032,
+                    .data_mode = RADIO_DATA_MODE_APRS_9600,
+                    .transmit_count = RADIO_TX_APRS_9600_COUNT,
+                    .time_sync_seconds = APRS_9600_TIME_SYNC_SECONDS,
+                    .time_sync_seconds_offset = APRS_9600_TIME_SYNC_OFFSET_SECONDS,
+                    .frequency = RADIO_TX_FREQUENCY_APRS_9600,
+                    .tx_power = RADIO_SI4032_TX_POWER,
+                    .payload_encoder = &radio_aprs_9600_position_payload_encoder,
+                    .fsk_encoder_api = &raw_fsk_encoder_api,
+                },
+        #endif
+        
     #endif // HORUS Continuous
 #endif // RS41
 
@@ -631,6 +646,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             entry->fsk_encoder_api->set_data(&entry->fsk_encoder, radio_current_payload_length, radio_current_payload);
             break;
         case RADIO_DATA_MODE_CATS:
+        case RADIO_DATA_MODE_APRS_9600:
             enable_gps_during_transmit = true;
 
             raw_encoder_new(&entry->fsk_encoder);
