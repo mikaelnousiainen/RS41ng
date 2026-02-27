@@ -42,6 +42,7 @@ void delay_us(uint16_t us)
     __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
     HAL_TIM_Base_Start_IT(&htim1);
 
+    // Loop, in case a different interrupt triggers
     while (!__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE)) {
         __WFI();
     }
