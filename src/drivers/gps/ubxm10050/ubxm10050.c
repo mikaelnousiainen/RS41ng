@@ -6,7 +6,7 @@
  *   - Configuration via CFG-VALSET (0x06 0x8A) with 32-bit key IDs.
  *     Legacy CFG-PRT / CFG-MSG / CFG-NAV5 / CFG-RXM are not available.
  *   - Multiple config items can be batched into a single CFG-VALSET packet.
- *   - Power save via UBX-RXM-PMREQ (same message class/ID as M8).
+ *   - Power save via CFG-PM-OPERATEMODE set to PSMCT (cyclic tracking).
  *   - NAV-PVT (0x01 0x07) provides position + velocity + time in one message.
  *   - UBX frame format and checksum algorithm are unchanged.
  */
@@ -75,6 +75,11 @@
 
 /* CFG-NAVSPG keys */
 #define CFG_NAVSPG_DYNMODEL     0x20110021UL  /* U1 - Dynamic model */
+
+/* CFG-PM keys - Power Management (group 0xD0)
+ * Key format: (size << 28) | (group << 16) | item
+ */
+#define CFG_PM_OPERATEMODE      0x20D00001UL  /* E1 - Operating mode: 0=full, 1=PSMOO, 2=PSMCT */
 
 /* Dynamic model values */
 #define DYNMODEL_PORTABLE       0
@@ -549,24 +554,46 @@ void ubxm10050_request_gpstime(void)
 
 bool ubxm10050_enable_power_save_mode(void)
 {
-    /* M10050 does not support PSM-CT (cyclic tracking) - only SW standby.
-     * Send RXM-PMREQ to enter backup mode; GPS wakes on UART1 activity.
-     * Note: M10050-KB has no PSMCT support per the product summary. */
-    UbxRxmPmreqPayload pmreq = {
-        .version      = 0x00,
-        .reserved1    = {0, 0, 0},
-        .duration     = 0,          /* 0 = indefinite */
-        .flags        = 0x02,       /* bit1 = backup */
-        .wakeupSources = 0x08,      /* bit3 = UART1 */
+    /* Enable PSMCT (Power Save Mode - Cyclic Tracking).
+     * The receiver cycles between tracking and idle states to maintain
+     * a fix while reducing power consumption by ~50%.
+     * Write to RAM+BBR since RAM is erased during PSM state transitions
+     * and restored from BBR on wakeup. */
+    const ValsetU1 psm_items[] = {
+        { CFG_PM_OPERATEMODE, 2 },  /* 2 = PSMCT (cyclic tracking) */
     };
 
-    log_info("GPS M10: Entering SW standby (backup) mode\n");
+    log_info("GPS M10: Enabling PSMCT (cyclic tracking) power save\n");
+    bool success = ubxm10050_valset_u1_multi(VALSET_LAYER_RAM | VALSET_LAYER_BBR,
+                                              psm_items,
+                                              sizeof(psm_items) / sizeof(psm_items[0]));
+    if (!success) {
+        log_error("GPS M10: Failed to enable PSMCT\n");
+        return false;
+    }
+
+    m10_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING;
+    return true;
+}
+
+void ubxm10050_sleep(void)
+{
+    /* Send RXM-PMREQ to enter backup (deep sleep) mode.
+     * The receiver shuts down almost entirely; wakes on UART1 activity.
+     * No ACK is sent - the device goes to sleep immediately. */
+    UbxRxmPmreqPayload pmreq = {
+        .version       = 0x00,
+        .reserved1     = {0, 0, 0},
+        .duration      = 0,          /* 0 = indefinite */
+        .flags         = 0x02,       /* bit1 = backup */
+        .wakeupSources = 0x08,       /* bit3 = UART1 */
+    };
+
+    log_info("GPS M10: Entering backup (sleep) mode\n");
     ubxm10050_send_raw(UBX_CLASS_RXM, UBX_RXM_PMREQ,
                        (const uint8_t *)&pmreq, sizeof(pmreq));
 
-    /* No ACK for PMREQ - device goes to sleep immediately */
     m10_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_INACTIVE;
-    return true;
 }
 
 bool ubxm10050_init(void)

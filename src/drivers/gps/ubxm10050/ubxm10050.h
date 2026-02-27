@@ -12,7 +12,7 @@
  *   - UART baud rate: key 0x40520001 (CFG-UART1-BAUDRATE), U4 value.
  *   - Message output rates: CFG-MSGOUT-* keys, U1 value per port.
  *   - Dynamic model: key 0x20110021 (CFG-NAVSPG-DYNMODEL), U1 value.
- *   - Power save: UBX-RXM-PMREQ (0x02 0x41) - same as M8, no CFG-RXM.
+ *   - Power save: CFG-PM-OPERATEMODE (0x20D00001) set to PSMCT (value 2).
  *   - NAV-PVT (0x01 0x07) is the recommended primary message.
  *   - UBX frame format, checksum algorithm, and ACK/NAK are unchanged.
  *
@@ -28,6 +28,8 @@
 bool ubxm10050_init(void);
 
 bool ubxm10050_enable_power_save_mode(void);
+
+void ubxm10050_sleep(void);
 
 void ubxm10050_request_gpstime(void);
 
