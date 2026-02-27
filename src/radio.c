@@ -60,7 +60,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v3_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
-    #else // HORUS Continuous
+        #ifdef RADIO_TX_FREQUENCY_HORUS_V3_ALT
+            {
+                    .enabled = RADIO_TX_HORUS_V3,
+                    .radio_type = RADIO_TYPE_SI4032,
+                    .data_mode = RADIO_DATA_MODE_HORUS_V3,
+                    .time_sync_seconds = HORUS_V3_TIME_SYNC_SECONDS,
+                    .time_sync_seconds_offset = HORUS_V3_TIME_SYNC_OFFSET_SECONDS,
+                    .frequency = RADIO_TX_FREQUENCY_HORUS_V3_ALT,
+                    .tx_power = RADIO_SI4032_TX_POWER,
+                    .symbol_rate = HORUS_V3_BAUD_RATE_SI4032,
+                    .payload_encoder = &radio_horus_v3_payload_encoder,
+                    .fsk_encoder_api = &mfsk_fsk_encoder_api,
+            },
+        #endif
+    #else // (not) HORUS Continuous
         #if RADIO_TX_PIP
                 {
                         .enabled = RADIO_TX_PIP,
@@ -139,6 +153,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                         .payload_encoder = &radio_horus_v3_payload_encoder,
                         .fsk_encoder_api = &mfsk_fsk_encoder_api,
                 },
+                #ifdef RADIO_TX_FREQUENCY_HORUS_V3_ALT
+                        {
+                                .enabled = RADIO_TX_HORUS_V3,
+                                .radio_type = RADIO_TYPE_SI4032,
+                                .data_mode = RADIO_DATA_MODE_HORUS_V3,
+                                .transmit_count = RADIO_TX_HORUS_V3_COUNT,
+                                .time_sync_seconds = HORUS_V3_TIME_SYNC_SECONDS,
+                                .time_sync_seconds_offset = HORUS_V3_TIME_SYNC_OFFSET_SECONDS,
+                                .frequency = RADIO_TX_FREQUENCY_HORUS_V3_ALT,
+                                .tx_power = RADIO_SI4032_TX_POWER,
+                                .symbol_rate = HORUS_V3_BAUD_RATE_SI4032,
+                                .payload_encoder = &radio_horus_v3_payload_encoder,
+                                .fsk_encoder_api = &mfsk_fsk_encoder_api,
+                        },
+                #endif
         #endif
         #if RADIO_TX_CATS
                 {

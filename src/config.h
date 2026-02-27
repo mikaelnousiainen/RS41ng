@@ -44,8 +44,6 @@
 #define RADIO_TX_CATS_COUNT 1
 
 // Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
-// The continuous mode transmits Horus 4FSK preamble between transmissions
-// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
 #define RADIO_TX_HORUS_V2_CONTINUOUS false
 #define RADIO_TX_HORUS_V3_CONTINUOUS false
 
@@ -57,6 +55,10 @@
 #define RADIO_TX_FREQUENCY_HORUS_V2  432501000
 #define RADIO_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_TX_FREQUENCY_CATS      434100000
+
+// Enable transmitting Horus V3 on an additional frequency
+// NOTE: It is recommended to use continuous mode or to change the _COUNT parameter to 1 if using this mode
+// #define RADIO_TX_FREQUENCY_HORUS_V3_ALT  432701000
 
 // RS41 only: Built-in Si4032 radio chip transmission configuration
 // Si4032 transmit power: 0..7
