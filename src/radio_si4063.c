@@ -15,6 +15,7 @@
 #define SI4063_DEVIATION_HZ_RTTY 200.0
 #define SI4063_DEVIATION_HZ_APRS 2600.0
 #define SI4063_DEVIATION_HZ_CATS 4800.0
+#define SI4063_DEVIATION_HZ_APRS_9600 3000.0
 
 #define CW_SYMBOL_RATE_MULTIPLIER 4
 
@@ -73,6 +74,14 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             use_fifo_mode = true;
             data_rate = 9600;
             break;
+        case RADIO_DATA_MODE_APRS_9600:
+            frequency_offset = 0;
+            frequency_deviation = SI4063_DEVIATION_HZ_APRS_9600;
+            modulation_type = SI4063_MODULATION_TYPE_FIFO_FSK;
+            use_direct_mode = false;
+            use_fifo_mode = true;
+            data_rate = 9600;
+            break;
         default:
             return false;
     }
@@ -113,6 +122,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_CATS:
+        case RADIO_DATA_MODE_APRS_9600:
             shared_state->radio_fifo_transmit_active = true;
             break;
         default:
@@ -326,6 +336,7 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             data_timer_uninit();
             break;
         case RADIO_DATA_MODE_CATS:
+        case RADIO_DATA_MODE_APRS_9600:
             break;
         case RADIO_DATA_MODE_APRS_1200:
             use_direct_mode = true;
@@ -355,6 +366,7 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             system_enable_tick();
             break;
         case RADIO_DATA_MODE_CATS:
+        case RADIO_DATA_MODE_APRS_9600:
             break;
         default:
             break;

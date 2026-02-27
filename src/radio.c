@@ -196,8 +196,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .payload_encoder = &radio_aprs_9600_position_payload_encoder,
                     .fsk_encoder_api = &raw_fsk_encoder_api,
                 },
-        #endif
-        
+        #endif      
     #endif // HORUS Continuous
 #endif // RS41
 
@@ -320,6 +319,20 @@ radio_transmit_entry radio_transmit_schedule[] = {
                         .frequency = RADIO_TX_FREQUENCY_CATS,
                         .tx_power = RADIO_SI4063_TX_POWER,
                         .payload_encoder = &radio_cats_payload_encoder,
+                        .fsk_encoder_api = &raw_fsk_encoder_api,
+                },
+        #endif
+        #if RADIO_TX_APRS_9600
+                {
+                        .enabled = RADIO_TX_APRS_9600,
+                        .radio_type = RADIO_TYPE_SI4063,
+                        .data_mode = RADIO_DATA_MODE_APRS_9600,
+                        .transmit_count = RADIO_TX_APRS_9600_COUNT,
+                        .time_sync_seconds = APRS_9600_TIME_SYNC_SECONDS,
+                        .time_sync_seconds_offset = APRS_9600_TIME_SYNC_OFFSET_SECONDS,
+                        .frequency = RADIO_TX_FREQUENCY_APRS_9600,
+                        .tx_power = RADIO_SI4063_TX_POWER,
+                        .payload_encoder = &radio_aprs_9600_position_payload_encoder,
                         .fsk_encoder_api = &raw_fsk_encoder_api,
                 },
         #endif
