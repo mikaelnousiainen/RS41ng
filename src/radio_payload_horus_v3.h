@@ -4,6 +4,5 @@
 #include "payload.h"
 
 extern payload_encoder radio_horus_v3_payload_encoder;
-extern payload_encoder radio_horus_v3_idle_encoder;
 
 #endif

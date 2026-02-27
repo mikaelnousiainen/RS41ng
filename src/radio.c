@@ -47,18 +47,6 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
-        {
-                .enabled = RADIO_TX_HORUS_V2,
-                .radio_type = RADIO_TYPE_SI4032,
-                .data_mode = RADIO_DATA_MODE_HORUS_V2,
-                .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
-                .time_sync_seconds_offset = HORUS_V2_TIME_SYNC_OFFSET_SECONDS,
-                .frequency = RADIO_TX_FREQUENCY_HORUS_V2,
-                .tx_power = RADIO_SI4032_TX_POWER,
-                .symbol_rate = HORUS_V2_BAUD_RATE_SI4032,
-                .payload_encoder = &radio_horus_v2_idle_encoder,
-                .fsk_encoder_api = &mfsk_fsk_encoder_api,
-        },
     #elif RADIO_TX_HORUS_V3_CONTINUOUS
         {
                 .enabled = RADIO_TX_HORUS_V3,
@@ -197,19 +185,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .payload_encoder = &radio_horus_v3_payload_encoder,
                     .fsk_encoder_api = &mfsk_fsk_encoder_api,
             },
-            {
-                    .enabled = RADIO_TX_HORUS_V3,
-                    .radio_type = RADIO_TYPE_SI4063,
-                    .data_mode = RADIO_DATA_MODE_HORUS_V3,
-                    .time_sync_seconds = HORUS_V3_TIME_SYNC_SECONDS,
-                    .time_sync_seconds_offset = HORUS_V3_TIME_SYNC_OFFSET_SECONDS,
-                    .frequency = RADIO_TX_FREQUENCY_HORUS_V3,
-                    .tx_power = RADIO_SI4063_TX_POWER,
-                    .symbol_rate = HORUS_V3_BAUD_RATE_SI4063,
-                    .payload_encoder = &radio_horus_v3_idle_encoder,
-                    .fsk_encoder_api = &mfsk_fsk_encoder_api,
-            },
-    #else // HORUS Continuous
+    #else // (not) HORUS Continuous
         #if RADIO_TX_PIP
                 {
                         .enabled = RADIO_TX_PIP,
