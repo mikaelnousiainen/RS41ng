@@ -37,16 +37,25 @@ void delay_init()
 
 void delay_us(uint16_t us)
 {
-    HAL_TIM_Base_Start_IT(&htim1);
     __HAL_TIM_SET_COUNTER(&htim1, 0);
+    __HAL_TIM_SET_AUTORELOAD(&htim1, us);
+    __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
+    HAL_TIM_Base_Start_IT(&htim1);
 
-    while ((uint16_t)(__HAL_TIM_GET_COUNTER(&htim1)) < us);
+    while (!__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE)) {
+        __WFI();
+    }
+
     HAL_TIM_Base_Stop_IT(&htim1);
 }
 
 inline void delay_ms(uint32_t ms)
 {
-    while (ms-- > 0) {
-        delay_us(1000);
+    while (ms >= 65) {
+        delay_us(65000);
+        ms -= 65;
+    }
+    if (ms > 0) {
+        delay_us((uint16_t)(ms * 1000));
     }
 }
