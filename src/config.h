@@ -291,9 +291,8 @@ Setting, measured RF output power, relative DC power draw
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define PIP_TIME_SYNC_OFFSET_SECONDS 0
 
-
 /**
- * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
+ * I2C Bus Settings
  */
 
 // Define the I²C bus clock speed in Hz. (old RS41 only)
@@ -346,7 +345,7 @@ Setting, measured RF output power, relative DC power draw
 
 // Enable pulse counter via expansion header pin for use with devices like Geiger counters.
 // This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
-// Also changes the Horus 4FSK V2 data format and adds a custom data field for pulse count.
+// Also changes the Horus 4FSK data format and adds a custom data field for pulse count.
 // The pulse count will wrap to zero at 65535 as it is stored as a 16-bit unsigned integer value.
 #define PULSE_COUNTER_ENABLE false
 
@@ -368,7 +367,7 @@ Setting, measured RF output power, relative DC power draw
 #define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
 
 /**
- * RS41 only: External Si5351 radio chip transmission configuration
+ * External Si5351 radio chip transmission configuration
  */
 
 // Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions

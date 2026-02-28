@@ -908,7 +908,6 @@ void radio_handle_timer_tick()
         }
     } else {
         if (radio_post_transmit_delay_counter > 0) {
-            // TODO: use power saving
             radio_post_transmit_delay_counter--;
         }
     }
@@ -995,7 +994,6 @@ void radio_handle_main_loop()
         !radio_shared_state.radio_transmission_finished) {
         bool schedule_transmit = radio_handle_time_sync();
         if (!schedule_transmit) {
-            // TODO: use power saving
             delay_ms(100);
             return;
         }
