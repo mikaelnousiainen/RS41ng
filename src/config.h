@@ -97,6 +97,8 @@ Setting, measured RF output power, relative DC power draw
 // Recommended for temperature below 0C
 #define RADIO_SI4063_TX_CORRECT true
 
+// Append processor and crystal capacitance values to Horus v3 telem
+#define TX_DFM_ADDITIONAL_TELEM true
 
 /* General Settings */
 

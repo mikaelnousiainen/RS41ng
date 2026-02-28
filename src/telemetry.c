@@ -87,20 +87,22 @@ void telemetry_collect(telemetry_data *data)
         data->gps.climb_cm_per_second = 0;
     }
 
-#ifdef DFM17
-    data->clock_calibration_trim = clock_calibration_get_trim();
-    data->clock_calibration_count = clock_calibration_get_change_count();
-    
-    #if RADIO_SI4063_TX_CORRECT
-    t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
-    if (t_look < 0 ){
-        t_look = 39;
-    }
-    if (t_look >49 ){
-        t_look = 49;
-    }
+    #ifdef DFM17
+        data->clock_calibration_trim = clock_calibration_get_trim();
+        data->clock_calibration_count = clock_calibration_get_change_count();
+        
+        #if RADIO_SI4063_TX_CORRECT
+        t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
+        if (t_look < 0){
+            t_look = 39;
+        }
+        if (t_look > 49){
+            t_look = 49;
+        }
 
-    si4063_set_crystal_capacitance(c_value[t_look]);
+        si4063_set_crystal_capacitance(c_value[t_look]);
+
+        data->si4063_capacitance_trim = c_value[t_look];
     #endif
 #endif
 
