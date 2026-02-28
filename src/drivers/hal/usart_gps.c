@@ -14,7 +14,7 @@
 
 /*
  * Hardware abstraction macros.
- * gpio.h provides USART_IT (instance), USART_IRQ (IRQn), and USART_IRQ_HANDLER.
+ * gpio.h provides GPS_USART_IT (instance), GPS_USART_IRQ (IRQn), and GPS_USART_IRQ_HANDLER.
  * We add clock enable/disable and the correct PCLK source for baud rate calculation.
  * USART1 sits on APB2 (PCLK2); USART2 sits on APB1 (PCLK1).
  */
@@ -42,8 +42,8 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
      * On STM32L4, soft reset does not reset peripheral registers or the NVIC.
      * The USART may be left clocked with ISR flags set and NVIC enabled from the
      * previous run, causing the IRQ to fire before gps_usart.Instance is even set. */
-    HAL_NVIC_DisableIRQ(USART_IRQ);
-    NVIC_ClearPendingIRQ(USART_IRQ);
+    HAL_NVIC_DisableIRQ(GPS_USART_IRQ);
+    NVIC_ClearPendingIRQ(GPS_USART_IRQ);
 
 #ifdef RS41_RSM4x4
     /* Step 2: RCC peripheral reset clears all USART registers including
@@ -66,7 +66,7 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     /* Step 3: Enable clock and proceed */
     GPS_USART_CLK_ENABLE();
 
-    gps_usart.Instance = USART_IT;
+    gps_usart.Instance = GPS_USART_IT;
 
     // GPIO - USART TX
     gpio_init.Pin = PIN_USART_TX;
@@ -98,8 +98,8 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     HAL_GPIO_WritePin(BANK_USART_PWR, PIN_USART_PWR, GPIO_PIN_SET);
 #endif //RS41 power pin
 
-    HAL_NVIC_DisableIRQ(USART_IRQ);
-    NVIC_ClearPendingIRQ(USART_IRQ);
+    HAL_NVIC_DisableIRQ(GPS_USART_IRQ);
+    NVIC_ClearPendingIRQ(GPS_USART_IRQ);
 
     gps_usart.Init.BaudRate = baud_rate;
     gps_usart.Init.WordLength = UART_WORDLENGTH_8B;
@@ -122,13 +122,13 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
     gps_usart.Instance->ICR = USART_ICR_ORECF | USART_ICR_FECF | USART_ICR_NECF | USART_ICR_PECF;
     volatile uint32_t tmp = gps_usart.Instance->RDR; (void)tmp;
 #endif
-    NVIC_ClearPendingIRQ(USART_IRQ);
+    NVIC_ClearPendingIRQ(GPS_USART_IRQ);
 
     // Priority 5 > TIM6(3) and TIM2(2) - prevents USART preempting delay_ms()
-    HAL_NVIC_SetPriority(USART_IRQ, 5, 0);
+    HAL_NVIC_SetPriority(GPS_USART_IRQ, 5, 0);
 
     if (enable_irq) {
-        HAL_NVIC_EnableIRQ(USART_IRQ);
+        HAL_NVIC_EnableIRQ(GPS_USART_IRQ);
         __HAL_UART_ENABLE_IT(&gps_usart, UART_IT_RXNE);
         // Enable error interrupt so FE/NE/ORE flags generate an IRQ we can clear
         __HAL_UART_ENABLE_IT(&gps_usart, UART_IT_ERR);
@@ -150,12 +150,12 @@ void usart_gps_set_baud_rate(uint32_t baud_rate) {
 
 static void usart_gps_enable_irq(bool enabled) {
     if (enabled) {
-        HAL_NVIC_EnableIRQ(USART_IRQ);
+        HAL_NVIC_EnableIRQ(GPS_USART_IRQ);
         __HAL_UART_ENABLE_IT(&gps_usart, USART_IT_RXNE);
         __HAL_UART_ENABLE_IT(&gps_usart, UART_IT_ERR);
     } else {
-        HAL_NVIC_DisableIRQ(USART_IRQ);
-        NVIC_ClearPendingIRQ(USART_IRQ);
+        HAL_NVIC_DisableIRQ(GPS_USART_IRQ);
+        NVIC_ClearPendingIRQ(GPS_USART_IRQ);
         __HAL_UART_DISABLE_IT(&gps_usart, USART_IT_RXNE);
         __HAL_UART_DISABLE_IT(&gps_usart, UART_IT_ERR);
     }
@@ -171,7 +171,7 @@ void usart_gps_uninit()
     usart_gps_enable_irq(false);
     __HAL_UART_DISABLE(&gps_usart);
     HAL_UART_DeInit(&gps_usart);
-    NVIC_ClearPendingIRQ(USART_IRQ);
+    NVIC_ClearPendingIRQ(GPS_USART_IRQ);
     GPS_USART_CLK_DISABLE();
 
 #ifdef RS41  // both models of RS41 have a GPS power pin
@@ -204,7 +204,7 @@ void usart_gps_send_byte(uint8_t data)
 }
 
 #ifdef RS41_RSM4x4
-void USART_IRQ_HANDLER(UART_HandleTypeDef *huart)
+void GPS_USART_IRQ_HANDLER(void)
 {
     gps_ints++;
     uint32_t isr = READ_REG(gps_usart.Instance->ISR);
@@ -241,7 +241,7 @@ void USART_IRQ_HANDLER(UART_HandleTypeDef *huart)
     gps_usart.Instance->ICR = 0xFFFFFFFF;
 }
 #else // stm32f1xx
-void USART_IRQ_HANDLER(UART_HandleTypeDef *huart)
+void GPS_USART_IRQ_HANDLER(void)
 {
     gps_ints++;		// Bump the global counter
     uint32_t sr = READ_REG(gps_usart.Instance->SR);
