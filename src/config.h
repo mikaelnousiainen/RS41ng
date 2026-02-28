@@ -302,14 +302,15 @@ Setting, measured RF output power, relative DC power draw
 // The STM32L4 on the RSM4x4 series uses a timing configuration register: 
 // 0x20422727 = 100KHz
 // 0x90427777 = 10KHz
-#define I2C_BUS_TIMING 0x20422727
+#define I2C_BUS_TIMING 0x9044A747
 
 // I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
 // PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
 // 0x20422727
-// I2C timing for 24 MHz PCLK1, 10 kHz standard mode (I2C2)
-// PRESC=9, SCLDEL=4, SDADEL=2, SCLH=0x77(5us), SCLL=0x77(5us)
-// 0x90427777
+// I2C timing for 24 MHz PCLK1, 10 kHz asymmetric duty (I2C2)
+// PRESC=9, SCLDEL=4, SDADEL=4, SCLH=0xA7(70µs), SCLL=0x47(30µs)
+// Asymmetric duty cycle: 70% high / 30% low compensates for slow rise time with internal pull-ups
+// 0x9044A747
 
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
