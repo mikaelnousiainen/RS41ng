@@ -64,7 +64,6 @@ void pwm_data_timer_uninit()
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
     TIM_MasterConfigTypeDef sMasterConfig = {0};
-    GPIO_InitTypeDef gpio_init = {0};
     htim15.Instance = TIM15;
 #ifdef RS41
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
@@ -73,6 +72,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     __HAL_RCC_TIM15_CLK_ENABLE();
 
 #if defined(RS41_RSM4x4)   //L4 only - we need to use the Alternate Function to put PWM on PB15
+    GPIO_InitTypeDef gpio_init = {0};
     gpio_init.Pin = PIN_MOSI;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
@@ -180,8 +180,6 @@ void pwm_timer_use(bool use)
 
 void pwm_timer_uninit()
 {
-    GPIO_InitTypeDef gpio_init = {0};
-
     __HAL_TIM_MOE_DISABLE(&htim15);
     __HAL_TIM_DISABLE(&htim15);
     hang_if_bad("HAL_TIM_PWM_Stop",
@@ -198,6 +196,7 @@ void pwm_timer_uninit()
 
 #if defined(RS41_RSM4x4)   //L4 only - Restore the GPIO pin to how spi.c sets it up
     // MOSI
+    GPIO_InitTypeDef gpio_init = {0};
     gpio_init.Pin = PIN_MOSI;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
