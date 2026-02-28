@@ -127,9 +127,7 @@ void spi_send(uint8_t data)
     while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_TXE) == RESET);
     while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_BSY) == SET);
 
-    // Reset the overrun error by reading the data and status registers
-    // NOTE: It seems this sequence is required to make Si4063 SPI communication work on DFM17 radiosondes
-    HAL_SPI_Receive(&hspi, NULL, 1, 10);
+    // Clear overrun flag caused by full-duplex transmit discarding received data
     __HAL_SPI_CLEAR_OVRFLAG(&hspi);
 #endif
 }
@@ -148,15 +146,13 @@ uint8_t spi_receive()
 
 uint8_t spi_read()
 {
-    uint8_t data = 0xFF;
+    uint8_t tx_data = 0xFF;
+    uint8_t rx_data = 0x00;
 
     while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_BSY) == SET);
-    // Send dummy data to read in bidirectional mode
-    HAL_SPI_Transmit(&hspi, &data, 1, 10);
-    // Wait for data in RX buffer
-    while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_RXNE) == RESET);
-    HAL_SPI_Receive(&hspi, &data, 1, 10);
-    return data;
+    // Send dummy data and read response in one operation
+    HAL_SPI_TransmitReceive(&hspi, &tx_data, &rx_data, 1, 10);
+    return rx_data;
 }
 
 void spi_set_chip_select(GPIO_TypeDef *gpio_cs, uint16_t pin_cs, bool select)
