@@ -301,8 +301,8 @@ Setting, measured RF output power, relative DC power draw
 
 // The STM32L4 on the RSM4x4 series uses a timing configuration register: 
 // 0x20422727 = 100KHz
-// 0x90427777 = 10KHz
-#define I2C_BUS_TIMING 0x9044A747
+// 0x9044A747 = 10KHz
+#define I2C_BUS_TIMING 0x20422727
 
 // I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
 // PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
