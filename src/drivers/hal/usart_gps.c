@@ -46,7 +46,7 @@
 #define GPS_DMA_IRQn        DMA1_Channel5_IRQn
 #endif
 
-#define GPS_DMA_BUF_SIZE    512
+#define GPS_DMA_BUF_SIZE    256
 
 volatile uint32_t gps_ints = 0;
 
@@ -110,6 +110,24 @@ void usart_gps_drain_dma(void)
     if (hdma_usart_rx.Instance == NULL) return;
 
     draining = true;
+
+    /* Check for USART error flags (overrun, framing, noise).
+     * On STM32F1, an overrun error (ORE) inhibits DMA requests,
+     * permanently stopping DMA transfers until the flag is cleared.
+     * Clear errors by reading SR then DR (F1) or writing ICR (L4). */
+#ifdef RS41_RSM4x4
+    uint32_t isr = gps_usart.Instance->ISR;
+    if (isr & (USART_ISR_ORE | USART_ISR_FE | USART_ISR_NE)) {
+        gps_usart.Instance->ICR = USART_ICR_ORECF | USART_ICR_FECF | USART_ICR_NECF;
+    }
+#else
+    volatile uint32_t sr = gps_usart.Instance->SR;
+    if (sr & (USART_SR_ORE | USART_SR_FE | USART_SR_NE)) {
+        /* On STM32F1, reading SR then DR clears ORE/FE/NE */
+        volatile uint32_t dr = gps_usart.Instance->DR;
+        (void)dr;
+    }
+#endif
 
     uint16_t wr_pos = GPS_DMA_BUF_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart_rx);
 
