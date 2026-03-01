@@ -102,6 +102,47 @@ static void dma_rx_restart(void)
     __HAL_DMA_DISABLE_IT(&hdma_usart_rx, DMA_IT_HT | DMA_IT_TC);
 }
 
+static void dma_rx_recover(void)
+{
+    DMA_Channel_TypeDef *ch = hdma_usart_rx.Instance;
+
+    /* Clear all DMA error flags for this channel */
+#ifdef RS41_RSM4x4
+    hdma_usart_rx.DmaBaseAddress->IFCR = DMA_FLAG_GL5 | DMA_FLAG_TE5;
+#elif defined(DFM17)
+    DMA1->IFCR = DMA_ISR_GIF6 | DMA_ISR_TEIF6;
+#else
+    DMA1->IFCR = DMA_ISR_GIF5 | DMA_ISR_TEIF5;
+#endif
+
+    /* Clear USART error flags */
+#ifdef RS41_RSM4x4
+    gps_usart.Instance->ICR = USART_ICR_ORECF | USART_ICR_FECF | USART_ICR_NECF | USART_ICR_PECF;
+    volatile uint32_t tmp = gps_usart.Instance->RDR; (void)tmp;
+#else
+    volatile uint32_t sr = gps_usart.Instance->SR;
+    volatile uint32_t dr = gps_usart.Instance->DR;
+    (void)sr; (void)dr;
+#endif
+
+    /* Disable the channel, reconfigure, and re-enable */
+    ch->CCR &= ~DMA_CCR_EN;
+    ch->CNDTR = GPS_DMA_BUF_SIZE;
+    ch->CPAR = (uint32_t)&gps_usart.Instance->
+#ifdef RS41_RSM4x4
+        RDR;
+#else
+        DR;
+#endif
+    ch->CMAR = (uint32_t)dma_rx_buf;
+    ch->CCR |= DMA_CCR_EN;
+
+    /* Ensure USART DMA receive request is enabled */
+    gps_usart.Instance->CR3 |= USART_CR3_DMAR;
+
+    dma_rd_pos = 0;
+}
+
 void usart_gps_drain_dma(void)
 {
     static volatile bool draining = false;
@@ -111,10 +152,19 @@ void usart_gps_drain_dma(void)
 
     draining = true;
 
-    /* Check for USART error flags (overrun, framing, noise).
-     * On STM32F1, an overrun error (ORE) inhibits DMA requests,
-     * permanently stopping DMA transfers until the flag is cleared.
-     * Clear errors by reading SR then DR (F1) or writing ICR (L4). */
+    /* Check if DMA channel is still running. It can stop due to:
+     * - DMA transfer error (clears EN bit automatically)
+     * - USART error causing DMAR to be cleared by HAL error paths
+     * If stopped, restart it. */
+    DMA_Channel_TypeDef *ch = hdma_usart_rx.Instance;
+    if (!(ch->CCR & DMA_CCR_EN) || !(gps_usart.Instance->CR3 & USART_CR3_DMAR)) {
+        dma_rx_recover();
+        draining = false;
+        return;
+    }
+
+    /* Clear USART error flags (ORE/FE/NE) to prevent them from
+     * inhibiting DMA requests on some STM32 variants. */
 #ifdef RS41_RSM4x4
     uint32_t isr = gps_usart.Instance->ISR;
     if (isr & (USART_ISR_ORE | USART_ISR_FE | USART_ISR_NE)) {
@@ -123,9 +173,8 @@ void usart_gps_drain_dma(void)
 #else
     volatile uint32_t sr = gps_usart.Instance->SR;
     if (sr & (USART_SR_ORE | USART_SR_FE | USART_SR_NE)) {
-        /* On STM32F1, reading SR then DR clears ORE/FE/NE */
-        volatile uint32_t dr = gps_usart.Instance->DR;
-        (void)dr;
+        volatile uint32_t dr_discard = gps_usart.Instance->DR;
+        (void)dr_discard;
     }
 #endif
 
