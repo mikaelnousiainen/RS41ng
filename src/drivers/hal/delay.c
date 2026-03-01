@@ -37,6 +37,7 @@ void delay_init()
 
 void delay_us(uint16_t us)
 {
+    // delay_us_loop(us);
     __HAL_TIM_SET_COUNTER(&htim1, 0);
     __HAL_TIM_SET_AUTORELOAD(&htim1, us);
     __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
@@ -52,8 +53,9 @@ void delay_us(uint16_t us)
 
 void delay_us_loop(uint16_t us)
 {
-    HAL_TIM_Base_Start_IT(&htim1);
     __HAL_TIM_SET_COUNTER(&htim1, 0);
+    __HAL_TIM_SET_AUTORELOAD(&htim1, 65535);
+    HAL_TIM_Base_Start_IT(&htim1);
 
     while ((uint16_t)(__HAL_TIM_GET_COUNTER(&htim1)) < us);
     HAL_TIM_Base_Stop_IT(&htim1);
