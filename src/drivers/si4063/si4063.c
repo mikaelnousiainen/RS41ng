@@ -815,9 +815,9 @@ int si4063_init()
     si4063_configure_gpio(
             0x00, // GPIO0: Do nothing
             0x00, // GPIO1: Do nothing
-            0x07, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
+            0x00, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
             0x04, // GPIO3: Pin is configured as a CMOS input for direct mode transmissions.
-            0x00 // Drive strength: HIGH
+            0x03 // Drive strength: Low
     );
 
     si4063_set_tx_power(0x00);

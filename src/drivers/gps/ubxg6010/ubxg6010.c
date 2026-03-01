@@ -553,7 +553,7 @@ bool ubxg6010_init()
     usart_gps_set_baud_rate(GPS_INITIAL_BAUD_RATE);
     delay_ms(100);
     
-  delay_ms(1000);
+    delay_ms(1000);
     log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
     delay_ms(1000);
@@ -695,21 +695,21 @@ void ubxg6010_request_gpstime()
 
 static void ubxg6010_handle_packet(uBloxPacket *pkt)
 {
-    // log_debug("Handling GPS packet\n");
+    // log_info("Handling GPS packet\n");
     uBloxChecksum cksum = ubxg6010_calculate_checksum(pkt->header.messageClass, pkt->header.messageId,
             (const uint8_t *) &pkt->data, pkt->header.payloadSize);
     uBloxChecksum *checksum = (uBloxChecksum *) (((uint8_t *) &pkt->data) + pkt->header.payloadSize);
 
     if (cksum.ck_a != checksum->ck_a || cksum.ck_b != checksum->ck_b) {
         ubxg6010_current_gps_data.bad_packets += 1;
-        // log_debug("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
+        // log_info("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
         //          ubxg6010_current_gps_data.bad_packets,
         //          pkt->header.messageClass, pkt->header.messageId,
         //          pkt->header.payloadSize);
         return;
     }
 
-    // log_debug("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
+    // log_info("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
         // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this
@@ -758,6 +758,7 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
         ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navsol.iTOW;
         ubxg6010_current_gps_data.week = pkt->data.navsol.week;
         ubxg6010_current_gps_data.fix = pkt->data.navsol.gpsFix;
+        ubxg6010_current_gps_data.fix_ok = pkt->data.navsol.flags & 0x01;
         ubxg6010_current_gps_data.satellites_visible = pkt->data.navsol.numSV;
         ubxg6010_current_gps_data.position_dilution_of_precision = pkt->data.navsol.pDOP;
 

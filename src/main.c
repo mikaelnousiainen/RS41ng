@@ -129,8 +129,8 @@ int main(void)
     log_info("Si4063 init\n");
     si4063_init();
 
-    log_info("Switching to HSE bypass (12.8 MHz TCXO)\n");
-    system_switch_to_hse_bypass();
+    // log_info("Switching to HSE PLL (12.8 MHz input from Si4063)\n");
+    // system_switch_to_hse_bypass();
 #endif
 
     gps_init:

@@ -73,13 +73,14 @@ static void rcc_init()
 
 #endif
 #ifdef DFM17
-    // Boot on HSI 8 MHz initially (no PLL).
-    // After Si4063 init enables TCXO clock output on GPIO2/PD0,
-    // system_switch_to_hse_bypass() switches SYSCLK to HSE PLL
+    // HSI (8 MHz) / 2 = 4 MHz into PLL, × 6 = 24 MHz SYSCLK.
+    // No external clock required at boot.
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = 0x10U;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         while(1);
@@ -107,9 +108,11 @@ static void rcc_init()
 #endif //RS41_RSM4x4
 #endif // RS41
 #ifdef DFM17
-    // Use HSI (8 MHz) as initial SYSCLK; will switch to HSE PLL later
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+    // Use HSI PLL (24 MHz) as SYSCLK; FLASH_LATENCY_0 valid for ≤24 MHz on STM32F1
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+        while(1);
+    }
 #endif //DFM17
 
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
