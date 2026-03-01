@@ -71,14 +71,18 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 
     // External temperature & humidity sensors (typically BMP280 -- can expand to others)
     if (data->temperature_celsius_100 != 0 && data->humidity_percentage_100 != 0) {
-        asnMessage.temperatureCelsius_x10.external = (int16_t) (data->temperature_celsius_100 / 10);
-        asnMessage.temperatureCelsius_x10.exist.external = true;
+        if (data->temperature_celsius_100 >= -10230 && data->temperature_celsius_100 <= 10230) {
+            asnMessage.temperatureCelsius_x10.external = (int16_t)(data->temperature_celsius_100 / 10);
+            asnMessage.temperatureCelsius_x10.exist.external = true;
+        }
 
-        asnMessage.humidityPercentage = (uint8_t) (data->humidity_percentage_100 / 100);
-        asnMessage.exist.humidityPercentage = true;
+        if (data->humidity_percentage_100 >= 0 && data->humidity_percentage_100 <= 10000) {
+            asnMessage.humidityPercentage = (uint8_t) (data->humidity_percentage_100 / 100);
+            asnMessage.exist.humidityPercentage = true;
+        }
     }
 
-    if (data->pressure_mbar_100 > 0) {
+    if (data->pressure_mbar_100 > 0 && data->pressure_mbar_100 <= 12000) {
         asnMessage.pressurehPa_x10 = (uint16_t) (data->pressure_mbar_100 / 10);
         asnMessage.exist.pressurehPa_x10 = true;
     }
