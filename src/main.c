@@ -120,6 +120,19 @@ int main(void)
     //log_info("SPI init\n");
     spi_init();
 
+#if defined(RS41)
+    //log_info("Si4032 init\n");
+    si4032_init();
+#elif defined(DFM17)
+    // Init Si4063 early: powers up the radio and enables 12.8 MHz TCXO clock output
+    // on GPIO2/PD0 (OSC_IN), then switch SYSCLK from HSI to HSE bypass.
+    log_info("Si4063 init\n");
+    si4063_init();
+
+    log_info("Switching to HSE bypass (12.8 MHz TCXO)\n");
+    system_switch_to_hse_bypass();
+#endif
+
     gps_init:
     log_info("GPS init\n");
     success = gps_driver_init();
@@ -132,14 +145,6 @@ int main(void)
 #ifdef DFM17
     log_info("Timepulse init\n");
     timepulse_init();
-#endif
-
-#if defined(RS41)
-    //log_info("Si4032 init\n");
-    si4032_init();
-#elif defined(DFM17)
-    log_info("Si4063 init\n");
-    si4063_init();
 #endif
 
 #if SENSOR_BMP280_ENABLE
@@ -216,9 +221,6 @@ int main(void)
 
     while (true) {
         radio_handle_main_loop();
-#ifdef DFM17
-        clock_calibration_adjust();
-#endif
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
     }

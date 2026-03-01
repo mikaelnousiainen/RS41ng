@@ -73,15 +73,13 @@ static void rcc_init()
 
 #endif
 #ifdef DFM17
-    // The DFM17 hardware uses the internal clock
-    RCC_OscInitStruct.HSICalibrationValue = 0x10U;
-
-    // Set up a 24 MHz PLL for 24 MHz SYSCLK (8 MHz / 2) * 6 = 24 MHz
+    // Boot on HSI 8 MHz initially (no PLL).
+    // After Si4063 init enables TCXO clock output on GPIO2/PD0,
+    // system_switch_to_hse_bypass() switches SYSCLK to HSE PLL
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+    RCC_OscInitStruct.HSICalibrationValue = 0x10U;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
 
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         while(1);
@@ -109,8 +107,8 @@ static void rcc_init()
 #endif //RS41_RSM4x4
 #endif // RS41
 #ifdef DFM17
-    // Use the 24 MHz PLL as SYSCLK
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    // Use HSI (8 MHz) as initial SYSCLK; will switch to HSE PLL later
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 #endif //DFM17
 
@@ -526,6 +524,54 @@ void system_init()
     HAL_SYSTICK_Config(SystemCoreClock / 1000U);
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0U);
 }
+
+#ifdef DFM17
+void system_switch_to_hse_bypass()
+{
+    // Si4063 TCXO divided clock (12.8 MHz) is now active on GPIO2/PD0 (OSC_IN).
+    // Use PLL to clean up the signal and produce exactly 24 MHz SYSCLK:
+    //   12.8 MHz HSE bypass → PREDIV1 ÷8 → 1.6 MHz → PLL ×15 → 24 MHz
+    delay_ms(100);
+
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV8;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL15;
+
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+        // Blink red LED to indicate failure
+        for (int i = 0; i < 10; i++) {
+            HAL_GPIO_TogglePin(BANK_RED_LED, PIN_RED_LED);
+            for (volatile int j = 0; j < 200000; j++);
+        }
+        return;
+    }
+
+    // Switch SYSCLK from HSI to PLL (24 MHz, same as original DFM17 config)
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+        for (int i = 0; i < 20; i++) {
+            HAL_GPIO_TogglePin(BANK_RED_LED, PIN_RED_LED);
+            for (volatile int j = 0; j < 100000; j++);
+        }
+        return;
+    }
+
+    // Reconfigure SysTick for 24 MHz
+    HAL_SYSTICK_Config(SystemCoreClock / 1000U);
+
+    // Yellow LED flash to confirm clock switch success
+    // HAL_GPIO_WritePin(BANK_YELLOW_LED, PIN_YELLOW_LED, GPIO_PIN_SET);
+    // delay_ms(200);
+    // HAL_GPIO_WritePin(BANK_YELLOW_LED, PIN_YELLOW_LED, GPIO_PIN_RESET);
+}
+#endif
 
 void SysTick_Handler(void)
 {

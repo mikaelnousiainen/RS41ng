@@ -581,8 +581,8 @@ void si4063_configure()
         uint8_t data[] = {
                 0x00, // 0x00 = Group GLOBAL
                 0x01, // Set 1 property
-                0x01, // 0x00 = GLOBAL_CLK_CFG
-                0x00  // No clock output needed
+                0x01, // 0x01 = GLOBAL_CLK_CFG
+                0x48  // DIV_CLK_EN=1 (enable on GPIO), DIV_CLK_SEL=001 (÷2 = 12.8 MHz)
         };
 
         si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
@@ -815,7 +815,7 @@ int si4063_init()
     si4063_configure_gpio(
             0x00, // GPIO0: Do nothing
             0x00, // GPIO1: Do nothing
-            0x00, // GPIO2: Do nothing
+            0x07, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
             0x04, // GPIO3: Pin is configured as a CMOS input for direct mode transmissions.
             0x00 // Drive strength: HIGH
     );

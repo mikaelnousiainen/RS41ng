@@ -45,7 +45,7 @@ void clock_calibration_adjust()
         return;
     }
 
-    __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(trim_suggestion);
+    // __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(trim_suggestion);
     trim_current = trim_suggestion;
 
     calibration_change_count++;
