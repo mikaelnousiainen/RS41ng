@@ -56,16 +56,19 @@ void clock_calibration_adjust()
 
 void timepulse_init()
 {
-    // Initialize pin PB8 as floating input with rising-edge EXTI interrupt
+    // Initialize pin PB8 as pulled-down input with rising-edge EXTI interrupt.
+    // Pull-down prevents the floating pin from generating spurious interrupts before GPS lock.
     GPIO_InitTypeDef gpio_init = {0};
     gpio_init.Pin = GPIO_PIN_8;
     gpio_init.Mode = GPIO_MODE_IT_RISING;
-    gpio_init.Pull = GPIO_NOPULL;
+    gpio_init.Pull = GPIO_PULLDOWN;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOB, &gpio_init);
 
-    // PB8 is connected to EXTI_Line8, which has EXTI9_5_IRQn vector. Use priority 0 for now.
-    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+    // PB8 is connected to EXTI_Line8, which has EXTI9_5_IRQn vector.
+    // Priority must be numerically higher (lower urgency) than GPS USART2 (priority 5)
+    // to prevent timepulse interrupts from preempting and starving the USART ISR.
+    HAL_NVIC_SetPriority(EXTI9_5_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
     // Pull the current calibration to start

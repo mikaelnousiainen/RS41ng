@@ -600,7 +600,7 @@ bool ubxg6010_init()
     // Rate of 1 for message: 0x01 0x06 Navigation Solution Information
     msgcfgmsg.data.cfgmsg.msgID = 0x06;
     msgcfgmsg.data.cfgmsg.rate = GPS_POSITION_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    log_info("GPS: Configuring navigation solution\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -620,7 +620,7 @@ bool ubxg6010_init()
     // Configure rate of 1 for message: 0x01 0x21 UTC Time Solution
     msgcfgmsg.data.cfgmsg.msgID = 0x21;
     msgcfgmsg.data.cfgmsg.rate = GPS_TIME_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    log_info("GPS: Configuring UTC time solution\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -629,7 +629,7 @@ bool ubxg6010_init()
     // Configure rate of 2 for message: 0x01 0x12 Velocity Solution in NED
     msgcfgmsg.data.cfgmsg.msgID = 0x12;
     msgcfgmsg.data.cfgmsg.rate = GPS_POSITION_MESSAGE_RATE;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    log_info("GPS: Configuring velocity solution in NED\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -638,7 +638,7 @@ bool ubxg6010_init()
     // Configure rate of 2 for message: 0x01 0x03 Receiver Navigation Status
     msgcfgmsg.data.cfgmsg.msgID = 0x03;
     msgcfgmsg.data.cfgmsg.rate = 1;
-    log_info("GPS: Requesting update messages from GPS chip\n");
+    log_info("GPS: Configuring receiver navigation status\n");
     success = ubxg6010_send_packet_and_wait_for_ack(&msgcfgmsg);
     if (!success) {
         return false;
@@ -695,17 +695,21 @@ void ubxg6010_request_gpstime()
 
 static void ubxg6010_handle_packet(uBloxPacket *pkt)
 {
-    // log_info("Handling GPS packet\n");
+    // log_debug("Handling GPS packet\n");
     uBloxChecksum cksum = ubxg6010_calculate_checksum(pkt->header.messageClass, pkt->header.messageId,
             (const uint8_t *) &pkt->data, pkt->header.payloadSize);
     uBloxChecksum *checksum = (uBloxChecksum *) (((uint8_t *) &pkt->data) + pkt->header.payloadSize);
 
     if (cksum.ck_a != checksum->ck_a || cksum.ck_b != checksum->ck_b) {
         ubxg6010_current_gps_data.bad_packets += 1;
+        // log_debug("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
+        //          ubxg6010_current_gps_data.bad_packets,
+        //          pkt->header.messageClass, pkt->header.messageId,
+        //          pkt->header.payloadSize);
         return;
     }
 
-    //log_debug("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
+    // log_debug("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
         // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this
