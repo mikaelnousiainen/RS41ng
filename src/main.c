@@ -32,6 +32,8 @@ gps_data current_gps_data;
 
 void handle_timer_tick()
 {
+    usart_gps_drain_dma();
+
     if (!system_initialized) {		// Timer may pop before everything fully initialized
         return;
     }
@@ -220,9 +222,10 @@ int main(void)
     system_initialized = true;
 
     while (true) {
+        usart_gps_drain_dma();
         radio_handle_main_loop();
 #ifdef DFM17
-        clock_calibration_adjust();
+        // clock_calibration_adjust();
 #endif
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
