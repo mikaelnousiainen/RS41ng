@@ -185,7 +185,7 @@ static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, ra
             while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
                 pwm_timer_set_frequency(precalculated_pwm_periods[tone_index]);
                 shared_state->radio_symbol_count_loop++;
-                delay_us(symbol_delay_bell_202_1200bps_us);
+                delay_us_loop(symbol_delay_bell_202_1200bps_us);
             }
 
             radio_si4063_state_change = false;

@@ -18,6 +18,8 @@ void delay_init();
 
 void delay_us(uint16_t us);
 
+void delay_us_loop(uint16_t us);
+
 void delay_ms(uint32_t ms);
 
 void User_TIM1_IRQHandler(TIM_HandleTypeDef *htim);

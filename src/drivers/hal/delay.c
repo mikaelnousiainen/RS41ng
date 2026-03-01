@@ -50,6 +50,15 @@ void delay_us(uint16_t us)
     HAL_TIM_Base_Stop_IT(&htim1);
 }
 
+void delay_us_loop(uint16_t us)
+{
+    HAL_TIM_Base_Start_IT(&htim1);
+    __HAL_TIM_SET_COUNTER(&htim1, 0);
+
+    while ((uint16_t)(__HAL_TIM_GET_COUNTER(&htim1)) < us);
+    HAL_TIM_Base_Stop_IT(&htim1);
+}
+
 inline void delay_ms(uint32_t ms)
 {
     while (ms >= 65) {

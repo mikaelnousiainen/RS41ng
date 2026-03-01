@@ -221,6 +221,9 @@ int main(void)
 
     while (true) {
         radio_handle_main_loop();
+#ifdef DFM17
+        clock_calibration_adjust();
+#endif
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();
     }
