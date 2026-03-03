@@ -49,8 +49,15 @@
 #define GPS_DMA_BUF_SIZE    256
 
 volatile uint32_t gps_ints = 0;
+volatile uint32_t drain_interrupted = 0;
+volatile uint32_t drain_not_enabled = 0;
+volatile uint32_t drain_null_instance = 0;
+volatile uint32_t drain_dma_not_running = 0;
+volatile uint32_t drain_byte_calls = 0;
+volatile uint32_t reset_gps_parse = 0;
 
-void (*usart_gps_handle_incoming_byte)(uint8_t data) = NULL;
+
+void (*usart_gps_handle_incoming_byte)(uint8_t data, uint8_t reset) = NULL;
 
 UART_HandleTypeDef gps_usart;
 
@@ -141,14 +148,24 @@ static void dma_rx_recover(void)
     gps_usart.Instance->CR3 |= USART_CR3_DMAR;
 
     dma_rd_pos = 0;
+    reset_gps_parse = 1;    // We reset our read position.  Any in-flight GPS strings are garbage.  Reset parsers.
 }
 
 void usart_gps_drain_dma(void)
 {
     static volatile bool draining = false;
-    if (draining) return;           // ISR hit us mid-drain — skip
-    if (!dma_drain_enabled) return;
-    if (hdma_usart_rx.Instance == NULL) return;
+    if (draining) {
+       drain_interrupted++;
+       return;           // ISR hit us mid-drain — skip
+    }
+    if (!dma_drain_enabled) {
+       drain_not_enabled++;
+       return;
+    }
+    if (hdma_usart_rx.Instance == NULL) {
+       drain_null_instance++;
+       return;
+    }
 
     draining = true;
 
@@ -158,6 +175,7 @@ void usart_gps_drain_dma(void)
      * If stopped, restart it. */
     DMA_Channel_TypeDef *ch = hdma_usart_rx.Instance;
     if (!(ch->CCR & DMA_CCR_EN) || !(gps_usart.Instance->CR3 & USART_CR3_DMAR)) {
+        drain_dma_not_running++;
         dma_rx_recover();
         draining = false;
         return;
@@ -184,8 +202,10 @@ void usart_gps_drain_dma(void)
         uint8_t byte = dma_rx_buf[dma_rd_pos];
         dma_rd_pos = (dma_rd_pos + 1) % GPS_DMA_BUF_SIZE;
         if (usart_gps_handle_incoming_byte) {
-            usart_gps_handle_incoming_byte(byte);
+            drain_byte_calls++;
+            usart_gps_handle_incoming_byte(byte,reset_gps_parse);
         }
+        reset_gps_parse = 0;	// We're processing bytes.  Clear the parse reset until/unless something bad happens.
     }
 
     draining = false;

@@ -477,8 +477,12 @@ void ubxm10050_reset_parser(void)
     parse_pos  = 0;
 }
 
-void ubxm10050_handle_incoming_byte(uint8_t data)
+void ubxm10050_handle_incoming_byte(uint8_t data, uint8_t reset)
 {
+    if (reset) {
+       parse_sync = 0;
+       parse_pos = 0;
+    }
     if (raw_capture_pos < RAW_CAPTURE_SIZE) {
         raw_capture_buf[raw_capture_pos++] = data;
     }

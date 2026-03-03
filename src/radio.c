@@ -1012,6 +1012,8 @@ void radio_handle_main_loop()
         log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
                 current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
                 current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
+        log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
+                 drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
         log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
                 current_telemetry_data.gps.latitude_degrees_10000000 / 10,
                 current_telemetry_data.gps.longitude_degrees_10000000 / 10,
