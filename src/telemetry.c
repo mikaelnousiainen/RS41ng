@@ -91,21 +91,23 @@ void telemetry_collect(telemetry_data *data)
         data->clock_calibration_trim = clock_calibration_get_trim();
         data->clock_calibration_count = clock_calibration_get_change_count();
         data->clock_millis_delta = clock_calibration_get_millis_delta();
+        data->cap_trim_offset = clock_calibration_get_cap_trim_offset();
+        data->timepulse_error_us = clock_calibration_get_us_error();
         
         #if RADIO_SI4063_TX_CORRECT
-        t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
-        if (t_look < 0){
-            t_look = 39;
-        }
-        if (t_look > 49){
-            t_look = 49;
-        }
+        // t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
+        // if (t_look < 0){
+        //     t_look = 39;
+        // }
+        // if (t_look > 49){
+        //     t_look = 49;
+        // }
 
         // Apply GPS-disciplined XO_TUNE offset on top of the temperature LUT baseline.
         // cap_trim_offset is updated each GPS timepulse by an integrating PLL in
         // clock_calibration.c; it converges toward the value that minimises RF
         // frequency error relative to GPS. Clamp to the Si4063 XO_TUNE range [0, 127].
-        int cap_adjusted = (int)c_value[t_look] + clock_calibration_get_cap_trim_offset();
+        int cap_adjusted = 0x62 + clock_calibration_get_cap_trim_offset(); // + (int)c_value[t_look]
         if (cap_adjusted < 0)   cap_adjusted = 0;
         if (cap_adjusted > 127) cap_adjusted = 127;
 

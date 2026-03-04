@@ -15,6 +15,10 @@ extern void clock_calibration_adjust();
 // Add this to the temperature LUT value before calling si4063_set_crystal_capacitance().
 extern int clock_calibration_get_cap_trim_offset();
 
+// Returns the last measured timepulse error in µs (delta_ticks - 1,000,000).
+// Nominally 0 when locked; sign shows frequency direction.
+extern int32_t clock_calibration_get_us_error();
+
 #endif
 
 #endif

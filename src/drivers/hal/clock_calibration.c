@@ -64,6 +64,10 @@ bool calibration_indicator_state = true;
 // Volatile because it is written in the ISR and read from the main context.
 static volatile int cap_trim_offset = 0;
 
+// Last measured timepulse error in µs (delta_ticks - 1,000,000).
+// Nominally 0; sign indicates direction of frequency error.
+static volatile int32_t last_us_error = 0;
+
 // Integrating error accumulator (µs). One XO_TUNE step is issued per
 // CAP_TRIM_ACCUM_THRESHOLD µs of accumulated error.
 // Tune CAP_TRIM_ACCUM_THRESHOLD to set the loop speed:
@@ -85,8 +89,8 @@ static int32_t cap_error_accumulator = 0;
 
 // Sanity window: reject timepulse deltas outside this range (µs).
 // Catches GPS dropouts, counter wrap, and multi-pulse events.
-#define TIMEPULSE_MIN_TICKS     500000UL    // 0.5 s
-#define TIMEPULSE_MAX_TICKS    2000000UL    // 2.0 s
+#define TIMEPULSE_MIN_TICKS     950000UL    // 0.95 s
+#define TIMEPULSE_MAX_TICKS    1050000UL    // 1.05 s
 
 // ---- Public getters ---------------------------------------------------------
 
@@ -108,6 +112,11 @@ uint32_t clock_calibration_get_millis_delta()
 int clock_calibration_get_cap_trim_offset()
 {
     return cap_trim_offset;
+}
+
+int32_t clock_calibration_get_us_error()
+{
+    return last_us_error;
 }
 
 // ---- HSI trim application (optional, call from main loop) -------------------
@@ -235,13 +244,14 @@ void TIM4_IRQHandler(void)
 
         // ---- Si4063 XO_TUNE GPS PLL (integrating loop) ----------------------
         //
-        // error > 0: interval too long  → MCU/XO running slow → decrease cap → cap_trim_offset--
-        // error < 0: interval too short → MCU/XO running fast → increase cap → cap_trim_offset++
+        // error > 0: interval too long  → MCU/XO running slow → increase cap → cap_trim_offset++
+        // error < 0: interval too short → MCU/XO running fast → decrease cap → cap_trim_offset--
         //
         // The accumulator absorbs sub-step errors. A correction is issued only
         // when the accumulated error exceeds one threshold unit (≈ a few µs).
 
         int32_t error = (int32_t)delta_ticks - (int32_t)TIMEPULSE_EXPECTED_TICKS;
+        last_us_error = error;
         cap_error_accumulator -= error;
 
         if (cap_error_accumulator >= (int32_t)CAP_TRIM_ACCUM_THRESHOLD) {
