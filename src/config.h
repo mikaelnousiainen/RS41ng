@@ -76,9 +76,6 @@
  * DFM-17 only: Built-in Si4063 radio chip transmission configuration
  */
 
-// NOTE: DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
-// DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated with GPS lock. 
-
 // Si4063 transmit power: 0..127
 /*
 Setting, measured RF output power, relative DC power draw
@@ -511,8 +508,8 @@ Setting, measured RF output power, relative DC power draw
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-// #define SEMIHOSTING_ENABLE
-// #define LOGGING_ENABLE
+#define SEMIHOSTING_ENABLE
+#define LOGGING_ENABLE
 
 #include "config_internal.h"
 

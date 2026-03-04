@@ -58,10 +58,6 @@
     * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 8.  Verify functionality.
 
-
-**NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
-DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
-
 **NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
 In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
@@ -172,28 +168,20 @@ Features available on RS41 hardware only:
 * GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 
-Notes for DFM-17:
-
-* **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
-  This is necessary, because the internal oscillator is not particularly accurate.
-  DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before
-  the internal oscillator has been calibrated.
-  * The RS41 radiosonde hardware uses an external oscillator, which is more stable, so RS41 does not
-    suffer from the same issue.
 
 ### Transmission modes
 
 On the internal Si4032 (RS41) and Si4063 (DFM-17) transmitters:
 
-* APRS (1200 baud)
-* Horus 4FSK v1 and v2 (100 baud)
+* APRS (1200 baud and 9600 baud)
+* Horus 4FSK v2 and v3 (100 baud)
 * CATS (9600 baud)
 * Morse code (CW)
 * "Pip" - a short beep to indicate presence of the transmitter
 
 On an external Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde:
 
-* Horus 4FSK v1 and v2 (50 baud, because the Si5351 frequency changes are slow)
+* Horus 4FSK v2 and v3 (50 baud, because the Si5351 frequency changes are slow)
 * JT65/JT9/JT4/FT8/WSPR/FSQ mode beacon transmissions using the JTEncode library. I've decoded FT8, WSPR and FSQ modes successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
 * Morse code (CW)
@@ -251,12 +239,10 @@ Sensor driver code contributions are welcome!
 
 1. Configure your amateur radio call sign, transmission schedule (time sync),
    transmit frequencies and transmission mode parameters in `config.h`
-    * Select the desired radiosonde type in the beginning of the file by removing the `//` comment from either
-      the `#define RS41` or `#define DFM17` lines.
+    * NOTE: Selecting the radiosonde type is not necessary with the compiler options ("-DDFM17=1", "-DRS41=1", or "-DRS41_RSM4X4=1").
     * Customize at least the following settings:
         * `CALLSIGN`
-        * For RS41, the settings beginning with `RADIO_SI4032_` to select transmit power and the modes to transmit
-        * For DFM-17, the settings beginning with `RADIO_SI4063_` to select transmit power and the modes to transmit
+        * Settings beginning with `RADIO_` to select transmit power and the modes to transmit
         * At least `APRS_SSID`, `APRS_SYMBOL` and `APRS_COMMENT` if you transmit APRS
         * At least `CATS_SSID`, `CATS_ICON` and `CATS_COMMENT` if you transmit CATS
 2. Set up transmitted message templates in `config.c`, depending on the modes you use.
