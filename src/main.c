@@ -145,8 +145,8 @@ int main(void)
     }
 
 #ifdef DFM17
-    // log_info("Timepulse init\n");
-    // timepulse_init();
+    log_info("Timepulse init\n");
+    timepulse_init();
 #endif
 
 #if SENSOR_BMP280_ENABLE

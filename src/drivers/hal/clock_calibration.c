@@ -5,6 +5,7 @@
 #include <stm32f1xx_hal.h>
 #include "system.h"
 #include "clock_calibration.h"
+#include "log.h"
 
 // Register definition for reading the HSI current trim out of the Calibration Register (CR).
 // Resulting value will be between 0-31.
@@ -25,6 +26,7 @@ int trim_suggestion = 16;
 int trim_current = 16;
 
 uint32_t old_millis = 0;
+uint32_t millis_delta;
 uint16_t calibration_change_count = 0;
 
 bool calibration_indicator_state = true;
@@ -37,6 +39,11 @@ uint8_t clock_calibration_get_trim()
 uint16_t clock_calibration_get_change_count()
 {
     return calibration_change_count;
+}
+
+uint32_t clock_calibration_get_millis_delta()
+{
+    return millis_delta;
 }
 
 void clock_calibration_adjust()
@@ -107,7 +114,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     }
 
     // Calculate milliseconds since last timepulse. Ideally there were 1000.
-    uint32_t millis_delta = current_millis - old_millis;
+    millis_delta = current_millis - old_millis;
     old_millis = current_millis;
 
     // If too few clicks, speed up clock.  If too many, slow down.
@@ -127,6 +134,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // If the delta makes sense, apply to the suggestion.  Otherwise, skip.
         trim_suggestion = trim_current + delta;
     }
+
+    // log_info(".\n");
 }
 
 #endif // DFM17

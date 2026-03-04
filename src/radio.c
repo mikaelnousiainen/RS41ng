@@ -1018,6 +1018,7 @@ void radio_handle_main_loop()
                 current_telemetry_data.gps.latitude_degrees_10000000 / 10,
                 current_telemetry_data.gps.longitude_degrees_10000000 / 10,
                 (current_telemetry_data.gps.altitude_mm / 1000));
+        log_info("Millis Delta: %lu\n", current_telemetry_data.clock_millis_delta);
         #endif
 
         radio_reset_transmit_delay_counter();

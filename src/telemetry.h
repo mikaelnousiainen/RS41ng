@@ -27,6 +27,7 @@ typedef struct _telemetry_data {
 
     int	clock_calibration_trim;
     uint16_t clock_calibration_count;
+    uint32_t clock_millis_delta;
     uint8_t si4063_capacitance_trim;
 } telemetry_data;
 

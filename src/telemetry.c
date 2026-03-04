@@ -90,6 +90,7 @@ void telemetry_collect(telemetry_data *data)
     #ifdef DFM17
         data->clock_calibration_trim = clock_calibration_get_trim();
         data->clock_calibration_count = clock_calibration_get_change_count();
+        data->clock_millis_delta = clock_calibration_get_millis_delta();
         
         #if RADIO_SI4063_TX_CORRECT
         t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);
