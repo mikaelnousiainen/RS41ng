@@ -532,10 +532,25 @@ void system_init()
 void system_switch_to_hse_bypass()
 {
     // Si4063 TCXO divided clock (12.8 MHz) is now active on GPIO2/PD0 (OSC_IN).
-    // Use PLL to clean up the signal and produce exactly 24 MHz SYSCLK:
+    // Use PLL to produce exactly 24 MHz SYSCLK:
     //   12.8 MHz HSE bypass → PREDIV1 ÷8 → 1.6 MHz → PLL ×15 → 24 MHz
+    //
+    // The STM32F1 HAL refuses to reconfigure PLL while it is the active SYSCLK
+    // source (returns HAL_ERROR). We must first step SYSCLK back to raw HSI,
+    // then reconfigure PLL, then switch SYSCLK to the new PLL.
     delay_ms(100);
 
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+
+    // Step 1: Move SYSCLK off PLL → raw HSI (8 MHz) so PLL can be reconfigured.
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+        log_info("HSE Handover: switch to HSI failed!\n");
+        return;
+    }
+
+    // Step 2: Enable HSE bypass and reconfigure PLL to use it.
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
@@ -543,36 +558,20 @@ void system_switch_to_hse_bypass()
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL15;
-
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
-        // Blink red LED to indicate failure
-        for (int i = 0; i < 10; i++) {
-            HAL_GPIO_TogglePin(BANK_RED_LED, PIN_RED_LED);
-            for (volatile int j = 0; j < 200000; j++);
-        }
+        log_info("HSE Handover: HAL_RCC_OscConfig failed!\n");
         return;
     }
 
-    // Switch SYSCLK from HSI to PLL (24 MHz, same as original DFM17 config)
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
+    // Step 3: Switch SYSCLK to the new PLL (24 MHz).
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
-        for (int i = 0; i < 20; i++) {
-            HAL_GPIO_TogglePin(BANK_RED_LED, PIN_RED_LED);
-            for (volatile int j = 0; j < 100000; j++);
-        }
+        log_info("HSE Handover: HAL_RCC_ClockConfig failed!\n");
         return;
     }
 
-    // Reconfigure SysTick for 24 MHz
+    // Reconfigure SysTick for 24 MHz.
     HAL_SYSTICK_Config(SystemCoreClock / 1000U);
-
-    // Yellow LED flash to confirm clock switch success
-    // HAL_GPIO_WritePin(BANK_YELLOW_LED, PIN_YELLOW_LED, GPIO_PIN_SET);
-    // delay_ms(200);
-    // HAL_GPIO_WritePin(BANK_YELLOW_LED, PIN_YELLOW_LED, GPIO_PIN_RESET);
 }
 #endif
 

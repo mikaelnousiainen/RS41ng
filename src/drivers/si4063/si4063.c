@@ -666,14 +666,14 @@ void si4063_configure()
     {
         /*
           2. Detailed Errata Descriptions
-2.1 If Configured to Skip Sync and Preamble on Transmit, the TX Data from the FIFO is Corrupted
-Description of Errata
-If preamble and sync word are excluded from the transmitted data (PREMABLE_TX_LENGTH = 0 and SYNC_CONFIG: SKIP_TX = 1), data from the FIFO is not transmitted correctly.
-Affected Conditions / Impacts
-Some number of missed bytes will occur at the beginning of the packet and some number of repeated bytes at the end of the packet.
-Workaround
-Set PKT_FIELD_1_CRC_CONFIG: CRC_START to 1. This will trigger the packet handler and result in transmitting the correct data,
-while still not sending a CRC unless enabled in a FIELD configuration. A fix has been identified and will be included in a future release
+                2.1 If Configured to Skip Sync and Preamble on Transmit, the TX Data from the FIFO is Corrupted
+                Description of Errata
+                If preamble and sync word are excluded from the transmitted data (PREMABLE_TX_LENGTH = 0 and SYNC_CONFIG: SKIP_TX = 1), data from the FIFO is not transmitted correctly.
+                Affected Conditions / Impacts
+                Some number of missed bytes will occur at the beginning of the packet and some number of repeated bytes at the end of the packet.
+                Workaround
+                Set PKT_FIELD_1_CRC_CONFIG: CRC_START to 1. This will trigger the packet handler and result in transmitting the correct data,
+                while still not sending a CRC unless enabled in a FIELD configuration. A fix has been identified and will be included in a future release
         */
 
         // In other words, without this, the FIFO buffer gets corrupted while TXing, because we're not using
@@ -815,7 +815,7 @@ int si4063_init()
     si4063_configure_gpio(
             0x00, // GPIO0: Do nothing
             0x00, // GPIO1: Do nothing
-            0x00, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
+            0x07, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
             0x04, // GPIO3: Pin is configured as a CMOS input for direct mode transmissions.
             0x03 // Drive strength: Low
     );

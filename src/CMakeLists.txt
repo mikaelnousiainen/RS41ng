@@ -7,6 +7,7 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "*.h")
 if(DFM17)
     set(STM32F1 1)
     set(HW_DEFINES DFM17)
+    set(HSE_DEFINES HSE_VALUE=12800000U HSE_STARTUP_TIMEOUT=5000U)
 elseif(RS41)
     set(STM32F1 1)
     set(HW_DEFINES RS41)
@@ -59,6 +60,7 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     ${MCU_DEFINE}
     ${HW_DEFINES}
+    ${HSE_DEFINES}
     SUPPORT_CPLUSPLUS
     __ASSEMBLY__
 )
@@ -69,7 +71,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -Wall
     -ffunction-sections
     -fdata-sections
-    # -g
+    -g
     -Os
 )
 
@@ -87,7 +89,7 @@ target_include_directories(${PROJECT_NAME}.elf PRIVATE
 target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=${MCU_CPU}
     -mthumb
-    # -g
+    -g
     -Os
     -Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map
     -Wl,--gc-sections
