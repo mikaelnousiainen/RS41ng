@@ -204,10 +204,11 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
         precalculated_pwm_periods[i] = pwm_calculate_period(shared_state->radio_current_fsk_tones[i].frequency_hz_100);
     }
 
-    system_disable_tick();
-
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_APRS_1200: {
+            // Don't disable system tick: GPS DMA drain runs in the tick handler
+            // and the TIM15 PWM ISR (priority 2,1) preempts TIM6 (priority 3,3)
+            // so tone generation is unaffected.
             int8_t tone_index;
 
             while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
@@ -223,8 +224,6 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
         default:
             break;
     }
-
-    system_enable_tick();
 }
 
 void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *shared_state) {
