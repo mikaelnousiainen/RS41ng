@@ -32,14 +32,6 @@
  *      Each XO_TUNE step ≈ 1-3 ppm; with 1 µs resolution the loop is sensitive to
  *      errors well below one step.
  *
- * Sign convention for cap_trim_offset:
- *   Positive error (measured interval > 1 s → MCU running slow):
- *     Inferred: oscillators are slow → need to raise XO frequency →
- *     decrease load capacitance → cap_trim_offset decrements.
- *   If convergence goes the wrong way, negate the error variable or swap
- *   the ++ / -- below. Verify by watching cap_trim_offset drift vs temperature
- *   and comparing against the LUT.
- *
  * The temperature LUT handles the large open-loop temperature compensation.
  * The GPS PLL handles manufacturing variance, aging, and LUT residual error.
  * Both corrections are additive: applied cap = c_value[t_look] + cap_trim_offset.
@@ -79,7 +71,7 @@ static int32_t cap_error_accumulator = 0;
 // Expected timer ticks for a 1-second GPS timepulse at 1 MHz.
 #define TIMEPULSE_EXPECTED_TICKS    1000000UL
 
-// Accumulator threshold for one XO_TUNE step (µs). Adjust empirically.
+// Accumulator threshold for one XO_TUNE step (µs). 
 #define CAP_TRIM_ACCUM_THRESHOLD    4
 
 // Maximum GPS-derived offset from the temperature LUT baseline (±steps).
