@@ -139,7 +139,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
-    // Add BME6XX gas data to packet if enabled
+// Add BME6XX gas data to packet if enabled
 #if SENSOR_BME_6XX_GAS_MEASUREMENT
     if (asnMessage.extraSensors.nCount < 4) {
         // Unit: µR/h
@@ -168,26 +168,6 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 #if TX_DFM_ADDITIONAL_TELEM && defined(DFM17)
     asnMessage.exist.extraSensors = true;
     if (asnMessage.extraSensors.nCount < 4) {
-        horusAdditionalSensorType clock_calibration_struct = {
-            .name = "clktrim",
-            .exist = { 
-                .name = 1, 
-                .values = 1 
-            },
-            .values = {
-                .kind = horusInt_PRESENT,
-                .u = {
-                    .horusInt = {
-                        .nCount = 1,
-                        .arr[0] = data->clock_calibration_trim
-                    }   
-                }
-            }
-        };
-        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = clock_calibration_struct;
-        asnMessage.extraSensors.nCount += 1;
-    }
-    if (asnMessage.extraSensors.nCount < 4) {
         horusAdditionalSensorType radio_capacitance_struct = {
             .name = "radiotrm",
             .exist = { 
@@ -205,6 +185,27 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
             }
         };
         asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = radio_capacitance_struct;
+        asnMessage.extraSensors.nCount += 1;
+    }
+#if 0
+    if (asnMessage.extraSensors.nCount < 4) {
+        horusAdditionalSensorType clock_calibration_struct = {
+            .name = "clktrim",
+            .exist = { 
+                .name = 1, 
+                .values = 1 
+            },
+            .values = {
+                .kind = horusInt_PRESENT,
+                .u = {
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = data->clock_calibration_trim
+                    }   
+                }
+            }
+        };
+        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = clock_calibration_struct;
         asnMessage.extraSensors.nCount += 1;
     }
     if (asnMessage.extraSensors.nCount < 4) {
@@ -227,6 +228,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = clock_trim_count_struct;
         asnMessage.extraSensors.nCount += 1;
     }
+#endif
 #endif
 
 #if 0
