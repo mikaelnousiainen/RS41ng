@@ -101,9 +101,17 @@ void telemetry_collect(telemetry_data *data)
             t_look = 49;
         }
 
-        si4063_set_crystal_capacitance(c_value[t_look]);
+        // Apply GPS-disciplined XO_TUNE offset on top of the temperature LUT baseline.
+        // cap_trim_offset is updated each GPS timepulse by an integrating PLL in
+        // clock_calibration.c; it converges toward the value that minimises RF
+        // frequency error relative to GPS. Clamp to the Si4063 XO_TUNE range [0, 127].
+        int cap_adjusted = (int)c_value[t_look] + clock_calibration_get_cap_trim_offset();
+        if (cap_adjusted < 0)   cap_adjusted = 0;
+        if (cap_adjusted > 127) cap_adjusted = 127;
 
-        data->si4063_capacitance_trim = c_value[t_look];
+        si4063_set_crystal_capacitance((uint8_t)cap_adjusted);
+
+        data->si4063_capacitance_trim = (uint8_t)cap_adjusted;
     #endif
 #endif
 

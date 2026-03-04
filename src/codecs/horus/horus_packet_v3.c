@@ -187,6 +187,26 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = radio_capacitance_struct;
         asnMessage.extraSensors.nCount += 1;
     }
+    if (asnMessage.extraSensors.nCount < 4) {
+        horusAdditionalSensorType clock_millis_delta_struct = {
+            .name = "millis",
+            .exist = { 
+                .name = 1, 
+                .values = 1 
+            },
+            .values = {
+                .kind = horusInt_PRESENT,
+                .u = {
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = data->clock_millis_delta
+                    }   
+                }
+            }
+        };
+        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = clock_millis_delta_struct;
+        asnMessage.extraSensors.nCount += 1;
+    }
 #if 0
     if (asnMessage.extraSensors.nCount < 4) {
         horusAdditionalSensorType clock_calibration_struct = {
