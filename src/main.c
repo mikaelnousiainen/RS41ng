@@ -32,7 +32,8 @@ gps_data current_gps_data;
 
 void handle_timer_tick()
 {
-    usart_gps_drain_dma();
+    if(counter % 100 == 0)
+        usart_gps_drain_dma();
 
     if (!system_initialized) {		// Timer may pop before everything fully initialized
         return;

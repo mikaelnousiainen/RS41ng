@@ -628,6 +628,9 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_RTTY:
             break;
         case RADIO_DATA_MODE_APRS_1200:
+            // GPS uses DMA (no USART interrupts), so it won't disturb APRS timing
+            enable_gps_during_transmit = true;
+
             // TODO: make bell tones and flag field count configurable
             bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, BELL_FLAG_FIELD_COUNT_1200, bell202_tones);
             radio_shared_state.radio_current_symbol_rate = entry->fsk_encoder_api->get_symbol_rate(&entry->fsk_encoder);
