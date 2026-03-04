@@ -12,6 +12,7 @@
 #include "log.h"
 #include "gpio.h"
 
+#if 0
 uint16_t pwm_timer_dma_buffer[PWM_TIMER_DMA_BUFFER_SIZE];
 
 uint16_t (*pwm_handle_dma_transfer_half)(uint16_t buffer_size, uint16_t *buffer) = NULL;
@@ -60,6 +61,7 @@ void pwm_data_timer_uninit()
 {
     HAL_TIM_Base_Stop(&htim2);
 }
+#endif
 
 void pwm_timer_init(uint32_t frequency_hz_100)
 {
@@ -223,6 +225,8 @@ inline void pwm_timer_set_frequency(uint32_t pwm_period)
  * This does not work correctly, but is left for future reference.
  */
 
+ #if 0
+
 // static void pwm_dma_init_channel()
 // {
 //     DMA_InitTypeDef dma_init;
@@ -308,3 +312,5 @@ void pwm_dma_stop()
 //         pwm_handle_dma_transfer_full(PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
 //     }
 // }
+
+#endif

@@ -26,7 +26,7 @@
  * but when si4032_use_dma is false, the symbol timing is created in a loop with delay that was chosen
  * carefully via experiments.
  */
-static bool si4032_use_dma = false;
+// static bool si4032_use_dma = false;
 
 // TODO: Add support for multiple APRS baud rates
 // This delay is for RS41 radiosondes
@@ -67,10 +67,10 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             frequency_offset = 0;
             modulation_type = SI4032_MODULATION_TYPE_FSK;
             use_direct_mode = true;
-            if (si4032_use_dma) {
-                pwm_data_timer_init();
-                radio_si4032_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
-            }
+            // if (si4032_use_dma) {
+            //     pwm_data_timer_init();
+            //     radio_si4032_fill_pwm_buffer(0, PWM_TIMER_DMA_BUFFER_SIZE, pwm_timer_dma_buffer);
+            // }
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3: {
@@ -135,14 +135,14 @@ bool radio_start_transmit_si4032(radio_transmit_entry *entry, radio_module_state
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            if (si4032_use_dma) {
-                shared_state->radio_dma_transfer_active = true;
-                radio_dma_transfer_stop_after_counter = -1;
-                system_disable_tick();
-                pwm_dma_start();
-            } else {
-                shared_state->radio_manual_transmit_active = true;
-            }
+            // if (si4032_use_dma) {
+            //     shared_state->radio_dma_transfer_active = true;
+            //     radio_dma_transfer_stop_after_counter = -1;
+            //     system_disable_tick();
+            //     pwm_dma_start();
+            // } else {
+            shared_state->radio_manual_transmit_active = true;
+            // }
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
@@ -377,10 +377,10 @@ bool radio_stop_transmit_si4032(radio_transmit_entry *entry, radio_module_state 
             system_enable_tick();
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            if (si4032_use_dma) {
-                pwm_data_timer_uninit();
-                system_enable_tick();
-            }
+            // if (si4032_use_dma) {
+            //     pwm_data_timer_uninit();
+            //     system_enable_tick();
+            // }
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
@@ -463,9 +463,9 @@ void radio_init_si4032()
     pwm_handle_dma_transfer_half = radio_si4032_handle_pwm_transfer_half;
     pwm_handle_dma_transfer_full = radio_si4032_handle_pwm_transfer_full;
 
-    if (si4032_use_dma) {
-        pwm_data_timer_init();
-        pwm_dma_init();
-    }
+    // if (si4032_use_dma) {
+    //     pwm_data_timer_init();
+    //     pwm_dma_init();
+    // }
 }
 #endif
