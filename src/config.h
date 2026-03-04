@@ -508,8 +508,8 @@ Setting, measured RF output power, relative DC power draw
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-#define SEMIHOSTING_ENABLE
-#define LOGGING_ENABLE
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
 
 #include "config_internal.h"
 
