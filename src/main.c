@@ -93,7 +93,7 @@ void set_yellow_led(bool enabled)
 
 int main(void)
 {
-    bool success;
+    bool success __attribute__((unused));
 
     // Set up interrupt handlers
     system_handle_timer_tick = handle_timer_tick;
@@ -136,18 +136,24 @@ int main(void)
     system_switch_to_hse_bypass();
 #endif
 
-    gps_init:
-    log_info("GPS init\n");
-    success = gps_driver_init();
-    if (!success) {
-        log_error("GPS initialization failed, retrying...\n");
-        delay_ms(1000);
-        goto gps_init;
-    }
+#if !ENABLE_FOX_MODE
+        gps_init:
+        log_info("GPS init\n");
+        success = gps_driver_init();
+        if (!success) {
+            log_error("GPS initialization failed, retrying...\n");
+            delay_ms(1000);
+            goto gps_init;
+        }
 
-#ifdef DFM17
-    log_info("Timepulse init\n");
-    timepulse_init();
+    #ifdef DFM17
+        log_info("Timepulse init\n");
+        timepulse_init();
+    #endif
+#else
+        // Fox mode: init USART at GPS default baud rate and immediately deep sleep
+        log_info("GPS deep sleep (fox mode)\n");
+        gps_driver_init_and_sleep();
 #endif
 
 #if SENSOR_BMP280_ENABLE

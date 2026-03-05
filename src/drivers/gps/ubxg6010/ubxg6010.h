@@ -7,6 +7,8 @@
 
 bool ubxg6010_init();
 
+void ubxg6010_init_and_sleep(void);
+
 bool ubxg6010_enable_power_save_mode();
 
 void ubxg6010_sleep(void);

@@ -196,7 +196,20 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .payload_encoder = &radio_aprs_9600_position_payload_encoder,
                     .fsk_encoder_api = &raw_fsk_encoder_api,
                 },
-        #endif      
+        #endif
+        #if RADIO_TX_LONG_TONE
+                {
+                        .enabled = RADIO_TX_LONG_TONE,
+                        .radio_type = RADIO_TYPE_SI4032,
+                        .data_mode = RADIO_DATA_MODE_LONG_TONE,
+                        .transmit_count = RADIO_TX_LONG_TONE_COUNT,
+                        .time_sync_seconds = LONG_TONE_TIME_SYNC_SECONDS,
+                        .time_sync_seconds_offset = LONG_TONE_TIME_SYNC_OFFSET_SECONDS,
+                        .frequency = RADIO_TX_FREQUENCY_LONG_TONE,
+                        .tx_power = RADIO_SI4032_TX_POWER,
+                        .symbol_rate = ENABLE_FM_CW ? FM_TONE_FREQ : 0,
+                },
+        #endif
     #endif // HORUS Continuous
 #endif // RS41
 
@@ -334,6 +347,19 @@ radio_transmit_entry radio_transmit_schedule[] = {
                         .tx_power = RADIO_SI4063_TX_POWER,
                         .payload_encoder = &radio_aprs_9600_position_payload_encoder,
                         .fsk_encoder_api = &raw_fsk_encoder_api,
+                },
+        #endif
+        #if RADIO_TX_LONG_TONE
+                {
+                        .enabled = RADIO_TX_LONG_TONE,
+                        .radio_type = RADIO_TYPE_SI4063,
+                        .data_mode = RADIO_DATA_MODE_LONG_TONE,
+                        .transmit_count = RADIO_TX_LONG_TONE_COUNT,
+                        .time_sync_seconds = LONG_TONE_TIME_SYNC_SECONDS,
+                        .time_sync_seconds_offset = LONG_TONE_TIME_SYNC_OFFSET_SECONDS,
+                        .frequency = RADIO_TX_FREQUENCY_LONG_TONE,
+                        .tx_power = RADIO_SI4063_TX_POWER,
+                        .symbol_rate = ENABLE_FM_CW ? FM_TONE_FREQ : 0,
                 },
         #endif
     #endif // HORUS Continuous
@@ -587,6 +613,42 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
     radio_shared_state.radio_symbol_count_interrupt = 0;
     radio_shared_state.radio_symbol_count_loop = 0;
 
+    // LONG_TONE has no payload or encoder — just a continuous carrier/tone
+    if (entry->data_mode == RADIO_DATA_MODE_LONG_TONE) {
+        bool enable_gps_during_transmit = true;
+        radio_current_payload_length = 0;
+
+        usart_gps_enable(enable_gps_during_transmit);
+
+        switch (entry->radio_type) {
+        #ifdef RS41
+            case RADIO_TYPE_SI4032:
+                success = radio_start_transmit_si4032(entry, &radio_shared_state);
+                break;
+        #endif
+        #ifdef DFM17
+            case RADIO_TYPE_SI4063:
+                success = radio_start_transmit_si4063(entry, &radio_shared_state);
+                break;
+        #endif
+            default:
+                return false;
+        }
+
+        if (!success) {
+            usart_gps_enable(true);
+            return false;
+        }
+
+#if LEDS_ENABLE
+        set_red_led(true);
+#endif
+
+        log_info("TX start (long tone, %d sec)\n", RADIO_TX_LONG_TONE_DURATION_SECONDS);
+        radio_shared_state.radio_transmission_active = true;
+        return true;
+    }
+
     telemetry_collect(&current_telemetry_data);
 
     if (entry->messages != NULL && entry->message_count > 0) {
@@ -820,6 +882,8 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_FSQ_4_5:
         case RADIO_DATA_MODE_FSQ_6:
             jtencode_encoder_destroy(&entry->fsk_encoder);
+            break;
+        case RADIO_DATA_MODE_LONG_TONE:
             break;
         default:
             return false;

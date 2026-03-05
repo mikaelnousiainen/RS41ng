@@ -27,6 +27,8 @@
 
 bool ubxm10050_init(void);
 
+void ubxm10050_init_and_sleep(void);
+
 bool ubxm10050_enable_power_save_mode(void);
 
 void ubxm10050_sleep(void);

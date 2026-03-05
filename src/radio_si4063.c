@@ -14,6 +14,7 @@
 
 #define SI4063_DEVIATION_HZ_RTTY 200.0
 #define SI4063_DEVIATION_HZ_APRS 2600.0
+#define SI4063_DEVIATION_HZ_FM_CW 1000.0
 #define SI4063_DEVIATION_HZ_CATS 4800.0
 #define SI4063_DEVIATION_HZ_APRS_9600 3000.0
 
@@ -82,6 +83,18 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             use_fifo_mode = true;
             data_rate = 9600;
             break;
+        case RADIO_DATA_MODE_LONG_TONE:
+            #if ENABLE_FM_CW
+            frequency_offset = 0;
+            frequency_deviation = SI4063_DEVIATION_HZ_FM_CW;
+            modulation_type = SI4063_MODULATION_TYPE_FSK;
+            use_direct_mode = true;
+            #else
+            frequency_offset = 1;
+            modulation_type = SI4063_MODULATION_TYPE_OOK;
+            use_direct_mode = false;
+            #endif
+            break;
         default:
             return false;
     }
@@ -124,6 +137,14 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
         case RADIO_DATA_MODE_CATS:
         case RADIO_DATA_MODE_APRS_9600:
             shared_state->radio_fifo_transmit_active = true;
+            break;
+        case RADIO_DATA_MODE_LONG_TONE:
+            #if !ENABLE_FM_CW
+            // CW carrier: hold direct mode pin high for continuous carrier
+            spi_uninit();
+            si4063_set_direct_mode_pin(true);
+            #endif
+            shared_state->radio_manual_transmit_active = true;
             break;
         default:
             break;
@@ -169,6 +190,37 @@ bool radio_transmit_symbol_si4063(radio_transmit_entry *entry, radio_module_stat
 
 static void radio_handle_main_loop_manual_si4063(radio_transmit_entry *entry, radio_module_state *shared_state)
 {
+    switch (entry->data_mode) {
+        case RADIO_DATA_MODE_LONG_TONE: {
+            #if ENABLE_FM_CW
+            // Dead carrier before tone
+            pwm_timer_pwm_enable(false);
+            delay_ms(FM_CW_TX_DELAY);
+
+            // FM tone
+            uint32_t tone_period = pwm_calculate_period(entry->symbol_rate * 100);
+            pwm_timer_pwm_enable(true);
+            pwm_timer_set_frequency(tone_period);
+            delay_ms(RADIO_TX_LONG_TONE_DURATION_SECONDS * 1000);
+
+            // Dead carrier after tone
+            pwm_timer_pwm_enable(false);
+            delay_ms(FM_CW_TX_DELAY);
+            #else
+            delay_ms(RADIO_TX_LONG_TONE_DURATION_SECONDS * 1000);
+            #endif
+
+            shared_state->radio_transmission_finished = true;
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (shared_state->radio_transmission_finished) {
+        return;
+    }
+
     fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
     fsk_encoder *fsk_enc = &entry->fsk_encoder;
 
@@ -339,6 +391,14 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
             break;
         case RADIO_DATA_MODE_APRS_1200:
             use_direct_mode = true;
+            break;
+        case RADIO_DATA_MODE_LONG_TONE:
+            #if ENABLE_FM_CW
+            use_direct_mode = true;
+            #else
+            si4063_set_direct_mode_pin(false);
+            spi_init();
+            #endif
             break;
         default:
             break;

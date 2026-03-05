@@ -600,6 +600,18 @@ void ubxm10050_sleep(void)
     m10_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_INACTIVE;
 }
 
+void ubxm10050_init_and_sleep(void)
+{
+    memset(&m10_current_gps_data, 0, sizeof(gps_data));
+
+    // ublox M10 series defaults to 38400 baud after power-on
+    log_info("GPS M10: Initializing USART at 38400 baud for sleep\n");
+    usart_gps_init(38400, true);
+    delay_ms(100);
+
+    ubxm10050_sleep();
+}
+
 bool ubxm10050_init(void)
 {
     bool success;
