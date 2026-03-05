@@ -182,8 +182,8 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                     .horusInt = {
                         .nCount = 4,
                         .arr[0] = data->si4063_capacitance_trim,
-                        .arr[1] = (uint16_t)(data->cap_trim_offset + 127),
-                        .arr[2] = (uint16_t)(data->timepulse_error_us + 32767),
+                        .arr[1] = (int64_t)(data->cap_trim_offset),
+                        .arr[2] = (int64_t)(data->timepulse_error_us),
                         .arr[3] = data->po_state
                     }
                 }
