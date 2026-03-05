@@ -93,6 +93,7 @@ void telemetry_collect(telemetry_data *data)
         data->clock_millis_delta = clock_calibration_get_millis_delta();
         data->cap_trim_offset = clock_calibration_get_cap_trim_offset();
         data->timepulse_error_us = clock_calibration_get_us_error();
+        data->po_state = clock_calibration_get_po_state();
         
         #if RADIO_SI4063_TX_CORRECT
         // t_look = (int) ((data->internal_temperature_celsius_100/100 + 60)/2);

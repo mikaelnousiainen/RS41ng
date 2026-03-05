@@ -19,6 +19,9 @@ extern int clock_calibration_get_cap_trim_offset();
 // Nominally 0 when locked; sign shows frequency direction.
 extern int32_t clock_calibration_get_us_error();
 
+// Returns P&O state: 0=STARTUP, 1=SETTLING, 2=OBSERVING, 3=LOCKED.
+extern uint8_t clock_calibration_get_po_state();
+
 #endif
 
 #endif

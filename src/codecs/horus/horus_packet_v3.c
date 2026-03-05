@@ -168,53 +168,10 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 #if TX_DFM_ADDITIONAL_TELEM && defined(DFM17)
     asnMessage.exist.extraSensors = true;
     if (asnMessage.extraSensors.nCount < 4) {
-        horusAdditionalSensorType radio_capacitance_struct = {
-            .name = "radiotrm",
-            .exist = { 
-                .name = 1, 
-                .values = 1 
-            },
-            .values = {
-                .kind = horusInt_PRESENT,
-                .u = {
-                    .horusInt = {
-                        .nCount = 1,
-                        .arr[0] = data->si4063_capacitance_trim
-                    }   
-                }
-            }
-        };
-        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = radio_capacitance_struct;
-        asnMessage.extraSensors.nCount += 1;
-    }
-    if (asnMessage.extraSensors.nCount < 4) {
-        // Timepulse error in µs (delta_ticks - 1,000,000), biased +32767 for unsigned transport.
-        // Decode: displayed - 32767 = signed µs error. Nominally 0 when PLL is locked.
-        // If 0 (no GPS fix yet), the field is still transmitted so the absence of lock is visible.
-        horusAdditionalSensorType us_error_struct = {
-            .name = "usofs",
-            .exist = {
-                .name = 1,
-                .values = 1
-            },
-            .values = {
-                .kind = horusInt_PRESENT,
-                .u = {
-                    .horusInt = {
-                        .nCount = 1,
-                        .arr[0] = (uint16_t)(data->timepulse_error_us + 32767)
-                    }
-                }
-            }
-        };
-        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = us_error_struct;
-        asnMessage.extraSensors.nCount += 1;
-    }
-    if (asnMessage.extraSensors.nCount < 4) {
         // GPS-derived XO_TUNE signed offset (cap_trim_offset + 127 to make it unsigned).
         // Decode: gpsofs - 127 gives the signed correction applied on top of the 0x60 baseline.
         horusAdditionalSensorType gps_offset_struct = {
-            .name = "gpsofs",
+            .name = "cal",
             .exist = {
                 .name = 1,
                 .values = 1
@@ -223,8 +180,11 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 .kind = horusInt_PRESENT,
                 .u = {
                     .horusInt = {
-                        .nCount = 1,
-                        .arr[0] = (uint16_t)(data->cap_trim_offset + 127)
+                        .nCount = 4,
+                        .arr[0] = data->si4063_capacitance_trim,
+                        .arr[1] = (uint16_t)(data->cap_trim_offset + 127),
+                        .arr[2] = (uint16_t)(data->timepulse_error_us + 32767),
+                        .arr[3] = data->po_state
                     }
                 }
             }

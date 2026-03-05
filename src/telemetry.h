@@ -31,6 +31,7 @@ typedef struct _telemetry_data {
     uint8_t si4063_capacitance_trim;
     int cap_trim_offset;
     int32_t timepulse_error_us;
+    uint8_t po_state;
 } telemetry_data;
 
 void telemetry_collect(telemetry_data *data);
