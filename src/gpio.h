@@ -141,9 +141,14 @@
 #define ADC_VOLTAGE	ADC1			// Needs confirmation
 #define CHANNEL_VOLTAGE	ADC_CHANNEL_0		// Needs confirmation
 
-#define	BANK_BUTTON	GPIOC			
+#define	BANK_BUTTON	GPIOC
 #define PIN_BUTTON	GPIO_PIN_8
 // No ADC available on the GPIOC, so we have to use digital reads/writes for the button
+
+// On some DFMs there is a current sense amplifier connected to pin PB1
+#define BANK_CURRENT	GPIOB
+#define PIN_CURRENT	GPIO_PIN_1
+#define CHANNEL_CURRENT	ADC_CHANNEL_9
 
 #define	BANK_RED_LED	GPIOB
 #define PIN_RED_LED	GPIO_PIN_12

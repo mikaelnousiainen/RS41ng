@@ -39,6 +39,9 @@ void telemetry_collect(telemetry_data *data)
 #endif
 #ifdef DFM17
     data->internal_temperature_celsius_100 = si4063_read_temperature_celsius_100();
+    data->current_milliamps = system_get_current_milliamps();
+    if(data->current_milliamps > 0)
+        log_info("Current: %u mA\n", data->current_milliamps);
 #endif
 
 #if SENSOR_BMP280_ENABLE

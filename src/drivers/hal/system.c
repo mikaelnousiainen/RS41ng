@@ -189,6 +189,12 @@ static void gpio_init()
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(BANK_YELLOW_LED, &gpio_init);
+
+    // Current sense (analog) on PB1
+    gpio_init.Pin = PIN_CURRENT;
+    gpio_init.Mode = GPIO_MODE_ANALOG;
+    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(BANK_CURRENT, &gpio_init);
 #endif
 }
 
@@ -254,7 +260,7 @@ static void dma_adc_init()
     hadc1.Init.OversamplingMode      = DISABLE;
 #endif
 #ifdef DFM17
-    hadc1.Init.NbrOfConversion = 1;
+    hadc1.Init.NbrOfConversion = 2;
 #endif
 
     hang_if_bad("HAL_ADC_Init",
@@ -297,7 +303,15 @@ static void dma_adc_init()
 #endif
 
 #ifdef DFM17
-// Not using ADC for button on DFM17
+    // Current sense on PB1 (ADC_CHANNEL_9)
+    memset(&adc_channel, 0, sizeof(adc_channel));
+    adc_channel.Channel = CHANNEL_CURRENT;
+    adc_channel.Rank = ADC_REGULAR_RANK_2;
+    adc_channel.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+
+    hang_if_bad("HAL_ADC_ConfigChannel - current",
+                HAL_ADC_ConfigChannel(&hadc1, &adc_channel)
+               );
 #endif
 
 #ifdef RS41_RSM4x4
@@ -308,7 +322,7 @@ static void dma_adc_init()
 
 #ifdef DFM17
     hang_if_bad("HAL_ADC_Start_DMA",
-                HAL_ADC_Start_DMA(&hadc1, (uint32_t *) dma_buffer_adc, 1) 
+                HAL_ADC_Start_DMA(&hadc1, (uint32_t *) dma_buffer_adc, 2)
                );
 #endif
 #ifdef RS41
@@ -340,6 +354,18 @@ uint16_t system_get_battery_voltage_millivolts()
         return voltage;
     }
 }
+
+#ifdef DFM17
+uint16_t system_get_current_milliamps()
+{
+    // 1V per amp scaling, 3.3V reference, 12-bit ADC
+    // millivolts = milliamps since 1V/A
+    // NOTE: some DFMs may be missing the current sense amplifier! This 
+    // value will read 0 if the amplifier is not populated. Horus Telem
+    // will not convey it if it reads 0. 
+    return (uint16_t)((uint32_t)dma_buffer_adc[1] * 3300UL / 4096UL);
+}
+#endif
 
 uint16_t system_get_button_adc_value()
 {

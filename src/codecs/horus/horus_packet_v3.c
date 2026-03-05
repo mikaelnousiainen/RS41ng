@@ -165,6 +165,30 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
+#ifdef DFM17
+    if (asnMessage.extraSensors.nCount < 4 && data->current_milliamps > 0) {
+        asnMessage.exist.extraSensors = true;
+        horusAdditionalSensorType current_struct = {
+            .name = "cur",
+            .exist = {
+                .name = 1,
+                .values = 1
+            },
+            .values = {
+                .kind = horusInt_PRESENT,
+                .u = {
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = (uint16_t) data->current_milliamps
+                    }
+                }
+            }
+        };
+        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = current_struct;
+        asnMessage.extraSensors.nCount += 1;
+    }
+#endif
+
 #if TX_DFM_ADDITIONAL_TELEM && defined(DFM17)
     asnMessage.exist.extraSensors = true;
     if (asnMessage.extraSensors.nCount < 4) {

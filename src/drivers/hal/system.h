@@ -25,6 +25,7 @@ void system_set_red_led(bool enabled);
 #ifdef DFM17
 void system_set_yellow_led(bool enabled);
 void system_switch_to_hse_bypass();
+uint16_t system_get_current_milliamps();
 #endif
 uint16_t system_get_battery_voltage_millivolts();
 uint16_t system_get_button_adc_value();
