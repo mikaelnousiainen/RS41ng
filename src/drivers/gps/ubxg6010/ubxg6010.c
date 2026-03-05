@@ -352,8 +352,7 @@ const uBloxPacket msgcfgrst = {
                 .payloadSize=sizeof(uBloxCFGRSTPayload)
         },
         .data.cfgrst = {
-                // .navBbrMask=0xffff, // Coldstart
-                .navBbrMask=0x0000, // Hotstart
+                .navBbrMask=0xffff, // Coldstart
                 .resetMode=1, // Controlled Software reset
                 .reserved1=0
         },

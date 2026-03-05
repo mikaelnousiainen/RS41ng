@@ -39,9 +39,16 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
+            #if ENABLE_FM_CW
+            frequency_offset = 0;
+            frequency_deviation = SI4063_DEVIATION_HZ_FM_CW;
+            modulation_type = SI4063_MODULATION_TYPE_FSK;
+            use_direct_mode = true;
+            #else
             frequency_offset = 1;
             modulation_type = SI4063_MODULATION_TYPE_OOK;
             use_direct_mode = false;
+            #endif
 
             data_timer_init(entry->symbol_rate * CW_SYMBOL_RATE_MULTIPLIER);
             break;
@@ -122,8 +129,15 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
+            #if ENABLE_FM_CW
+            // Direct mode already set up; start with PWM off (key off = dead carrier)
+            pwm_timer_pwm_enable(false);
+            pwm_timer_set_frequency(pwm_calculate_period(FM_TONE_FREQ * 100));
+            system_disable_tick();
+            #else
             spi_uninit();
             system_disable_tick();
+            #endif
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_APRS_1200:
@@ -332,7 +346,11 @@ inline void radio_handle_data_timer_si4063()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
+                #if ENABLE_FM_CW
+                pwm_timer_pwm_enable(false);
+                #else
                 si4063_set_direct_mode_pin(false);
+                #endif
                 log_info("CW TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
@@ -340,7 +358,11 @@ inline void radio_handle_data_timer_si4063()
                 break;
             }
 
+            #if ENABLE_FM_CW
+            pwm_timer_pwm_enable(tone_index != 0);
+            #else
             si4063_set_direct_mode_pin(tone_index == 0 ? false : true);
+            #endif
 
             radio_shared_state.radio_symbol_count_interrupt++;
             break;
@@ -378,8 +400,12 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-            data_timer_uninit();
+            #if ENABLE_FM_CW
+            use_direct_mode = true;
+            #else
             spi_init();
+            #endif
+            data_timer_uninit();
             break;
         case RADIO_DATA_MODE_RTTY:
         case RADIO_DATA_MODE_HORUS_V2:
