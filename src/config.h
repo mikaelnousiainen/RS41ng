@@ -23,7 +23,7 @@
 // Set the tracker amateur radio call sign here
 #define CALLSIGN "4FSKTEST-V3"
 
-// Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary.
+// Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
 #define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // The COUNT settings define the number of times that each type of transmission is repeated
@@ -67,11 +67,11 @@
 // Fox Mode -- disables GPS and follows transmit scheme above
 // Use RADIO_POST_TRANSMIT_DELAY_MS to define wait periods between transmissions
 // Use CW, PIP and LONG_TONE settings 
-#define ENABLE_FOX_MODE true
+#define ENABLE_FOX_MODE false
 // Change CW modes (CW, PIP, LONG_TONE) to be FM modulated
-#define ENABLE_FM_CW true
+#define ENABLE_FM_CW false
 // Delay in ms for FM CW transmit
-#define FM_CW_TX_DELAY 5000 
+#define FM_CW_TX_DELAY 500 
 // Frequency in Hz of FM CW tone
 #define FM_TONE_FREQ 1000
 

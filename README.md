@@ -150,7 +150,7 @@ The main features the RS41ng firmware are:
 * Support for multiple transmission modes:
   * Standard 1200-baud APRS
     * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
-  * [Horus 4FSK v1, v2, and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+  * [Horus 4FSK v2 and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
     * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
   * [CATS - Communication And Telemetry System](https://cats.radio/) packet radio standard, which has a modulation much more efficient than APRS
@@ -212,9 +212,30 @@ On an external Si5351 clock generator connected to the external I²C bus:
   * If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
 * For more information, be sure to check [the CATS standard](https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build).
 
-### External sensors (RS41 only)
+### Fox Mode
 
-It is possible to connect external sensors to the I²C bus of the RS41 radiosonde.
+RS41ng supports **Fox Mode**, whcih allows RS41ng to be used as a hidden transmitter. Fox Mode a simple mode that will disable the GPS and enable other power saving features.
+
+Fox Mode should **not** be enabled on any radiosonde that is intended to fly, as there will be no position data collected by the GPS.
+
+Recommended Fox Mode settings in `config.h`:
+```
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+
+#define RADIO_TX_CW true
+#define RADIO_TX_CW_COUNT 1
+
+#define RADIO_TX_LONG_TONE true
+#define RADIO_TX_LONG_TONE_COUNT 5
+#define RADIO_TX_LONG_TONE_DURATION_SECONDS 10
+
+#define ENABLE_FOX_MODE true
+#define ENABLE_FM_CW true
+```
+
+### External sensors
+
+It is possible to connect external sensors to the I²C bus.
 
 The following sensors are currently supported:
 
