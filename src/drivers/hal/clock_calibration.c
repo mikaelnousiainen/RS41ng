@@ -5,6 +5,7 @@
 #include <stm32f1xx_hal.h>
 #include "system.h"
 #include "clock_calibration.h"
+#include "radio_internal.h"
 #include "log.h"
 
 // Register definition for reading the HSI current trim out of the Calibration Register (CR).
@@ -82,6 +83,7 @@ static uint32_t obs_abs_error_sum   = 0;
 static uint32_t baseline_abs_error  = 0;
 static uint8_t  locked_count        = 0;
 static uint8_t  bad_pulse_count     = 0;
+static bool     last_tx_active      = false;
 
 // Expected timer ticks for a 1-second GPS timepulse at 1 MHz.
 #define TIMEPULSE_EXPECTED_TICKS    1000000UL
@@ -230,6 +232,7 @@ void timepulse_init()
     bad_pulse_count     = 0;
     last_capture        = 0;
     tim4_overflow    = 0;
+    last_tx_active      = false;
 
     system_set_yellow_led(calibration_indicator_state);
 }
@@ -288,6 +291,25 @@ void TIM4_IRQHandler(void)
         bad_pulse_count = 0;
 
         millis_delta = delta_ticks / 1000U;
+
+        // ---- Detect TX state transitions ------------------------------------
+        // If radio_transmission_active changed since the last timepulse, the
+        // observation window spans two different operating conditions (TX vs
+        // idle).  Discard any partially-accumulated observation so the P&O
+        // never acts on mixed-state data.  In continuous-TX or continuous-idle
+        // modes there are no transitions, so the P&O runs unimpeded.
+
+        bool tx_now = radio_shared_state.radio_transmission_active;
+        if (tx_now != last_tx_active) {
+            last_tx_active = tx_now;
+            if (po_state == PO_OBSERVING || po_state == PO_STARTUP) {
+                obs_count = 0;
+                obs_abs_error_sum = 0;
+            } else if (po_state == PO_SETTLING) {
+                settle_countdown = PO_SETTLE_PULSES;
+            }
+            // PO_LOCKED: let the normal drift-recheck handle it
+        }
 
         // ---- Si4063 XO_TUNE Perturb & Observe GPS PLL -----------------------
 
