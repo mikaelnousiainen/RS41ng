@@ -18,6 +18,9 @@
 #include "drivers/hal/system.h"
 #include "drivers/hal/usart_gps.h"
 #include "drivers/hal/delay.h"
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+#include "drivers/hal/usart_ext.h"
+#endif
 
 #include "ubxm10050.h"
 #include "log.h"
@@ -72,6 +75,14 @@
 #define CFG_MSGOUT_NAV_TIMEGPS_UART1 0x20910048UL  /* NAV-TIMEGPS on UART1 */
 #define CFG_MSGOUT_NAV_TIMEUTC_UART1 0x2091005BUL  /* NAV-TIMEUTC on UART1 */
 #define CFG_MSGOUT_NAV_STATUS_UART1  0x2091001BUL  /* NAV-STATUS on UART1 */
+
+/* CFG-MSGOUT keys - NMEA standard sentences on UART1, U1 */
+#define CFG_MSGOUT_NMEA_GGA_UART1    0x209100BBUL  /* NMEA-GGA on UART1 */
+#define CFG_MSGOUT_NMEA_GLL_UART1    0x209100CAUL  /* NMEA-GLL on UART1 */
+#define CFG_MSGOUT_NMEA_GSA_UART1    0x209100C0UL  /* NMEA-GSA on UART1 */
+#define CFG_MSGOUT_NMEA_GSV_UART1    0x209100C5UL  /* NMEA-GSV on UART1 */
+#define CFG_MSGOUT_NMEA_RMC_UART1    0x209100ACUL  /* NMEA-RMC on UART1 */
+#define CFG_MSGOUT_NMEA_VTG_UART1    0x209100B1UL  /* NMEA-VTG on UART1 */
 
 /* CFG-NAVSPG keys */
 #define CFG_NAVSPG_DYNMODEL     0x20110021UL  /* U1 - Dynamic model */
@@ -194,6 +205,16 @@ static volatile bool nack_received = false;
 static uint8_t  parse_sync     = 0;
 static uint8_t  parse_buf[256 + sizeof(UbxHeader) + sizeof(UbxChecksum)];
 static uint16_t parse_pos      = 0;
+
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+/* NMEA forwarding state:
+ *   0 = idle, waiting for '$'
+ *   1 = got '$', waiting for 'G'
+ *   2 = got '$G', waiting for talker ID letter
+ *   3 = forwarding sentence body until \n
+ */
+static volatile uint8_t nmea_sync = 0;
+#endif
 
 /* Raw-byte capture: filled by ubxm10050_handle_incoming_byte before
  * the parser runs, so we can log exactly what the GPS chip sends us. */
@@ -475,20 +496,76 @@ void ubxm10050_reset_parser(void)
 {
     parse_sync = 0;
     parse_pos  = 0;
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+    nmea_sync  = 0;
+#endif
 }
+
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+static void ubxm10050_handle_nmea_sentence_start(uint8_t data)
+{
+    if (nmea_sync == 0 && data == '$') {
+        nmea_sync = 1;
+    } else if (nmea_sync == 1) {
+        if (data == 'G') {
+            nmea_sync = 2;
+        } else {
+            nmea_sync = 0;
+        }
+    } else if (nmea_sync == 2) {
+        if (data >= 'A' && data <= 'Z') {
+            usart_ext_send_byte('$');
+            usart_ext_send_byte('G');
+            usart_ext_send_byte(data);
+            nmea_sync = 3;
+        } else {
+            nmea_sync = 0;
+        }
+    }
+}
+
+static void ubxm10050_handle_nmea_output(uint8_t data)
+{
+    usart_ext_send_byte(data);
+    if (data == '\r') {
+        nmea_sync = 3;
+    } else if (nmea_sync == 3 && data == '\n') {
+        nmea_sync = 0;
+    }
+}
+#endif
 
 void ubxm10050_handle_incoming_byte(uint8_t data, uint8_t reset)
 {
     if (reset) {
        parse_sync = 0;
        parse_pos = 0;
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+       nmea_sync = 0;
+#endif
     }
     if (raw_capture_pos < RAW_CAPTURE_SIZE) {
         raw_capture_buf[raw_capture_pos++] = data;
     }
 
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+    /* If we are in the middle of forwarding an NMEA sentence, keep forwarding */
+    if (nmea_sync >= 3) {
+        ubxm10050_handle_nmea_output(data);
+        return;
+    }
+#endif
+
     if (parse_sync == 0) {
-        if (data == UBX_SYNC1) { parse_sync = 1; parse_pos = 0; }
+        if (data == UBX_SYNC1) {
+            parse_sync = 1;
+            parse_pos = 0;
+        }
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+        else {
+            ubxm10050_handle_nmea_sentence_start(data);
+        }
+#endif
         return;
     }
 
@@ -497,6 +574,9 @@ void ubxm10050_handle_incoming_byte(uint8_t data, uint8_t reset)
             parse_sync = 2;
         } else {
             parse_sync = 0; /* false start */
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+            ubxm10050_handle_nmea_sentence_start(data);
+#endif
         }
         return;
     }
@@ -648,14 +728,18 @@ bool ubxm10050_init(void)
         delay_ms(100);
     }
 
-    /* Step 2: Configure UART1 protocols - UBX in/out only, no NMEA out */
+    /* Step 2: Configure UART1 protocols */
     log_info("GPS M10: Configuring UART1 protocols\n");
     {
         const ValsetU1 proto_items[] = {
             { CFG_UART1INPROT_UBX,   1 },  /* Accept UBX input */
             { CFG_UART1INPROT_NMEA,  0 },  /* Reject NMEA input */
             { CFG_UART1OUTPROT_UBX,  1 },  /* Output UBX */
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+            { CFG_UART1OUTPROT_NMEA, 1 },  /* Enable NMEA output */
+#else
             { CFG_UART1OUTPROT_NMEA, 0 },  /* No NMEA output */
+#endif
         };
         success = ubxm10050_valset_u1_multi(VALSET_LAYER_RAM,
                                              proto_items,
@@ -697,6 +781,28 @@ bool ubxm10050_init(void)
             return false;
         }
     }
+
+#if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+    /* Step 5: Enable standard NMEA sentence output at 1Hz */
+    log_info("GPS M10: Configuring NMEA message output rates\n");
+    {
+        const ValsetU1 nmea_items[] = {
+            { CFG_MSGOUT_NMEA_GGA_UART1, 1 },  /* GGA every epoch */
+            { CFG_MSGOUT_NMEA_GLL_UART1, 1 },  /* GLL every epoch */
+            { CFG_MSGOUT_NMEA_GSA_UART1, 1 },  /* GSA every epoch */
+            { CFG_MSGOUT_NMEA_GSV_UART1, 1 },  /* GSV every epoch */
+            { CFG_MSGOUT_NMEA_RMC_UART1, 1 },  /* RMC every epoch */
+            { CFG_MSGOUT_NMEA_VTG_UART1, 1 },  /* VTG every epoch */
+        };
+        success = ubxm10050_valset_u1_multi(VALSET_LAYER_RAM,
+                                             nmea_items,
+                                             sizeof(nmea_items) / sizeof(nmea_items[0]));
+        if (!success) {
+            log_error("GPS M10: NMEA message rate config failed\n");
+            return false;
+        }
+    }
+#endif
 
     m10_initialized = true;
     log_info("GPS M10: Init complete\n");
