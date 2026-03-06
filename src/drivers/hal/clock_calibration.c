@@ -88,7 +88,7 @@ static uint8_t  bad_pulse_count     = 0;
 
 // Maximum GPS-derived offset from the temperature LUT baseline (±steps).
 #define CAP_TRIM_OFFSET_MAX     30
-#define CAP_TRIM_OFFSET_MIN    -30
+#define CAP_TRIM_OFFSET_MIN    -90
 
 // Sanity window: reject timepulse deltas outside this range (µs).
 #define TIMEPULSE_MIN_TICKS     950000UL    // 0.95 s
