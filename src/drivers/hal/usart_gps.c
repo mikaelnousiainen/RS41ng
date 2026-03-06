@@ -115,7 +115,8 @@ static void dma_rx_recover(void)
 
     /* Clear all DMA error flags for this channel */
 #ifdef RS41_RSM4x4
-    hdma_usart_rx.DmaBaseAddress->IFCR = DMA_FLAG_GL5 | DMA_FLAG_TE5;
+    // hdma_usart_rx.DmaBaseAddress->IFCR = DMA_FLAG_GL5 | DMA_FLAG_TE5;
+    hdma_usart_rx.DmaBaseAddress->IFCR = DMA_ISR_GIF5 | DMA_ISR_TEIF5;
 #elif defined(DFM17)
     DMA1->IFCR = DMA_ISR_GIF6 | DMA_ISR_TEIF6;
 #else
