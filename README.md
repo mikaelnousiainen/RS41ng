@@ -545,11 +545,11 @@ _____
 ### STM32F1-based boards (older RS41 and DFM-17)
 
 1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
-    * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
     * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `63` with either `31` or the number the error message suggests:
-        * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+        * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
 2. Flash the firmware
-    * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 3. Power cycle the sonde to start running the new firmware
 
 ### STM32L4-based boards (newer RS41 RSM4x4)
@@ -593,7 +593,7 @@ otherwise the firmware will not run.**
     ```
 3. Start OpenOCD and leave it running in the background
     ```
-    openocd -f ./openocd_rs41.cfg
+    openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
     ```
 4. Start ARM GDB
     ```
