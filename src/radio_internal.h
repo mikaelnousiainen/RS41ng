@@ -31,6 +31,7 @@ typedef enum _radio_data_mode {
     RADIO_DATA_MODE_FSQ_6,
     RADIO_DATA_MODE_CATS,
     RADIO_DATA_MODE_APRS_9600,
+    RADIO_DATA_MODE_LONG_TONE
 } radio_data_mode;
 
 typedef struct _radio_transmit_entry {

@@ -157,11 +157,18 @@ void pwm_timer_init(uint32_t frequency_hz_100)
 void pwm_timer_pwm_enable(bool enabled)
 {
 #ifdef RS41
-    if(enabled) 
+    if(enabled)
     {
         __HAL_TIM_MOE_ENABLE(&htim15);
     } else {
         __HAL_TIM_MOE_DISABLE(&htim15);
+    }
+#endif
+#ifdef DFM17
+    if (enabled) {
+        __HAL_TIM_ENABLE_IT(&htim15, TIM_IT_UPDATE);
+    } else {
+        __HAL_TIM_DISABLE_IT(&htim15, TIM_IT_UPDATE);
     }
 #endif
 }

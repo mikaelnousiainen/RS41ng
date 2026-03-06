@@ -35,7 +35,7 @@
 #define RADIO_TX_PIP false
 #define RADIO_TX_PIP_COUNT 6
 #define RADIO_TX_APRS false
-#define RADIO_TX_APRS_COUNT 2
+#define RADIO_TX_APRS_COUNT 1
 #define RADIO_TX_APRS_9600 false
 #define RADIO_TX_APRS_9600_COUNT 1
 #define RADIO_TX_HORUS_V2 false
@@ -44,6 +44,9 @@
 #define RADIO_TX_HORUS_V3_COUNT 5
 #define RADIO_TX_CATS false
 #define RADIO_TX_CATS_COUNT 1
+#define RADIO_TX_LONG_TONE false
+#define RADIO_TX_LONG_TONE_COUNT 1
+#define RADIO_TX_LONG_TONE_DURATION_SECONDS 10
 
 // Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
 #define RADIO_TX_HORUS_V2_CONTINUOUS false
@@ -58,6 +61,19 @@
 #define RADIO_TX_FREQUENCY_HORUS_V2  432501000
 #define RADIO_TX_FREQUENCY_HORUS_V3  432501000
 #define RADIO_TX_FREQUENCY_CATS      434100000
+#define RADIO_TX_FREQUENCY_LONG_TONE 432501000
+
+
+// Fox Mode -- disables GPS and follows transmit scheme above
+// Use RADIO_POST_TRANSMIT_DELAY_MS to define wait periods between transmissions
+// Use CW, PIP and LONG_TONE settings 
+#define ENABLE_FOX_MODE true
+// Change CW modes (CW, PIP, LONG_TONE) to be FM modulated
+#define ENABLE_FM_CW true
+// Delay in ms for FM CW transmit
+#define FM_CW_TX_DELAY 5000 
+// Frequency in Hz of FM CW tone
+#define FM_TONE_FREQ 1000
 
 // Enable transmitting Horus V3 on an additional frequency
 // NOTE: It is recommended to use continuous mode or to change the _COUNT parameter to 1 if using this mode
@@ -172,7 +188,7 @@ Setting, measured RF output power, relative DC power draw
 #define APRS_SYMBOL 'O'
 // Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
 // Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
-#define APRS_COMMENT "RS41ng radiosonde firmware"
+#define APRS_COMMENT "https://amateur.sondehub.org/" CALLSIGN
 #define APRS_RELAYS "" // No spaces. This is where you can define "WIDE1-1,WIDE2-1" etc, but it is highly discouraged for balloons.
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
@@ -287,6 +303,11 @@ Setting, measured RF output power, relative DC power draw
 #define PIP_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define PIP_TIME_SYNC_OFFSET_SECONDS 0
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define LONG_TONE_TIME_SYNC_SECONDS 0
+#define LONG_TONE_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * I2C Bus Settings

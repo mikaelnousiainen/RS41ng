@@ -14,6 +14,7 @@
  *
  * All drivers expose the same API through these macros:
  *   gps_driver_init()
+ *   gps_driver_init_and_sleep()
  *   gps_driver_enable_power_save_mode()
  *   gps_driver_sleep()
  *   gps_driver_request_gpstime()
@@ -39,6 +40,7 @@
 #include "drivers/gps/ubxg6010/ubxg6010.h"
 
 #define gps_driver_init()                       ubxg6010_init()
+#define gps_driver_init_and_sleep()             ubxg6010_init_and_sleep()
 #define gps_driver_enable_power_save_mode()     ubxg6010_enable_power_save_mode()
 #define gps_driver_sleep()                      ubxg6010_sleep()
 #define gps_driver_request_gpstime()            ubxg6010_request_gpstime()
@@ -56,6 +58,7 @@
 #include "drivers/gps/ubxm10050/ubxm10050.h"
 
 #define gps_driver_init()                       ubxm10050_init()
+#define gps_driver_init_and_sleep()             ubxm10050_init_and_sleep()
 #define gps_driver_enable_power_save_mode()     ubxm10050_enable_power_save_mode()
 #define gps_driver_sleep()                      ubxm10050_sleep()
 #define gps_driver_request_gpstime()            ubxm10050_request_gpstime()

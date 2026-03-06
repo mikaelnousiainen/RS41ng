@@ -533,6 +533,18 @@ void ubxg6010_sleep(void)
     ubxg6010_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_INACTIVE;
 }
 
+void ubxg6010_init_and_sleep(void)
+{
+    memset(&ubxg6010_current_gps_data, 0, sizeof(gps_data));
+
+    // Init USART at the GPS chip's default power-on baud rate
+    log_info("GPS: Initializing USART at %d baud for sleep\n", GPS_INITIAL_BAUD_RATE);
+    usart_gps_init(GPS_INITIAL_BAUD_RATE, true);
+    delay_ms(100);
+
+    ubxg6010_sleep();
+}
+
 bool ubxg6010_init()
 {
     bool success;
