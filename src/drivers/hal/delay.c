@@ -37,18 +37,18 @@ void delay_init()
 
 void delay_us(uint16_t us)
 {
-    delay_us_loop(us);
-    // __HAL_TIM_SET_COUNTER(&htim1, 0);
-    // __HAL_TIM_SET_AUTORELOAD(&htim1, us);
-    // __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
-    // HAL_TIM_Base_Start_IT(&htim1);
+    // delay_us_loop(us);
+    __HAL_TIM_SET_COUNTER(&htim1, 0);
+    __HAL_TIM_SET_AUTORELOAD(&htim1, us);
+    __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
+    HAL_TIM_Base_Start_IT(&htim1);
 
-    // // Loop, in case a different interrupt triggers
-    // while (!__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE)) {
-    //     __WFI();
-    // }
+    // Loop, in case a different interrupt triggers
+    while (!__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE)) {
+        __WFI();
+    }
 
-    // HAL_TIM_Base_Stop_IT(&htim1);
+    HAL_TIM_Base_Stop_IT(&htim1);
 }
 
 void delay_us_loop(uint16_t us)
