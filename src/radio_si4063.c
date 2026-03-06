@@ -480,5 +480,6 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
 
 void radio_init_si4063()
 {
+    return;
 }
 #endif

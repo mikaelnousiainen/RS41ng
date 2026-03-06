@@ -510,6 +510,7 @@ uint16_t radio_si4032_fill_pwm_buffer(uint16_t offset, uint16_t length, uint16_t
     return count;
 }
 
+#if 0
 bool radio_si4032_stop_dma_transfer_if_requested(radio_module_state *shared_state)
 {
     if (radio_dma_transfer_stop_after_counter > 0) {
@@ -558,15 +559,10 @@ uint16_t radio_si4032_handle_pwm_transfer_full(uint16_t buffer_size, uint16_t *b
 
     return length;
 }
+#endif
 
 void radio_init_si4032()
 {
-    pwm_handle_dma_transfer_half = radio_si4032_handle_pwm_transfer_half;
-    pwm_handle_dma_transfer_full = radio_si4032_handle_pwm_transfer_full;
-
-    // if (si4032_use_dma) {
-    //     pwm_data_timer_init();
-    //     pwm_dma_init();
-    // }
+    return;
 }
 #endif
