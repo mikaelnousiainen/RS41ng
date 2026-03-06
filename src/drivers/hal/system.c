@@ -467,7 +467,7 @@ void system_scheduler_timer_init()
     hang_if_bad("HAL_TIM_Base_Start_IT",
                 HAL_TIM_Base_Start_IT(&htim6)
                );
-    HAL_NVIC_SetPriority(TIM6_IRQn, 3, 3);
+    HAL_NVIC_SetPriority(TIM6_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(TIM6_IRQn);
 }
 

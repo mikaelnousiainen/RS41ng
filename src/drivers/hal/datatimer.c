@@ -53,7 +53,7 @@ void data_timer_init(uint32_t baud_rate)
                 HAL_TIM_Base_Start_IT(&htim2)
                );
 
-    HAL_NVIC_SetPriority(TIM2_IRQn, 2, 2);
+    HAL_NVIC_SetPriority(TIM2_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(TIM2_IRQn);
 
 }

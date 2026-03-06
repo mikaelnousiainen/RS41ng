@@ -144,7 +144,7 @@ void pwm_timer_init(uint32_t frequency_hz_100)
     __HAL_TIM_CLEAR_IT(&htim15, TIM_IT_UPDATE);
     __HAL_TIM_ENABLE_IT(&htim15, TIM_IT_UPDATE);
 
-    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 2, 1);
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
 #endif
 
