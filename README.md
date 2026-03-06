@@ -14,12 +14,12 @@
    2. Issue unlock flash command:
       * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; stm32l4x unlock 0; reset halt; exit"`
    3. There should be a message that includes `Info : RDP level 1 (0x00)`. This verifies that some protections were enabled. 
-   4. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to dischage. Fidgeting with the power switch may expedite this step.
+   4. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
    5. **Reconnect the RS41**.
    6. Disable additional protections:
         * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; flash protect 0 0 last off; exit"`
    7. We NOW expect to see the message `Info : RDP level 0 (0xAA)`.  This means the board was unlocked by the first command, and that this command is likely to succeed in unlocking the individual pages. If this message is not present, repeat the previous steps. 
-   8. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to dischage. Fidgeting with the power switch may expedite this step.
+   8. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
    9.  Normal flashing should now work -- **reconnect the RS41**. If flashing does not work, repeat the unlock process. 
 5.  Flash the firmware:
     * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg  -c "program build/src/RS41ng.elf verify reset exit"`
@@ -27,36 +27,37 @@
 
 ### RS41 with STM32F1 (old version)
 
-1. Install Docker. Configure a container for the compiler: 
+1. Install Docker. Configure a container for the compiler:
    * `docker build -t rs41ng_compiler .`
 2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
-3. Compile the image: 
+3. Compile the image:
    * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41=1`
 4. Unlock the STM32F1:
-5. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
-6. Issue unlock flash command:
-   * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
-7. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
-    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
-8. Flash the firmware:
+   1. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
+   2. Issue unlock flash command:
+      * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+   3. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
+      * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+5. Flash the firmware:
     * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
-9.  Verify functionality.
+6. Verify functionality.
 
 ### DFM17
 
-1. Install Docker. Configure a container for the compiler: 
+1. Install Docker. Configure a container for the compiler:
    * `docker build -t rs41ng_compiler .`
 2. Edit `config.h` to define your callsign and operating parameters (frequencies, modes). NOTE: Do not define DFM17, RS41, or RS41_RSM4x4 in the `config.h` file! This is performed with compile-time options.
-3. Compile the image: 
+3. Compile the image:
    * `docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DDFM17=1`
 4. Unlock the STM32F1:
-5. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
-   * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
-6. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
-    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
-7. Flash the firmware:
+   1. **Connect the device** to the STLink programmer (or equivalent -- be sure to update the OpenOCD interface options).
+   2. Issue unlock flash command:
+      * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+   3. If that command threw an error, try replacing the number `63` with either `31` or the number the error message suggests:
+      * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+5. Flash the firmware:
     * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
-8.  Verify functionality.
+6. Verify functionality.
 
 **NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
 flights, it is still a work in progress and some features might not work as expected yet!
@@ -103,7 +104,9 @@ For your own receiver station, you will need:
 
 The [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
 and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/)
-radiosondes both use off-the-shelf 32-bit [STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) microcontrollers,
+radiosondes use off-the-shelf 32-bit STM32 microcontrollers
+([STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) on older RS41 and DFM-17 boards,
+[STM32L412-series](https://www.st.com/en/microcontrollers-microprocessors/stm32l412cb.html) on newer RS41 RSM4x4 boards),
 which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
 or a smaller [ST-LINK v2 USB dongle](https://www.adafruit.com/product/2548).
 
@@ -267,7 +270,7 @@ Please note that the time sync requires a stable GPS signal (good visibility to 
 
 #### Time-slotted modes
 
-For time-slotted modes like FT8 and WSPR, there default configuration file (`config.h`) already contains useful defaults.
+For time-slotted modes like FT8 and WSPR, the default configuration file (`config.h`) already contains useful defaults.
 
 ##### FT8 example
 
@@ -386,15 +389,16 @@ The Docker environment can also help address issues with the build process.
     ```
     docker build -t rs41ng_compiler .
     ```
-4. Build the firmware using the following command. If you need to rebuild the firmware, simply run the command again.
+4. Build the firmware using the following command. You **must** specify a target flag: `-DRS41=1`, `-DRS41_RSM4X4=1`, or `-DDFM17=1`. If you need to rebuild the firmware, simply run the command again.
    On Linux/macOS, run:
     ```
-    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler
+    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41_RSM4X4=1
     ```
     On Windows, run:
     ```
-    docker run --rm -it -v %cd%:/usr/local/src/RS41ng rs41ng_compiler
+    docker run --rm -it -v %cd%:/usr/local/src/RS41ng rs41ng_compiler -DRS41_RSM4X4=1
     ```
+    Replace `-DRS41_RSM4X4=1` with `-DRS41=1` or `-DDFM17=1` as appropriate for your hardware.
 5. The firmware will be stored in file `build/src/RS41ng.elf`
 
 Now you can flash the firmware using instructions below (skip the build instructions for Linux).
@@ -406,7 +410,7 @@ Software requirements:
 * [GNU GCC toolchain](https://developer.arm.com/downloads/-/gnu-rm)
   for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
   * Pick the latest toolchain version available for your operating system.
-* [CMake](https://cmake.org/) version 3.6 or higher for building the firmware
+* [CMake](https://cmake.org/) version 3.13 or higher for building the firmware
 * [OpenOCD](http://openocd.org/) version 0.10.0 or higher for flashing the firmware
 
 On a Red Hat/Fedora Linux installation, the following packages can be installed:
@@ -417,13 +421,14 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
 #### Steps to build the firmware on Linux
 
 1. Install the required software dependencies listed above
-2. Build the firmware using the following commands
+2. Build the firmware using the following commands. You **must** specify a target flag: `-DRS41=1`, `-DRS41_RSM4X4=1`, or `-DDFM17=1`.
     ```
     mkdir build
     cd build
-    cmake ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/arm-none-eabi-gcc.cmake -DRS41=1 ..
     make
     ```
+    Replace `-DRS41=1` with `-DRS41_RSM4X4=1` or `-DDFM17=1` as appropriate for your hardware.
 3. The firmware will be stored in file `build/src/RS41ng.elf`
 
 ## Prepare the radiosonde for flashing the firmware
@@ -535,7 +540,9 @@ _____
 3. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 
-## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
+## Flashing the radiosonde with the firmware
+
+### STM32F1-based boards (older RS41 and DFM-17)
 
 1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
     * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
@@ -543,6 +550,23 @@ _____
         * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
 2. Flash the firmware
     * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+3. Power cycle the sonde to start running the new firmware
+
+### STM32L4-based boards (newer RS41 RSM4x4)
+
+1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
+   1. Issue unlock flash command:
+      * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; stm32l4x unlock 0; reset halt; exit"`
+   2. There should be a message that includes `Info : RDP level 1 (0x00)`. This verifies that some protections were enabled.
+   3. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
+   4. **Reconnect the RS41**.
+   5. Disable additional protections:
+      * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; flash protect 0 0 last off; exit"`
+   6. We NOW expect to see the message `Info : RDP level 0 (0xAA)`. This means the board was unlocked by the first command. If this message is not present, repeat the previous steps.
+   7. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
+   8. **Reconnect the RS41**. Normal flashing should now work. If flashing does not work, repeat the unlock process.
+2. Flash the firmware
+    * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 3. Power cycle the sonde to start running the new firmware
 
 ## Developing / debugging the firmware
