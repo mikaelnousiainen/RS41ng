@@ -158,18 +158,15 @@ The main features the RS41ng firmware are:
     * For more details on using CATS, see the CATS website and the notes below.
   * Morse code (CW)
   * "Pip" mode, which transmits a short beep generated using CW to indicate presence of the transmitter
-  * **RS41 only:** JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
+  * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
 * Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation
 * Extensibility to allow easy addition of new transmission modes and new sensors
-
-Features available on RS41 hardware only:
-
 * Support for custom sensors via the external I²C bus
-* Support for counting pulses on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
-* GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
-  * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
+* Support for counting pulses on expansion header (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
+* GPS NMEA data output via the external serial port (see below). RS41 only -- This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
+  * This allows using the sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 
 
 ### Transmission modes
@@ -181,8 +178,9 @@ On the internal Si4032 (RS41) and Si4063 (DFM-17) transmitters:
 * CATS (9600 baud)
 * Morse code (CW)
 * "Pip" - a short beep to indicate presence of the transmitter
+* Long Tone - continuous CW tone (useful for fox transmissions)
 
-On an external Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde:
+On an external Si5351 clock generator connected to the external I²C bus:
 
 * Horus 4FSK v2 and v3 (50 baud, because the Si5351 frequency changes are slow)
 * JT65/JT9/JT4/FT8/WSPR/FSQ mode beacon transmissions using the JTEncode library. I've decoded FT8, WSPR and FSQ modes successfully.
@@ -485,7 +483,7 @@ ______________________|           |______________________
     * GND -> Pin 1 (GND)
     * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
 
-### Graw DFM-17 programming connector
+### Graw DFM-17 programming and I²C connector
 
 The DFM-17 programming connector is an unpopulated group of pads on the circuit board
 between the sensor boom connector and the main STM32 microcontroller.
@@ -525,6 +523,12 @@ _____
 * 8 - NC EXT / TDI
 * 9 - GNDDetect
 * 10 - nRESET
+
+To enable external I²C, UART, or pulse counter access on the DFM17 radiosonde, some small pads must be shorted on the PCB with a very small wire or solder blob. At a minimum, the pads shown as PB10 and PB11 must be shorted. Optionally the pads shown as GND can be shorted if you wish to connect header pins 1 and 4 to ground. For full functionality, short all of the pads in each red box. 
+
++3.3V can be picked off the pin of the capacitor shown in the yellow box.
+
+![DFM-17 I²C](dfm_i2c.jpg)
 
 #### Connect the DFM-17 radiosonde to the programmer
 
