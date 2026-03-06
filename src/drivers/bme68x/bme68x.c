@@ -433,6 +433,7 @@ int8_t bme68x_set_op_mode(const uint8_t op_mode, struct bme68x_dev *dev)
     uint8_t tmp_pow_mode;
     uint8_t pow_mode = 0;
     uint8_t reg_addr = BME68X_REG_CTRL_MEAS;
+    uint8_t timeout = 0;
 
     /* Call until in sleep */
     do
@@ -449,7 +450,9 @@ int8_t bme68x_set_op_mode(const uint8_t op_mode, struct bme68x_dev *dev)
                 dev->delay_us(BME68X_PERIOD_POLL, dev->intf_ptr);
             }
         }
-    } while ((pow_mode != BME68X_SLEEP_MODE) && (rslt == BME68X_OK));
+        // Timeout at 50ms
+        timeout++;
+    } while ((pow_mode != BME68X_SLEEP_MODE) && (rslt == BME68X_OK) && (timeout < 50));
 
     /* Already in sleep */
     if ((op_mode != BME68X_SLEEP_MODE) && (rslt == BME68X_OK))

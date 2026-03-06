@@ -44,7 +44,11 @@ BME68X_INTF_RET_TYPE bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data,
  
 void bme68x_delay_us(uint32_t period, void *intf_ptr)
 {
-    delay_us(period);
+    if(period > 65535) {
+        delay_ms((period + 999) / 1000);
+    } else {
+        delay_us(period);
+    }
 }
  
 int8_t bme68x_interface_init(struct bme68x_dev *bme, uint8_t intf)
@@ -120,6 +124,7 @@ bool bme68x_handler_init(void)
 }
 
 bool bme68x_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, uint32_t *humidity_percentage_100, uint32_t *bme680_gas_r) {
+    int8_t rslt;
     uint32_t del_period;
     struct bme68x_data data;
     uint8_t n_fields;
@@ -130,7 +135,7 @@ bool bme68x_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
     del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
     bme.delay_us(del_period, bme.intf_ptr);
 
-    bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme);
+    rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme);
 
     log_info("BME68X: Temperature %d, Pressure %lu, Humidity %lu, Gas R %lu, Status 0x%x\n",
             (data.temperature / 100),
@@ -144,7 +149,11 @@ bool bme68x_read(int32_t *temperature_celsius_100, uint32_t *pressure_mbar_100, 
     *humidity_percentage_100 = data.humidity / 10;
     *bme680_gas_r = data.gas_resistance;
     
-    return true;
+    if(rslt >= 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool bme68x_read_telemetry(telemetry_data *data)
