@@ -93,9 +93,9 @@ bool bme68x_handler_init(void)
 
     conf.filter = BME68X_FILTER_OFF;
     conf.odr = BME68X_ODR_NONE;
-    conf.os_hum = BME68X_OS_16X;
-    conf.os_pres = BME68X_OS_16X;
-    conf.os_temp = BME68X_OS_16X;
+    conf.os_hum = BME68X_OS_8X;
+    conf.os_pres = BME68X_OS_8X;
+    conf.os_temp = BME68X_OS_8X;
     bme68x_set_conf(&conf, &bme);
 
 #if SENSOR_BME_6XX_GAS_MEASUREMENT
