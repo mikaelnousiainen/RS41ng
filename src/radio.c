@@ -995,28 +995,16 @@ void radio_handle_data_timer_tick()
 
 bool radio_handle_time_sync()
 {
-    // TODO: How to poll GPS time?
-    // TODO: Get time at millisecond precision!
-    // gps_driver_request_gpstime();
-
     gps_data gps;
     gps_driver_get_current_gps_data(&gps);
 
     if (!gps.updated) {
-        // The GPS data has not been updated yet
-        return false;
-    }
-
-    if (false && gps.fix < 3) {
-        log_info("Skipping transmit entry that requires time sync, no GPS fix");
-        radio_next_transmit_entry();
         return false;
     }
 
     uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
 
     if (time_millis == radio_previous_time_sync_scheduled) {
-        // The GPS chip has not provided an updated time yet for some reason
         return false;
     }
 
