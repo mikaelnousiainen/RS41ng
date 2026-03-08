@@ -233,6 +233,8 @@ Recommended Fox Mode settings in `config.h`:
 #define ENABLE_FM_CW true
 ```
 
+NOTE: See `config.c` (not `.h`) for CW string options. Many different parameters can be transmitted.
+
 ### External sensors
 
 It is possible to connect external sensors to the I²C bus.
