@@ -70,6 +70,19 @@ static void dma_rx_init(void)
 {
     __HAL_RCC_DMA1_CLK_ENABLE();
 
+    /* Force-stop any running DMA and clear HAL handle state.
+     * HAL_DMA_Start_IT locks the handle and expects a DMA ISR to unlock it,
+     * but we never enable the DMA NVIC interrupt.  On re-init the stale lock
+     * causes HAL_DMA_Init to silently return HAL_BUSY, leaving CCR unconfigured
+     * (MINC=0 means circular buffer broken). */
+    if (hdma_usart_rx.Instance != NULL) {
+        hdma_usart_rx.Instance->CCR &= ~DMA_CCR_EN;
+    }
+    hdma_usart_rx.Lock  = HAL_UNLOCKED;
+    hdma_usart_rx.State = HAL_DMA_STATE_RESET;
+    gps_usart.Lock      = HAL_UNLOCKED;
+    gps_usart.RxState   = HAL_UART_STATE_READY;
+
     hdma_usart_rx.Instance = GPS_DMA_CHANNEL;
 #ifdef RS41_RSM4x4
     hdma_usart_rx.Init.Request = GPS_DMA_REQUEST;

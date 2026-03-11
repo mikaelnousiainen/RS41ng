@@ -256,6 +256,7 @@ static bool ubxm10050_wait_for_ack(void)
     nack_received = false;
 
     while ((HAL_GetTick() - start) < UBX_ACK_TIMEOUT_MS) {
+        usart_gps_drain_dma();
         if (ack_received)  return true;
         if (nack_received) return false;
     }
@@ -316,6 +317,12 @@ static bool ubxm10050_valset_u1_multi(uint8_t layers,
         buf[off + 4] = items[i].val;
     }
 
+    /* Drain any pending bytes and reset parser to avoid stale state
+     * from NMEA or partial UBX packets consuming our ACK sync bytes. */
+    usart_gps_drain_dma();
+    parse_sync = 0;
+    parse_pos  = 0;
+
     ubxm10050_send_raw(UBX_CLASS_CFG, UBX_CFG_VALSET, buf, sizeof(buf));
     return ubxm10050_wait_for_ack();
 }
@@ -338,6 +345,12 @@ static bool ubxm10050_valset_u4(uint8_t layers, uint32_t key, uint32_t val)
     buf[9]  = (uint8_t)((val >> 8) & 0xFF);
     buf[10] = (uint8_t)((val >> 16) & 0xFF);
     buf[11] = (uint8_t)((val >> 24) & 0xFF);
+
+    /* Drain any pending bytes and reset parser to avoid stale state
+     * from NMEA or partial UBX packets consuming our ACK sync bytes. */
+    usart_gps_drain_dma();
+    parse_sync = 0;
+    parse_pos  = 0;
 
     ubxm10050_send_raw(UBX_CLASS_CFG, UBX_CFG_VALSET, buf, sizeof(buf));
     return ubxm10050_wait_for_ack();
