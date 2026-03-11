@@ -41,6 +41,11 @@ void handle_timer_tick()
 
     radio_handle_timer_tick();
 
+#if ALLOW_POWER_OFF
+    if(counter % 10 == 0)
+        system_handle_button();
+#endif
+
     counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
         gps_driver_get_current_gps_data(&current_gps_data);

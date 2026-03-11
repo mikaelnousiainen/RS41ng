@@ -30,6 +30,8 @@ uint16_t system_get_current_milliamps();
 uint16_t system_get_battery_voltage_millivolts();
 uint16_t system_get_button_adc_value();
 
+void system_handle_button();
+
 extern void (*system_handle_timer_tick)();
 
 void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim);

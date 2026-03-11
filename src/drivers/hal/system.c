@@ -15,13 +15,15 @@
 #include "log.h"
 #include "gpio.h"
 
-#define BUTTON_PRESS_LONG_COUNT SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND
+#define BUTTON_PRESS_LONG_COUNT 1000  // SysTick runs at 1 kHz, so 1000 = 1 second hold
 
 #define ADC1_DR_Address ((uint32_t) 0x4001244C)
 
 __IO uint16_t dma_buffer_adc[2];
 
 volatile uint32_t button_pressed = 0;
+
+static volatile uint16_t button_pressed_threshold = 0;
 
 void (*system_handle_timer_tick)() = NULL;
 
@@ -390,39 +392,39 @@ void system_shutdown()
 
 void system_handle_button()
 {
-
-// #TODO fix this on the RS41 RSM_4x4
-#ifndef RS41_RSM4x4
-    static uint16_t button_pressed_threshold = 2000;
-#else
-    static uint16_t button_pressed_threshold = 1500;
-#endif
     static bool shutdown = false;
 
-    // RS41 (RSM412) & DFM17
-    // ~1650-1850 - button up
-    // ~2000-2200 - button down
+    // RS41 & DFM17
+    // ~1590-1850 - button up
+    // ~1900-2200 - button down
 
-    // RS41 RSM4x4
-    // ~1300 - button up
-    // ~1565 - button down
+    volatile uint16_t current_value = system_get_button_adc_value();
 
-    uint16_t current_value = system_get_button_adc_value();
-
-    if (current_value > button_pressed_threshold) {
-        button_pressed++;
-        if (button_pressed >= BUTTON_PRESS_LONG_COUNT) {
-            shutdown = true;
-            system_shutdown();
+    // Calibrate threshold from first valid idle reading, skip until then
+    if (button_pressed_threshold == 0) {
+        if (current_value > 0) {
+            button_pressed_threshold = (uint16_t)(current_value * 11U / 10U);
         }
-    } else {
-        if (!shutdown) {
-           button_pressed = 0;		// Reset if we are not actually shutting down (accidental short press)
-        }
+        return;
     }
 
-    if (button_pressed == 0) {
-        button_pressed_threshold = current_value * 1.1;
+    if (current_value > (uint16_t)(button_pressed_threshold * 11U / 10U)) {
+        button_pressed++;
+        set_red_led(true);
+        if (button_pressed >= BUTTON_PRESS_LONG_COUNT) {
+            shutdown = true;
+        }
+    } else {
+        if (shutdown) {
+            // Button released after long press — now safe to cut power
+            // without the hardware interpreting the held button as a new power-on
+            system_shutdown();
+        }
+        button_pressed = 0;
+    }
+
+    if (button_pressed == 0 && current_value > 0) {
+        button_pressed_threshold = (uint16_t)((current_value + (uint32_t)button_pressed_threshold * 9U) / 10U);
     }
 }
 
@@ -617,9 +619,6 @@ void User_TIM6_IRQHandler(TIM_HandleTypeDef *htim)
     if (system_handle_timer_tick != NULL) {
         system_handle_timer_tick();
     }
-#if ALLOW_POWER_OFF
-        system_handle_button();
-#endif
 }
 
 void DMA1_Channel1_IRQHandler(void)
