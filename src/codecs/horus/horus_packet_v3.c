@@ -5,6 +5,8 @@
 #include "config.h"
 #include "log.h"
 
+#define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
+
 volatile uint16_t horus_v3_packet_counter = 0;
 static horusTelemetry asnMessage;
 static BitStream encodedMessage;
@@ -19,20 +21,25 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 
     uint32_t velocity_horizontal = (data->gps.ground_speed_cm_per_second * 36) / 1000;
 
+    int32_t time_of_day = data->gps.hours*3600 + data->gps.minutes*60 + data->gps.seconds;
+    int32_t lat = (int32_t)(data->gps.latitude_degrees_10000000 / 100);
+    int32_t lon = (int32_t)(data->gps.longitude_degrees_10000000 / 100);
+    int32_t alt = (int32_t)(data->gps.altitude_mm / 1000);
+
     memset(&asnMessage, 0, sizeof(asnMessage));
 
     asnMessage = (horusTelemetry){
         .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN,
-        .sequenceNumber = horus_v3_packet_counter,
-        .timeOfDaySeconds  = data->gps.hours*3600 + data->gps.minutes*60 + data->gps.seconds,
-        .latitude = (int32_t)(data->gps.latitude_degrees_10000000 / 100),
-        .longitude = (int32_t)(data->gps.longitude_degrees_10000000 / 100),
-        .altitudeMeters = ((data->gps.altitude_mm > 0 ? data->gps.altitude_mm : 0) / 1000),
-        .velocityHorizontalKilometersPerHour = (velocity_horizontal > 255) ? 255 : (uint8_t)velocity_horizontal,
-        .gnssSatellitesVisible = data->gps.satellites_visible,
-        .ascentRateCentimetersPerSecond = (int16_t) data->gps.climb_cm_per_second, // m/s -> cm/s
+        .sequenceNumber = horus_v3_packet_counter, // uint16_t, naturally 0..65535
+        .timeOfDaySeconds  = CLAMP(time_of_day, -1, 86400),
+        .latitude = CLAMP(lat, -9000000, 9000000),
+        .longitude = CLAMP(lon, -18000000, 18000000),
+        .altitudeMeters = CLAMP(alt, -1000, 50000),
+        .velocityHorizontalKilometersPerHour = CLAMP(velocity_horizontal, 0, 511),
+        .gnssSatellitesVisible = CLAMP(data->gps.satellites_visible, 0, 31),
+        .ascentRateCentimetersPerSecond = CLAMP((int32_t)data->gps.climb_cm_per_second, -32767, 32767),
         .temperatureCelsius_x10 = {
-            .internal = (int16_t) (data->internal_temperature_celsius_100 / 10),
+            .internal = CLAMP((int16_t)(data->internal_temperature_celsius_100 / 10), -1023, 1023),
             .exist = {
                 .internal = true,
                 .external = false,
@@ -41,7 +48,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
             }
         },
         .milliVolts = {
-            .battery = data->battery_voltage_millivolts,
+            .battery = CLAMP(data->battery_voltage_millivolts, 0, 16383),
             .exist = {
                 .battery = true,
                 .solar = false,
@@ -72,18 +79,18 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     // External temperature & humidity sensors (typically BMP280 -- can expand to others)
     if (data->temperature_celsius_100 != 0 && data->humidity_percentage_100 != 0) {
         if (data->temperature_celsius_100 >= -10230 && data->temperature_celsius_100 <= 10230) {
-            asnMessage.temperatureCelsius_x10.external = (int16_t)(data->temperature_celsius_100 / 10);
+            asnMessage.temperatureCelsius_x10.external = CLAMP((int16_t)(data->temperature_celsius_100 / 10), -1023, 1023);
             asnMessage.temperatureCelsius_x10.exist.external = true;
         }
 
         if (data->humidity_percentage_100 >= 0 && data->humidity_percentage_100 <= 10000) {
-            asnMessage.humidityPercentage = (uint8_t) (data->humidity_percentage_100 / 100);
+            asnMessage.humidityPercentage = CLAMP((uint8_t)(data->humidity_percentage_100 / 100), 0, 100);
             asnMessage.exist.humidityPercentage = true;
         }
     }
 
-    if (data->pressure_mbar_100 > 0 && data->pressure_mbar_100 <= 12000) {
-        asnMessage.pressurehPa_x10 = (uint16_t) (data->pressure_mbar_100 / 10);
+    if (data->pressure_mbar_100 > 0 && data->pressure_mbar_100 <= 120000) {
+        asnMessage.pressurehPa_x10 = CLAMP((uint16_t)(data->pressure_mbar_100 / 10), 0, 12000);
         asnMessage.exist.pressurehPa_x10 = true;
     }
 
@@ -103,7 +110,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 .u = {
                     .horusInt = {
                         .nCount = 1,
-                        .arr[0] = (uint16_t) data->radiation_intensity_uR_h
+                        .arr[0] = CLAMP((int64_t)data->radiation_intensity_uR_h, 0, UINT16_MAX)
                     }   
                 }
             }
@@ -129,7 +136,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 .u = {
                     .horusInt = {
                         .nCount = 1,
-                        .arr[0] = (uint16_t) data->pulse_count
+                        .arr[0] = CLAMP((int64_t)data->pulse_count, 0, UINT16_MAX)
                     }   
                 }
             }
@@ -208,7 +215,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 .u = {
                     .horusInt = {
                         .nCount = 1,
-                        .arr[0] = (uint16_t) data->current_milliamps
+                        .arr[0] = CLAMP((int64_t)data->current_milliamps, 0, UINT16_MAX)
                     }
                 }
             }
@@ -220,25 +227,27 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 
 #if 0
     // Unit: raw ADC
-    asnMessage.exist.extraSensors = true;
-    horusAdditionalSensorType button_adc_struct = {
-        .name = "button",
-        .exist = { 
-            .name = 1, 
-            .values = 1 
-        },
-        .values = {
-            .kind = horusInt_PRESENT,
-            .u = {
-                .horusInt = {
-                    .nCount = 1,
-                    .arr[0] = (uint16_t) data->button_adc_value
-                }   
+    if (asnMessage.extraSensors.nCount < 4) {
+        asnMessage.exist.extraSensors = true;
+        horusAdditionalSensorType button_adc_struct = {
+            .name = "button",
+            .exist = {
+                .name = 1,
+                .values = 1
+            },
+            .values = {
+                .kind = horusInt_PRESENT,
+                .u = {
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = CLAMP((int64_t)data->button_adc_value, 0, UINT16_MAX)
+                    }
+                }
             }
-        }
-    };
-    asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = button_adc_struct;
-    asnMessage.extraSensors.nCount += 1;
+        };
+        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = button_adc_struct;
+        asnMessage.extraSensors.nCount += 1;
+    }
 #endif
 
     memset(&encodedMessage, 0, sizeof(encodedMessage));
