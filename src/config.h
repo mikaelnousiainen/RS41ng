@@ -24,7 +24,7 @@
 #define CALLSIGN "4FSKTEST-V3"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+#define RADIO_POST_TRANSMIT_DELAY_MS 5000
 
 // The COUNT settings define the number of times that each type of transmission is repeated
 
@@ -123,8 +123,8 @@ Setting, measured RF output power, relative DC power draw
 // Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
 #define LEDS_DISABLE_ALTITUDE_METERS 1000
 
-// Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
-#define ALLOW_POWER_OFF false
+// Allow powering off the sonde by pressing the button for over a second
+#define ALLOW_POWER_OFF true
 
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
