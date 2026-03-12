@@ -640,7 +640,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             return false;
         }
 
-#if LEDS_ENABLE
+#if LEDS_ENABLE && ENABLE_FOX_MODE
         set_red_led(true);
 #endif
 
@@ -798,7 +798,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         return false;
     }
 
-#if LEDS_ENABLE
+#if LEDS_ENABLE && ENABLE_FOX_MODE
     set_red_led(true);
 #endif
 
@@ -891,7 +891,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
 
     usart_gps_enable(true);
 
-#if LEDS_ENABLE
+#if LEDS_ENABLE && ENABLE_FOX_MODE
     set_red_led(false);
 #endif
 

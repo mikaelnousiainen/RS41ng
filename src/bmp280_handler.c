@@ -57,6 +57,9 @@ bool bmp280_read_telemetry(telemetry_data *data)
     bool success;
 
     if (bmp280_initialization_required) {
+        if(LEDS_ENABLE)
+            set_red_led(true);
+
         log_info("BMP280 re-init\n");
         success = bmp280_handler_init();
         log_info("BMP280 re-init: %d\n", success);
@@ -65,12 +68,17 @@ bool bmp280_read_telemetry(telemetry_data *data)
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
             return false;
+        } else if(LEDS_ENABLE) {
+            set_red_led(false);
         }
     }
 
     success = bmp280_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100);
 
     if (!success) {
+        if(LEDS_ENABLE)
+            set_red_led(true);
+
         log_info("BMP280 re-init\n");
         success = bmp280_handler_init();
         log_info("BMP280 re-init: %d\n", success);
@@ -83,6 +91,8 @@ bool bmp280_read_telemetry(telemetry_data *data)
             data->temperature_celsius_100 = 0;
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
+        } else if(LEDS_ENABLE) {
+            set_red_led(false);
         }
     }
 

@@ -338,7 +338,7 @@ Setting, measured RF output power, relative DC power draw
 #define SENSOR_BMP280_I2C_ADDRESS 0x77
 
 // Enable use of a BME680/688/690 atmospheric sensor -- similar to BME280, but with Gas measurements
-#define SENSOR_BME68X_ENABLE false
+#define SENSOR_BME68X_ENABLE true
 #define SENSOR_BME68X_I2C_ADDRESS 0x77
 #define SENSOR_BME690_ENABLE false
 #define SENSOR_BME690_I2C_ADDRESS 0x77

@@ -161,6 +161,9 @@ bool bme68x_read_telemetry(telemetry_data *data)
     bool success;
 
     if (bme680_initialization_required) {
+        if(LEDS_ENABLE)
+            set_red_led(true);
+
         log_info("BME re-init\n");
         success = bme68x_handler_init();
         log_info("BME re-init: %d\n", success);
@@ -170,12 +173,17 @@ bool bme68x_read_telemetry(telemetry_data *data)
             data->humidity_percentage_100 = 0;
             data->bme6xx_gas_r = 0;
             return false;
+        } else if(LEDS_ENABLE) {
+            set_red_led(false);
         }
     }
 
     success = bme68x_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->bme6xx_gas_r);
 
     if (!success) {
+        if(LEDS_ENABLE)
+            set_red_led(true);
+
         log_info("BME re-init\n");
         success = bme68x_handler_init();
         log_info("BME re-init: %d\n", success);
@@ -189,6 +197,8 @@ bool bme68x_read_telemetry(telemetry_data *data)
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
             data->bme6xx_gas_r = 0;
+        } else if(LEDS_ENABLE) {
+            set_red_led(false);
         }
     }
 

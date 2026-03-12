@@ -27,6 +27,8 @@
 
 uint32_t counter = 0;
 bool led_state = true;
+uint32_t red_led_strobe_ticks = 0;
+bool red_led_strobe_state = false;
 
 gps_data current_gps_data;
 
@@ -51,17 +53,29 @@ void handle_timer_tick()
         gps_driver_get_current_gps_data(&current_gps_data);
     }
 
-#if LEDS_ENABLE
-    // Blink fast until GPS fix is acquired
+#if LEDS_ENABLE && !ENABLE_FOX_MODE
+    // Green LED: solid on when GPS acquired, 2Hz blink when no fix (suppressed during red strobe)
     if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
-        if (GPS_HAS_FIX(current_gps_data)) {
-            if (counter == 0) {
-                led_state = !led_state;
-                set_green_led(led_state);
-            }
+        if (red_led_strobe_ticks > 0) {
+            set_green_led(false);
+        } else if (GPS_HAS_FIX(current_gps_data)) {
+            set_green_led(true);
         } else {
             led_state = !led_state;
             set_green_led(led_state);
+        }
+    }
+
+    // Red LED: strobe at 2Hz for 5 seconds on error
+    if (red_led_strobe_ticks > 0) {
+        if (counter % (SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 4) == 0) {
+            red_led_strobe_state = !red_led_strobe_state;
+            system_set_red_led(red_led_strobe_state);
+        }
+        red_led_strobe_ticks--;
+        if (red_led_strobe_ticks == 0) {
+            red_led_strobe_state = false;
+            system_set_red_led(false);
         }
     }
 #endif
@@ -81,6 +95,17 @@ void set_red_led(bool enabled)
     if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
         enabled = false;
     }
+
+#if LEDS_ENABLE && !ENABLE_FOX_MODE
+    if (enabled) {
+        red_led_strobe_ticks = 5 * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
+        red_led_strobe_state = false;
+        return;
+    } else {
+        red_led_strobe_ticks = 0;
+        red_led_strobe_state = false;
+    }
+#endif
 
     system_set_red_led(enabled);
 }
@@ -108,8 +133,8 @@ int main(void)
     //log_info("System init\n");
     system_init();
 
-    set_green_led(false);
-    set_red_led(true);
+    set_green_led(true);
+    set_red_led(false);
 
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE 
     log_info("External USART init\n");
@@ -146,10 +171,13 @@ int main(void)
         log_info("GPS init\n");
         success = gps_driver_init();
         if (!success) {
+            set_green_led(false);
+            set_red_led(true);
             log_error("GPS initialization failed, retrying...\n");
             delay_ms(1000);
             goto gps_init;
         }
+        set_red_led(false);
 
     #ifdef DFM17
         log_info("Timepulse init\n");
@@ -224,8 +252,16 @@ int main(void)
     log_info("System initialized!\n");
 
 #if LEDS_ENABLE
-    set_green_led(true);
-    set_red_led(false);
+    #if ENABLE_FOX_MODE
+        set_green_led(false);
+        set_red_led(false);
+    #else
+        set_green_led(true);
+        set_red_led(false);
+        #ifdef DFM17
+            set_yellow_led(true);
+        #endif
+    #endif
 #else
     set_green_led(false);
     set_red_led(false);
