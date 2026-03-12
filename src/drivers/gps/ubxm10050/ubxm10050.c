@@ -611,6 +611,18 @@ void ubxm10050_handle_incoming_byte(uint8_t data, uint8_t reset)
     if (parse_pos < 4) return;
 
     uint16_t payloadLen = (uint16_t)parse_buf[2] | ((uint16_t)parse_buf[3] << 8);
+
+    /* Guard against corrupted length: payload must fit in parse_buf
+     * alongside the 4-byte header and 2-byte checksum.  Without this,
+     * a large payloadLen causes uint16_t totalLen to wrap, bypassing
+     * the accumulation check and passing a huge len to checksum(). */
+    if (payloadLen > sizeof(parse_buf) - 6) {
+        parse_sync = 0;
+        parse_pos  = 0;
+        m10_current_gps_data.bad_packets++;
+        return;
+    }
+
     uint16_t totalLen   = 4 + payloadLen + 2; /* class+id+len + payload + checksum */
 
     if (parse_pos < totalLen) return; /* still accumulating */
