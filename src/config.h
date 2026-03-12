@@ -149,11 +149,22 @@ Setting, measured RF output power, relative DC power draw
 // See the README for details about power consumption.
 #define GPS_POWER_SAVING_ENABLE false
 
-// Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
+// Enable NMEA output from GPS via external serial port.
+// On RS41, this uses USART3 (PB10/PB11) which shares pins with the I²C bus (Si5351 and sensors).
+// On DFM17, this can use USART1 (PA9/PA10 on Mini-USB header) or USART3 (PB10/PB11 on 4-pin PCB header). USART1 does not conflict with I²C.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
 
-#if (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
-#error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
+// Select the USART for external serial output on DFM17: 1 = USART1 (PA9/PA10), 3 = USART3 (PB10/PB11)
+// USART1 is recommended as it does not share pins with the I²C bus.
+// This setting is ignored on RS41 (always USART3).
+#define DFM17_USART_EXT_PORT 1
+
+#if defined(RS41) && (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus on RS41 (shared PB10/PB11 pins).
+#endif
+
+#if defined(DFM17) && (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && (DFM17_USART_EXT_PORT == 3) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#error GPS NMEA output via USART3 cannot be enabled simultaneously with the I2C bus on DFM17 (shared PB10/PB11 pins).
 #endif
 
 /* Mode specific settings */
