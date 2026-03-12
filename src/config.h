@@ -24,7 +24,7 @@
 #define CALLSIGN "4FSKTEST-V3"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+#define RADIO_POST_TRANSMIT_DELAY_MS 500
 
 // The COUNT settings define the number of times that each type of transmission is repeated
 
@@ -39,7 +39,7 @@
 #define RADIO_TX_APRS_9600 false
 #define RADIO_TX_APRS_9600_COUNT 1
 #define RADIO_TX_HORUS_V2 false
-#define RADIO_TX_HORUS_V2_COUNT 5
+#define RADIO_TX_HORUS_V2_COUNT 1
 #define RADIO_TX_HORUS_V3 true
 #define RADIO_TX_HORUS_V3_COUNT 5
 #define RADIO_TX_CATS false
@@ -65,7 +65,7 @@
 
 // Enable this setting to require a GPS fix before transmitting after power-on. If GPS fix has already been established, losing lock will
 // not prevent the radio from transmitting
-#define RADIO_TX_WAIT_FOR_GPS_LOCK true
+#define RADIO_TX_WAIT_FOR_GPS_LOCK false
 
 // Fox Mode -- disables GPS and follows transmit scheme above
 // Use RADIO_POST_TRANSMIT_DELAY_MS to define wait periods between transmissions
@@ -124,10 +124,10 @@ Setting, measured RF output power, relative DC power draw
 #define LEDS_ENABLE true
 
 // Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
-#define LEDS_DISABLE_ALTITUDE_METERS 1000
+#define LEDS_DISABLE_ALTITUDE_METERS 2000
 
 // Allow powering off the sonde by pressing the button for over a second
-#define ALLOW_POWER_OFF true
+#define ALLOW_POWER_OFF false
 
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
@@ -352,7 +352,7 @@ Setting, measured RF output power, relative DC power draw
 #define SENSOR_BMP280_I2C_ADDRESS 0x77
 
 // Enable use of a BME680/688/690 atmospheric sensor -- similar to BME280, but with Gas measurements
-#define SENSOR_BME68X_ENABLE true
+#define SENSOR_BME68X_ENABLE false
 #define SENSOR_BME68X_I2C_ADDRESS 0x77
 #define SENSOR_BME690_ENABLE false
 #define SENSOR_BME690_I2C_ADDRESS 0x77
