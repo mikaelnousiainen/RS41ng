@@ -21,12 +21,18 @@ void usart_ext_init(uint32_t baud_rate)
     gpio_init.Pin = PIN_EXT_USART_TX;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+#ifdef RS41_RSM4x4
+    gpio_init.Alternate = GPIO_AF7_USART3;
+#endif
     HAL_GPIO_Init(BANK_EXT_USART_TX, &gpio_init);
 
     // RX
     gpio_init.Pin = PIN_EXT_USART_RX;
     gpio_init.Mode = GPIO_MODE_INPUT;
     gpio_init.Pull = GPIO_NOPULL;
+#ifdef RS41_RSM4x4
+    gpio_init.Alternate = GPIO_AF7_USART3;
+#endif
     HAL_GPIO_Init(BANK_EXT_USART_RX, &gpio_init);
 
     HAL_NVIC_DisableIRQ(EXT_USART_IRQn);

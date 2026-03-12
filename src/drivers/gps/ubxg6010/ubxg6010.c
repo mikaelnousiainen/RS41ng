@@ -861,10 +861,9 @@ void ubxg6010_handle_incoming_byte(uint8_t data, uint8_t reset)
             incoming_packet->header.sc2 = data;
         } 
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
-        else {
-            if (gps_nmea_output_enabled) {
-                ubxg6010_handle_nmea_sentence_start(data);
-            }
+        else 
+        {
+            ubxg6010_handle_nmea_sentence_start(data);
             buffer_pos = 0;
         }
     } else if (sync_nmea >= 3) {
