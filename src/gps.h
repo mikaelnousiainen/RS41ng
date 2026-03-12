@@ -5,19 +5,16 @@
 #include <stdbool.h>
 #include "config.h"
 
-// Acquisition state: The receiver actively searches for and acquires signals.
-// Maximum power consumption. Can also mean that power saving is not turned on.
-#define POWER_SAFE_MODE_STATE_ACQUISITION 0
-// Tracking state: The receiver continuously tracks and downloads data. Less power consumption than in Acquisition state.
-#define POWER_SAFE_MODE_STATE_TRACKING 1
-// POT state: The receiver repeatedly loops through a sequence of tracking (TRK), calculating the position fix
-// (Calc), and entering an idle period (Idle). No new signals are acquired and no data is downloaded. Much less
-// power consumption than in Tracking state.
-#define POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING 2
-// Inactive state: Most parts of the receiver are switched off.
-#define POWER_SAFE_MODE_STATE_INACTIVE 3
+// Values follow Horus Binary v3 GnssPowerSaveState ASN.1 enumeration,
+// which matches the NAV-PVT psmState field on u-blox M10.
+#define POWER_SAFE_MODE_STATE_NOT_ACTIVE  0  // PSM is not active
+#define POWER_SAFE_MODE_STATE_ENABLED     1  // PSM enabled, intermediate state before acquisition
+#define POWER_SAFE_MODE_STATE_ACQUISITION 2  // Actively searching for and acquiring signals
+#define POWER_SAFE_MODE_STATE_TRACKING    3  // Continuously tracking, less power than acquisition
+#define POWER_SAFE_MODE_STATE_OPTIMISED   4  // Cyclic tracking/idle, much less power than tracking
+#define POWER_SAFE_MODE_STATE_INACTIVE    5  // Most parts of the receiver are switched off
 
-#define GPS_IS_POWER_SAVING_ACTIVE(gps_data) (gps_data.power_safe_mode_state != POWER_SAFE_MODE_STATE_ACQUISITION)
+#define GPS_IS_POWER_SAVING_ACTIVE(gps_data) (gps_data.power_safe_mode_state != POWER_SAFE_MODE_STATE_NOT_ACTIVE)
 
 #define GPS_FIX_NO_FIX 0
 #define GPS_FIX_DEAD_RECKONING_ONLY 1

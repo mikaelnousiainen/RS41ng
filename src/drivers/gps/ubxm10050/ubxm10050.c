@@ -447,6 +447,9 @@ static void ubxm10050_handle_packet(uint8_t msgClass, uint8_t msgId,
         m10_current_gps_data.heading_degrees_100000       = pvt->headMot;
         m10_current_gps_data.climb_cm_per_second          = -(pvt->velD / 10);
         m10_current_gps_data.position_dilution_of_precision = pvt->pDOP;
+        /* PSM state from flags bits [4:2] — values match gps.h constants directly */
+        m10_current_gps_data.power_safe_mode_state = (pvt->flags >> 2) & 0x07;
+
         m10_current_gps_data.updated                      = true;
 
         /* Debug: log every PVT packet so we can see communication, fix, time,
@@ -669,7 +672,6 @@ bool ubxm10050_enable_power_save_mode(void)
         return false;
     }
 
-    m10_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_POWER_OPTIMIZED_TRACKING;
     return true;
 }
 
@@ -690,6 +692,7 @@ void ubxm10050_sleep(void)
     ubxm10050_send_raw(UBX_CLASS_RXM, UBX_RXM_PMREQ,
                        (const uint8_t *)&pmreq, sizeof(pmreq));
 
+    /* No more PVT messages after backup mode - set explicitly */
     m10_current_gps_data.power_safe_mode_state = POWER_SAFE_MODE_STATE_INACTIVE;
 }
 

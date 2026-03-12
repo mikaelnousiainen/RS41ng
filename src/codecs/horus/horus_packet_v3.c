@@ -56,11 +56,15 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 .custom2 = false
             }
         },
+        .gnssPowerSaveState = (horusGnssPowerSaveState)data->gps.power_safe_mode_state,
         // We need to explicitly specify which optional fields we want to include in the packet
         .exist = {
             .extraSensors = false,
             .velocityHorizontalKilometersPerHour = true,
             .gnssSatellitesVisible = true,
+        #if GPS_POWER_SAVING_ENABLE
+            .gnssPowerSaveState = true,
+        #endif
             .ascentRateCentimetersPerSecond = true,
             .pressurehPa_x10 = false,
             .temperatureCelsius_x10 = true,

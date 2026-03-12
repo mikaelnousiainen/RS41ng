@@ -763,7 +763,19 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x03) {
         ubxg6010_current_gps_data.ok_packets += 1;
         ubxg6010_current_gps_data.fix_ok = pkt->data.navstatus.flags & 0x01;
-        ubxg6010_current_gps_data.power_safe_mode_state = pkt->data.navstatus.flags2 & 0x03;
+        /* NAV-STATUS flags2 bits [1:0] psmState uses a 2-bit scheme:
+         * 0=acquisition, 1=tracking, 2=POT, 3=inactive.
+         * Map to gps.h constants (which follow the NAV-PVT / Horus v3 scheme). */
+        {
+            static const uint8_t navstatus_psm_map[] = {
+                POWER_SAFE_MODE_STATE_ACQUISITION,
+                POWER_SAFE_MODE_STATE_TRACKING,
+                POWER_SAFE_MODE_STATE_OPTIMISED,
+                POWER_SAFE_MODE_STATE_INACTIVE,
+            };
+            ubxg6010_current_gps_data.power_safe_mode_state =
+                navstatus_psm_map[pkt->data.navstatus.flags2 & 0x03];
+        }
 
         ubxg6010_current_gps_data.updated = true;
     } else if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x06) {
