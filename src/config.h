@@ -135,7 +135,7 @@ Setting, measured RF output power, relative DC power draw
 
 // Enable NMEA output from GPS via external serial port.
 // On RS41, this uses USART3 (PB10/PB11) which shares pins with the I²C bus (Si5351 and sensors).
-// On DFM17, this can use USART1 (PA9/PA10) or USART3 (PB10/PB11). USART1 does not conflict with I²C.
+// On DFM17, this can use USART1 (PA9/PA10 on Mini-USB header) or USART3 (PB10/PB11 on 4-pin PCB header). USART1 does not conflict with I²C.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
 
 // Select the USART for external serial output on DFM17: 1 = USART1 (PA9/PA10), 3 = USART3 (PB10/PB11)
