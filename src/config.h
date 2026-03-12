@@ -24,7 +24,7 @@
 #define CALLSIGN "4FSKTEST-V3"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
-#define RADIO_POST_TRANSMIT_DELAY_MS 5000
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // The COUNT settings define the number of times that each type of transmission is repeated
 
@@ -63,6 +63,9 @@
 #define RADIO_TX_FREQUENCY_CATS      434100000
 #define RADIO_TX_FREQUENCY_LONG_TONE 432501000
 
+// Enable this setting to require a GPS fix before transmitting after power-on. If GPS fix has already been established, losing lock will
+// not prevent the radio from transmitting
+#define RADIO_TX_WAIT_FOR_GPS_LOCK true
 
 // Fox Mode -- disables GPS and follows transmit scheme above
 // Use RADIO_POST_TRANSMIT_DELAY_MS to define wait periods between transmissions

@@ -12,6 +12,7 @@
 #include "codecs/mfsk/mfsk.h"
 #include "codecs/raw/raw.h"
 #include "codecs/jtencode/jtencode.h"
+#include "gps.h"
 #include "drivers/gps/gps_driver.h"
 #include "radio_internal.h"
 #ifdef RS41
@@ -543,6 +544,10 @@ uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
 
+#if RADIO_TX_WAIT_FOR_GPS_LOCK
+static bool gps_fix_ever_acquired = false;
+#endif
+
 telemetry_data current_telemetry_data;
 
 radio_module_state radio_shared_state = {
@@ -1043,6 +1048,18 @@ bool radio_handle_time_sync()
 
 void radio_handle_main_loop()
 {
+#if RADIO_TX_WAIT_FOR_GPS_LOCK
+    if (!gps_fix_ever_acquired) {
+        gps_data gps;
+        gps_driver_get_current_gps_data(&gps);
+        if (GPS_HAS_FIX(gps)) {
+            gps_fix_ever_acquired = true;
+        } else {
+            return;
+        }
+    }
+#endif
+
     bool time_sync_required = radio_current_transmit_entry->time_sync_seconds > 0;
 
     if (time_sync_required && !radio_shared_state.radio_transmission_active &&
