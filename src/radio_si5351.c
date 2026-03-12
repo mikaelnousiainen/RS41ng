@@ -42,14 +42,14 @@ bool radio_start_transmit_si5351(radio_transmit_entry *entry, radio_module_state
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-            system_disable_tick();
+            // system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             // Setting the frequency turns on the output
             radio_si5351_frequency_not_set = true;
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
-            system_disable_tick();
+            // system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             break;
         default:
@@ -128,7 +128,7 @@ inline void radio_handle_data_timer_si5351()
                 log_info("CW TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
-                system_enable_tick();
+                // system_enable_tick();
                 break;
             }
 
@@ -154,7 +154,7 @@ inline void radio_handle_data_timer_si5351()
                 log_info("Horus TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
-                system_enable_tick();
+                // system_enable_tick();
                 break;
             }
 
@@ -181,7 +181,7 @@ bool radio_stop_transmit_si5351(radio_transmit_entry *entry, radio_module_state 
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
             data_timer_uninit();
-            system_enable_tick();
+            // system_enable_tick();
             break;
         default:
             break;

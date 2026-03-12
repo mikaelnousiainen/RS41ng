@@ -135,7 +135,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             shared_state->radio_manual_transmit_active = true;
             #else
             spi_uninit();
-            system_disable_tick();
+            // system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             #endif
             break;
@@ -144,7 +144,7 @@ bool radio_start_transmit_si4063(radio_transmit_entry *entry, radio_module_state
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
-            system_disable_tick();
+            // system_disable_tick();
             shared_state->radio_interrupt_transmit_active = true;
             break;
         case RADIO_DATA_MODE_CATS:
@@ -375,7 +375,7 @@ inline void radio_handle_data_timer_si4063()
                 log_info("CW TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
-                system_enable_tick();
+                // system_enable_tick();
                 break;
             }
 
@@ -395,7 +395,7 @@ inline void radio_handle_data_timer_si4063()
                 log_info("Horus TX finished\n");
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
-                system_enable_tick();
+                // system_enable_tick();
                 break;
             }
 
@@ -459,13 +459,13 @@ bool radio_stop_transmit_si4063(radio_transmit_entry *entry, radio_module_state 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_CW:
         case RADIO_DATA_MODE_PIP:
-            system_enable_tick();
+            // system_enable_tick();
             break;
         case RADIO_DATA_MODE_APRS_1200:
             break;
         case RADIO_DATA_MODE_HORUS_V2:
         case RADIO_DATA_MODE_HORUS_V3:
-            system_enable_tick();
+            // system_enable_tick();
             break;
         case RADIO_DATA_MODE_CATS:
         case RADIO_DATA_MODE_APRS_9600:
