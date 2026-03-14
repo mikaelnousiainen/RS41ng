@@ -166,7 +166,12 @@ static void gpio_init()
     // Button state (analog)
     //log_info("button pin\n");
     gpio_init.Pin = PIN_BUTTON;
+#ifdef RS41
     gpio_init.Mode = GPIO_MODE_ANALOG;
+#else // Must be DFM17
+    gpio_init.Mode = GPIO_MODE_INPUT;
+    //gpio_init.Pull = GPIO_PULLDOWN;
+#endif //RS41
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_BUTTON, &gpio_init);
 
@@ -377,7 +382,11 @@ uint16_t system_get_button_adc_value()
 #endif
 #ifdef DFM17
     // Fake being an ADC.  Take the binary value and if non-zero, make it trigger button-down
-    return ( ((int) HAL_GPIO_ReadPin(BANK_BUTTON, PIN_BUTTON)) * 2100);
+    if (HAL_GPIO_ReadPin(BANK_BUTTON, PIN_BUTTON) == GPIO_PIN_SET) {
+	return 2100;		// Pretend to be in range of pressed RS41 button
+    } else {
+        return 0;
+    }
 #endif
 }
 
@@ -404,7 +413,11 @@ void system_handle_button()
     // Calibrate threshold from first valid idle reading, skip until then
     if (button_pressed_threshold == 0) {
         if (current_value > 0) {
+#ifndef DFM17
             button_pressed_threshold = (uint16_t)(current_value * 11U / 10U);
+#else // DFM17
+            button_pressed_threshold = 100;	// Just set to non-zero for DFM17 so we skip this next time.
+#endif // DFM17
         }
         return;
     }
@@ -425,7 +438,11 @@ void system_handle_button()
     }
 
     if (button_pressed == 0 && current_value > 0) {
+#ifndef DFM17
         button_pressed_threshold = (uint16_t)((current_value + (uint32_t)button_pressed_threshold * 9U) / 10U);
+#else // DFM17
+        button_pressed_threshold = 100;   // Just set to something bogus and non-zero.
+#endif // DFM17
     }
 }
 
