@@ -669,7 +669,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     log_info("Full payload length: %d\n", radio_current_payload_length);
 
-#ifdef SEMIHOSTING_ENABLE
+#if 0 // def SEMIHOSTING_ENABLE && 
     log_info("Payload: ");
     log_bytes_hex(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n    ");
@@ -1077,15 +1077,15 @@ void radio_handle_main_loop()
         telemetry_collect(&current_telemetry_data);
         log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
         log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
-        log_info("Button State: %d\n", current_telemetry_data.button_adc_value);
+        // log_info("Button State: %d\n", current_telemetry_data.button_adc_value);
         log_info("Time: %02d:%02d:%02d\n",
                 current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
                 current_telemetry_data.gps.seconds);
         log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
                 current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
                 current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
-        log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
-                 drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
+        // log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
+                //  drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
         log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
                 current_telemetry_data.gps.latitude_degrees_10000000 / 10,
                 current_telemetry_data.gps.longitude_degrees_10000000 / 10,
@@ -1148,7 +1148,7 @@ void radio_handle_main_loop()
         radio_shared_state.radio_transmission_finished = false;
 
         radio_next_transmit_entry();
-
+#if 0
         log_info("TX stop\n");
         log_info("Symbol count (interrupt): %ld\n", radio_shared_state.radio_symbol_count_interrupt);
         log_info("Symbol count (loop): %ld\n", radio_shared_state.radio_symbol_count_loop);
@@ -1157,6 +1157,7 @@ void radio_handle_main_loop()
         log_info("Symbol rate: %ld\n", radio_shared_state.radio_current_symbol_rate);
         log_info("Symbol delay: %ld\n", radio_shared_state.radio_current_symbol_delay_ms_100);
         log_info("Tone spacing: %ld\n", radio_shared_state.radio_current_tone_spacing_hz_100);
+#endif
     }
 }
 

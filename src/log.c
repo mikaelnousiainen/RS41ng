@@ -33,6 +33,6 @@ void hang_if_bad(char *routine_name, int hal_ok)
       log_info("%s failed\n",routine_name);
       while(1);
    } else {
-      log_info("%s succeeded\n", routine_name);
+      log_debug("%s succeeded\n", routine_name);
    }
 }

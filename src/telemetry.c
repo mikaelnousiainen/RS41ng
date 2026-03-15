@@ -66,14 +66,22 @@ void telemetry_collect(telemetry_data *data)
 
     gps_driver_get_current_gps_data(&data->gps);
 
+    // RS41 RSM4X4 can enable power saving immediately
+    #if GPS_POWER_SAVING_ENABLE && defined(RS41_RSM4x4)
+    if(!gps_power_saving_enabled) {
+        gps_driver_enable_power_save_mode();
+        gps_power_saving_enabled = true;
+    }
+    #endif 
+
     if (GPS_HAS_FIX(data->gps)) {
         // If we have a good fix, we can enter power-saving mode
+        #if GPS_POWER_SAVING_ENABLE && !defined(RS41_RSM4x4)
         if ((data->gps.satellites_visible >= 6) && !gps_power_saving_enabled) {
-            #if GPS_POWER_SAVING_ENABLE
             gps_driver_enable_power_save_mode();
             gps_power_saving_enabled = true;
-            #endif
         }
+        #endif
 
         // If we get the number of leap seconds from GPS data, use it
         if (data->gps.leap_seconds > 0) {
