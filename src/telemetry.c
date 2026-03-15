@@ -25,7 +25,9 @@ int t_look;
 // Initialize leap seconds with a known good value
 int8_t gps_time_leap_seconds = GPS_TIME_LEAP_SECONDS;
 
+#if GPS_POWER_SAVING_ENABLE
 static bool gps_power_saving_enabled = false;
+#endif
 
 void telemetry_collect(telemetry_data *data)
 {

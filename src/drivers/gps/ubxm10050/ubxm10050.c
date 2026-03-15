@@ -418,6 +418,7 @@ static bool ubxm10050_valset_u2(uint8_t layers, uint32_t key, uint16_t val)
  * Payload: [version:1][layers:1][reserved:2][key0:4]...[keyN:4]
  * ------------------------------------------------------------------------- */
 
+#if 0
 static bool ubxm10050_valdel_keys(uint8_t layers,
                                    const uint32_t *keys, uint8_t count)
 {
@@ -443,6 +444,7 @@ static bool ubxm10050_valdel_keys(uint8_t layers,
     ubxm10050_send_raw(UBX_CLASS_CFG, UBX_CFG_VALDEL, buf, sizeof(buf));
     return ubxm10050_wait_for_ack();
 }
+#endif
 
 /* -------------------------------------------------------------------------
  * Cold reset

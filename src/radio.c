@@ -523,8 +523,8 @@ static volatile bool radio_module_initialized = false;
 const bool wspr_locator_fixed_enabled = WSPR_LOCATOR_FIXED_ENABLED;
 
 radio_transmit_entry *radio_current_transmit_entry = NULL;
-static uint8_t radio_current_transmit_entry_index = 0;
 static uint8_t radio_transmit_entry_count = 0;
+static uint8_t radio_next_non_synced_index = 0;
 
 static volatile uint32_t radio_post_transmit_delay_counter = 0;
 static volatile uint32_t radio_next_symbol_counter = 0;
@@ -951,14 +951,6 @@ static void radio_next_transmit_entry()
     radio_current_transmit_entry->current_transmit_index =
             (radio_current_transmit_entry->current_transmit_index + 1) % radio_current_transmit_entry->transmit_count;
 
-    // Proceed to next transmit entry when transmit counter wraps
-    if (radio_current_transmit_entry->current_transmit_index == 0) {
-        do {
-            radio_current_transmit_entry_index = (radio_current_transmit_entry_index + 1) % radio_transmit_entry_count;
-            radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
-        } while (!radio_current_transmit_entry->enabled);
-    }
-
     radio_reset_transmit_delay_counter();
 }
 
@@ -998,102 +990,112 @@ void radio_handle_data_timer_tick()
 #endif
 }
 
-bool radio_handle_time_sync()
+static bool radio_check_time_sync(radio_transmit_entry *entry, uint32_t time_millis, uint8_t gps_fix)
 {
-    gps_data gps;
-    gps_driver_get_current_gps_data(&gps);
-
-    if (!gps.updated) {
-        return false;
-    }
-
-    uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
-
-    if (time_millis == radio_previous_time_sync_scheduled) {
-        return false;
-    }
-
-    uint32_t time_sync_offset_millis = radio_current_transmit_entry->time_sync_seconds_offset * 1000;
+    uint32_t time_sync_offset_millis = entry->time_sync_seconds_offset * 1000;
 
     if (time_millis < time_sync_offset_millis) {
         return false;
     }
 
-    uint32_t time_sync_millis = radio_current_transmit_entry->time_sync_seconds * 1000;
+    uint32_t time_sync_millis = entry->time_sync_seconds * 1000;
 
     uint32_t time_with_offset_millis = time_millis - time_sync_offset_millis;
     uint32_t time_sync_period_millis = time_with_offset_millis % time_sync_millis;
 
-    bool is_scheduled_time = time_sync_period_millis < RADIO_TIME_SYNC_THRESHOLD_MS;
-
-    //log_debug("Time with offset: %lu, sync period: %lu, scheduled: %d\n", time_with_offset_millis, time_sync_period_millis, is_scheduled_time);
-
-    if (!is_scheduled_time) {
-        log_info("Time: %lu, GPS fix: %d - Waiting for time sync at every %d seconds with offset of %d\n", time_millis,
-                gps.fix,
-                radio_current_transmit_entry->time_sync_seconds,
-                radio_current_transmit_entry->time_sync_seconds_offset);
+    if (time_sync_period_millis >= RADIO_TIME_SYNC_THRESHOLD_MS) {
         return false;
     }
 
-    log_info("Time: %lu, GPS fix: %d, sync period: %lu - Scheduling transmit at %d seconds with offset of %d\n",
-            time_millis, gps.fix,
-            time_sync_period_millis, radio_current_transmit_entry->time_sync_seconds,
-            radio_current_transmit_entry->time_sync_seconds_offset);
-
-    radio_previous_time_sync_scheduled = time_millis;
+    log_info("Time: %lu, fix: %d, sync: %lu - Schedule TX at %ds offset %d\n",
+            time_millis, gps_fix, time_sync_period_millis,
+            entry->time_sync_seconds, entry->time_sync_seconds_offset);
 
     return true;
 }
 
-void radio_handle_main_loop()
+static radio_transmit_entry *radio_find_ready_entry()
 {
-#if RADIO_TX_WAIT_FOR_GPS_LOCK
-    if (!gps_fix_ever_acquired) {
-        gps_data gps;
-        gps_driver_get_current_gps_data(&gps);
-        if (GPS_HAS_FIX(gps)) {
-            gps_fix_ever_acquired = true;
-        } else {
-            return;
+    // Tier 1: current entry mid-repeat sequence
+    if (radio_current_transmit_entry != NULL &&
+        radio_current_transmit_entry->enabled &&
+        radio_current_transmit_entry->current_transmit_index != 0) {
+        return radio_current_transmit_entry;
+    }
+
+    // Tier 2: scan time-synced entries for matching window
+    gps_data gps;
+    gps_driver_get_current_gps_data(&gps);
+
+    if (gps.updated) {
+        uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
+
+        if (time_millis != radio_previous_time_sync_scheduled) {
+            for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
+                radio_transmit_entry *entry = &radio_transmit_schedule[i];
+                if (!entry->enabled || entry->time_sync_seconds == 0) continue;
+
+                if (radio_check_time_sync(entry, time_millis, gps.fix)) {
+                    radio_previous_time_sync_scheduled = time_millis;
+                    return entry;
+                }
+            }
         }
     }
-#endif
 
-    bool time_sync_required = radio_current_transmit_entry->time_sync_seconds > 0;
+    // Tier 3: non-time-synced entries, round-robin, respecting post-TX delay
+    if (radio_post_transmit_delay_counter == 0) {
+        for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
+            uint8_t idx = (radio_next_non_synced_index + i) % radio_transmit_entry_count;
+            radio_transmit_entry *entry = &radio_transmit_schedule[idx];
+            if (!entry->enabled || entry->time_sync_seconds > 0) continue;
 
-    if (time_sync_required && !radio_shared_state.radio_transmission_active &&
+            radio_next_non_synced_index = (idx + 1) % radio_transmit_entry_count;
+            return entry;
+        }
+    }
+
+    return NULL;
+}
+
+void radio_handle_main_loop()
+{
+    if (!radio_shared_state.radio_transmission_active &&
         !radio_shared_state.radio_transmission_finished) {
-        bool schedule_transmit = radio_handle_time_sync();
-        if (!schedule_transmit) {
+
+        radio_transmit_entry *ready = radio_find_ready_entry();
+
+        if (ready != NULL) {
+            #if defined(SEMIHOSTING_ENABLE) && defined(LOGGING_ENABLE)
+            telemetry_collect(&current_telemetry_data);
+            log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
+            log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
+            log_info("Button State: %d\n", current_telemetry_data.button_adc_value);
+            log_info("Time: %02d:%02d:%02d\n",
+                    current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
+                    current_telemetry_data.gps.seconds);
+            log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
+                    current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
+                    current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
+            log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
+                     drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
+            log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
+                    current_telemetry_data.gps.latitude_degrees_10000000 / 10,
+                    current_telemetry_data.gps.longitude_degrees_10000000 / 10,
+                    (current_telemetry_data.gps.altitude_mm / 1000));
+            #endif
+
+            radio_current_transmit_entry = ready;
+            radio_reset_transmit_delay_counter();
+            radio_start_transmit_entry = ready;
+        } else {
             delay_ms(100);
             return;
         }
+    }
 
-        radio_reset_transmit_delay_counter();
-        radio_start_transmit_entry = radio_current_transmit_entry;
-    } else if (!radio_shared_state.radio_transmission_active && radio_post_transmit_delay_counter == 0) {
-        #if defined(SEMIHOSTING_ENABLE) && defined(LOGGING_ENABLE)
-        telemetry_collect(&current_telemetry_data);
-        log_info("Battery: %d mV\n", current_telemetry_data.battery_voltage_millivolts);
-        log_info("Internal temperature: %ld C\n", current_telemetry_data.internal_temperature_celsius_100 / 100);
-        // log_info("Button State: %d\n", current_telemetry_data.button_adc_value);
-        log_info("Time: %02d:%02d:%02d\n",
-                current_telemetry_data.gps.hours, current_telemetry_data.gps.minutes,
-                current_telemetry_data.gps.seconds);
-        log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
-                current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
-                current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
-        // log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
-                //  drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
-        log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
-                current_telemetry_data.gps.latitude_degrees_10000000 / 10,
-                current_telemetry_data.gps.longitude_degrees_10000000 / 10,
-                (current_telemetry_data.gps.altitude_mm / 1000));
-        #endif
-
-        radio_reset_transmit_delay_counter();
-        radio_start_transmit_entry = radio_current_transmit_entry;
+    if (radio_current_transmit_entry == NULL) {
+        return;
     }
 
 #ifdef RS41
@@ -1216,12 +1218,9 @@ void radio_init()
         }
     }
 
-    radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
-
-    while (!radio_current_transmit_entry->enabled) {
-        radio_current_transmit_entry_index = (radio_current_transmit_entry_index + 1) % radio_transmit_entry_count;
-        radio_current_transmit_entry = &radio_transmit_schedule[radio_current_transmit_entry_index];
-    }
+    // radio_current_transmit_entry starts NULL; radio_find_ready_entry() will
+    // select the first ready entry when radio_handle_main_loop() runs.
+    radio_current_transmit_entry = NULL;
 
 #ifdef RS41
     radio_init_si4032();
