@@ -150,6 +150,8 @@ Setting, measured RF output power, relative DC power draw
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
+// NOTE: THIS IS NOT YET RECOMMENDED FOR THE RSM4X4-series PCBs! The u-blox M10050 does not properly enter a power-saving tracking state,
+// so no power savings are realized. The power saving mode requires Beidou B1C constellation to be disabled, so it provides no benefits, only problems.
 // RS41 RSM4x4 notes (u-blox MAX-10 series): https://content.u-blox.com/sites/default/files/MAX-M10S_IntegrationManual_UBX-20053088.pdf section 3.6.2
 #define GPS_POWER_SAVING_ENABLE false
 
@@ -545,8 +547,10 @@ Setting, measured RF output power, relative DC power draw
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-// #define SEMIHOSTING_ENABLE
-// #define LOGGING_ENABLE
+#define SEMIHOSTING_ENABLE
+#define LOGGING_ENABLE
+// GPS logging will affect timing during transmissions -- do not expect to decode Horus or APRS packets if enabled
+// #define GPS_LOGGING_ENABLE
 
 #include "config_internal.h"
 
