@@ -150,6 +150,7 @@ Setting, measured RF output power, relative DC power draw
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
+// RS41 RSM4x4 notes (u-blox MAX-10 series): https://content.u-blox.com/sites/default/files/MAX-M10S_IntegrationManual_UBX-20053088.pdf section 3.6.2
 #define GPS_POWER_SAVING_ENABLE false
 
 // Enable NMEA output from GPS via external serial port.
@@ -524,6 +525,7 @@ Setting, measured RF output power, relative DC power draw
 // GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
 // The UBX-G6010 in the older RS41 radiosondes (PCB revisions 4x1 and 4x2) should support rates up to 5 Hz (200 ms).
 // * Values < 200ms do not seem to work (not accepted by the GPS chip). 1000ms is a good value for most flights.
+// * The RSM4x4 platform does not seem to accept values above 1000
 #define GPS_MEASUREMENT_RATE 1000
 
 // Rate for GPS message updates sent by the GPS chip (default: 1, send message for every measurement done)
