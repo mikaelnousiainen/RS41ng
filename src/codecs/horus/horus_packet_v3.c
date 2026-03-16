@@ -29,7 +29,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     memset(&asnMessage, 0, sizeof(asnMessage));
 
     asnMessage = (horusTelemetry){
-        .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN,
+        .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN HORUS_V3_CALLSIGN_SUFFIX,
         .sequenceNumber = horus_v3_packet_counter, // uint16_t, naturally 0..65535
         .timeOfDaySeconds  = CLAMP(time_of_day, -1, 86400),
         .latitude = CLAMP(lat, -9000000, 9000000),

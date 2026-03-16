@@ -154,8 +154,8 @@ The main features the RS41ng firmware are:
   * Standard 1200-baud and 9600-baud APRS
     * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
   * [Horus 4FSK v2 and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
-    * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
-    * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
+    * There is an option to use continuous transmit mode which helps with receiver frequency synchronization and improves reception.
+    * Horus V2 is deprecated.  In order to use Horus V2 mode on a flight, you will need a  Horus V2  payload ID.  New IDs are no longer being issued.   V3 simply uses your callsign and is encouraged.
   * [CATS - Communication And Telemetry System](https://cats.radio/) packet radio standard, which has a modulation much more efficient than APRS
     * The primary benefit of CATS over APRS and Horus 4FSK is that it allows for fast beacon times (1 Hz or more) without congesting the network.
     * For more details on using CATS, see the CATS website and the notes below.
@@ -198,7 +198,7 @@ On an external Si5351 clock generator connected to the external I²C bus:
 
 #### Notes about Horus 4FSK
 
-* The Horus 4FSK modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki). Horus Binary v1 will soon be removed from RS41ng, but support for Horus Binary v2 and v3 will continue. No additional v2 IDs are being issued, in favor of using Horus Binary v3.
+* The Horus 4FSK modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki). Horus Binary v1 has been removed from RS41ng.  Support for Horus Binary v2 and v3 will continue. However, v2 is deprecated.  No additional v2 IDs are being issued, in favor of using Horus Binary v3.
   
 * There are 3 methods to decode Horus 4FSK modes:
   * Use [webhorus](https://horus.sondehub.org/), SSB audio input or an RTL-SDR, 

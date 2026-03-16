@@ -20,8 +20,8 @@
  * Basic configuration
  */
 
-// Set the tracker amateur radio call sign here
-#define CALLSIGN "4FSKTEST-V3"
+// Set the tracker amateur radio call sign here.  Note, if you want a SSID or SUFFIX, those are added by separate defines below.
+#define CALLSIGN "4FSKTEST"
 
 // Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
 #define RADIO_POST_TRANSMIT_DELAY_MS 500
@@ -253,6 +253,8 @@ Setting, measured RF output power, relative DC power draw
 // NOTE: Every character adds 6 bits to your packet size! Try and limit the callsign to 5-8 characters. 
 // This value is set by the callsign above, but can be overridden here. 
 #define HORUS_V3_PAYLOAD_CALLSIGN CALLSIGN
+// This SUFFIX will appended to HORUS_V3_PAYLOAD_CALLSIGN.  Ex: "-11"
+#define HORUS_V3_CALLSIGN_SUFFIX ""
 #define HORUS_V3_BAUD_RATE_SI4032 100
 #define HORUS_V3_BAUD_RATE_SI4063 100
 #define HORUS_V3_BAUD_RATE_SI5351 50
