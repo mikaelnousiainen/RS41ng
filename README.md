@@ -1,7 +1,10 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-## Quickstart Guide
+RS41ng supports 3 models of Radiosondes.  The Vaisala RS41 4x2 and Graw DFM-17 (both based on the STM32F1 processor), and the Vaisala 4x4 (newer version based on the STM32L4 processor).  
 
+Quickstart instructions follow to flash the firmware.  Below this quickstart you'll find more information about RS41ng.
+
+## Quickstart Guide
 ### RS41 with STM32L4 (new version)
 
 1. Install Docker. Configure a container for the compiler: 
@@ -148,7 +151,7 @@ See the feature list below.
 The main features the RS41ng firmware are:
 
 * Support for multiple transmission modes:
-  * Standard 1200-baud APRS
+  * Standard 1200-baud and 9600-baud APRS
     * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
   * [Horus 4FSK v2 and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
     * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
