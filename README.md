@@ -6,7 +6,7 @@ Quickstart instructions follow to flash the firmware.  Below this quickstart you
 
 ## Quickstart Guide
 
-If you've installed RS41ng before, jump down to the [Flashing the radiosonde with the Firmware](#flashing-the-radiosonde-with-the-firmware) section.
+If you've installed RS41ng before, edit your config.h and jump down to the [Flashing the radiosonde with the Firmware](#flashing-the-radiosonde-with-the-firmware) section.
 
 ## What is RS41ng?
 
