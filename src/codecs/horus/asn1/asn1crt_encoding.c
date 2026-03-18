@@ -762,42 +762,14 @@ flag BitStream_DecodeConstraintWholeNumber(BitStream* pBitStrm, asn1SccSint* v, 
 
 
 
-flag BitStream_DecodeConstraintWholeNumberInt16(BitStream* pBitStrm, int16_t* v, int16_t min, int16_t max)
-{
-    asn1SccSint bv = 0;
-    flag ret;
-    ret = BitStream_DecodeConstraintWholeNumber(pBitStrm, &bv, min, max);
-    *v = (int16_t)bv;
-    return ret;
-}
-
-flag BitStream_DecodeConstraintWholeNumberInt32(BitStream* pBitStrm, int32_t* v, int32_t min, int32_t max)
-{
-    asn1SccSint bv = 0;
-    flag ret;
-    ret = BitStream_DecodeConstraintWholeNumber(pBitStrm, &bv, min, max);
-    *v = (int32_t)bv;
-    return ret;
-}
 
 
-flag BitStream_DecodeConstraintPosWholeNumberUInt8(BitStream* pBitStrm, uint8_t* v, uint8_t min, uint8_t max)
-{
-    asn1SccUint bv = 0;
-    flag ret;
-    ret = BitStream_DecodeConstraintPosWholeNumber(pBitStrm, &bv, min, max);
-    *v = (uint8_t)bv;
-    return ret;
-}
 
-flag BitStream_DecodeConstraintPosWholeNumberUInt16(BitStream* pBitStrm, uint16_t* v, uint16_t min, uint16_t max)
-{
-    asn1SccUint bv = 0;
-    flag ret;
-    ret = BitStream_DecodeConstraintPosWholeNumber(pBitStrm, &bv, min, max);
-    *v = (uint16_t)bv;
-    return ret;
-}
+
+
+
+
+
 
 
 

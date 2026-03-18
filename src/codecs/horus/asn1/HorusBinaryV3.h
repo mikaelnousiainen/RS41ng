@@ -384,6 +384,8 @@ typedef struct {
     byte arr[255];
 } horusTelemetry_customData;
 
+typedef asn1SccUint horusTelemetry_fieldCount;
+
 typedef struct {
     unsigned long extensionMarkerForASN1CC:1;
     unsigned long extraSensors:1;
@@ -397,9 +399,10 @@ typedef struct {
     unsigned long counts:1;
     unsigned long gnssPowerSaveState:1;
     unsigned long customData:1;
+    unsigned long fieldCount:1;
 } horusTelemetry_exist;
 typedef struct {
-    flag extensionMarkerForASN1CC;
+    NullType extensionMarkerForASN1CC;
     horusTelemetry_payloadCallsign payloadCallsign;
     horusTelemetry_sequenceNumber sequenceNumber;
     horusTelemetry_timeOfDaySeconds timeOfDaySeconds;
@@ -417,57 +420,60 @@ typedef struct {
     horusTelemetry_counts counts;
     horusGnssPowerSaveState gnssPowerSaveState;
     horusTelemetry_customData customData;
+    horusTelemetry_fieldCount fieldCount;
 
     horusTelemetry_exist exist;
 
 } horusTelemetry;
 
-#define ERR_TELEMETRY_PAYLOADCALLSIGN		166  /*(FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15))*/
+#define ERR_TELEMETRY_PAYLOADCALLSIGN		165  /*(FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15))*/
 flag horusTelemetry_payloadCallsign_IsConstraintValid(const horusTelemetry_payloadCallsign pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_SEQUENCENUMBER		171  /*(0..65535)*/
+#define ERR_TELEMETRY_SEQUENCENUMBER		170  /*(0..65535)*/
 flag horusTelemetry_sequenceNumber_IsConstraintValid(const horusTelemetry_sequenceNumber* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_TIMEOFDAYSECONDS		176  /*(-1..86400)*/
+#define ERR_TELEMETRY_TIMEOFDAYSECONDS		175  /*(-1..86400)*/
 flag horusTelemetry_timeOfDaySeconds_IsConstraintValid(const horusTelemetry_timeOfDaySeconds* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_LATITUDE		181  /*(-9000000..9000000)*/
+#define ERR_TELEMETRY_LATITUDE		180  /*(-9000000..9000000)*/
 flag horusTelemetry_latitude_IsConstraintValid(const horusTelemetry_latitude* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_LONGITUDE		186  /*(-18000000..18000000)*/
+#define ERR_TELEMETRY_LONGITUDE		185  /*(-18000000..18000000)*/
 flag horusTelemetry_longitude_IsConstraintValid(const horusTelemetry_longitude* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_ALTITUDEMETERS		191  /*(-1000..50000)*/
+#define ERR_TELEMETRY_ALTITUDEMETERS		190  /*(-1000..50000)*/
 flag horusTelemetry_altitudeMeters_IsConstraintValid(const horusTelemetry_altitudeMeters* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		201  /*(0..512)*/
+#define ERR_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		200  /*(0..512)*/
 flag horusTelemetry_velocityHorizontalKilometersPerHour_IsConstraintValid(const horusTelemetry_velocityHorizontalKilometersPerHour* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_GNSSSATELLITESVISIBLE		206  /*(0..31)*/
+#define ERR_TELEMETRY_GNSSSATELLITESVISIBLE		205  /*(0..31)*/
 flag horusTelemetry_gnssSatellitesVisible_IsConstraintValid(const horusTelemetry_gnssSatellitesVisible* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		211  /*(-32767..32767)*/
+#define ERR_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		210  /*(-32767..32767)*/
 flag horusTelemetry_ascentRateCentimetersPerSecond_IsConstraintValid(const horusTelemetry_ascentRateCentimetersPerSecond* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_PRESSUREHPA_X10		216  /*(0..12000)*/
+#define ERR_TELEMETRY_PRESSUREHPA_X10		215  /*(0..12000)*/
 flag horusTelemetry_pressurehPa_x10_IsConstraintValid(const horusTelemetry_pressurehPa_x10* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_HUMIDITYPERCENTAGE		226  /*(0..100)*/
+#define ERR_TELEMETRY_HUMIDITYPERCENTAGE		225  /*(0..100)*/
 flag horusTelemetry_humidityPercentage_IsConstraintValid(const horusTelemetry_humidityPercentage* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_COUNTS		241  /*(SIZE(1..8))*/
-#define ERR_TELEMETRY_COUNTS_ELM		236  /**/
+#define ERR_TELEMETRY_COUNTS		240  /*(SIZE(1..8))*/
+#define ERR_TELEMETRY_COUNTS_ELM		235  /**/
 flag horusTelemetry_counts_IsConstraintValid(const horusTelemetry_counts* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY_CUSTOMDATA		256  /*(SIZE (0..255))*/
+#define ERR_TELEMETRY_CUSTOMDATA		255  /*(SIZE (0..255))*/
 flag horusTelemetry_customData_IsConstraintValid(const horusTelemetry_customData* pVal, int* pErrCode);
 
-#define ERR_TELEMETRY		261  /**/
-#define ERR_TELEMETRY_EXTENSIONMARKERFORASN1CC		161  /**/
-#define ERR_TELEMETRY_EXTRASENSORS		196  /**/
-#define ERR_TELEMETRY_TEMPERATURECELSIUS_X10		221  /**/
-#define ERR_TELEMETRY_MILLIVOLTS		231  /**/
-#define ERR_TELEMETRY_GNSSPOWERSAVESTATE_2		251  /**/
+#define ERR_TELEMETRY_FIELDCOUNT		260  /*(0..127)*/
+flag horusTelemetry_fieldCount_IsConstraintValid(const horusTelemetry_fieldCount* pVal, int* pErrCode);
+
+#define ERR_TELEMETRY		265  /**/
+#define ERR_TELEMETRY_EXTRASENSORS		195  /**/
+#define ERR_TELEMETRY_TEMPERATURECELSIUS_X10		220  /**/
+#define ERR_TELEMETRY_MILLIVOLTS		230  /**/
+#define ERR_TELEMETRY_GNSSPOWERSAVESTATE_2		250  /**/
 flag horusTelemetry_IsConstraintValid(const horusTelemetry* pVal, int* pErrCode);
 
 void horusTelemetry_payloadCallsign_Initialize(horusTelemetry_payloadCallsign pVal);
@@ -483,55 +489,107 @@ void horusTelemetry_pressurehPa_x10_Initialize(horusTelemetry_pressurehPa_x10* p
 void horusTelemetry_humidityPercentage_Initialize(horusTelemetry_humidityPercentage* pVal);
 void horusTelemetry_counts_Initialize(horusTelemetry_counts* pVal);
 void horusTelemetry_customData_Initialize(horusTelemetry_customData* pVal);
+void horusTelemetry_fieldCount_Initialize(horusTelemetry_fieldCount* pVal);
 void horusTelemetry_Initialize(horusTelemetry* pVal);
 
-#define ERR_UPER_ENCODE_TELEMETRY		262  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_EXTENSIONMARKERFORASN1CC		162  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_PAYLOADCALLSIGN		167  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_SEQUENCENUMBER		172  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_TIMEOFDAYSECONDS		177  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_LATITUDE		182  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_LONGITUDE		187  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_ALTITUDEMETERS		192  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_EXTRASENSORS		197  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		202  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_GNSSSATELLITESVISIBLE		207  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		212  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_PRESSUREHPA_X10		217  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_TEMPERATURECELSIUS_X10		222  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_HUMIDITYPERCENTAGE		227  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_MILLIVOLTS		232  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_COUNTS		242  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_COUNTS_ELM		237  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_GNSSPOWERSAVESTATE_2		252  /**/
-#define ERR_UPER_ENCODE_TELEMETRY_CUSTOMDATA		257  /**/
-#define horusTelemetry_REQUIRED_BYTES_FOR_ENCODING       1336
-#define horusTelemetry_REQUIRED_BITS_FOR_ENCODING        10687
+#define ERR_UPER_ENCODE_TELEMETRY		266  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_PAYLOADCALLSIGN		166  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_SEQUENCENUMBER		171  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_TIMEOFDAYSECONDS		176  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_LATITUDE		181  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_LONGITUDE		186  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_ALTITUDEMETERS		191  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_EXTRASENSORS		196  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		201  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_GNSSSATELLITESVISIBLE		206  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		211  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_PRESSUREHPA_X10		216  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_TEMPERATURECELSIUS_X10		221  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_HUMIDITYPERCENTAGE		226  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_MILLIVOLTS		231  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_COUNTS		241  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_COUNTS_ELM		236  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_GNSSPOWERSAVESTATE_2		251  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_CUSTOMDATA		256  /**/
+#define ERR_UPER_ENCODE_TELEMETRY_FIELDCOUNT		261  /**/
+#define horusTelemetry_REQUIRED_BYTES_FOR_ENCODING       1337
+#define horusTelemetry_REQUIRED_BITS_FOR_ENCODING        10693
 
 flag horusTelemetry_Encode(const horusTelemetry* pVal, BitStream* pBitStrm, int* pErrCode, flag bCheckConstraints);
 
-#define ERR_UPER_DECODE_TELEMETRY		263  /**/
-#define ERR_UPER_DECODE_TELEMETRY_EXTENSIONMARKERFORASN1CC		163  /**/
-#define ERR_UPER_DECODE_TELEMETRY_PAYLOADCALLSIGN		168  /**/
-#define ERR_UPER_DECODE_TELEMETRY_SEQUENCENUMBER		173  /**/
-#define ERR_UPER_DECODE_TELEMETRY_TIMEOFDAYSECONDS		178  /**/
-#define ERR_UPER_DECODE_TELEMETRY_LATITUDE		183  /**/
-#define ERR_UPER_DECODE_TELEMETRY_LONGITUDE		188  /**/
-#define ERR_UPER_DECODE_TELEMETRY_ALTITUDEMETERS		193  /**/
-#define ERR_UPER_DECODE_TELEMETRY_EXTRASENSORS		198  /**/
-#define ERR_UPER_DECODE_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		203  /**/
-#define ERR_UPER_DECODE_TELEMETRY_GNSSSATELLITESVISIBLE		208  /**/
-#define ERR_UPER_DECODE_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		213  /**/
-#define ERR_UPER_DECODE_TELEMETRY_PRESSUREHPA_X10		218  /**/
-#define ERR_UPER_DECODE_TELEMETRY_TEMPERATURECELSIUS_X10		223  /**/
-#define ERR_UPER_DECODE_TELEMETRY_HUMIDITYPERCENTAGE		228  /**/
-#define ERR_UPER_DECODE_TELEMETRY_MILLIVOLTS		233  /**/
-#define ERR_UPER_DECODE_TELEMETRY_COUNTS		243  /**/
-#define ERR_UPER_DECODE_TELEMETRY_COUNTS_ELM		238  /**/
-#define ERR_UPER_DECODE_TELEMETRY_GNSSPOWERSAVESTATE_2		253  /**/
-#define ERR_UPER_DECODE_TELEMETRY_CUSTOMDATA		258  /**/
+#define ERR_UPER_DECODE_TELEMETRY		267  /**/
+#define ERR_UPER_DECODE_TELEMETRY_PAYLOADCALLSIGN		167  /**/
+#define ERR_UPER_DECODE_TELEMETRY_SEQUENCENUMBER		172  /**/
+#define ERR_UPER_DECODE_TELEMETRY_TIMEOFDAYSECONDS		177  /**/
+#define ERR_UPER_DECODE_TELEMETRY_LATITUDE		182  /**/
+#define ERR_UPER_DECODE_TELEMETRY_LONGITUDE		187  /**/
+#define ERR_UPER_DECODE_TELEMETRY_ALTITUDEMETERS		192  /**/
+#define ERR_UPER_DECODE_TELEMETRY_EXTRASENSORS		197  /**/
+#define ERR_UPER_DECODE_TELEMETRY_VELOCITYHORIZONTALKILOMETERSPERHOUR		202  /**/
+#define ERR_UPER_DECODE_TELEMETRY_GNSSSATELLITESVISIBLE		207  /**/
+#define ERR_UPER_DECODE_TELEMETRY_ASCENTRATECENTIMETERSPERSECOND		212  /**/
+#define ERR_UPER_DECODE_TELEMETRY_PRESSUREHPA_X10		217  /**/
+#define ERR_UPER_DECODE_TELEMETRY_TEMPERATURECELSIUS_X10		222  /**/
+#define ERR_UPER_DECODE_TELEMETRY_HUMIDITYPERCENTAGE		227  /**/
+#define ERR_UPER_DECODE_TELEMETRY_MILLIVOLTS		232  /**/
+#define ERR_UPER_DECODE_TELEMETRY_COUNTS		242  /**/
+#define ERR_UPER_DECODE_TELEMETRY_COUNTS_ELM		237  /**/
+#define ERR_UPER_DECODE_TELEMETRY_GNSSPOWERSAVESTATE_2		252  /**/
+#define ERR_UPER_DECODE_TELEMETRY_CUSTOMDATA		257  /**/
+#define ERR_UPER_DECODE_TELEMETRY_FIELDCOUNT		262  /**/
 flag horusTelemetry_Decode(horusTelemetry* pVal, BitStream* pBitStrm, int* pErrCode);
+typedef asn1SccSint horusVia;
 
+
+#define ERR_VIA		270  /**/
+flag horusVia_IsConstraintValid(const horusVia* pVal, int* pErrCode);
+
+void horusVia_Initialize(horusVia* pVal);
+
+#define ERR_UPER_ENCODE_VIA		271  /**/
+#define horusVia_REQUIRED_BYTES_FOR_ENCODING       9
+#define horusVia_REQUIRED_BITS_FOR_ENCODING        72
+
+flag horusVia_Encode(const horusVia* pVal, BitStream* pBitStrm, int* pErrCode, flag bCheckConstraints);
+
+#define ERR_UPER_DECODE_VIA		272  /**/
+flag horusVia_Decode(horusVia* pVal, BitStream* pBitStrm, int* pErrCode);
+/*-- horusExtensions --------------------------------------------*/
+typedef struct {
+    unsigned long via:1;
+} horusExtensions_exist;
+typedef struct {
+    horusVia via;
+
+    horusExtensions_exist exist;
+
+} horusExtensions;
+
+#define ERR_EXTENSIONS		285  /**/
+#define ERR_EXTENSIONS_VIA_2		280  /**/
+flag horusExtensions_IsConstraintValid(const horusExtensions* pVal, int* pErrCode);
+
+void horusExtensions_Initialize(horusExtensions* pVal);
+
+#define ERR_UPER_ENCODE_EXTENSIONS		286  /**/
+#define ERR_UPER_ENCODE_EXTENSIONS_VIA_2		281  /**/
+#define horusExtensions_REQUIRED_BYTES_FOR_ENCODING       10
+#define horusExtensions_REQUIRED_BITS_FOR_ENCODING        73
+
+flag horusExtensions_Encode(const horusExtensions* pVal, BitStream* pBitStrm, int* pErrCode, flag bCheckConstraints);
+
+#define ERR_UPER_DECODE_EXTENSIONS		287  /**/
+#define ERR_UPER_DECODE_EXTENSIONS_VIA_2		282  /**/
+flag horusExtensions_Decode(horusExtensions* pVal, BitStream* pBitStrm, int* pErrCode);
+
+extern const horusVia Via_sondehub;
+extern const horusVia Via_nohub;
+extern const horusVia Via_unknown1;
+extern const horusVia Via_unknown2;
+extern const horusVia Via_unknown3;
+extern const horusVia Via_unknown4;
+extern const horusVia Via_unknown5;
+extern const horusVia Via_unknown6;
 
 /* ================= Encoding/Decoding function prototypes =================
  * These functions are placed at the end of the file to make sure all types
