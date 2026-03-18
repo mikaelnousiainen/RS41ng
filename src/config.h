@@ -1,20 +1,8 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-// NOTE: These options may be selected as define flags in the compiler! See the README for more info.
-// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-// #define RS41
-// #define DFM17
-
-// Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
-// #define RS41_RSM4x4
-
-#if !defined(RS41) && !defined(DFM17)
-#error "No hardware type specified. Please define RS41 or DFM17."
-#endif
-#if defined(RS41) && defined(DFM17)
-#error "Please define either RS41 or DFM17."
-#endif
+// Note: these defines for radiosonde type (RS41, DFM17) are no longer used in this config file.  They are defined in your compile
+// command line as noted in the README.md.  Do not set them here.  
 
 /**
  * Basic configuration
@@ -553,6 +541,21 @@ Setting, measured RF output power, relative DC power draw
 #define LOGGING_ENABLE
 // GPS logging will affect timing during transmissions -- do not expect to decode Horus or APRS packets if enabled
 // #define GPS_LOGGING_ENABLE
+
+// NOTE: These options may be selected as define flags in the compiler! See the README for more info.
+// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
+// #define RS41
+// #define DFM17
+
+// Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
+// #define RS41_RSM4x4
+#if !defined(RS41) && !defined(DFM17)
+#error "No hardware type specified. Please define RS41 or DFM17."
+#endif
+#if defined(RS41) && defined(DFM17)
+#error "Please define either RS41 or DFM17."
+#endif
+
 
 #include "config_internal.h"
 
