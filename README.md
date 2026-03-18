@@ -2,8 +2,6 @@
 
 RS41ng supports 3 models of Radiosondes.  The Vaisala RS41 4x2 and Graw DFM-17 (both based on the STM32F1 processor), and the Vaisala 4x4 (newer version based on the STM32L4 processor).  
 
-Quickstart instructions follow to flash the firmware.  Below this quickstart you'll find more information about RS41ng.
-
 ## Quickstart Guide
 
 If you've installed RS41ng before, edit your config.h and jump down to the [Flashing the radiosonde with the Firmware](#flashing-the-radiosonde-with-the-firmware) section.
