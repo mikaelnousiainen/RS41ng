@@ -193,19 +193,25 @@ static void si4603_set_shutdown(bool active)
 
 static void si4063_set_state(uint8_t state)
 {
-    //log_debug("Si4063: Set state %02x\n", state);
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Set state %02x\n", state);
+#endif
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
 void si4063_enable_tx()
 {
-    //log_debug("Si4063: Enable TX\n");
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Enable TX\n");
+#endif
     si4063_set_state(SI4063_STATE_TX);
 }
 
 void si4063_inhibit_tx()
 {
-    //log_debug("Si4063: Inhibit TX\n");
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Inhibit TX\n");
+#endif
     si4063_set_state(SI4063_STATE_READY);
 }
 
@@ -349,7 +355,9 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     uint32_t f_pfd, n, m;
     float ratio, rest;
 
-    //log_debug("Si4063: Set frequency %lu\n", frequency_hz);
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Set frequency %lu\n", frequency_hz);
+#endif
 
     outdiv = si4063_get_outdiv(frequency_hz);
     band = si4063_get_band(frequency_hz);
@@ -426,7 +434,9 @@ void si4063_set_tx_power(uint8_t power)
             power & 0x7F // Power level from 00..7F
     };
 
-    //log_debug("Si4063: Set TX power %02x\n", power);
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Set TX power %02x\n", power);
+#endif
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
@@ -465,7 +475,9 @@ void si4063_set_frequency_deviation(uint32_t deviation_hz)
             deviation & 0xFF
     };
 
+#ifdef RADIO_LOGGING_ENABLE
     log_info("Si4063: Set frequency deviation to value %lu with %lu Hz\n", deviation, deviation_hz);
+#endif
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 
@@ -483,7 +495,9 @@ void si4063_set_modulation_type(si4063_modulation_type type)
             0x08 // 0x08 = Direct modulation source (MCU-controlled)
     };
 
-    //log_debug("Si4063: Set modulation type %d\n", type);
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Si4063: Set modulation type %d\n", type);
+#endif
 
     switch (type) {
         case SI4063_MODULATION_TYPE_CW:

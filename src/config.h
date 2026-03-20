@@ -541,6 +541,8 @@ Setting, measured RF output power, relative DC power draw
 // #define LOGGING_ENABLE
 // GPS logging will affect timing during transmissions -- do not expect to decode Horus or APRS packets if enabled
 // #define GPS_LOGGING_ENABLE
+// Radio logging -- enable additional logging messages related to the transmissions 
+// #define RADIO_LOGGING_ENABLE
 // Transmit the button ADC value (useful for RS41s when debugging power button performance)
 // #define DEBUG_TX_BUTTON_ADC
 

@@ -125,7 +125,9 @@ inline void radio_handle_data_timer_si5351()
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
                 si5351_output_enable(SI5351_CLOCK_CLK0, false);
+                #ifdef RADIO_LOGGING_ENABLE
                 log_info("CW TX finished\n");
+                #endif
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 // system_enable_tick();
@@ -151,7 +153,9 @@ inline void radio_handle_data_timer_si5351()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
+                #ifdef RADIO_LOGGING_ENABLE
                 log_info("Horus TX finished\n");
+                #endif
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 // system_enable_tick();

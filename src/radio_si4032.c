@@ -316,7 +316,9 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
 }
 
 void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *shared_state) {
-    //log_debug("Start FIFO TX\n");
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Start FIFO TX\n");
+#endif
     fsk_encoder_api *fsk_encoder_api = entry->fsk_encoder_api;
     fsk_encoder *fsk_enc = &entry->fsk_encoder;
 
@@ -333,10 +335,12 @@ void radio_handle_fifo_si4032(radio_transmit_entry *entry, radio_module_state *s
 
     int err = si4032_wait_for_tx_complete(500);
     if (err != HAL_OK) {
-        //log_info("Error waiting for tx complete: %d\n", err);
+        log_error("Error waiting for tx complete: %d\n", err);
     }
 
-    //log_debug("Finished FIFO TX\n");
+#ifdef RADIO_LOGGING_ENABLE
+    log_debug("Finished FIFO TX\n");
+#endif
 
     shared_state->radio_transmission_finished = true;
 }
@@ -389,7 +393,9 @@ inline void radio_handle_data_timer_si4032()
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
                 si4032_set_sdi_pin(false);
-                //log_info("CW TX finished\n");
+                #ifdef RADIO_LOGGING_ENABLE
+                log_info("CW TX finished\n");
+                #endif
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 // system_enable_tick();
@@ -409,7 +415,9 @@ inline void radio_handle_data_timer_si4032()
 
             tone_index = fsk_encoder_api->next_tone(fsk_enc);
             if (tone_index < 0) {
-                //log_info("Horus TX finished\n");
+                #ifdef RADIO_LOGGING_ENABLE
+                log_info("Horus TX finished\n");
+                #endif
                 radio_shared_state.radio_interrupt_transmit_active = false;
                 radio_shared_state.radio_transmission_finished = true;
                 // system_enable_tick();

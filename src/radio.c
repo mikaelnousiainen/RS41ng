@@ -669,7 +669,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     log_info("Full payload length: %d\n", radio_current_payload_length);
 
-#if 0 // def SEMIHOSTING_ENABLE && 
+#ifdef SEMIHOSTING_ENABLE && defined(RADIO_LOGGING_ENABLE)
     log_info("Payload: ");
     log_bytes_hex(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n    ");
@@ -1150,7 +1150,7 @@ void radio_handle_main_loop()
         radio_shared_state.radio_transmission_finished = false;
 
         radio_next_transmit_entry();
-#if 0
+#ifdef RADIO_LOGGING_ENABLE
         log_info("TX stop\n");
         log_info("Symbol count (interrupt): %ld\n", radio_shared_state.radio_symbol_count_interrupt);
         log_info("Symbol count (loop): %ld\n", radio_shared_state.radio_symbol_count_loop);
