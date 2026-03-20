@@ -3,14 +3,8 @@
 #ifdef DFM17
 
 #include <stm32f1xx_hal.h>
-#include "system.h"
 #include "clock_calibration.h"
 #include "radio_internal.h"
-#include "log.h"
-
-// Register definition for reading the HSI current trim out of the Calibration Register (CR).
-// Resulting value will be between 0-31.
-#define CURRENT_TRIM    ((RCC->CR & RCC_CR_HSITRIM) >> RCC_CR_HSITRIM_Pos)
 
 /**
  * GPS-disciplined oscillator (GPSDO) for the DFM-17 Si4063.
@@ -20,13 +14,9 @@
  * A 32-bit virtual counter is maintained: (tim4_overflow << 16) | CCR3.
  *
  * Each GPS timepulse captures a timestamp. The delta between consecutive captures
- * (expected: 1,000,000 µs) feeds two control loops:
+ * (expected: 1,000,000 µs) feeds a control loop:
  *
- *   1. HSI trim suggestion (HSITRIM[4:0], 0-31, ~40 kHz/step at 8 MHz, ~10,000 ppm/step
- *      after the ×3 PLL to 24 MHz). Apply via clock_calibration_adjust() from main loop.
- *      Currently commented out in main.c; kept for reference and optional use.
- *
- *   2. Si4063 XO_TUNE GPS PLL (cap_trim_offset, ±CAP_TRIM_OFFSET_MAX steps).
+ *   Si4063 XO_TUNE GPS PLL (cap_trim_offset, ±CAP_TRIM_OFFSET_MAX steps).
  *      A signed offset added to the temperature LUT value in telemetry.c before
  *      calling si4063_set_crystal_capacitance(). Uses a Perturb & Observe (P&O)
  *      algorithm to handle the non-monotonic XO_TUNE frequency response:
@@ -43,14 +33,6 @@
 
 static volatile uint32_t tim4_overflow   = 0;
 static volatile uint32_t last_capture    = 0;
-
-// ---- HSI trim state (legacy, kept for optional use) -------------------------
-
-int trim_suggestion  = 16;
-int trim_current     = 16;
-uint32_t millis_delta = 0;
-uint16_t calibration_change_count = 0;
-bool calibration_indicator_state = true;
 
 // ---- GPS-disciplined Si4063 XO_TUNE state (Perturb & Observe) ---------------
 //
@@ -121,21 +103,6 @@ static void po_apply_step(int8_t direction)
 
 // ---- Public getters ---------------------------------------------------------
 
-uint8_t clock_calibration_get_trim()
-{
-    return CURRENT_TRIM;
-}
-
-uint16_t clock_calibration_get_change_count()
-{
-    return calibration_change_count;
-}
-
-uint32_t clock_calibration_get_millis_delta()
-{
-    return millis_delta;
-}
-
 int clock_calibration_get_cap_trim_offset()
 {
     return cap_trim_offset;
@@ -149,23 +116,6 @@ int32_t clock_calibration_get_us_error()
 uint8_t clock_calibration_get_po_state()
 {
     return (uint8_t)po_state;
-}
-
-// ---- HSI trim application (optional, call from main loop) -------------------
-
-void clock_calibration_adjust()
-{
-    if (trim_suggestion == trim_current) {
-        return;
-    }
-
-    __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(trim_suggestion);
-    trim_current = trim_suggestion;
-
-    calibration_change_count++;
-
-    calibration_indicator_state = !calibration_indicator_state;
-    system_set_yellow_led(calibration_indicator_state);
 }
 
 // ---- TIM4 initialisation ----------------------------------------------------
@@ -217,9 +167,6 @@ void timepulse_init()
     HAL_NVIC_SetPriority(TIM4_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(TIM4_IRQn);
 
-    // Seed trim tracking from current hardware state.
-    trim_current     = CURRENT_TRIM;
-    trim_suggestion  = trim_current;
     cap_trim_offset     = 0;
     last_us_error       = 0;
     po_state            = PO_STARTUP;
@@ -233,8 +180,6 @@ void timepulse_init()
     last_capture        = 0;
     tim4_overflow    = 0;
     last_tx_active      = false;
-
-    system_set_yellow_led(calibration_indicator_state);
 }
 
 // ---- TIM4 ISR ---------------------------------------------------------------
@@ -289,8 +234,6 @@ void TIM4_IRQHandler(void)
             return;
         }
         bad_pulse_count = 0;
-
-        millis_delta = delta_ticks / 1000U;
 
         // ---- Detect TX state transitions ------------------------------------
         // If radio_transmission_active changed since the last timepulse, the
@@ -400,22 +343,6 @@ void TIM4_IRQHandler(void)
                 }
             }
             break;
-        }
-
-        // ---- Legacy HSI trim suggestion (coarser, kept for optional use) ----
-        //
-        // Each HSITRIM step ≈ 40 kHz at 8 MHz HSI → ~10,000 ppm at 24 MHz SYSCLK.
-        // The 1 ms divisor gives limited resolution; the XO_TUNE loop above is
-        // far more sensitive. Uncomment clock_calibration_adjust() in main.c to
-        // apply HSITRIM adjustments.
-
-        int32_t ms_error     = 1000 - (int32_t)millis_delta;
-        int     hsitrim_step = (int)(ms_error / 5);
-        if (hsitrim_step >  1) hsitrim_step =  1;
-        if (hsitrim_step < -1) hsitrim_step = -1;
-        int new_trim = trim_current + hsitrim_step;
-        if (new_trim >= 0 && new_trim <= 31) {
-            trim_suggestion = new_trim;
         }
     }
 }

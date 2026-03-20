@@ -101,9 +101,6 @@ void telemetry_collect(telemetry_data *data)
     }
 
     #ifdef DFM17
-        data->clock_calibration_trim = clock_calibration_get_trim();
-        data->clock_calibration_count = clock_calibration_get_change_count();
-        data->clock_millis_delta = clock_calibration_get_millis_delta();
         data->cap_trim_offset = clock_calibration_get_cap_trim_offset();
         data->timepulse_error_us = clock_calibration_get_us_error();
         data->po_state = clock_calibration_get_po_state();
