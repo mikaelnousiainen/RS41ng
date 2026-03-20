@@ -29,6 +29,8 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     memset(&asnMessage, 0, sizeof(asnMessage));
 
     asnMessage = (horusTelemetry){
+        .extensionMarkerForASN1CC = HORUS_V3_EXTENSIONS,
+        .fieldCount = HORUS_V3_EXTRA_FIELD_COUNT, // extension field count this will be number of extra extension fields -1 (the first one is free)
         .payloadCallsign  = HORUS_V3_PAYLOAD_CALLSIGN HORUS_V3_CALLSIGN_SUFFIX,
         .sequenceNumber = horus_v3_packet_counter, // uint16_t, naturally 0..65535
         .timeOfDaySeconds  = CLAMP(time_of_day, -1, 86400),
@@ -69,7 +71,12 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
             .pressurehPa_x10 = false,
             .temperatureCelsius_x10 = true,
             .humidityPercentage = false,
-            .milliVolts = true
+            .milliVolts = true,
+        #if HORUS_V3_EXTENSIONS
+            .fieldCount = true, 
+            // Note that HorusBinaryV3.c/h have been modified to add this exists field with as optional in horusTelemetry_Encode without causing an additional optional bitflag
+            // This works around asn1scc not supporting extension markers
+        #endif
         },
         .extraSensors = {
           .nCount=0, // this is incremented further down, depending on sensors enabled
@@ -289,6 +296,39 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         return 0;
     } else {
         // Encoding was successful!
+        // Now we try to add extensions if we have any
+
+        #if HORUS_V3_EXTENSIONS 
+        horusExtensions asnExtensions = {
+            #ifdef HORUS_V3_NOHUB
+            .via = Via_nohub, 
+            #endif
+            .exist = {
+                #ifdef HORUS_V3_NOHUB
+                .via = true
+                #endif
+            }
+        };
+
+        if (!horusExtensions_Encode(&asnExtensions,
+                        &encodedMessage,
+                        &errCode,
+                        true) || assert_value != 0)
+        {  
+            // Not at this error helps that much in a flight, but it helps
+            // us when debugging!   
+            if(errCode > 0) {
+                log_error("[error]: HORUS v3 Extension Encoding Failed: %i\n", errCode);
+            }
+            if(assert_value != 0){
+                log_error("[error]: HORUS v3 Extension Assert Failure, maybe hit buffer size limit\n");
+            }
+            // Need to check what happens here.
+            return 0;
+        }
+
+        #endif
+
         // Now we need to figure out the required frame size, and add the CRC.
         int encodedSize = BitStream_GetLength(&encodedMessage);
 
