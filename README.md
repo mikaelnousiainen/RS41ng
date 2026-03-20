@@ -145,6 +145,10 @@ On an external Si5351 clock generator connected to the external I²C bus:
   * Use the [horus-gui](https://github.com/projecthorus/horus-gui) application, 
   * Use [horusdemodlib](https://github.com/projecthorus/horusdemodlib) on a Raspberry Pi with an RTL-SDR
 
+#### Disabling Sondehub Upload
+
+A `via` flag exists in the Horus Binary v3 protocol that requests for a packet to **not** be uploaded to Sondehub. This is useful if RS41ng and Horus Binary v3 are being used for asset tracking at public service events. The latest version of `horusdemodlib` supports this flag. 
+
 #### Notes about CATS
 
 * CATS is a [modern packet radio standard](https://cats.radio/) designed for communication and telemetry. Due to its increased efficiency over APRS, it allows for fast beacon times (1 Hz or more) without congesting the network.

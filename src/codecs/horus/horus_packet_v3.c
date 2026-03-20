@@ -322,11 +322,11 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
 
         #if HORUS_V3_EXTENSIONS 
         horusExtensions asnExtensions = {
-            #ifdef HORUS_V3_NOHUB
+            #if HORUS_V3_NOHUB
             .via = Via_nohub, 
             #endif
             .exist = {
-                #ifdef HORUS_V3_NOHUB
+                #if HORUS_V3_NOHUB
                 .via = true
                 #endif
             }
