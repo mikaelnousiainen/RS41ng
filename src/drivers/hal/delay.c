@@ -16,8 +16,6 @@ volatile bool done;
 
 void delay_init()
 {
-    //HAL_TIM_Base_DeInit(&htim1);
-
     __HAL_RCC_TIM1_CLK_ENABLE();
 
     // The data timer assumes a 24 MHz clock source
@@ -37,7 +35,6 @@ void delay_init()
 
 void delay_us(uint16_t us)
 {
-    // delay_us_loop(us);
     __HAL_TIM_SET_COUNTER(&htim1, 0);
     __HAL_TIM_SET_AUTORELOAD(&htim1, us);
     __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
