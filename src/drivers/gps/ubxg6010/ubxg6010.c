@@ -12,7 +12,7 @@
 
 #ifdef RS41_RSM4x4
 #define GPS_INITIAL_BAUD_RATE 38400
-#else // DMF or RSM4x2
+#else // DFM or RSM4x2
 #define GPS_INITIAL_BAUD_RATE 9600
 #endif // initial GPS baud rate
 
