@@ -7,7 +7,8 @@ MEMORY
 }
 
 _eram = 0x20000000 + 0x00002000;
-__HeapSize = 0x000;
+/* No heap for RS41ng, thus no dynamic memory allocations. Use static allocations if needed. */
+__HeapSize = 0x000; 
 SECTIONS
 {
     .text :

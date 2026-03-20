@@ -157,7 +157,7 @@ On an external Si5351 clock generator connected to the external I²C bus:
 
 ### Fox Mode
 
-RS41ng supports **Fox Mode**, whcih allows RS41ng to be used as a hidden transmitter. Fox Mode a simple mode that will disable the GPS and enable other power saving features.
+RS41ng supports **Fox Mode**, which allows RS41ng to be used as a hidden transmitter. Fox Mode a simple mode that will disable the GPS and enable other power saving features.
 
 Fox Mode should **not** be enabled on any radiosonde that is intended to fly, as there will be no position data collected by the GPS.
 
@@ -583,6 +583,8 @@ otherwise the firmware will not run.**
 
 To load debugging symbols for settings breakpoints and to perform more detailed inspection,
 use command `file src/RS41ng.elf`.
+
+NOTE: To save RAM, the heap size has been zeroed out. Dynamic memory allocations (`malloc`, etc.) will not function. Use static or stack-based allocation if needed. 
 
 ## Si4032 Bell FSK modulation hack for APRS
 
