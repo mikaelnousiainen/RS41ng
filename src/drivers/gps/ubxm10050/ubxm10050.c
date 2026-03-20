@@ -415,6 +415,12 @@ static bool ubxm10050_valset_u2(uint8_t layers, uint32_t key, uint16_t val)
 
 /* -------------------------------------------------------------------------
  * CFG-VALDEL: delete keys from BBR/Flash, reverting them to ROM defaults.
+ *
+ * This function is disabled because the RS41 RSM4x4-series uses a GPS without
+ * onboard flash memory. Resetting can be achieved by power cycling the unit.
+ * 
+ * This function is kept for reference purposes. 
+ * 
  * Payload: [version:1][layers:1][reserved:2][key0:4]...[keyN:4]
  * ------------------------------------------------------------------------- */
 
