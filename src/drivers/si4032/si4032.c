@@ -136,7 +136,7 @@ int si4032_wait_for_tx_complete(int timeout_ms)
     // clear txon manually
     si4032_write(0x07, 0x00);
 
-    return HAL_ERROR_TIMEOUT;
+    return HAL_TIMEOUT;
 }
 
 void si4032_use_direct_mode(bool use)

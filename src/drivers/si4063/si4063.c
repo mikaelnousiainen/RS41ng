@@ -293,7 +293,7 @@ int si4063_wait_for_tx_complete(int timeout_ms)
     si4063_disable_tx();
     si4063_wait_for_cts();
 
-    return HAL_ERROR_TIMEOUT;
+    return HAL_TIMEOUT;
 }
 
 static int si4063_get_outdiv(const uint32_t frequency_hz)
