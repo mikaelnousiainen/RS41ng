@@ -32,16 +32,6 @@ static volatile uint32_t systick_counter = 0;
 DMA_HandleTypeDef hdma_adc1;
 ADC_HandleTypeDef hadc1;
 
-// Removed with LL conversion.  This is not defined in any of our compiles, so this code would never trigger anyway.
-//static void nvic_init()
-//{
-//#ifdef  VECT_TAB_RAM
-    //SCB->VTOR = SRAM_BASE;
-//#else  // VECT_TAB_FLASH
-    //SCB->VTOR = FLASH_BASE;
-//#endif
-//}
-
 // TODO: Find out how to configure watchdog!
 
 static void rcc_init()
@@ -52,7 +42,6 @@ static void rcc_init()
 
 #ifdef RS41
 #ifdef RS41_RSM4x4
-    //log_info("PWREx\n");
     if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
         while(1);
     }
@@ -68,7 +57,6 @@ static void rcc_init()
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Do not configure PLL now
 
-    //log_info("OscC\n");
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         while(1);
     }
@@ -170,7 +158,6 @@ static void gpio_init()
     gpio_init.Mode = GPIO_MODE_ANALOG;
 #else // Must be DFM17
     gpio_init.Mode = GPIO_MODE_INPUT;
-    //gpio_init.Pull = GPIO_PULLDOWN;
 #endif //RS41
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_BUTTON, &gpio_init);
@@ -219,8 +206,6 @@ static void dma_adc_init()
 
     __HAL_RCC_DMA1_CLK_ENABLE();
 
-    // HAL_DMA_DeInit(&hdma_adc1);
-
     hdma_adc1.Instance = DMA1_Channel1;
 #ifdef RS41_RSM4x4
     hdma_adc1.Init.Request = DMA_REQUEST_0;  // L4 requires DMA request source
@@ -230,15 +215,8 @@ static void dma_adc_init()
     hdma_adc1.Init.MemInc  = DMA_MINC_ENABLE;
     hdma_adc1.Init.PeriphDataAlignment  = DMA_PDATAALIGN_HALFWORD;
     hdma_adc1.Init.MemDataAlignment  = DMA_MDATAALIGN_HALFWORD;
-    hdma_adc1.Init.Mode = DMA_CIRCULAR;			// Normal or Circular??
+    hdma_adc1.Init.Mode = DMA_CIRCULAR;
     hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
-
-// #ifdef RS41
-//     hdma_adc1.Init.BufferSize = 2;
-// #endif
-// #ifdef DFM17
-//     dma_init.DMA_BufferSize = 1;
-// #endif
 
     hang_if_bad("HAL_DMA_Init",
                 HAL_DMA_Init(&hdma_adc1)
@@ -337,11 +315,6 @@ static void dma_adc_init()
                 HAL_ADC_Start_DMA(&hadc1, (uint32_t *) dma_buffer_adc, 2) 
                );
 #endif
-    //HAL_NVIC_SetPriority(ADC1_IRQn, 1, 0);
-    //HAL_NVIC_EnableIRQ(ADC1_IRQn);
-    //HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-    //HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
 }
 
 uint16_t system_get_battery_voltage_millivolts()
@@ -457,8 +430,6 @@ void system_scheduler_timer_init()
     // TIM_CLK =
     // TIM_PSC = Prescaler
     // TIM_ARR = Period
-
-    // HAL_TIM_Base_DeInit(&htim6);
 
 #ifdef RS41_RSM4x4
     __HAL_RCC_TIM6_CLK_ENABLE();  // L4 style
