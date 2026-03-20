@@ -229,15 +229,15 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
-#if 0
+#ifdef DEBUG_TX_BUTTON_ADC
     // Unit: raw ADC
     if (asnMessage.extraSensors.nCount < 4) {
         asnMessage.exist.extraSensors = true;
         horusAdditionalSensorType button_adc_struct = {
-            .name = "button",
+            .name = "adcbutton",
             .exist = {
                 .name = 1,
-                .values = 1
+                .values = 2
             },
             .values = {
                 .kind = horusInt_PRESENT,

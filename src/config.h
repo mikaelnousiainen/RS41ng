@@ -537,18 +537,19 @@ Setting, measured RF output power, relative DC power draw
 // Enable semihosting to receive debug logs during development
 // See the README for details on how to set up debugging and debug logs with GDB
 // NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-#define SEMIHOSTING_ENABLE
-#define LOGGING_ENABLE
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
 // GPS logging will affect timing during transmissions -- do not expect to decode Horus or APRS packets if enabled
 // #define GPS_LOGGING_ENABLE
+// Transmit the button ADC value (useful for RS41s when debugging power button performance)
+// #define DEBUG_TX_BUTTON_ADC
 
-// NOTE: These options may be selected as define flags in the compiler! See the README for more info.
+// NOTE: These options may be selected as define flags in the compiler! See the README for more info. Use these to keep your IDE happy when developing. 
 // Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
 // #define RS41
 // #define DFM17
+// #define RS41_RSM4x4 // Uncomment for RS41 RSM4x4/4x5 PCBs (newer, STM32L412-series)
 
-// Define RS41 PCB type -- RSM4x2 (older generation, STM32F100-series) or RSM4x4 (newer, STM32L412-series)
-// #define RS41_RSM4x4
 #if !defined(RS41) && !defined(DFM17)
 #error "No hardware type specified. Please define RS41 or DFM17."
 #endif
