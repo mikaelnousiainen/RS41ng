@@ -50,6 +50,8 @@ fsk_tone bell103_tones[] = {
 
 void bell_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate, uint16_t flag_field_count, fsk_tone *tones)
 {
+    // Static singleton: only one bell encoder may exist at a time.
+    // This avoids needing any heap allocation. 
     static bell_encoder bell_instance;
     memset(&bell_instance, 0, sizeof(bell_encoder));
     encoder->priv = &bell_instance;
