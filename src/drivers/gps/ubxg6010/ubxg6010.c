@@ -714,14 +714,18 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
 
     if (cksum.ck_a != checksum->ck_a || cksum.ck_b != checksum->ck_b) {
         ubxg6010_current_gps_data.bad_packets += 1;
-        // log_info("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
-        //          ubxg6010_current_gps_data.bad_packets,
-        //          pkt->header.messageClass, pkt->header.messageId,
-        //          pkt->header.payloadSize);
+#ifdef GPS_LOGGING_ENABLE 
+        log_info("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
+                 ubxg6010_current_gps_data.bad_packets,
+                 pkt->header.messageClass, pkt->header.messageId,
+                 pkt->header.payloadSize);
+#endif
         return;
     }
 
-    // log_info("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
+#ifdef GPS_LOGGING_ENABLE 
+    log_info("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
+#endif
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
         // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this
