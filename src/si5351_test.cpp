@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "hal/delay.h"
+#include "drivers/hal/delay.h"
 #include "drivers/si5351/si5351.h"
 #include "si5351_test.h"
 

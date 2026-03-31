@@ -7,18 +7,23 @@
  */
 
 #include <string>
-#include <cstdlib>
+#include <cstring>
 #include "JTEncode.h"
 #include "rs_common.h"
 
+// Static allocations for RS codec initialized with symsize=6, nroots=51
+// nn = (1<<6)-1 = 63
+#define RS_NN 63
+#define RS_NROOTS 51
+
+static struct rs rs_instance;
+static data_t rs_alpha_to[RS_NN + 1];
+static data_t rs_index_of[RS_NN + 1];
+static data_t rs_genpoly[RS_NROOTS + 1];
+
 void JTEncode::free_rs_int(void * p)
 {
-  struct rs *rs = (struct rs *)p;
-
-  free(rs->alpha_to);
-  free(rs->index_of);
-  free(rs->genpoly);
-  free(rs);
+  // Static allocations, nothing to free
 }
 
 void * JTEncode::init_rs_int(int symsize, int gfpoly, int fcr, int prim,
@@ -43,24 +48,20 @@ void * JTEncode::init_rs_int(int symsize, int gfpoly, int fcr, int prim,
   if(pad < 0 || pad >= ((1<<symsize) -1 - nroots))
     goto done; /* Too much padding */
 
-  rs = (struct rs *)calloc(1,sizeof(struct rs));
-  if(rs == ((struct rs *)0))
-    goto done;
+  rs = &rs_instance;
+  memset(rs, 0, sizeof(struct rs));
 
   rs->mm = symsize;
   rs->nn = (1<<symsize)-1;
   rs->pad = pad;
 
-  rs->alpha_to = (data_t *)malloc(sizeof(data_t)*(rs->nn+1));
+  rs->alpha_to = rs_alpha_to;
   if(rs->alpha_to == NULL){
-    free(rs);
     rs = ((struct rs *)0);
     goto done;
   }
-  rs->index_of = (data_t *)malloc(sizeof(data_t)*(rs->nn+1));
+  rs->index_of = rs_index_of;
   if(rs->index_of == NULL){
-    free(rs->alpha_to);
-    free(rs);
     rs = ((struct rs *)0);
     goto done;
   }
@@ -79,19 +80,13 @@ void * JTEncode::init_rs_int(int symsize, int gfpoly, int fcr, int prim,
   }
   if(sr != 1){
     /* field generator polynomial is not primitive! */
-    free(rs->alpha_to);
-    free(rs->index_of);
-    free(rs);
     rs = ((struct rs *)0);
     goto done;
   }
 
   /* Form RS code generator polynomial from its roots */
-  rs->genpoly = (data_t *)malloc(sizeof(data_t)*(nroots+1));
+  rs->genpoly = rs_genpoly;
   if(rs->genpoly == NULL){
-    free(rs->alpha_to);
-    free(rs->index_of);
-    free(rs);
     rs = ((struct rs *)0);
     goto done;
   }

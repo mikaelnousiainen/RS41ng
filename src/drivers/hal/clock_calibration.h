@@ -1,0 +1,23 @@
+#ifndef __CLOCK_CALIBRATION_H
+#define __CLOCK_CALIBRATION_H
+
+#include "config.h"
+
+#ifdef DFM17
+
+extern void timepulse_init();
+
+// Returns the GPS-disciplined Si4063 XO_TUNE offset (signed, ±CAP_TRIM_OFFSET_MAX steps).
+// Add this to the temperature LUT value before calling si4063_set_crystal_capacitance().
+extern int clock_calibration_get_cap_trim_offset();
+
+// Returns the last measured timepulse error in µs (delta_ticks - 1,000,000).
+// Nominally 0 when locked; sign shows frequency direction.
+extern int32_t clock_calibration_get_us_error();
+
+// Returns P&O state: 0=STARTUP, 1=SETTLING, 2=OBSERVING, 3=LOCKED.
+extern uint8_t clock_calibration_get_po_state();
+
+#endif
+
+#endif

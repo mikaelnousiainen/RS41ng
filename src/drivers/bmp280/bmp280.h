@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "hal/i2c.h"
+#include "drivers/hal/i2c.h"
 
 /**
  * BMP280 or BME280 address is 0x77 if SDO pin is high, and is 0x76 if

@@ -1,8 +1,13 @@
-#include <stm32f10x_gpio.h>
+#include "drivers/hal/spi.h"
+#include "drivers/hal/hal.h"
+#include "drivers/hal/delay.h"
+#ifndef RS41_RSM4x4
+    #include <stm32f1xx_hal.h>
+#else
+    #include <stm32l4xx_hal.h>
+#endif
 
-#include "hal/spi.h"
-#include "hal/hal.h"
-#include "hal/delay.h"
+#include "gpio.h"
 #include "si4032.h"
 #include "log.h"
 
@@ -11,20 +16,14 @@
 #define SI4032_CLOCK 26.0f
 #define EXPECTED_SI4032_CLOCK 30
 
-#define GPIO_SI4032_NSEL GPIOC
-#define GPIO_PIN_SI4032_NSEL GPIO_Pin_13
-
-#define GPIO_SI4032_SDI GPIOB
-#define GPIO_PIN_SI4032_SDI GPIO_Pin_15
-
 static inline uint8_t si4032_write(uint8_t reg, uint8_t value)
 {
-    return spi_send_and_receive(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, ((reg | SPI_WRITE_FLAG) << 8U) | value);
+    return spi_send_and_receive(BANK_NSEL, PIN_NSEL, ((reg | SPI_WRITE_FLAG) << 8U) | value);
 }
 
 static inline uint8_t si4032_read(uint8_t reg)
 {
-    return spi_send_and_receive(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL, (reg << 8U) | 0xFFU);
+    return spi_send_and_receive(BANK_NSEL, PIN_NSEL, (reg << 8U) | 0xFFU);
 }
 
 void si4032_soft_reset()
@@ -35,18 +34,18 @@ void si4032_soft_reset()
 void si4032_enable_tx()
 {
     // Modified to set the PLL and Crystal enable bits to high. Not sure if this makes much difference.
-    si4032_write(0x07, 0x4B);
+    si4032_write(0x07, 0x0B);
 }
 
 void si4032_inhibit_tx()
 {
     // Sleep mode, but with PLL idle mode enabled, in an attempt to reduce drift on key-up.
-    si4032_write(0x07, 0x43);
+    si4032_write(0x07, 0x03);
 }
 
 void si4032_disable_tx()
 {
-    si4032_write(0x07, 0x40);
+    si4032_write(0x07, 0x00);
 }
 
 // Returns number of bytes sent from *data
@@ -135,18 +134,14 @@ int si4032_wait_for_tx_complete(int timeout_ms)
     }
 
     // clear txon manually
-    si4032_write(0x07, 0x40);
+    si4032_write(0x07, 0x00);
 
-    return HAL_ERROR_TIMEOUT;
+    return HAL_TIMEOUT;
 }
 
 void si4032_use_direct_mode(bool use)
 {
-    if (use) {
-        GPIO_SetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
-    } else {
-        GPIO_ResetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
-    }
+    HAL_GPIO_WritePin(BANK_NSEL, PIN_NSEL, use ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
 void si4032_set_tx_frequency(const float frequency_mhz)
@@ -157,6 +152,9 @@ void si4032_set_tx_frequency(const float frequency_mhz)
                             (1 + hbsel));
     uint8_t gen_div = 3;  // constant - not possible to change!
     uint16_t fc = (uint16_t) (((frequency_mhz / ((SI4032_CLOCK / gen_div) * (hbsel + 1))) - fb - 24) * 64000);
+#ifdef RADIO_LOGGING_ENABLE
+    log_info("Setting tx frequency to %ld\n", (uint32_t) (1000000 * frequency_mhz));
+#endif
     si4032_write(0x75, (uint8_t) (0b01000000 | (fb & 0b11111) | ((hbsel & 0b1) << 5)));
     si4032_write(0x76, (uint8_t) (((uint16_t) fc >> 8U) & 0xffU));
     si4032_write(0x77, (uint8_t) ((uint16_t) fc & 0xff));
@@ -166,8 +164,10 @@ void si4032_set_data_rate(const uint32_t rate_bps)
 {
     uint32_t rate = (uint64_t) rate_bps * (1 << 21) * EXPECTED_SI4032_CLOCK / 1000000 / SI4032_CLOCK;
 
+#ifdef RADIO_LOGGING_ENABLE
     log_info("Rate BPS:   %lu\n", rate_bps);
     log_info("Rate (raw): %lu\n", rate);
+#endif
 
     si4032_write(0x6E, rate >> 8);
     si4032_write(0x6F, rate & 0xFF);
@@ -242,6 +242,10 @@ int32_t si4032_read_temperature_celsius_100()
     // Read temperature value—Read contents of "Register 11h. ADC Value"
     int32_t raw_value = (int32_t) si4032_read(0x11);
 
+#ifdef RADIO_LOGGING_ENABLE
+    log_info("Raw temp: %li\n", raw_value);
+#endif
+
     int32_t temperature = (int32_t) (-6400 + (raw_value * 100 * 500 / 1000));
 
     return temperature;
@@ -249,32 +253,28 @@ int32_t si4032_read_temperature_celsius_100()
 
 static void si4032_set_nsel_pin(bool high)
 {
-    if (high) {
-        GPIO_SetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
-    } else {
-        GPIO_ResetBits(GPIO_SI4032_NSEL, GPIO_PIN_SI4032_NSEL);
-    }
+    HAL_GPIO_WritePin(BANK_NSEL, PIN_NSEL, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_set_sdi_pin(bool high)
 {
-    if (high) {
-        GPIO_SetBits(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI);
-    } else {
-        GPIO_ResetBits(GPIO_SI4032_SDI, GPIO_PIN_SI4032_SDI);
-    }
+    HAL_GPIO_WritePin(BANK_MOSI, PIN_MOSI, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void si4032_use_sdi_pin(bool use)
 {
-    GPIO_InitTypeDef gpio_init;
-
     si4032_set_nsel_pin(true);
 
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4032_SDI;
-    gpio_init.GPIO_Mode = use ? GPIO_Mode_Out_PP : GPIO_Mode_AF_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4032_SDI, &gpio_init);
+    GPIO_InitTypeDef gpio_init;
+    gpio_init.Pin = PIN_MOSI;
+    gpio_init.Mode = use ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_AF_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+#ifdef RS41_RSM4x4
+    if (!use) {  // Using the alternate function
+       gpio_init.Alternate = GPIO_AF14_TIM15;
+    }
+#endif // RSM4x4
+    HAL_GPIO_Init(BANK_MOSI, &gpio_init);
 
     si4032_set_sdi_pin(false);
 }
@@ -284,14 +284,18 @@ void si4032_init()
     GPIO_InitTypeDef gpio_init;
 
     // Si4032 chip select pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4032_NSEL;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4032_NSEL, &gpio_init);
+    gpio_init.Pin = PIN_NSEL;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_NSEL, &gpio_init);
 
     si4032_set_nsel_pin(true);
 
     si4032_soft_reset();
+
+    __attribute__((unused)) uint8_t version = si4032_read(0x01);
+    log_info("Si4032 version: %u\n", version);
+
     si4032_set_tx_power(0);
 
     // Temperature Value Offset
@@ -301,6 +305,9 @@ void si4032_init()
 
     // ADC configuration
     si4032_write(0x0f, 0x80);
+
+    // Disable onboard reference heater (drive GPIO_1 low)
+    si4032_write(0x0C, 0b11111);
 
     si4032_set_frequency_offset(0);
     si4032_set_frequency_deviation(5); // Was: 5 for APRS in RS41HUP?

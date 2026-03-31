@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -119,8 +118,9 @@ typedef struct _morse_encoder {
 
 void morse_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate)
 {
-    encoder->priv = malloc(sizeof(morse_encoder));
-    memset(encoder->priv, 0, sizeof(morse_encoder));
+    static morse_encoder morse_instance;
+    memset(&morse_instance, 0, sizeof(morse_encoder));
+    encoder->priv = &morse_instance;
 
     morse_encoder *morse = (morse_encoder *) encoder->priv;
     morse->symbol_rate = symbol_rate;
@@ -133,10 +133,7 @@ void morse_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate)
 
 void morse_encoder_destroy(fsk_encoder *encoder)
 {
-    if (encoder->priv != NULL) {
-        free(encoder->priv);
-        encoder->priv = NULL;
-    }
+    encoder->priv = NULL;
 }
 
 void morse_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8_t *data)

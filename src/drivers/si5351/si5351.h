@@ -29,7 +29,7 @@
 #ifndef SI5351_H_
 #define SI5351_H_
 
-#include "hal/i2c.h"
+#include "drivers/hal/i2c.h"
 
 /* Define definitions */
 

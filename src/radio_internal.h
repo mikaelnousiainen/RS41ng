@@ -18,8 +18,8 @@ typedef enum _radio_data_mode {
     RADIO_DATA_MODE_PIP,
     RADIO_DATA_MODE_RTTY,
     RADIO_DATA_MODE_APRS_1200,
-    RADIO_DATA_MODE_HORUS_V1,
     RADIO_DATA_MODE_HORUS_V2,
+    RADIO_DATA_MODE_HORUS_V3,
     RADIO_DATA_MODE_WSPR,
     RADIO_DATA_MODE_FT8,
     RADIO_DATA_MODE_JT65,
@@ -30,6 +30,8 @@ typedef enum _radio_data_mode {
     RADIO_DATA_MODE_FSQ_4_5,
     RADIO_DATA_MODE_FSQ_6,
     RADIO_DATA_MODE_CATS,
+    RADIO_DATA_MODE_APRS_9600,
+    RADIO_DATA_MODE_LONG_TONE
 } radio_data_mode;
 
 typedef struct _radio_transmit_entry {

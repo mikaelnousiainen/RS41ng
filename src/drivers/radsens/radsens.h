@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "hal/i2c.h"
+#include "drivers/hal/i2c.h"
 
 #define RS_REG_COUNT 21
 

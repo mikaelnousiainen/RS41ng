@@ -71,15 +71,10 @@ static char uw[] = {'$', '$'};
 /* Function Prototypes ------------------------------------------------*/
 
 int32_t get_syndrome(int32_t pattern);
-
 void golay23_init(void);
-
 int golay23_decode(int received_codeword);
-
 unsigned short gen_crc16(unsigned char *data_p, unsigned char length);
-
 void interleave(unsigned char *inout, int nbytes, int dir);
-
 void scramble(unsigned char *inout, int nbytes);
 
 /* Functions ----------------------------------------------------------*/
@@ -98,7 +93,7 @@ int horus_l2_get_num_tx_data_bytes(int num_payload_data_bytes)
 {
     int num_payload_data_bits, num_golay_codewords;
     int num_tx_data_bits, num_tx_data_bytes;
-
+    
     num_payload_data_bits = num_payload_data_bytes * 8;
     num_golay_codewords = num_payload_data_bits / 12;
     if (num_payload_data_bits % 12) /* round up to 12 bits, may mean some unused bits */
@@ -108,7 +103,7 @@ int horus_l2_get_num_tx_data_bytes(int num_payload_data_bytes)
     num_tx_data_bytes = num_tx_data_bits / 8;
     if (num_tx_data_bits % 8) /* round up to nearest byte, may mean some unused bits */
         num_tx_data_bytes++;
-
+    
     #ifdef DEBUG0
     fprintf(stderr, "\nnum_payload_data_bytes: %d\n", num_payload_data_bytes);
     fprintf(stderr, "num_golay_codewords...: %d\n", num_golay_codewords);
@@ -133,7 +128,7 @@ int horus_l2_get_num_tx_data_bytes(int num_payload_data_bytes)
  */
 
 int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
-        unsigned char *input_payload_data,
+                              unsigned char *input_payload_data,
         int num_payload_data_bytes)
 {
     int num_tx_data_bytes, num_payload_data_bits;
@@ -167,7 +162,7 @@ int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
         shift = 7 - (ninbit % 8);
         inbit = (input_payload_data[ninbyte] >> shift) & 0x1;
         #ifdef DEBUG1
-        fprintf(stderr, "inbit %d ninbyte: %d inbyte: 0x%02x inbit: %d\n",
+        fprintf(stderr, "inbit %d ninbyte: %d inbyte: 0x%02x inbit: %d\n", 
                 ninbit, ninbyte, input_payload_data[ninbyte], inbit);
         #endif
         ninbit++;
@@ -198,12 +193,12 @@ int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
                 golayparitybit = (golayparity >> (10 - i)) & 0x1;
                 paritybyte = paritybyte | golayparitybit;
                 #ifdef DEBUG0
-                fprintf(stderr, "    i: %d golayparitybit: %d paritybyte: 0x%02x\n",
+                fprintf(stderr, "    i: %d golayparitybit: %d paritybyte: 0x%02x\n", 
                         i, golayparitybit, paritybyte);
                 #endif
                 nparitybits++;
                 if (nparitybits % 8) {
-                    paritybyte <<= 1;
+                   paritybyte <<= 1;
                 } else {
                     /* OK we have a full byte ready */
                     *pout = paritybyte;
@@ -238,7 +233,7 @@ int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
             golayparitybit = (golayparity >> (10 - i)) & 0x1;
             paritybyte = paritybyte | golayparitybit;
             #ifdef DEBUG1
-            fprintf(stderr, "    i: %d golayparitybit: %d paritybyte: 0x%02x\n",
+            fprintf(stderr, "    i: %d golayparitybit: %d paritybyte: 0x%02x\n", 
                     i, golayparitybit, paritybyte);
             #endif
             nparitybits++;
@@ -254,7 +249,7 @@ int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
             }
         }
     }
-
+ 
     /* and final, partially complete, parity byte */
 
     if (nparitybits % 8) {
@@ -265,10 +260,10 @@ int horus_l2_encode_tx_packet(unsigned char *output_tx_data,
         #endif
     }
 
-            #ifdef DEBUG0
-        fprintf(stderr, "\npout - output_tx_data: %ld num_tx_data_bytes: %d\n",
+    #ifdef DEBUG0
+    fprintf(stderr, "\npout - output_tx_data: %ld num_tx_data_bytes: %d\n",
             pout - output_tx_data, num_tx_data_bytes);
-            #endif
+    #endif
     assert(pout == (output_tx_data + num_tx_data_bytes));
 
     /* optional interleaver - we dont interleave UW */
@@ -302,13 +297,13 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
 
     /* optional scrambler and interleaver - we dont interleave UW */
 
-#ifdef SCRAMBLER
+    #ifdef SCRAMBLER
     scramble(&input_rx_data[sizeof(uw)], num_tx_data_bytes-2);
-#endif
+    #endif
 
-#ifdef INTERLEAVER
+    #ifdef INTERLEAVER
     interleave(&input_rx_data[sizeof(uw)], num_tx_data_bytes-2, 1);
-#endif
+    #endif
 
     pin = input_rx_data + sizeof(uw) + num_payload_data_bytes;
 
@@ -321,9 +316,9 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
     ningolay = 0;
     nparitybits = 0;
     paritybyte = *pin++;
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr,"  Read paritybyte: 0x%02x\n", paritybyte);
-#endif
+    #endif
     pout = output_payload_data;
     noutbits = 0;
     outbyte = 0;
@@ -335,10 +330,10 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
         ninbyte = ninbit/8 + sizeof(uw);
         shift = 7 - (ninbit % 8);
         inbit = (input_rx_data[ninbyte] >> shift) & 0x1;
-#ifdef DEBUG1
-        fprintf(stderr, "inbit %d ninbyte: %d inbyte: 0x%02x inbit: %d\n",
+        #ifdef DEBUG1
+        fprintf(stderr, "inbit %d ninbyte: %d inbyte: 0x%02x inbit: %d\n", 
                 ninbit, ninbyte, input_rx_data[ninbyte], inbit);
-#endif
+        #endif
         ninbit++;
 
         /* build up golay codeword */
@@ -350,9 +345,9 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
         /* when we get 12 data bits start reading parity bits */
 
         if ((ningolay % 12) == 0) {
-#ifdef DEBUG0
+            #ifdef DEBUG0
             fprintf(stderr, "  ningolay: %d ingolay: 0x%04x\n", ningolay, ingolay>>1);
-#endif
+            #endif
             for (i=0; i<11; i++) {
                 shift = 7 - (nparitybits % 8);
                 golayparitybit = (paritybyte >> shift) & 0x1;
@@ -363,25 +358,25 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
                 if ((nparitybits % 8) == 0) {
                     /* OK grab a new byte */
                     paritybyte = *pin++;
-#ifdef DEBUG0
+                    #ifdef DEBUG0
                     fprintf(stderr,"  Read paritybyte: 0x%02x\n", paritybyte);
-#endif
+                    #endif
                 }
             }
 
-#ifdef DEBUG0
+            #ifdef DEBUG0
             fprintf(stderr, "  golay code word: 0x%04x\n", ingolay);
             fprintf(stderr, "  golay decode...: 0x%04x\n", golay23_decode(ingolay));
-#endif
-
+            #endif
+           
             /* write decoded/error corrected bits to output payload data */
 
             outdata = golay23_decode(ingolay) >> 11;
-#ifdef DEBUG0
+            #ifdef DEBUG0
             fprintf(stderr, "  outdata...: 0x%04x\n", outdata);
-#endif
+            #endif
 
-            for(i=0; i<12; i++) {
+            for(i=0; i<12; i++) {   
                 shift = 11 - i;
                 outbit = (outdata >> shift) & 0x1;
                 outbyte |= outbit;
@@ -390,9 +385,9 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
                     outbyte <<= 1;
                 }
                 else {
-#ifdef DEBUG0
+                    #ifdef DEBUG0
                     fprintf(stderr, "  output payload byte: 0x%02x\n", outbyte);
-#endif
+                    #endif
                     *pout++ = outbyte;
                     outbyte = 0;
                 }
@@ -403,9 +398,9 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
     } /* while(.... */
 
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "finishing up .....\n");
-#endif
+    #endif
 
     /* Complete final Golay decode  */
 
@@ -421,30 +416,30 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
             if ((nparitybits % 8) == 0) {
                 /* OK grab a new byte */
                 paritybyte = *pin++;
-#ifdef DEBUG0
+                #ifdef DEBUG0
                 fprintf(stderr,"  Read paritybyte: 0x%02x\n", paritybyte);
-#endif
+                #endif
             }
         }
 
         ingolay >>= 1;
         int codeword = (ingolay<<12) + golayparity;
-#ifdef DEBUG0
+        #ifdef DEBUG0
         fprintf(stderr, "  ningolay: %d ingolay: 0x%04x\n", ningolay, ingolay);
         fprintf(stderr, "  golay code word: 0x%04x\n", codeword);
         fprintf(stderr, "  golay decode...: 0x%04x\n", golay23_decode(codeword));
-#endif
+        #endif
 
         outdata = golay23_decode(codeword) >> 11;
-#ifdef DEBUG0
+        #ifdef DEBUG0
         fprintf(stderr, "  outdata...: 0x%04x\n", outdata);
         fprintf(stderr, "  num_payload_data_bits: %d noutbits: %d\n", num_payload_data_bits, noutbits);
-#endif
+        #endif
 
         /* write final byte */
 
         int ntogo = num_payload_data_bits - noutbits;
-        for(i=0; i<ntogo; i++) {
+        for(i=0; i<ntogo; i++) {   
             shift = ntogo - i;
             outbit = (outdata >> shift) & 0x1;
             outbyte |= outbit;
@@ -453,19 +448,19 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
                 outbyte <<= 1;
             }
             else {
-#ifdef DEBUG0
+                #ifdef DEBUG0
                 fprintf(stderr, "  output payload byte: 0x%02x\n", outbyte);
-#endif
+                #endif
                 *pout++ = outbyte;
                 outbyte = 0;
             }
         }
     }
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "\npin - output_payload_data: %ld num_payload_data_bytes: %d\n",
             pout - output_payload_data, num_payload_data_bytes);
-#endif
+    #endif
 
     assert(pout == (output_payload_data + num_payload_data_bytes));
 
@@ -474,19 +469,29 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
 
 #ifdef INTERLEAVER
 
-uint16_t primes[] = {
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
-        31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
-        73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
-        127, 131, 137, 139, 149, 151, 157, 163, 167, 173,
-        179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
-        233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
-        283, 293, 307, 311, 313, 317, 331, 337, 347, 349,
-        379, 383, 389, 757, 761, 769, 773
-};
+// from https://github.com/drowe67/codec2/blob/96e8a19c2487fd83bd981ce570f257aef42618f9/src/gp_interleaver.c#L39-L40
+int is_prime(int x) {
+  for (int i = 2; i < x; i++) {
+    if ((x % i) == 0) return 0;
+  }
+  return 1;
+}
+
+int next_prime(int x) {
+  x++;
+  while (is_prime(x) == 0) x++;
+  return x;
+}
+
+int choose_interleaver_b(int Nbits) {
+  int b = (Nbits * 50) / 81;
+  b = next_prime(b);
+  return b;
+}
 
 void interleave(unsigned char *inout, int nbytes, int dir)
-{
+{   
+    /* note: to work on small uCs (e.g. AVR) needed to declare specific words sizes */
     uint16_t nbits = (uint16_t) nbytes * 8;
     uint32_t i, j, n, ibit, ibyte, ishift, jbyte, jshift;
     uint32_t b;
@@ -495,30 +500,36 @@ void interleave(unsigned char *inout, int nbytes, int dir)
 
     memset(out, 0, nbytes);
 
-    /* b chosen to be co-prime with nbits, I'm cheating by just finding the
-       nearest prime to nbits.  It also uses storage, is run on every call,
-       and has an upper limit.  Oh Well, still seems to interleave OK. */
-    i = 1;
-    uint16_t imax = sizeof(primes) / sizeof(uint16_t);
-    while ((primes[i] < nbits) && (i < imax))
-        i++;
-    b = primes[i - 1];
+    switch(nbytes)
+    {
+        case 43: // horus v1
+            b = 337;
+            break;
+        case 63: // horus v2
+            b = 389;
+            break;
+        default: // everything else (including horus v3)
+            b = choose_interleaver_b(nbits);
+    }
 
-    for (n = 0; n < nbits; n++) {
+    // fprintf(stderr,"n: %d b: %d bits: %d\n",nbytes, b, nbits);
+
+
+    for(n = 0; n < nbits; n++) {
 
         /*
           "On the Analysis and Design of Good Algebraic Interleavers", Xie et al,eq (5)
         */
 
         i = n;
-        j = (b * i) % nbits;
-
+        j = (b * i) % nbits; /* note these all need to be 32-bit ints to make multiply work without overflow */
+        
         if (dir) {
             uint16_t tmp = j;
             j = i;
             i = tmp;
         }
-
+        
         #ifdef DEBUG0
         printf("i: %d j: %d\n",i, j);
         #endif
@@ -537,7 +548,7 @@ void interleave(unsigned char *inout, int nbytes, int dir)
         out[jbyte] |= ibit << jshift; // replace with i-th bit
         //out[ibyte] |= ibit << ishift; // replace with i-th bit
     }
-
+ 
     memcpy(inout, out, nbytes);
 
     #ifdef DEBUG0
@@ -561,8 +572,8 @@ int main(void) {
     /* copy of input for later comp   */
 
     for(i=0; i<nbytes; i++)
-        inout[i] = incopy[i] = rand() & 0xff;
-
+        inout[i] = incopy[i] = rand() & 0xff;    
+    
     interleave(inout, nbytes, 0);    /* interleave                     */
     memcpy(inter, inout, nbytes);    /* snap shot of interleaved bytes */
     interleave(inout, nbytes, 1);    /* de-interleave                  */
@@ -570,7 +581,7 @@ int main(void) {
     /* all ones in last col means it worked! */
 
     for(i=0; i<nbytes; i++) {
-        printf("%d 0x%02x 0x%02x 0x%02x %d\n",
+        printf("%d 0x%02x 0x%02x 0x%02x %d\n", 
                i, incopy[i], inter[i], inout[i],  incopy[i] == inout[i]);
         assert(incopy[i] == inout[i]);
     }
@@ -615,7 +626,7 @@ void scramble(unsigned char *inout, int nbytes)
         scrambler |= scrambler_out << 14;
 
         #ifdef DEBUG0
-        printf("i: %02d ibyte: %d ishift: %d ibit: %d ibits: %d scrambler_out: %d\n",
+        printf("i: %02d ibyte: %d ishift: %d ibit: %d ibits: %d scrambler_out: %d\n", 
                i, ibyte, ishift, ibit, ibits, scrambler_out);
         #endif
 
@@ -650,11 +661,11 @@ int test_sending_bytes(int nbytes, float ber, int error_pattern) {
 
     horus_l2_encode_tx_packet(tx, input_payload, sizeof(input_payload));
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "\nTx Data:\n");
     for(i=0; i<num_tx_data_bytes; i++)
         fprintf(stderr, "  %02d 0x%02x\n", i, tx[i]);
-#endif
+    #endif
 
     /* insert random bit errors */
 
@@ -665,13 +676,13 @@ int test_sending_bytes(int nbytes, float ber, int error_pattern) {
                 r = (float)rand()/RAND_MAX;
                 if (r < ber) {
                     unsigned char mask = (1<<b);
-#ifdef DEBUG1
+                    #ifdef DEBUG1
                     fprintf("mask: 0x%x tx[%d] = 0x%x ", mask, i, tx[i]);
-#endif
+                    #endif
                     tx[i] ^= mask;
-#ifdef DEBUG1
+                    #ifdef DEBUG1
                     fprintf("0x%x\n", tx[i]);
-#endif
+                    #endif
                     nbiterrors++;
                 }
             }
@@ -695,37 +706,37 @@ int test_sending_bytes(int nbytes, float ber, int error_pattern) {
                 bn++;
                 if ((bn % 12) == 0) {
                     unsigned char mask = (1<<(7-b));
-#ifdef DEBUG1
+                    #ifdef DEBUG1
                     fprintf("mask: 0x%x tx[%d] = 0x%x ", mask, i, tx[i]);
-#endif
+                    #endif
                     tx[i] ^= mask;
-#ifdef DEBUG1
+                    #ifdef DEBUG1
                     fprintf("0x%x\n", tx[i]);
-#endif
+                    #endif
                     nbiterrors++;
                 }
             }
         }
     }
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "\nTx Data after errors:\n");
     for(i=0; i<num_tx_data_bytes; i++)
         fprintf(stderr, "  %02d 0x%02x\n", i, tx[i]);
-#endif
+    #endif
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "nbiterrors: %d BER: %3.2f\n", nbiterrors, (float)nbiterrors/(num_tx_data_bytes*8));
-#endif
+    #endif
 
     golay23_init();
     horus_l2_decode_rx_packet(output_payload, tx, sizeof(input_payload));
 
-#ifdef DEBUG0
+    #ifdef DEBUG0
     fprintf(stderr, "\nOutput Payload:\n");
     for(i=0; i<sizeof(input_payload); i++)
         fprintf(stderr, "  %02d 0x%02x\n", i, output_payload[i]);
-#endif
+    #endif
 
     /* count bit errors */
 
@@ -735,7 +746,7 @@ int test_sending_bytes(int nbytes, float ber, int error_pattern) {
         for(b=0; b<8; b++)
             nerr += (error_pattern>>b) & 0x1;
     }
-
+    
     return nerr;
 }
 
@@ -801,7 +812,7 @@ int main(void) {
     input_payload.Checksum = gen_crc16((unsigned char*)&input_payload, nbytes-2);
 
     horus_l2_encode_tx_packet(tx, (unsigned char*)&input_payload, nbytes);
-
+    
     FILE *f = fopen("../octave/horus_tx_bits_binary.txt","wt");
     assert(f != NULL);
     int b, tx_bit;
@@ -837,23 +848,23 @@ int main(void) {
 
     assert(num_tx_data_bytes == 45);
 
-#define READ_FILE /* overwrite tx[] above, that's OK */
-#ifdef READ_FILE
+    #define READ_FILE /* overwrite tx[] above, that's OK */
+    #ifdef READ_FILE
     FILE *f = fopen("../octave/horus_rx_bits_binary.bin","rb");
     assert(f != NULL);
     ret = fread(rx, sizeof(char), num_tx_data_bytes, f);
     assert(ret == num_tx_data_bytes);
     fclose(f);
-#endif
+    #endif
 
     golay23_init();
     horus_l2_decode_rx_packet(output_payload, rx, nbytes);
 
-#ifdef HEX_DUMP
+    #ifdef HEX_DUMP
     fprintf(stderr, "\nOutput Payload:\n");
     for(i=0; i<nbytes; i++)
         fprintf(stderr, "  %02d 0x%02x 0x%02x\n", i, output_payload[i], rx[i+2]);
-#endif
+    #endif
 
     struct TBinaryPacket h;
     assert(sizeof(h) == nbytes);
@@ -861,7 +872,7 @@ int main(void) {
 
     uint16_t crc_rx = gen_crc16(output_payload, nbytes-2);
     char crc_str[80];
-
+    
     if (crc_rx == h.Checksum) {
         sprintf(crc_str, "CRC OK");
     } else {
@@ -870,20 +881,20 @@ int main(void) {
 
     fprintf(stderr, "%d,%d,%02d:%02d:%02d,%f,%f,%d,%d,%d,%d,%d,%04x %s\n",
         h.PayloadID, h.Counter, h.Hours, h.Minutes, h.Seconds,
-        h.Latitude, h.Longitude, h.Altitude, h.Speed, h.Sats, h.Temp,
+        h.Latitude, h.Longitude, h.Altitude, h.Speed, h.Sats, h.Temp, 
             h.BattVoltage, h.Checksum, crc_str);
-
+    
     /* Hex ASCII file output */
 
-#define WRITE_HEX_FILE /* overwrite tx[] above, that's OK */
-#ifdef WRITE_HEX_FILE
+    #define WRITE_HEX_FILE /* overwrite tx[] above, that's OK */
+    #ifdef WRITE_HEX_FILE
     FILE *fh = fopen("../octave/horus_rx_bits_hex.txt","wt");
     assert(fh != NULL);
     for(i=0; i<nbytes; i++) {
         fprintf(fh, "%02X", (unsigned int)output_payload[i]);
     }
     fclose(fh);
-#endif
+    #endif
 
     return 0;
 }
@@ -1032,11 +1043,11 @@ int32_t get_syndrome(int32_t pattern)
     int32_t aux = X22;
 
     if (pattern >= X11)
-        while (pattern & MASK12) {
-            while (!(aux & pattern))
-                aux = aux >> 1;
+       while (pattern & MASK12) {
+           while (!(aux & pattern))
+              aux = aux >> 1;
             pattern ^= (aux / X11) * GENPOL;
-        }
+           }
     return (pattern);
 }
 

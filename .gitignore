@@ -3,3 +3,5 @@
 /build
 /samples
 *~
+.vscode/
+.DS_Store

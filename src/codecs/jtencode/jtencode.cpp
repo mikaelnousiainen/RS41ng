@@ -1,5 +1,4 @@
 #include <cstring>
-#include <cstdlib>
 #include <drivers/si5351/si5351.h>
 
 #include "codecs/fsk/fsk.h"
@@ -147,10 +146,11 @@ bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8
         }
     }
 
-    encoder->priv = malloc(sizeof(jtencode_encoder));
-    memset(encoder->priv, 0, sizeof(jtencode_encoder));
+    static jtencode_encoder jte_instance;
+    memset(&jte_instance, 0, sizeof(jtencode_encoder));
+    encoder->priv = &jte_instance;
 
-    auto *jte = (jtencode_encoder *) encoder->priv;
+    auto *jte = &jte_instance;
     jte->symbol_data_length = symbol_data_length;
     jte->symbol_data = symbol_data;
 
@@ -165,19 +165,15 @@ bool jtencode_encoder_new(fsk_encoder *encoder, size_t symbol_data_length, uint8
 
     jte->fsq_callsign_from = fsq_callsign_from;
 
-    jte->jtencode = new JTEncode();
+    static JTEncode jtencode_instance;
+    jte->jtencode = &jtencode_instance;
 
     return true;
 }
 
 void jtencode_encoder_destroy(fsk_encoder *encoder)
 {
-    if (encoder->priv != nullptr) {
-        auto *jte = (jtencode_encoder *) encoder->priv;
-        delete jte->jtencode;
-        free(encoder->priv);
-        encoder->priv = nullptr;
-    }
+    encoder->priv = nullptr;
 }
 
 void jtencode_encoder_get_tones(fsk_encoder *encoder, int8_t *tone_count, fsk_tone **tones)

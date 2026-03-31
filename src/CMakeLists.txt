@@ -1,67 +1,113 @@
-project(RS41ng C CXX)
+# Collect all sources via GLOB_RECURSE (re-run cmake after adding new files)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "*.c")
+file(GLOB_RECURSE SOURCES_ASM CONFIGURE_DEPENDS "*.s")
+file(GLOB_RECURSE SOURCES_CXX CONFIGURE_DEPENDS "*.cpp")
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "*.h")
 
-set(CMAKE_FIND_ROOT_PATH /usr/arm-none-eabi)
+if(DFM17)
+    set(STM32F1 1)
+    set(HW_DEFINES DFM17)
+    set(HSE_DEFINES HSE_VALUE=12800000U HSE_STARTUP_TIMEOUT=5000U)
+elseif(RS41)
+    set(STM32F1 1)
+    set(HW_DEFINES RS41)
+elseif(RS41_RSM4X4)
+    set(STM32L4 1)
+    set(HW_DEFINES RS41 RS41_RSM4x4)
+else()
+    message(FATAL_ERROR "You must define a target type (-DDFM17=1 or -DRS41=1 or -DRS41_RSM4X4=1)")
+endif()
 
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+# --- Per-target configuration ---
+if(STM32F1)
+    message(STATUS "Target: STM32F1 (RS41 old / DFM-17)")
+    set(MCU_CPU cortex-m3)
+    set(MCU_DEFINE STM32F100xB)
+    set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/STM32F100XB_FLASH.ld)
+    set(HAL_DIR hal_stm32f1xx)
+    set(EXCLUDE_HAL_DIR hal_stm32l4xx)
+else()
+    message(STATUS "Target: STM32L4 (RS41 RSM4x4 series)")
+    set(MCU_CPU cortex-m4)
+    set(MCU_DEFINE STM32L412xx)
+    set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/STM32L412RBTX_FLASH.ld)
+    set(HAL_DIR hal_stm32l4xx)
+    set(EXCLUDE_HAL_DIR hal_stm32f1xx)
+endif()
 
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+# Filter out the unused HAL
+list(FILTER SOURCES EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
+list(FILTER SOURCES_ASM EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
+list(FILTER SOURCES_CXX EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
+list(FILTER HEADERS EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
 
-set(COLLECT_GCC ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
+# --- Executable ---
+add_executable(${PROJECT_NAME}.elf
+    ${SOURCES}
+    ${SOURCES_ASM}
+    ${SOURCES_CXX}
+    ${HEADERS}
+    ${LINKER_SCRIPT}
+)
 
-if (UNIX)
-  set(TOOLCHAIN_PATH /usr/bin)
-  set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc)
-  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-g++)
-  set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy)
-else ()
-  set(TOOLCHAIN_PATH C:\\)
-  set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-gcc.exe)
-  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/arm-none-eabi-g++.exe)
-  set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/arm-none-eabi-objcopy.exe)
-endif ()
+set_target_properties(${PROJECT_NAME}.elf PROPERTIES
+    C_STANDARD 99
+    C_EXTENSIONS ON
+    CXX_STANDARD 11
+    CXX_EXTENSIONS OFF
+)
 
-add_definitions(-DSTM32F100C8)
-add_definitions(-DSTM32F10X_MD_VL)
-add_definitions(-DUSE_STDPERIPH_DRIVER)
-add_definitions(-DSUPPORT_CPLUSPLUS)
-add_definitions(-D__ASSEMBLY__)
+target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+    ${MCU_DEFINE}
+    ${HW_DEFINES}
+    ${HSE_DEFINES}
+    SUPPORT_CPLUSPLUS
+    __ASSEMBLY__
+)
 
-SET(LINKER_SCRIPT arm-gcc-link.ld)
-SET(COMMON_FLAGS " -mcpu=cortex-m3 -mthumb -Wall -ffunction-sections -fdata-sections -O3 -nostartfiles")
-SET(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
-SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=nano.specs -T ${LINKER_SCRIPT}")
-# -u _printf_float
-#SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map -lstdc++ -O3 -mcpu=cortex-m3 -mthumb -Wl,--gc-sections --specs=rdimon.specs -lc -lrdimon -T ${LINKER_SCRIPT}")
+target_compile_options(${PROJECT_NAME}.elf PRIVATE
+    -mcpu=${MCU_CPU}
+    -mthumb
+    -Wall
+    -ffunction-sections
+    -fdata-sections
+    -g
+    -Os
+)
 
-file(GLOB_RECURSE USER_SOURCES "*.c")
-file(GLOB_RECURSE USER_SOURCES_CXX "*.cpp")
-file(GLOB_RECURSE USER_HEADERS "*.h")
+target_include_directories(${PROJECT_NAME}.elf PRIVATE
+    ${HAL_DIR}/cmsis
+    ${HAL_DIR}/cmsis_boot/startup
+    ${HAL_DIR}/cmsis_boot
+    ${HAL_DIR}/stm_lib/inc
+    drivers
+    codecs
+    syscalls
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
 
-include_directories(hal/cmsis
-    hal/cmsis_boot
-    hal/stm_lib/inc
-    ..)
+target_link_options(${PROJECT_NAME}.elf PRIVATE
+    -mcpu=${MCU_CPU}
+    -mthumb
+    -g
+    -Os
+    -Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map
+    -Wl,--gc-sections
+    --specs=nano.specs
+    --specs=nosys.specs
+    -z muldefs
+    -T${LINKER_SCRIPT}
+)
 
-add_executable(${PROJECT_NAME}.elf ${USER_SOURCES} ${USER_SOURCES_CXX} ${USER_HEADERS} ${HAL_SOURCES} ${LINKER_SCRIPT})
+target_link_libraries(${PROJECT_NAME}.elf PRIVATE stdc++)
 
+# --- Post-build: generate HEX and BIN, print size ---
 set(HEX_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin)
+
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
     COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-    COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
-    COMMAND ${TOOLCHAIN_PATH}/arm-none-eabi-size ${PROJECT_NAME}.elf)
-
-set(CMAKE_CXX_STANDARD 11)
-
-add_custom_target(program
-    DEPENDS ${PROJECT_NAME}.elf
-
-    if (UNIX)
-    #TODO
-    else ()
-    COMMAND C:/Programs/stlink-1.3.0-win64/bin/st-flash --reset write ${BIN_FILE} 0x08000000
-    endif ()
-    COMMENT "flashing ${BIN_FILE}")
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
+    COMMENT "Building ${HEX_FILE}\nBuilding ${BIN_FILE}"
+)

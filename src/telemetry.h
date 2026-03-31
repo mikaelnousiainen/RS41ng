@@ -17,15 +17,19 @@ typedef struct _telemetry_data {
     int32_t temperature_celsius_100;
     uint32_t pressure_mbar_100;
     uint32_t humidity_percentage_100;
+    uint32_t bme6xx_gas_r;
     uint16_t pulse_count;
+    uint16_t current_milliamps;
     float radiation_intensity_uR_h;
 
     gps_data gps;
 
     char locator[LOCATOR_PAIR_COUNT_FULL * 2 + 1];
 
-    int	clock_calibration_trim;
-    uint16_t clock_calibration_count;
+    uint8_t si4063_capacitance_trim;
+    int cap_trim_offset;
+    int32_t timepulse_error_us;
+    uint8_t po_state;
 } telemetry_data;
 
 void telemetry_collect(telemetry_data *data);

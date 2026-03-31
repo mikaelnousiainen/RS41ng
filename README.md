@@ -1,13 +1,10 @@
 # RS41ng - Amateur radio firmware for Vaisala RS41 and Graw DFM-17 radiosondes
 
-**NEW:** Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues! **Using a DFM-17 as a primary flight tracker is NOT recommended yet!**
+RS41ng supports 3 models of Radiosondes.  The Vaisala RS41 4x2 and Graw DFM-17 (both based on the STM32F1 processor), and the Vaisala 4x4 (newer version based on the STM32L4 processor).  
 
-**NOTE:** **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
-DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
+## Quickstart Guide
 
-**NOTE:** While this firmware has been tested (on RS41) with great success on a number of high-altitude balloon
-flights, it is still a work in progress and some features might not work as expected yet!
-In particular, the time sync (scheduling) features and use of an external Si5351 as a transmitter need more testing.
+If you've installed RS41ng before, edit your config.h and jump down to the [Flashing the radiosonde with the Firmware](#flashing-the-radiosonde-with-the-firmware) section.
 
 ## What is RS41ng?
 
@@ -50,7 +47,9 @@ For your own receiver station, you will need:
 
 The [Vaisala RS41](https://www.vaisala.com/en/products/weather-environmental-sensors/upper-air-radiosondes-rs41-rs41-e-models)
 and [Graw DFM-17](https://www.graw.de/products/radiosondes/dfm-17/)
-radiosondes both use off-the-shelf 32-bit [STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) microcontrollers,
+radiosondes use off-the-shelf 32-bit STM32 microcontrollers
+([STM32F100-series](https://www.st.com/en/microcontrollers-microprocessors/stm32f100-value-line.html) on older RS41 and DFM-17 boards,
+[STM32L412-series](https://www.st.com/en/microcontrollers-microprocessors/stm32l412cb.html) on newer RS41 RSM4x4 boards),
 which can be reprogrammed using an [ST-LINK v2 programmer](https://www.st.com/en/development-tools/st-link-v2.html)
 or a smaller [ST-LINK v2 USB dongle](https://www.adafruit.com/product/2548).
 
@@ -92,51 +91,41 @@ See the feature list below.
 The main features the RS41ng firmware are:
 
 * Support for multiple transmission modes:
-  * Standard 1200-baud APRS
+  * Standard 1200-baud and 9600-baud APRS
     * Option to transmit APRS weather reports using readings from an external BMP280/BME280 sensor (only RS41 supports custom sensors)
-  * [Horus 4FSK v1 and v2 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
-    * There is an option to use continuous transmit mode (for either V1 or V2 mode), which helps with receiver frequency synchronization and improves reception.
-    * In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
+  * [Horus 4FSK v2 and v3 modes](https://github.com/projecthorus/horusdemodlib/wiki) that has improved performance compared to APRS or RTTY
+    * There is an option to use continuous transmit mode which helps with receiver frequency synchronization and improves reception.
+    * Horus V2 is deprecated.  In order to use Horus V2 mode on a flight, you will need a  Horus V2  payload ID.  New IDs are no longer being issued.   V3 simply uses your callsign and is encouraged.
   * [CATS - Communication And Telemetry System](https://cats.radio/) packet radio standard, which has a modulation much more efficient than APRS
     * The primary benefit of CATS over APRS and Horus 4FSK is that it allows for fast beacon times (1 Hz or more) without congesting the network.
     * For more details on using CATS, see the CATS website and the notes below.
   * Morse code (CW)
   * "Pip" mode, which transmits a short beep generated using CW to indicate presence of the transmitter
-  * **RS41 only:** JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
+  * JT65/JT9/JT4/FT8/WSPR/FSQ digital modes on HF/VHF amateur radio bands using an external Si5351 clock generator connected to the external I²C bus
 * Support for transmitting multiple modes consecutively with custom, rotating comment messages (see `config.c`)
 * Support for GPS-based scheduling is available for transmission modes that require specific timing for transmissions
 * Enhanced support for the internal Si4032 radio transmitter via PWM-based tone generation
 * Extensibility to allow easy addition of new transmission modes and new sensors
-
-Features available on RS41 hardware only:
-
 * Support for custom sensors via the external I²C bus
-* Support for counting pulses on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
-* GPS NMEA data output via the external serial port pin 3 (see below). This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
-  * This allows using the RS41 sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
+* Support for counting pulses on expansion header (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
+* GPS NMEA data output via the external serial port (see below). RS41 only -- This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
+  * This allows using the sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
 
-Notes for DFM-17:
-
-* **DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.**
-  This is necessary, because the internal oscillator is not particularly accurate.
-  DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before
-  the internal oscillator has been calibrated.
-  * The RS41 radiosonde hardware uses an external oscillator, which is more stable, so RS41 does not
-    suffer from the same issue.
 
 ### Transmission modes
 
 On the internal Si4032 (RS41) and Si4063 (DFM-17) transmitters:
 
-* APRS (1200 baud)
-* Horus 4FSK v1 and v2 (100 baud)
+* APRS (1200 baud and 9600 baud)
+* Horus 4FSK v2 and v3 (100 baud)
 * CATS (9600 baud)
 * Morse code (CW)
 * "Pip" - a short beep to indicate presence of the transmitter
+* Long Tone - continuous CW tone (useful for fox transmissions)
 
-On an external Si5351 clock generator connected to the external I²C bus of the RS41 radiosonde:
+On an external Si5351 clock generator connected to the external I²C bus:
 
-* Horus 4FSK v1 and v2 (50 baud, because the Si5351 frequency changes are slow)
+* Horus 4FSK v2 and v3 (50 baud, because the Si5351 frequency changes are slow)
 * JT65/JT9/JT4/FT8/WSPR/FSQ mode beacon transmissions using the JTEncode library. I've decoded FT8, WSPR and FSQ modes successfully.
   * GPS-based scheduling is available for modes that require specific timing for transmissions
 * Morse code (CW)
@@ -149,10 +138,16 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
 
 #### Notes about Horus 4FSK
 
-* The Horus 4FSK v1 and v2 modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki).
-* Use [horus-gui](https://github.com/projecthorus/horus-gui) software to receive the 4FSK mode and to submit packets to [Habhub](http://habhub.org/) high-altitude balloon tracking platform.
-* See [horus-gui installation and usage instructions](https://github.com/projecthorus/horusdemodlib/wiki/1.1-Horus-GUI-Reception-Guide-(Windows-Linux-OSX)) and [horusdemodlib](https://github.com/projecthorus/horusdemodlib) library that is responsible for demodulating the signal.
-* In order to use Horus 4FSK mode on a flight, you will need to request a new Horus 4FSK payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it 
+* The Horus 4FSK modes have significantly [improved performance compared to APRS or RTTY](https://github.com/projecthorus/horusdemodlib/wiki). Horus Binary v1 has been removed from RS41ng.  Support for Horus Binary v2 and v3 will continue. However, v2 is deprecated.  No additional v2 IDs are being issued, in favor of using Horus Binary v3.
+  
+* There are 3 methods to decode Horus 4FSK modes:
+  * Use [webhorus](https://horus.sondehub.org/), SSB audio input or an RTL-SDR, 
+  * Use the [horus-gui](https://github.com/projecthorus/horus-gui) application, 
+  * Use [horusdemodlib](https://github.com/projecthorus/horusdemodlib) on a Raspberry Pi with an RTL-SDR
+
+#### Disabling Sondehub Upload
+
+A `via` flag exists in the Horus Binary v3 protocol that requests for a packet to **not** be uploaded to Sondehub. This is useful if RS41ng and Horus Binary v3 are being used for asset tracking at public service events. The latest version of `horusdemodlib` supports this flag. 
 
 #### Notes about CATS
 
@@ -164,9 +159,32 @@ On an external Si5351 clock generator connected to the external I²C bus of the 
   * If you're relying on APRS gating, be sure to set an SSID below 100 or the APRS network may reject it.
 * For more information, be sure to check [the CATS standard](https://gitlab.scd31.com/cats/cats-standard/builds/artifacts/master/file/standard.pdf?job=build).
 
-### External sensors (RS41 only)
+### Fox Mode
 
-It is possible to connect external sensors to the I²C bus of the RS41 radiosonde.
+RS41ng supports **Fox Mode**, which allows RS41ng to be used as a hidden transmitter. Fox Mode a simple mode that will disable the GPS and enable other power saving features.
+
+Fox Mode should **not** be enabled on any radiosonde that is intended to fly, as there will be no position data collected by the GPS.
+
+Recommended Fox Mode settings in `config.h`:
+```
+#define RADIO_POST_TRANSMIT_DELAY_MS 1000
+
+#define RADIO_TX_CW true
+#define RADIO_TX_CW_COUNT 1
+
+#define RADIO_TX_LONG_TONE true
+#define RADIO_TX_LONG_TONE_COUNT 5
+#define RADIO_TX_LONG_TONE_DURATION_SECONDS 10
+
+#define ENABLE_FOX_MODE true
+#define ENABLE_FM_CW true
+```
+
+NOTE: See `config.c` (not `.h`) for CW string options. Many different parameters can be transmitted.
+
+### External sensors
+
+It is possible to connect external sensors to the I²C bus.
 
 The following sensors are currently supported:
 
@@ -192,13 +210,10 @@ Sensor driver code contributions are welcome!
 
 1. Configure your amateur radio call sign, transmission schedule (time sync),
    transmit frequencies and transmission mode parameters in `config.h`
-    * Select the desired radiosonde type in the beginning of the file by removing the `//` comment from either
-      the `#define RS41` or `#define DFM17` lines.
+    * NOTE: Selecting the radiosonde type is not necessary with the compiler options ("-DDFM17=1", "-DRS41=1", or "-DRS41_RSM4X4=1").
     * Customize at least the following settings:
         * `CALLSIGN`
-        * For RS41, the settings beginning with `RADIO_SI4032_` to select transmit power and the modes to transmit
-        * For DFM-17, the settings beginning with `RADIO_SI4063_` to select transmit power and the modes to transmit
-        * `HORUS_V2_PAYLOAD_ID` if you transmit Horus 4FSK
+        * Settings beginning with `RADIO_` to select transmit power and the modes to transmit
         * At least `APRS_SSID`, `APRS_SYMBOL` and `APRS_COMMENT` if you transmit APRS
         * At least `CATS_SSID`, `CATS_ICON` and `CATS_COMMENT` if you transmit CATS
 2. Set up transmitted message templates in `config.c`, depending on the modes you use.
@@ -223,7 +238,7 @@ Please note that the time sync requires a stable GPS signal (good visibility to 
 
 #### Time-slotted modes
 
-For time-slotted modes like FT8 and WSPR, there default configuration file (`config.h`) already contains useful defaults.
+For time-slotted modes like FT8 and WSPR, the default configuration file (`config.h`) already contains useful defaults.
 
 ##### FT8 example
 
@@ -342,15 +357,16 @@ The Docker environment can also help address issues with the build process.
     ```
     docker build -t rs41ng_compiler .
     ```
-4. Build the firmware using the following command. If you need to rebuild the firmware, simply run the command again.
+4. Build the firmware using the following command. You **must** specify a target flag: `-DRS41=1`, `-DRS41_RSM4X4=1`, or `-DDFM17=1`. If you need to rebuild the firmware, simply run the command again.
    On Linux/macOS, run:
     ```
-    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler
+    docker run --rm -it -v $(pwd):/usr/local/src/RS41ng rs41ng_compiler -DRS41_RSM4X4=1
     ```
     On Windows, run:
     ```
-    docker run --rm -it -v %cd%:/usr/local/src/RS41ng rs41ng_compiler
+    docker run --rm -it -v %cd%:/usr/local/src/RS41ng rs41ng_compiler -DRS41_RSM4X4=1
     ```
+    Replace `-DRS41_RSM4X4=1` with `-DRS41=1` or `-DDFM17=1` as appropriate for your hardware.
 5. The firmware will be stored in file `build/src/RS41ng.elf`
 
 Now you can flash the firmware using instructions below (skip the build instructions for Linux).
@@ -362,7 +378,7 @@ Software requirements:
 * [GNU GCC toolchain](https://developer.arm.com/downloads/-/gnu-rm)
   for cross-compiling the firmware for the ARM Cortex-M3 architecture (`arm-none-eabi-gcc`)
   * Pick the latest toolchain version available for your operating system.
-* [CMake](https://cmake.org/) version 3.6 or higher for building the firmware
+* [CMake](https://cmake.org/) version 3.13 or higher for building the firmware
 * [OpenOCD](http://openocd.org/) version 0.10.0 or higher for flashing the firmware
 
 On a Red Hat/Fedora Linux installation, the following packages can be installed:
@@ -373,13 +389,14 @@ dnf install arm-none-eabi-gcc-cs arm-none-eabi-gcc-cs-c++ arm-none-eabi-binutils
 #### Steps to build the firmware on Linux
 
 1. Install the required software dependencies listed above
-2. Build the firmware using the following commands
+2. Build the firmware using the following commands. You **must** specify a target flag: `-DRS41=1`, `-DRS41_RSM4X4=1`, or `-DDFM17=1`.
     ```
     mkdir build
     cd build
-    cmake ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/arm-none-eabi-gcc.cmake -DRS41=1 ..
     make
     ```
+    Replace `-DRS41=1` with `-DRS41_RSM4X4=1` or `-DDFM17=1` as appropriate for your hardware.
 3. The firmware will be stored in file `build/src/RS41ng.elf`
 
 ## Prepare the radiosonde for flashing the firmware
@@ -436,7 +453,7 @@ ______________________|           |______________________
     * GND -> Pin 1 (GND)
     * 3.3V -> Pin 5 (MCU switch 3.3V) (only required when using the programmer to power the sonde)
 
-### Graw DFM-17 programming connector
+### Graw DFM-17 programming and I²C connector
 
 The DFM-17 programming connector is an unpopulated group of pads on the circuit board
 between the sensor boom connector and the main STM32 microcontroller.
@@ -477,6 +494,12 @@ _____
 * 9 - GNDDetect
 * 10 - nRESET
 
+To enable external I²C, UART, or pulse counter access on the DFM17 radiosonde, some small pads must be shorted on the PCB with a very small wire or solder blob. At a minimum, the pads shown as PB10 and PB11 must be shorted. Optionally the pads shown as GND can be shorted if you wish to connect header pins 1 and 4 to ground. For full functionality, short all of the pads in each red box. 
+
++3.3V can be picked off the pin of the capacitor shown in the yellow box.
+
+![DFM-17 I²C](dfm_i2c.jpg)
+
 #### Connect the DFM-17 radiosonde to the programmer
 
 1. Since the DFM-17 programming connector is just an unpopulated group of pads on the circuit board,
@@ -491,14 +514,33 @@ _____
 3. If your ST-LINK v2 programmer is capable of providing a voltage of 3.3V (as some third-party clones are),
    remove the batteries from the sonde. Otherwise, leave the batteries in and power on the sonde.
 
-## Flashing the radiosonde with the firmware (both RS41 and DFM-17)
+## Flashing the radiosonde with the firmware
+
+### STM32F1-based boards (older RS41 and DFM-17)
 
 1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
-    * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 63 off; exit"`
     * **NOTE:** If the above command fails with an error about erasing sectors, try replacing the number `63` with either `31` or the number the error message suggests:
-        * `openocd -f ./openocd_rs41.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
+        * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; halt; flash protect 0 0 31 off; exit"`
 2. Flash the firmware
-    * `openocd -f ./openocd_rs41.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+    * `openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
+3. Power cycle the sonde to start running the new firmware
+
+### STM32L4-based boards (newer RS41 RSM4x4)
+
+1. Unlock the flash protection - needed only before reprogramming the sonde for the first time
+   1. Issue unlock flash command:
+      * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; stm32l4x unlock 0; reset halt; exit"`
+   2. There should be a message that includes `Info : RDP level 1 (0x00)`. This verifies that some protections were enabled.
+   3. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
+   4. **Reconnect the RS41**.
+   5. Disable additional protections:
+      * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "init; reset halt; flash protect 0 0 last off; exit"`
+   6. We NOW expect to see the message `Info : RDP level 0 (0xAA)`. This means the board was unlocked by the first command. If this message is not present, repeat the previous steps.
+   7. **Disconnect the RS41**. Remove batteries if present. Allow 30 seconds for capacitors to discharge. Fidgeting with the power switch may expedite this step.
+   8. **Reconnect the RS41**. Normal flashing should now work. If flashing does not work, repeat the unlock process.
+2. Flash the firmware
+    * `openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "program build/src/RS41ng.elf verify reset exit"`
 3. Power cycle the sonde to start running the new firmware
 
 ## Developing / debugging the firmware
@@ -525,7 +567,7 @@ otherwise the firmware will not run.**
     ```
 3. Start OpenOCD and leave it running in the background
     ```
-    openocd -f ./openocd_rs41.cfg
+    openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
     ```
 4. Start ARM GDB
     ```
@@ -545,6 +587,8 @@ otherwise the firmware will not run.**
 
 To load debugging symbols for settings breakpoints and to perform more detailed inspection,
 use command `file src/RS41ng.elf`.
+
+NOTE: To save RAM, the heap size has been zeroed out. Dynamic memory allocations (`malloc`, etc.) will not function. Use static or stack-based allocation if needed. 
 
 ## Si4032 Bell FSK modulation hack for APRS
 

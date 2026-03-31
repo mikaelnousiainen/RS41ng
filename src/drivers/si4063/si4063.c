@@ -6,32 +6,24 @@
  */
 
 #include <stdbool.h>
-#include <stm32f10x_gpio.h>
-#include <stm32f10x_tim.h>
 
-#include "hal/hal.h"
-#include "hal/delay.h"
-#include "hal/spi.h"
+#include "config.h"
+#ifndef RS41_RSM4x4
+    #include <stm32f1xx_hal.h>
+#else
+    #include <stm32l4xx_hal.h>
+#endif
+
+#include "drivers/hal/hal.h"
+#include "drivers/hal/delay.h"
+#include "drivers/hal/spi.h"
+#include "drivers/hal/timers.h"
+
 #include "si4063.h"
 #include "gpio.h"
 #include "log.h"
 
 #define SI4063_CLOCK 25600000UL
-
-#define GPIO_SI4063_SDN GPIOC
-#define GPIO_PIN_SI4063_SDN GPIO_Pin_3
-
-#define GPIO_SI4063_NSEL GPIOB
-#define GPIO_PIN_SI4063_NSEL GPIO_Pin_2
-
-#define GPIO_SI4063_SDI GPIOA
-#define GPIO_PIN_SI4063_SDI GPIO_Pin_7
-
-#define GPIO_SI4063_GPIO2 GPIOD
-#define GPIO_PIN_SI4063_GPIO2 GPIO_Pin_0
-
-#define GPIO_SI4063_GPIO3 GPIOA
-#define GPIO_PIN_SI4063_GPIO3 GPIO_Pin_4
 
 #define SI4063_COMMAND_PART_INFO    0x01
 #define SI4063_COMMAND_POWER_UP     0x02
@@ -96,7 +88,7 @@ uint32_t current_deviation_hz = 0;
 
 static inline void si4063_set_chip_select(bool select)
 {
-    spi_set_chip_select(GPIO_SI4063_NSEL, GPIO_PIN_SI4063_NSEL, select);
+    spi_set_chip_select(BANK_NSEL, PIN_NSEL, select);
 
     // Output enable time, 20ns
     for (uint32_t i = 0; i < 0xFFFF; i++);
@@ -193,27 +185,33 @@ static int si4063_power_up()
 static void si4603_set_shutdown(bool active)
 {
     if (active) {
-        GPIO_SetBits(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN);
+        HAL_GPIO_WritePin(BANK_SDN, PIN_SDN, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4063_SDN, GPIO_PIN_SI4063_SDN);
+        HAL_GPIO_WritePin(BANK_SDN, PIN_SDN, GPIO_PIN_RESET);
     }
 }
 
 static void si4063_set_state(uint8_t state)
 {
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Set state %02x\n", state);
+#endif
     si4063_send_command(SI4063_COMMAND_CHANGE_STATE, 1, &state);
 }
 
 void si4063_enable_tx()
 {
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Enable TX\n");
+#endif
     si4063_set_state(SI4063_STATE_TX);
 }
 
 void si4063_inhibit_tx()
 {
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Inhibit TX\n");
+#endif
     si4063_set_state(SI4063_STATE_READY);
 }
 
@@ -301,7 +299,7 @@ int si4063_wait_for_tx_complete(int timeout_ms)
     si4063_disable_tx();
     si4063_wait_for_cts();
 
-    return HAL_ERROR_TIMEOUT;
+    return HAL_TIMEOUT;
 }
 
 static int si4063_get_outdiv(const uint32_t frequency_hz)
@@ -357,7 +355,9 @@ void si4063_set_tx_frequency(const uint32_t frequency_hz)
     uint32_t f_pfd, n, m;
     float ratio, rest;
 
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Set frequency %lu\n", frequency_hz);
+#endif
 
     outdiv = si4063_get_outdiv(frequency_hz);
     band = si4063_get_band(frequency_hz);
@@ -434,7 +434,9 @@ void si4063_set_tx_power(uint8_t power)
             power & 0x7F // Power level from 00..7F
     };
 
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Set TX power %02x\n", power);
+#endif
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
@@ -473,7 +475,9 @@ void si4063_set_frequency_deviation(uint32_t deviation_hz)
             deviation & 0xFF
     };
 
+#ifdef RADIO_LOGGING_ENABLE
     log_info("Si4063: Set frequency deviation to value %lu with %lu Hz\n", deviation, deviation_hz);
+#endif
 
     si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 
@@ -491,7 +495,9 @@ void si4063_set_modulation_type(si4063_modulation_type type)
             0x08 // 0x08 = Direct modulation source (MCU-controlled)
     };
 
+#ifdef RADIO_LOGGING_ENABLE
     log_debug("Si4063: Set modulation type %d\n", type);
+#endif
 
     switch (type) {
         case SI4063_MODULATION_TYPE_CW:
@@ -554,10 +560,22 @@ uint16_t si4063_read_part_info()
 inline void si4063_set_direct_mode_pin(bool high)
 {
     if (high) {
-        GPIO_SetBits(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3);
+        HAL_GPIO_WritePin(BANK_SI4063_GPIO3, PIN_SI4063_GPIO3, GPIO_PIN_SET);
     } else {
-        GPIO_ResetBits(GPIO_SI4063_GPIO3, GPIO_PIN_SI4063_GPIO3);
+        HAL_GPIO_WritePin(BANK_SI4063_GPIO3, PIN_SI4063_GPIO3, GPIO_PIN_RESET);
     }
+}
+
+void si4063_set_crystal_capacitance(uint8_t c_count)
+{
+        uint8_t data[] = {
+                0x00, // 0x00 = Group GLOBAL
+                0x01, // Set 1 property
+                0x00, // 0x00 = GLOBAL_XO_TUNE
+                c_count  // Value of 62 standard determined for DFM17 radiosondes
+        };
+
+        si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
 }
 
 void si4063_configure()
@@ -577,8 +595,8 @@ void si4063_configure()
         uint8_t data[] = {
                 0x00, // 0x00 = Group GLOBAL
                 0x01, // Set 1 property
-                0x01, // 0x00 = GLOBAL_CLK_CFG
-                0x00  // No clock output needed
+                0x01, // 0x01 = GLOBAL_CLK_CFG
+                0x48  // DIV_CLK_EN=1 (enable on GPIO), DIV_CLK_SEL=001 (÷2 = 12.8 MHz)
         };
 
         si4063_send_command(SI4063_COMMAND_SET_PROPERTY, sizeof(data), data);
@@ -662,14 +680,14 @@ void si4063_configure()
     {
         /*
           2. Detailed Errata Descriptions
-2.1 If Configured to Skip Sync and Preamble on Transmit, the TX Data from the FIFO is Corrupted
-Description of Errata
-If preamble and sync word are excluded from the transmitted data (PREMABLE_TX_LENGTH = 0 and SYNC_CONFIG: SKIP_TX = 1), data from the FIFO is not transmitted correctly.
-Affected Conditions / Impacts
-Some number of missed bytes will occur at the beginning of the packet and some number of repeated bytes at the end of the packet.
-Workaround
-Set PKT_FIELD_1_CRC_CONFIG: CRC_START to 1. This will trigger the packet handler and result in transmitting the correct data,
-while still not sending a CRC unless enabled in a FIELD configuration. A fix has been identified and will be included in a future release
+                2.1 If Configured to Skip Sync and Preamble on Transmit, the TX Data from the FIFO is Corrupted
+                Description of Errata
+                If preamble and sync word are excluded from the transmitted data (PREMABLE_TX_LENGTH = 0 and SYNC_CONFIG: SKIP_TX = 1), data from the FIFO is not transmitted correctly.
+                Affected Conditions / Impacts
+                Some number of missed bytes will occur at the beginning of the packet and some number of repeated bytes at the end of the packet.
+                Workaround
+                Set PKT_FIELD_1_CRC_CONFIG: CRC_START to 1. This will trigger the packet handler and result in transmitting the correct data,
+                while still not sending a CRC unless enabled in a FIELD configuration. A fix has been identified and will be included in a future release
         */
 
         // In other words, without this, the FIFO buffer gets corrupted while TXing, because we're not using
@@ -765,22 +783,22 @@ int si4063_init()
     GPIO_InitTypeDef gpio_init;
 
     // Si4063 shutdown pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_SDN;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_SDN, &gpio_init);
+    gpio_init.Pin = PIN_SDN;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_SDN, &gpio_init);
 
     // Si4063 chip select pin
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_NSEL;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_NSEL, &gpio_init);
+    gpio_init.Pin = PIN_NSEL;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_NSEL, &gpio_init);
 
     // Si4063 GPIO3 pin for direct mode transmission
-    gpio_init.GPIO_Pin = GPIO_PIN_SI4063_GPIO3;
-    gpio_init.GPIO_Mode = GPIO_Mode_Out_PP;
-    gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIO_SI4063_GPIO3, &gpio_init);
+    gpio_init.Pin = PIN_SI4063_GPIO3;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BANK_SI4063_GPIO3, &gpio_init);
 
     si4063_set_direct_mode_pin(false);
 
@@ -811,9 +829,9 @@ int si4063_init()
     si4063_configure_gpio(
             0x00, // GPIO0: Do nothing
             0x00, // GPIO1: Do nothing
-            0x00, // GPIO2: Do nothing
+            0x07, // GPIO2: DIV_CLK output (12.8 MHz divided TCXO clock to STM32 PD0/OSC_IN)
             0x04, // GPIO3: Pin is configured as a CMOS input for direct mode transmissions.
-            0x00 // Drive strength: HIGH
+            0x03 // Drive strength: Low
     );
 
     si4063_set_tx_power(0x00);
@@ -836,8 +854,8 @@ void TIM1_BRK_TIM15_IRQHandler(void)
     static bool pin_state = false;
 #endif
 
-    if (TIM_GetITStatus(TIM15, TIM_IT_Update) != RESET) {
-        TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+    if (__HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE) && __HAL_TIM_GET_IT_SOURCE(&htim15, TIM_IT_UPDATE)) {
+        __HAL_TIM_CLEAR_IT(&htim15, TIM_IT_UPDATE);
 #ifdef DFM17
         // Restrict the interrupt to DFM17 only just in case this ISR gets called on RS41
         pin_state = !pin_state;

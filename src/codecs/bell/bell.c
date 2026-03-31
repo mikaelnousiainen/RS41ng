@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include "codecs/ax25/ax25.h"
 #include "bell.h"
@@ -50,8 +50,11 @@ fsk_tone bell103_tones[] = {
 
 void bell_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate, uint16_t flag_field_count, fsk_tone *tones)
 {
-    encoder->priv = malloc(sizeof(bell_encoder));
-    memset(encoder->priv, 0, sizeof(bell_encoder));
+    // Static singleton: only one bell encoder may exist at a time.
+    // This avoids needing any heap allocation. 
+    static bell_encoder bell_instance;
+    memset(&bell_instance, 0, sizeof(bell_encoder));
+    encoder->priv = &bell_instance;
 
     bell_encoder *bell = (bell_encoder *) encoder->priv;
     bell->symbol_rate = symbol_rate;
@@ -61,10 +64,7 @@ void bell_encoder_new(fsk_encoder *encoder, uint32_t symbol_rate, uint16_t flag_
 
 void bell_encoder_destroy(fsk_encoder *encoder)
 {
-    if (encoder->priv != NULL) {
-        free(encoder->priv);
-        encoder->priv = NULL;
-    }
+    encoder->priv = NULL;
 }
 
 void bell_encoder_set_data(fsk_encoder *encoder, uint16_t data_length, uint8_t *data)

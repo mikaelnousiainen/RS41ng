@@ -1,34 +1,110 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-// Experimental support for Graw DFM-17 radiosondes added! Please test and report any issues!
-// WARNING: Using a DFM-17 as a primary flight tracker is NOT recommended yet!
-// NOTE: DFM-17 radiosondes require a GPS lock (and clear visibility to the sky) to calibrate its internal oscillator.
-// DFM-17 transmissions, especially APRS, may not decode correctly because of incorrect timing before the internal oscillator has been calibrated.
-
-// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
-//#define RS41
-//#define DFM17
-
-#if !defined(RS41) && !defined(DFM17)
-#error "No hardware type specified. Please define RS41 or DFM17."
-#endif
-#if defined(RS41) && defined(DFM17)
-#error "Please define either RS41 or DFM17."
-#endif
-
-// Enable semihosting to receive debug logs during development
-// See the README for details on how to set up debugging and debug logs with GDB
-// NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
-//#define SEMIHOSTING_ENABLE
-//#define LOGGING_ENABLE
+// Note: these defines for radiosonde type (RS41, DFM17) are no longer used in this config file.  They are defined in your compile
+// command line as noted in the README.md.  Do not set them here.  
 
 /**
- * Global configuration
+ * Basic configuration
  */
 
-// Set the tracker amateur radio call sign here
-#define CALLSIGN "MYCALL"
+// Set the tracker amateur radio call sign here.  Note, if you want a SSID or SUFFIX, those are added by separate defines below.
+#define CALLSIGN "4FSKTEST"
+
+// Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus Binary. Max value: 200000 milliseconds or 200 seconds
+#define RADIO_POST_TRANSMIT_DELAY_MS 500
+
+// The COUNT settings define the number of times that each type of transmission is repeated
+
+// It is strongly recommended to use Horus Binary V3 and the latest version of Horus GUI or WebHorus (horus.sondehub.org) for reception.
+
+#define RADIO_TX_CW false
+#define RADIO_TX_CW_COUNT 1
+#define RADIO_TX_PIP false
+#define RADIO_TX_PIP_COUNT 6
+#define RADIO_TX_APRS false
+#define RADIO_TX_APRS_COUNT 1
+#define RADIO_TX_APRS_9600 false
+#define RADIO_TX_APRS_9600_COUNT 1
+#define RADIO_TX_HORUS_V2 false
+#define RADIO_TX_HORUS_V2_COUNT 1
+#define RADIO_TX_HORUS_V3 true
+#define RADIO_TX_HORUS_V3_COUNT 5
+#define RADIO_TX_CATS false
+#define RADIO_TX_CATS_COUNT 1
+#define RADIO_TX_LONG_TONE false
+#define RADIO_TX_LONG_TONE_COUNT 1
+#define RADIO_TX_LONG_TONE_DURATION_SECONDS 10
+
+// Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
+#define RADIO_TX_HORUS_V2_CONTINUOUS false
+#define RADIO_TX_HORUS_V3_CONTINUOUS false
+
+// Transmit frequencies for the transmitter modes
+#define RADIO_TX_FREQUENCY_CW        432501000
+#define RADIO_TX_FREQUENCY_PIP       432501000
+#define RADIO_TX_FREQUENCY_APRS_1200 432500000
+#define RADIO_TX_FREQUENCY_APRS_9600 432500000
+// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
+#define RADIO_TX_FREQUENCY_HORUS_V2  432501000
+#define RADIO_TX_FREQUENCY_HORUS_V3  432501000
+#define RADIO_TX_FREQUENCY_CATS      434100000
+#define RADIO_TX_FREQUENCY_LONG_TONE 432501000
+
+// Enable this setting to require a GPS fix before transmitting after power-on. If GPS fix has already been established, losing lock will
+// not prevent the radio from transmitting
+#define RADIO_TX_WAIT_FOR_GPS_LOCK false
+
+// Fox Mode -- disables GPS and follows transmit scheme above
+// Use RADIO_POST_TRANSMIT_DELAY_MS to define wait periods between transmissions
+// Use CW, PIP and LONG_TONE settings 
+#define ENABLE_FOX_MODE false
+// Change CW modes (CW, PIP, LONG_TONE) to be FM modulated
+#define ENABLE_FM_CW false
+// Delay in ms for FM CW transmit
+#define FM_CW_TX_DELAY 500 
+// Frequency in Hz of FM CW tone
+#define FM_TONE_FREQ 1000
+
+// Enable transmitting Horus V3 on an additional frequency
+// NOTE: It is recommended to use continuous mode or to change the _COUNT parameter to 1 if using this mode
+// #define RADIO_TX_FREQUENCY_HORUS_V3_ALT  432701000
+
+// RS41 only: Built-in Si4032 radio chip transmission configuration
+// Si4032 transmit power: 0..7
+// 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
+// This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
+// For APRS usage, you might want to use maximum power setting of 7 (20 dBm, 100 mW). Note that this setting reduces battery life.
+// See the README for details about power consumption.
+#define RADIO_SI4032_TX_POWER 5
+
+
+/**
+ * DFM-17 only: Built-in Si4063 radio chip transmission configuration
+ */
+
+// Si4063 transmit power: 0..127
+/*
+Setting, measured RF output power, relative DC power draw
+7, 0 dBm (~0mW), 0 mW DC
+10, 3.3 dBm (~2mW), 26 mW DC
+14, 6.2 dBm (~4mW), 54 mW DC
+22, 10.2 dBm (~10mW), 114 mW DC
+32, 13.2 dBm (~20mW), 186 mW DC <-- Recommended
+48, 16.7 dBm (~47mW), 294 mW DC
+80, 20.1 dBm (~100mW), 462 mW DC
+127, 21.5 dBm (~141mW), 558 mW DC
+*/
+#define RADIO_SI4063_TX_POWER 32
+
+// Use crystal capacitance LUT to better maintain frequency stability over temperature. 
+// Recommended for temperature below 0C
+#define RADIO_SI4063_TX_CORRECT true
+
+// Append processor and crystal capacitance values to Horus v3 telem
+#define TX_DFM_ADDITIONAL_TELEM true
+
+/* General Settings */
 
 // Disabling LEDs will save power
 // Red LED: Lit during initialization and transmit.
@@ -36,16 +112,13 @@
 #define LEDS_ENABLE true
 
 // Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
-#define LEDS_DISABLE_ALTITUDE_METERS 1000
+#define LEDS_DISABLE_ALTITUDE_METERS 2000
 
-// Allow powering off the sonde by pressing the button for over a second (when the sonde is not transmitting)
+// Allow powering off the sonde by pressing the button for over a second
 #define ALLOW_POWER_OFF false
 
 // Number of character pairs to include in locator
 #define LOCATOR_PAIR_COUNT_FULL 6 // max. 6 (12 characters WWL)
-
-// Delay after transmission for modes that do not use time synchronization. Zero delay allows continuous transmit mode for Horus V1 and V2.
-#define RADIO_POST_TRANSMIT_DELAY_MS 1000
 
 // Threshold for time-synchronized modes regarding how far from scheduled transmission time the transmission is still allowed
 #define RADIO_TIME_SYNC_THRESHOLD_MS 2000
@@ -65,227 +138,30 @@
 // Based on measurements Mark VK5QI, enabling this reduces power consumption by about 30-40 mA (~50%) to around 30-50 mA,
 // where the consumption is 70-90 mA when power saving is not enabled and any radio transmitters are idle.
 // See the README for details about power consumption.
+// NOTE: THIS IS NOT YET RECOMMENDED FOR THE RSM4X4-series PCBs! The u-blox M10050 does not properly enter a power-saving tracking state,
+// so no power savings are realized. The power saving mode requires Beidou B1C constellation to be disabled, so it provides no benefits, only problems.
+// RS41 RSM4x4 notes (u-blox MAX-10 series): https://content.u-blox.com/sites/default/files/MAX-M10S_IntegrationManual_UBX-20053088.pdf section 3.6.2
 #define GPS_POWER_SAVING_ENABLE false
 
-// Enable NMEA output from GPS via external serial port. This disables use of I²C bus (Si5351 and sensors) because the pins are shared.
+// Enable NMEA output from GPS via external serial port.
+// On RS41, this uses USART3 (PB10/PB11) which shares pins with the I²C bus (Si5351 and sensors).
+// On DFM17, this can use USART1 (PA9/PA10 on Mini-USB header) or USART3 (PB10/PB11 on 4-pin PCB header). USART1 does not conflict with I²C.
 #define GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE false
 
-#if (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
-#error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus.
+// Select the USART for external serial output on DFM17: 1 = USART1 (PA9/PA10), 3 = USART3 (PB10/PB11)
+// USART1 is recommended as it does not share pins with the I²C bus.
+// This setting is ignored on RS41 (always USART3).
+#define DFM17_USART_EXT_PORT 1
+
+#if defined(RS41) && (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#error GPS NMEA output via serial port cannot be enabled simultaneously with the I2C bus on RS41 (shared PB10/PB11 pins).
 #endif
 
-/**
- * Advanced GPS settings - Do not modify if you are not sure what you are doing!
- * The default settings are suitable for high-altitude balloon flights.
- */
-
-// GPS Dynamic Platform model: (default: 6 - Airborne <1g)
-// - 0 Portable
-// - 2 Stationary
-// - 3 Pedestrian
-// - 4 Automotive
-// - 5 Sea
-// - 6 Airborne with <1g Acceleration
-// - 7 Airborne with <2g Acceleration
-// - 8 Airborne with <4g Acceleration
-#define GPS_DYNAMIC_MODEL 6
-
-// GPS Position Fixing Mode: (default: 2 - 3D only)
-// - 1: 2D only
-// - 2: 3D only
-// - 3: Auto 2D/3D
-#define GPS_POSITION_FIXING_MODE 2
-
-// Measurement Rate in milliseconds (default: 1000)
-// GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
-// The UBX-G6010 in the older RS41 radiosondes (PCB revisions 4x1 and 4x2) should support rates up to 5 Hz (200 ms).
-// * Values < 200ms do not seem to work (not accepted by the GPS chip). 1000ms is a good value for most flights.
-#define GPS_MEASUREMENT_RATE 1000
-
-// Rate for GPS message updates sent by the GPS chip (default: 1, send message for every measurement done)
-// Message rate is defined as the number of measurements between messages.
-// For example:
-// * Rate of 1 will lead to updates for every measurement (e.g. every second if measurement rate is set to 1000 ms)
-// * Rate of 5 will lead to updates for every 5th measurement (e.g. every 5 seconds if measurement rate is set to 1000 ms)
-#define GPS_POSITION_MESSAGE_RATE 1
-#define GPS_TIME_MESSAGE_RATE 1
-
-/**
- * RS41 only: Global configuration (there is no I²C bus exposed in DFM-17)
- */
-
-// Define the I²C bus clock speed in Hz.
-// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
-// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
-#define I2C_BUS_CLOCK_SPEED 100000
-
-// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
-// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
-#define SENSOR_BMP280_ENABLE false
-// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
-#define SENSOR_BMP280_I2C_ADDRESS 0x77
-
-// Enable use of an externally connected I²C RadSens radiation sensor
-#define SENSOR_RADSENS_ENABLE false
-// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
-#define SENSOR_RADSENS_CHIP_ID 0x7D
-// RadSens I²C device address, default is 0x66.
-#define SENSOR_RADSENS_I2C_ADDRESS 0x66
-// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
-// The value is stored in the non-volatile memory of the microcontroller.
-#define SENSOR_RADSENS_SENSITIVITY 105
-
-// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
-#define RADIO_SI5351_ENABLE false
-
-// Enable pulse counter via expansion header pin for use with devices like Geiger counters.
-// This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
-// Also changes the Horus 4FSK V2 data format and adds a custom data field for pulse count.
-// The pulse count will wrap to zero at 65535 as it is stored as a 16-bit unsigned integer value.
-#define PULSE_COUNTER_ENABLE false
-
-// Pulse counter pin modes
-#define PULSE_COUNTER_PIN_MODE_FLOATING 0
-#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP 1
-#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_DOWN 2
-
-// Enable the internal pull-up or pull-down resistor on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX)
-// This is necessary if the pulse counter needs to count pulses where the pin is pulled low (ground) or high (VCC) during the pulse.
-// Set to "floating" if the circuit that generates the pulses already has a pull-up or a pull-down resistor.
-#define PULSE_COUNTER_PIN_MODE PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP
-
-// Pulse counter interrupt edges
-#define PULSE_COUNTER_INTERRUPT_EDGE_FALLING 1
-#define PULSE_COUNTER_INTERRUPT_EDGE_RISING 2
-
-// Set the edge of the pulse where the interrupt is triggered: falling or rising.
-#define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
-
-#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
-#error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
+#if defined(DFM17) && (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) && (DFM17_USART_EXT_PORT == 3) && ((RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE))
+#error GPS NMEA output via USART3 cannot be enabled simultaneously with the I2C bus on DFM17 (shared PB10/PB11 pins).
 #endif
 
-/**
- * RS41 only: Built-in Si4032 radio chip transmission configuration
- */
-
-// Si4032 transmit power: 0..7
-// 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
-// This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
-// For APRS usage, you might want to use maximum power setting of 7 (20 dBm, 100 mW). Note that this setting reduces battery life.
-// See the README for details about power consumption.
-#define RADIO_SI4032_TX_POWER 5
-
-// Which modes to transmit using the built-in Si4032 transmitter chip
-// The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI4032_TX_CW false
-#define RADIO_SI4032_TX_CW_COUNT 1
-#define RADIO_SI4032_TX_PIP false
-#define RADIO_SI4032_TX_PIP_COUNT 6
-#define RADIO_SI4032_TX_APRS true
-#define RADIO_SI4032_TX_APRS_COUNT 2
-#define RADIO_SI4032_TX_HORUS_V1 false
-#define RADIO_SI4032_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4032_TX_HORUS_V2 true
-#define RADIO_SI4032_TX_HORUS_V2_COUNT 6
-#define RADIO_SI4032_TX_CATS false
-#define RADIO_SI4032_TX_CATS_COUNT 1
-
-// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
-// The continuous mode transmits Horus 4FSK preamble between transmissions
-// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4032_TX_HORUS_V1_CONTINUOUS false
-#define RADIO_SI4032_TX_HORUS_V2_CONTINUOUS false
-
-// Transmit frequencies for the Si4032 transmitter modes
-#define RADIO_SI4032_TX_FREQUENCY_CW        432300000
-#define RADIO_SI4032_TX_FREQUENCY_PIP       432300000
-#define RADIO_SI4032_TX_FREQUENCY_APRS_1200 432500000
-// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V1  432301000
-#define RADIO_SI4032_TX_FREQUENCY_HORUS_V2  432301000
-#define RADIO_SI4032_TX_FREQUENCY_CATS      434100000
-
-/**
- * DFM-17 only: Built-in Si4063 radio chip transmission configuration
- */
-
-// Si4063 transmit power: 0..127
-// TODO: Document Si4063 transmit power levels
-#define RADIO_SI4063_TX_POWER 127
-
-// Which modes to transmit using the built-in Si4063 transmitter chip
-// The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI4063_TX_CW false
-#define RADIO_SI4063_TX_CW_COUNT 1
-#define RADIO_SI4063_TX_PIP false
-#define RADIO_SI4063_TX_PIP_COUNT 6
-#define RADIO_SI4063_TX_APRS true
-#define RADIO_SI4063_TX_APRS_COUNT 2
-#define RADIO_SI4063_TX_HORUS_V1 false
-#define RADIO_SI4063_TX_HORUS_V1_COUNT 1
-#define RADIO_SI4063_TX_HORUS_V2 true
-#define RADIO_SI4063_TX_HORUS_V2_COUNT 6
-#define RADIO_SI4063_TX_CATS false
-#define RADIO_SI4063_TX_CATS_COUNT 1
-
-// Continuous transmit mode can be enabled for *either* Horus V1 or V2, but not both. This disables all other transmission modes.
-// The continuous mode transmits Horus 4FSK preamble between transmissions
-// to allow Horus receivers to keep frequency synchronization at all times, which improves reception.
-#define RADIO_SI4063_TX_HORUS_V1_CONTINUOUS false
-#define RADIO_SI4063_TX_HORUS_V2_CONTINUOUS false
-
-// Transmit frequencies for the Si4063 transmitter modes
-#define RADIO_SI4063_TX_FREQUENCY_CW        432500000
-#define RADIO_SI4063_TX_FREQUENCY_PIP       432500000
-#define RADIO_SI4063_TX_FREQUENCY_APRS_1200 432500000
-// Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V1  432501000
-#define RADIO_SI4063_TX_FREQUENCY_HORUS_V2  432501000
-#define RADIO_SI4063_TX_FREQUENCY_CATS      430500000
-
-/**
- * RS41 only: External Si5351 radio chip transmission configuration
- */
-
-// Si5351 transmit power: 0..3
-// Si5351 drive strength: 0 = 2mA, 1 = 4mA, 2 = 6mA, 3 = 8mA
-#define RADIO_SI5351_TX_POWER 3
-
-// Which modes to transmit using an externally connected Si5351 chip in the I²C bus
-// The COUNT settings define the number of times that each type of transmission is repeated
-#define RADIO_SI5351_TX_CW true
-#define RADIO_SI5351_TX_CW_COUNT 1
-#define RADIO_SI5351_TX_PIP false
-#define RADIO_SI5351_TX_PIP_COUNT 6
-#define RADIO_SI5351_TX_HORUS_V1 false
-#define RADIO_SI5351_TX_HORUS_V1_COUNT 1
-#define RADIO_SI5351_TX_HORUS_V2 true
-#define RADIO_SI5351_TX_HORUS_V2_COUNT 4
-#define RADIO_SI5351_TX_JT9 false
-#define RADIO_SI5351_TX_JT9_COUNT 1
-#define RADIO_SI5351_TX_JT65 false
-#define RADIO_SI5351_TX_JT65_COUNT 1
-#define RADIO_SI5351_TX_JT4 false
-#define RADIO_SI5351_TX_JT4_COUNT 1
-#define RADIO_SI5351_TX_WSPR false
-#define RADIO_SI5351_TX_WSPR_COUNT 1
-#define RADIO_SI5351_TX_FSQ false
-#define RADIO_SI5351_TX_FSQ_COUNT 1
-#define RADIO_SI5351_TX_FT8 false
-#define RADIO_SI5351_TX_FT8_COUNT 1
-
-// Transmit frequencies for the Si5351 transmitter modes
-#define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
-#define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
-#define RADIO_SI5351_TX_FREQUENCY_HORUS_V1   3608000UL
-#define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
-#define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
-#define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
-#define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
-#define RADIO_SI5351_TX_FREQUENCY_WSPR       14085000UL    // Was: 14097200UL
-#define RADIO_SI5351_TX_FREQUENCY_FSQ        3608350UL    // Was: 7105350UL     // Base freq is 1350 Hz higher than dial freq in USB
-#define RADIO_SI5351_TX_FREQUENCY_FT8        14085000UL    // Was: 14075000UL
+/* Mode specific settings */
 
 /**
  * APRS mode settings
@@ -317,8 +193,8 @@
 #define APRS_SYMBOL 'O'
 // Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
 // Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
-#define APRS_COMMENT "RS41ng radiosonde firmware test"
-#define APRS_RELAYS "WIDE1-1,WIDE2-1" // Do not include any spaces in the APRS_RELAYS
+#define APRS_COMMENT "https://amateur.sondehub.org/" CALLSIGN
+#define APRS_RELAYS "" // No spaces. This is where you can define "WIDE1-1,WIDE2-1" etc, but it is highly discouraged for balloons.
 #define APRS_DESTINATION "APZ41N"
 #define APRS_DESTINATION_SSID '0'
 // Generate an APRS weather report instead of a position report. This will override the APRS symbol with the weather station symbol.
@@ -327,8 +203,10 @@
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
 #define APRS_TIME_SYNC_SECONDS 0
+#define APRS_9600_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define APRS_TIME_SYNC_OFFSET_SECONDS 0
+#define APRS_9600_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * Common Horus 4FSK mode settings
@@ -338,28 +216,7 @@
 #define HORUS_FREQUENCY_OFFSET_SI4063 0
 
 /**
- * Horus V1 4FSK mode settings (deprecated, please use Horus V2 mode)
- */
-
-// NOTE: Horus 4FSK V1 mode is deprecated in favor of Horus 4FSK V2 mode. All new Horus 4FSK payload IDs are allocated for V2 mode.
-// NOTE: Payload ID 0 (4FSKTEST) is for testing purposes only, and should not be used on an actual flight.
-// Please request a new payload ID in GitHub according to the instructions at: https://github.com/projecthorus/horusdemodlib/wiki#how-do-i-transmit-it
-#define HORUS_V1_PAYLOAD_ID 0
-#define HORUS_V1_BAUD_RATE_SI4032 100
-#define HORUS_V1_BAUD_RATE_SI4063 100
-#define HORUS_V1_BAUD_RATE_SI5351 50
-#define HORUS_V1_PREAMBLE_LENGTH 16
-#define HORUS_V1_IDLE_PREAMBLE_LENGTH 32
-#define HORUS_V1_TONE_SPACING_HZ_SI5351 270
-
-// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
-// See the README file for more detailed documentation about time sync and its offset setting
-#define HORUS_V1_TIME_SYNC_SECONDS 0
-// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
-#define HORUS_V1_TIME_SYNC_OFFSET_SECONDS 0
-
-/**
- * Horus V2 4FSK mode settings
+ * Horus V2 4FSK mode settings -- Horus V2 has been deprecated in favor of V3. Please use V3 whenever possible. 
  */
 
 // NOTE: Payload ID 256 (4FSKTEST-V2) is for testing purposes only, and should not be used on an actual flight.
@@ -368,8 +225,7 @@
 #define HORUS_V2_BAUD_RATE_SI4032 100
 #define HORUS_V2_BAUD_RATE_SI4063 100
 #define HORUS_V2_BAUD_RATE_SI5351 50
-#define HORUS_V2_PREAMBLE_LENGTH 16
-#define HORUS_V2_IDLE_PREAMBLE_LENGTH 32
+#define HORUS_V2_PREAMBLE_LENGTH 4
 #define HORUS_V2_TONE_SPACING_HZ_SI5351 270
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
@@ -377,6 +233,28 @@
 #define HORUS_V2_TIME_SYNC_SECONDS 0
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define HORUS_V2_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * Horus V3 4FSK mode settings
+ */
+
+// NOTE: Every character adds 6 bits to your packet size! Try and limit the callsign to 5-8 characters. 
+// This value is set by the callsign above, but can be overridden here. 
+#define HORUS_V3_PAYLOAD_CALLSIGN CALLSIGN
+// This SUFFIX will appended to HORUS_V3_PAYLOAD_CALLSIGN.  Ex: "-11"
+#define HORUS_V3_CALLSIGN_SUFFIX ""
+#define HORUS_V3_BAUD_RATE_SI4032 100
+#define HORUS_V3_BAUD_RATE_SI4063 100
+#define HORUS_V3_BAUD_RATE_SI5351 50
+#define HORUS_V3_PREAMBLE_LENGTH 4
+#define HORUS_V3_TONE_SPACING_HZ_SI5351 270
+#define HORUS_V3_NOHUB false // Disable uploading to SondeHub
+
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define HORUS_V3_TIME_SYNC_SECONDS 0
+// Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
+#define HORUS_V3_TIME_SYNC_OFFSET_SECONDS 0
 
 /**
  * CATS mode settings
@@ -434,6 +312,132 @@
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define PIP_TIME_SYNC_OFFSET_SECONDS 0
 
+// Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
+// See the README file for more detailed documentation about time sync and its offset setting
+#define LONG_TONE_TIME_SYNC_SECONDS 0
+#define LONG_TONE_TIME_SYNC_OFFSET_SECONDS 0
+
+/**
+ * I2C Bus Settings
+ */
+
+// Define the I²C bus clock speed in Hz. (old RS41 only)
+// The default of 100000 (= 100 kHz) should be used with the Si5351 clock generator to allow fast frequency changes.
+// Note that some BMP280 sensors may require decreasing the clock speed to 10000 (= 10 kHz)
+#define I2C_BUS_CLOCK_SPEED 100000
+
+// The STM32L4 on the RSM4x4 series uses a timing configuration register: 
+// 0x20422727 = 100KHz
+// 0x9044A747 = 10KHz
+#define I2C_BUS_TIMING 0x20422727
+
+// I2C timing for 24 MHz PCLK1, 100 kHz standard mode (I2C2)
+// PRESC=2, SCLDEL=4, SDADEL=2, SCLH=0x27(5µs), SCLL=0x27(5µs)
+// 0x20422727
+// I2C timing for 24 MHz PCLK1, 10 kHz asymmetric duty (I2C2)
+// PRESC=9, SCLDEL=4, SDADEL=4, SCLH=0xA7(70µs), SCLL=0x47(30µs)
+// Asymmetric duty cycle: 70% high / 30% low compensates for slow rise time with internal pull-ups
+// 0x9044A747
+
+// Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
+// NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
+#define SENSOR_BMP280_ENABLE false
+// BMP280/BME280 I²C device address is usually 0x76 or 0x77.
+#define SENSOR_BMP280_I2C_ADDRESS 0x77
+
+// Enable use of a BME680/688/690 atmospheric sensor -- similar to BME280, but with Gas measurements
+#define SENSOR_BME68X_ENABLE false
+#define SENSOR_BME68X_I2C_ADDRESS 0x77
+#define SENSOR_BME690_ENABLE false
+#define SENSOR_BME690_I2C_ADDRESS 0x77
+
+// BME680/688/690 gas measurement parameters
+#define SENSOR_BME_6XX_GAS_MEASUREMENT false
+// Gas heater duration in ms
+#define SENSOR_BME_6XX_GAS_HEATER_DURATION 100
+// Gas heater temperature in degrees C
+#define SENSOR_BME_6XX_GAS_HEATER_TEMP 300
+
+
+// Enable use of an externally connected I²C RadSens radiation sensor
+#define SENSOR_RADSENS_ENABLE false
+// Expected RadSens chip ID to verify initialization of the sensor, default is 0x7D.
+#define SENSOR_RADSENS_CHIP_ID 0x7D
+// RadSens I²C device address, default is 0x66.
+#define SENSOR_RADSENS_I2C_ADDRESS 0x66
+// Uncomment to set RadSens sensor sensitivity (imp/MKR). The default value is 105 imp/MKR.
+// The value is stored in the non-volatile memory of the microcontroller.
+#define SENSOR_RADSENS_SENSITIVITY 105
+
+// Enable pulse counter via expansion header pin for use with devices like Geiger counters.
+// This disables the external I²C bus and the serial port as the expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX) is used for pulse input.
+// Also changes the Horus 4FSK data format and adds a custom data field for pulse count.
+// The pulse count will wrap to zero at 65535 as it is stored as a 16-bit unsigned integer value.
+#define PULSE_COUNTER_ENABLE false
+
+// Pulse counter pin modes
+#define PULSE_COUNTER_PIN_MODE_FLOATING 0
+#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP 1
+#define PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_DOWN 2
+
+// Enable the internal pull-up or pull-down resistor on expansion header pin 2 (I2C2_SDA (PB11) / UART3 RX)
+// This is necessary if the pulse counter needs to count pulses where the pin is pulled low (ground) or high (VCC) during the pulse.
+// Set to "floating" if the circuit that generates the pulses already has a pull-up or a pull-down resistor.
+#define PULSE_COUNTER_PIN_MODE PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP
+
+// Pulse counter interrupt edges
+#define PULSE_COUNTER_INTERRUPT_EDGE_FALLING 1
+#define PULSE_COUNTER_INTERRUPT_EDGE_RISING 2
+
+// Set the edge of the pulse where the interrupt is triggered: falling or rising.
+#define PULSE_COUNTER_INTERRUPT_EDGE PULSE_COUNTER_INTERRUPT_EDGE_FALLING
+
+/**
+ * External Si5351 radio chip transmission configuration
+ */
+
+// Enable use of an externally connected I²C Si5351 clock generator chip for HF radio transmissions
+#define RADIO_SI5351_ENABLE false
+
+// Si5351 transmit power: 0..3
+// Si5351 drive strength: 0 = 2mA, 1 = 4mA, 2 = 6mA, 3 = 8mA
+#define RADIO_SI5351_TX_POWER 3
+
+// Which modes to transmit using an externally connected Si5351 chip in the I²C bus
+// The COUNT settings define the number of times that each type of transmission is repeated
+#define RADIO_SI5351_TX_CW true
+#define RADIO_SI5351_TX_CW_COUNT 1
+#define RADIO_SI5351_TX_PIP false
+#define RADIO_SI5351_TX_PIP_COUNT 6
+#define RADIO_SI5351_TX_HORUS_V2 false
+#define RADIO_SI5351_TX_HORUS_V2_COUNT 4
+#define RADIO_SI5351_TX_HORUS_V3 true
+#define RADIO_SI5351_TX_HORUS_V3_COUNT 4
+#define RADIO_SI5351_TX_JT9 false
+#define RADIO_SI5351_TX_JT9_COUNT 1
+#define RADIO_SI5351_TX_JT65 false
+#define RADIO_SI5351_TX_JT65_COUNT 1
+#define RADIO_SI5351_TX_JT4 false
+#define RADIO_SI5351_TX_JT4_COUNT 1
+#define RADIO_SI5351_TX_WSPR false
+#define RADIO_SI5351_TX_WSPR_COUNT 1
+#define RADIO_SI5351_TX_FSQ false
+#define RADIO_SI5351_TX_FSQ_COUNT 1
+#define RADIO_SI5351_TX_FT8 false
+#define RADIO_SI5351_TX_FT8_COUNT 1
+
+// Transmit frequencies for the Si5351 transmitter modes
+#define RADIO_SI5351_TX_FREQUENCY_CW         3595000UL
+#define RADIO_SI5351_TX_FREQUENCY_PIP        3595000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V2   3608000UL
+#define RADIO_SI5351_TX_FREQUENCY_HORUS_V3   3608000UL
+#define RADIO_SI5351_TX_FREQUENCY_JT9        14085000UL    // Was: 14078700UL
+#define RADIO_SI5351_TX_FREQUENCY_JT65       14085000UL    // Was: 14078300UL
+#define RADIO_SI5351_TX_FREQUENCY_JT4        14085000UL    // Was: 14078500UL
+#define RADIO_SI5351_TX_FREQUENCY_WSPR       14085000UL    // Was: 14097200UL
+#define RADIO_SI5351_TX_FREQUENCY_FSQ        3608350UL    // Was: 7105350UL     // Base freq is 1350 Hz higher than dial freq in USB
+#define RADIO_SI5351_TX_FREQUENCY_FT8        14085000UL    // Was: 14075000UL
+
 /**
  * WSPR settings
  */
@@ -487,6 +491,75 @@
 #define JT65_TIME_SYNC_SECONDS 60
 // Delay transmission for an N second offset, counting from the scheduled time set with TIME_SYNC_SECONDS.
 #define JT65_TIME_SYNC_OFFSET_SECONDS 1
+
+/**
+ * Advanced GPS settings - Do not modify if you are not sure what you are doing!
+ * The default settings are suitable for high-altitude balloon flights.
+ */
+
+// GPS Dynamic Platform model: (default: 6 - Airborne <1g)
+// - 0 Portable
+// - 2 Stationary
+// - 3 Pedestrian
+// - 4 Automotive
+// - 5 Sea
+// - 6 Airborne with <1g Acceleration
+// - 7 Airborne with <2g Acceleration
+// - 8 Airborne with <4g Acceleration
+#define GPS_DYNAMIC_MODEL 6
+
+// GPS Position Fixing Mode: (default: 2 - 3D only)
+// - 1: 2D only
+// - 2: 3D only
+// - 3: Auto 2D/3D
+#define GPS_POSITION_FIXING_MODE 2
+
+// Measurement Rate in milliseconds (default: 1000)
+// GPS measurements are taken every GPS_MEASUREMENT_RATE milliseconds
+// The UBX-G6010 in the older RS41 radiosondes (PCB revisions 4x1 and 4x2) should support rates up to 5 Hz (200 ms).
+// * Values < 200ms do not seem to work (not accepted by the GPS chip). 1000ms is a good value for most flights.
+// * The RSM4x4 platform does not seem to accept values above 1000
+#define GPS_MEASUREMENT_RATE 1000
+
+// Rate for GPS message updates sent by the GPS chip (default: 1, send message for every measurement done)
+// Message rate is defined as the number of measurements between messages.
+// For example:
+// * Rate of 1 will lead to updates for every measurement (e.g. every second if measurement rate is set to 1000 ms)
+// * Rate of 5 will lead to updates for every 5th measurement (e.g. every 5 seconds if measurement rate is set to 1000 ms)
+#define GPS_POSITION_MESSAGE_RATE 1
+#define GPS_TIME_MESSAGE_RATE 1
+
+#if (PULSE_COUNTER_ENABLE) && ((GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (RADIO_SI5351_ENABLE) || (SENSOR_BMP280_ENABLE) || (SENSOR_BME690_ENABLE))
+#error Pulse counter cannot be enabled simultaneously with GPS NMEA output or I2C bus sensors.
+#endif
+
+/* Debug settings */
+
+// Enable semihosting to receive debug logs during development
+// See the README for details on how to set up debugging and debug logs with GDB
+// NOTE: Semihosting has to be disabled when the radiosonde is not connected to an STM32 programmer dongle, otherwise the firmware will not run.
+// #define SEMIHOSTING_ENABLE
+// #define LOGGING_ENABLE
+// GPS logging will affect timing during transmissions -- do not expect to decode Horus or APRS packets if enabled
+// #define GPS_LOGGING_ENABLE
+// Radio logging -- enable additional logging messages related to the transmissions 
+// #define RADIO_LOGGING_ENABLE
+// Transmit the button ADC value (useful for RS41s when debugging power button performance)
+// #define DEBUG_TX_BUTTON_ADC
+
+// NOTE: These options may be selected as define flags in the compiler! See the README for more info. Use these to keep your IDE happy when developing. 
+// Define radiosonde type. Remove the "//" comment to select either RS41 or DFM17.
+// #define RS41
+// #define DFM17
+// #define RS41_RSM4x4 // Uncomment for RS41 RSM4x4/4x5 PCBs (newer, STM32L412-series)
+
+#if !defined(RS41) && !defined(DFM17)
+#error "No hardware type specified. Please define RS41 or DFM17."
+#endif
+#if defined(RS41) && defined(DFM17)
+#error "Please define either RS41 or DFM17."
+#endif
+
 
 #include "config_internal.h"
 

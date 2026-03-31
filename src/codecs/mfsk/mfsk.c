@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <string.h>
 
 #include "mfsk.h"
@@ -28,8 +27,9 @@ typedef struct _mfsk_encoder {
 
 void mfsk_encoder_new(fsk_encoder *encoder, mfsk_type type, uint32_t symbol_rate, uint32_t tone_spacing_hz_100)
 {
-    encoder->priv = malloc(sizeof(mfsk_encoder));
-    memset(encoder->priv, 0, sizeof(mfsk_encoder));
+    static mfsk_encoder mfsk_instance;
+    memset(&mfsk_instance, 0, sizeof(mfsk_encoder));
+    encoder->priv = &mfsk_instance;
 
     mfsk_encoder *mfsk = (mfsk_encoder *) encoder->priv;
     mfsk->type = type;
@@ -61,10 +61,7 @@ void mfsk_encoder_new(fsk_encoder *encoder, mfsk_type type, uint32_t symbol_rate
 
 void mfsk_encoder_destroy(fsk_encoder *encoder)
 {
-    if (encoder->priv != NULL) {
-        free(encoder->priv);
-        encoder->priv = NULL;
-    }
+    encoder->priv = NULL;
 }
 
 fsk_tone *mfsk_get_idle_tone(fsk_encoder *encoder)

@@ -1,22 +1,22 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 #define OPENOCD_SYS_WRITEC 0x03
 #define OPENOCD_SYS_WRITE0 0x04
 #define OPENOCD_SYS_WRITE  0x05
 
-/**
- * TODO:
- * I've used the following code to check for a connected debugger in the past with an STM32F4xx series MCU
- * (when the only choice was the StdPeriph library -- perhaps this has changed with HAL/LL, but the hardware
- * register and corresponding bit is obviously the same):
- * if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)
- * {
- *     // Debugger is connected
- * }
- */
+#define CoreDebug_DHCSR    (*(volatile uint32_t *)0xE000EDF0)
+#define CoreDebug_DHCSR_C_DEBUGEN (1UL << 0)
+
+static inline bool debugger_connected(void)
+{
+    return (CoreDebug_DHCSR & CoreDebug_DHCSR_C_DEBUGEN) != 0;
+}
 
 void openocd_send_command(int command, void *message)
 {
+    if (!debugger_connected())
+        return;
 
     asm("mov r0, %[cmd];"
         "mov r1, %[msg];"

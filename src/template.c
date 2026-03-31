@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "utils.h"
 #include "config.h"
 #include "strlcpy.h"
@@ -7,11 +6,7 @@
 
 size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *data)
 {
-    char *temp = malloc(dest_len);
-    if (temp == NULL) {
-        return 0;
-    }
-
+    char temp[dest_len];
     char replacement[32];
 
     strlcpy(replacement, CALLSIGN, sizeof(replacement));
@@ -58,6 +53,10 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$pr", replacement);
 
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->bme6xx_gas_r);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$gas", replacement);
+
     snprintf(replacement, sizeof(replacement), "%u", (unsigned int) data->gps.time_of_week_millis);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$tow", replacement);
@@ -78,11 +77,11 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$sv", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.latitude_degrees_1000000 / 10000);
+    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.latitude_degrees_10000000 / 10000);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$lat", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.longitude_degrees_1000000 / 10000);
+    snprintf(replacement, sizeof(replacement), "%05d", (int) data->gps.longitude_degrees_10000000 / 10000);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$lon", replacement);
 
@@ -119,15 +118,23 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$gu", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%d", (int) data->clock_calibration_trim);
+#ifdef DFM17
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->si4063_capacitance_trim);
     strlcpy(temp, dest, dest_len);
-    str_replace(dest, dest_len, temp, "$ct", replacement);
+    str_replace(dest, dest_len, temp, "$xc", replacement);
 
-    snprintf(replacement, sizeof(replacement), "%d", (int) data->clock_calibration_count);
+    snprintf(replacement, sizeof(replacement), "%d", data->cap_trim_offset);
     strlcpy(temp, dest, dest_len);
-    str_replace(dest, dest_len, temp, "$cc", replacement);
+    str_replace(dest, dest_len, temp, "$xo", replacement);
 
-    free(temp);
+    snprintf(replacement, sizeof(replacement), "%ld", (long) data->timepulse_error_us);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$xe", replacement);
 
-    return len;
+    snprintf(replacement, sizeof(replacement), "%d", (int) data->po_state);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$xs", replacement);
+#endif
+
+return len;
 }

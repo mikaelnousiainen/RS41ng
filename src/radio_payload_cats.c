@@ -1,7 +1,8 @@
 #include <stdint.h>
-#include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
+#include "config_internal.h"
 #include "telemetry.h"
 #include "payload.h"
 #include "log.h"
@@ -27,22 +28,22 @@ uint16_t radio_cats_encode(uint8_t *payload, uint16_t length, telemetry_data *te
         *(cur++) = (CATS_SYNC_WORD >> (i * 8));
     }
 
-    uint8_t *data = malloc(length);
+    static uint8_t data[RADIO_PAYLOAD_MAX_LENGTH];
+    memset(data, 0, sizeof(data));
     cats_packet packet = cats_create(data);
     cats_append_identification_whisker(&packet, CATS_CALLSIGN, CATS_SSID, CATS_ICON); // 11
     cats_append_comment_whisker(&packet, message); // 102
 
     if (GPS_HAS_FIX(telemetry_data->gps) &&
-       (telemetry_data->gps.latitude_degrees_1000000 != 0 ||
-        telemetry_data->gps.longitude_degrees_1000000 != 0)) {
+       (telemetry_data->gps.latitude_degrees_10000000 != 0 ||
+        telemetry_data->gps.longitude_degrees_10000000 != 0)) {
         cats_append_gps_whisker(&packet, telemetry_data->gps); // 16
     }
 
     cats_append_node_info_whisker(&packet, telemetry_data); // 16
 
     size_t len = cats_fully_encode(packet, cur);
-    log_info("CATS packet length: %ld\n", len + CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH);
-    free(data);
+    log_info("CATS packet length: %i\n", (int)(len + CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH));
 
     return (uint16_t)(CATS_PREAMBLE_LENGTH + CATS_SYNC_WORD_LENGTH + len);
 }

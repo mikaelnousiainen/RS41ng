@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-#include "hal/i2c.h"
+#include "drivers/hal/i2c.h"
+
 #include "bmp280.h"
 
 /**

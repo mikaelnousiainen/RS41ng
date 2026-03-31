@@ -20,4 +20,6 @@ void horus_l2_decode_rx_packet(unsigned char *output_payload_data,
         unsigned char *input_rx_data,
         int num_payload_data_bytes);
 
+unsigned short gen_crc16(unsigned char *data_p, unsigned char length);
+
 #endif
