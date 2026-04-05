@@ -234,7 +234,9 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
-#ifdef DFM17
+#if 0
+// Reevaluate this at a later time -- something isn't scaled right
+// #ifdef DFM17
     if (asnMessage.extraSensors.nCount < 4 && data->current_milliamps > 0) {
         asnMessage.exist.extraSensors = true;
         horusAdditionalSensorType current_struct = {
