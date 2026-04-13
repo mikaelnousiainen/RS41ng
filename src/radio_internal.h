@@ -54,6 +54,7 @@ typedef struct _radio_transmit_entry {
 
     uint8_t current_transmit_index;
     uint8_t transmit_count;
+    bool pass_completed;
 
     payload_encoder *payload_encoder;
     fsk_encoder_api *fsk_encoder_api;
@@ -85,6 +86,8 @@ typedef struct _radio_module_state {
 
 extern radio_transmit_entry *radio_current_transmit_entry;
 extern radio_module_state radio_shared_state;
+extern radio_transmit_entry radio_transmit_schedule[];
+extern uint8_t radio_transmit_entry_count;
 extern uint32_t precalculated_pwm_periods[];
 
 #endif

@@ -41,4 +41,6 @@ void ubxm10050_handle_incoming_byte(uint8_t data, uint8_t reset);
 
 void ubxm10050_reset_parser(void);
 
+void ubxm10050_clear_data(void);
+
 #endif /* __UBXM10050_H */

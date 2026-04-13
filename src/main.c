@@ -13,6 +13,7 @@
 #include "radsens_handler.h"
 #include "si5351_handler.h"
 #include "radio.h"
+#include "landed.h"
 #include "config.h"
 #include "log.h"
 
@@ -87,6 +88,15 @@ void set_green_led(bool enabled)
         enabled = false;
     }
 
+#if LANDED_MODE_ENABLE && LANDED_MODE_LEDS_TRANSMIT_ONLY
+    if (landed_is_active()) {
+        landed_state ls = landed_get_state();
+        if (ls != LANDED_STATE_TRANSMITTING && ls != LANDED_STATE_PIPPING) {
+            enabled = false;
+        }
+    }
+#endif
+
     system_set_green_led(enabled);
 }
 
@@ -95,6 +105,15 @@ void set_red_led(bool enabled)
     if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
         enabled = false;
     }
+
+#if LANDED_MODE_ENABLE && LANDED_MODE_LEDS_TRANSMIT_ONLY
+    if (landed_is_active()) {
+        landed_state ls = landed_get_state();
+        if (ls != LANDED_STATE_TRANSMITTING && ls != LANDED_STATE_PIPPING) {
+            enabled = false;
+        }
+    }
+#endif
 
 #if LEDS_ENABLE && !ENABLE_FOX_MODE
     if (enabled) {
@@ -116,6 +135,15 @@ void set_yellow_led(bool enabled)
     if ((LEDS_DISABLE_ALTITUDE_METERS > 0) && (current_gps_data.altitude_mm / 1000 > LEDS_DISABLE_ALTITUDE_METERS)) {
         enabled = false;
     }
+
+#if LANDED_MODE_ENABLE && LANDED_MODE_LEDS_TRANSMIT_ONLY
+    if (landed_is_active()) {
+        landed_state ls = landed_get_state();
+        if (ls != LANDED_STATE_TRANSMITTING && ls != LANDED_STATE_PIPPING) {
+            enabled = false;
+        }
+    }
+#endif
 
     system_set_yellow_led(enabled);
 }
@@ -245,6 +273,10 @@ int main(void)
     //log_info("Radio module init\n");
     radio_init();
 
+#if LANDED_MODE_ENABLE
+    landed_init();
+#endif
+
     delay_ms(100);
 
     log_info("System initialized!\n");
@@ -269,6 +301,40 @@ int main(void)
 
     while (true) {
         usart_gps_drain_dma();
+
+#if GPS_SLEEP_TEST_SECONDS > 0
+        {
+            static bool gps_sleep_test_done = false;
+            if (!gps_sleep_test_done && HAL_GetTick() >= (GPS_SLEEP_TEST_SECONDS * 1000U)) {
+                log_info("GPS SLEEP TEST: Putting GPS to sleep at %lu ms\n", HAL_GetTick());
+                gps_driver_sleep();
+                gps_sleep_test_done = true;
+            }
+        }
+#endif
+
+#if LANDED_MODE_ENABLE
+        {
+            /* Drive the landed-mode state machine once per second. */
+            static uint32_t landed_last_tick_ms = 0;
+            uint32_t now_ms = HAL_GetTick();
+            if ((now_ms - landed_last_tick_ms) >= 1000) {
+                landed_last_tick_ms = now_ms;
+                if (!landed_update(&current_gps_data)) {
+                    /* SLEEPING / ACQUIRING - skip radio processing to save power. */
+                    __WFI();
+                    continue;
+                }
+            } else if (landed_is_active()
+                       && (landed_get_state() == LANDED_STATE_SLEEPING
+                           || landed_get_state() == LANDED_STATE_ACQUIRING)) {
+                /* Between ticks while sleeping, just idle. */
+                delay_ms(100);
+                continue;
+            }
+        }
+#endif
+
         radio_handle_main_loop();
         //NVIC_SystemLPConfig(NVIC_LP_SEVONPEND, DISABLE);
         //__WFI();

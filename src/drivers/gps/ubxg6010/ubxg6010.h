@@ -21,4 +21,6 @@ void ubxg6010_handle_incoming_byte(uint8_t data, uint8_t reset);
 
 void ubxg6010_reset_parser();
 
+void ubxg6010_clear_data();
+
 #endif

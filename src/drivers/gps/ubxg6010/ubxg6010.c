@@ -823,6 +823,11 @@ void ubxg6010_reset_parser()
     sync_nmea = 0;
 }
 
+void ubxg6010_clear_data()
+{
+    memset(&ubxg6010_current_gps_data, 0, sizeof(gps_data));
+}
+
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
 static void ubxg6010_handle_nmea_sentence_start(uint8_t data)
 {

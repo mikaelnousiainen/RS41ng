@@ -42,7 +42,7 @@ static void rcc_init()
 
 #ifdef RS41
 #ifdef RS41_RSM4x4
-    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
+    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2) != HAL_OK) {
         while(1);
     }
 
@@ -189,6 +189,54 @@ static void gpio_init()
     gpio_init.Mode = GPIO_MODE_ANALOG;
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BANK_CURRENT, &gpio_init);
+#endif
+
+#ifdef RS41_RSM4x4
+    // Disable oscillator bias rails and analog switches on RSM4x4.
+    // All pins driven low to cut power to the temperature/humidity
+    // ring oscillators and disconnect the analog signal paths.
+
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+    gpio_init.Pull = GPIO_NOPULL;
+
+    // Oscillator bias rail pullups
+    gpio_init.Pin = PIN_PULLUP_TM;
+    HAL_GPIO_Init(BANK_PULLUP_TM, &gpio_init);
+    HAL_GPIO_WritePin(BANK_PULLUP_TM, PIN_PULLUP_TM, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_PULLUP_HYG;
+    HAL_GPIO_Init(BANK_PULLUP_HYG, &gpio_init);
+    HAL_GPIO_WritePin(BANK_PULLUP_HYG, PIN_PULLUP_HYG, GPIO_PIN_RESET);
+
+    // Analog switch control (SPST1-4, SPDT1-3)
+    gpio_init.Pin = PIN_SPST1;
+    HAL_GPIO_Init(BANK_SPST1, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPST1, PIN_SPST1, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPST2;
+    HAL_GPIO_Init(BANK_SPST2, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPST2, PIN_SPST2, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPST3;
+    HAL_GPIO_Init(BANK_SPST3, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPST3, PIN_SPST3, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPST4;
+    HAL_GPIO_Init(BANK_SPST4, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPST4, PIN_SPST4, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPDT1;
+    HAL_GPIO_Init(BANK_SPDT1, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPDT1, PIN_SPDT1, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPDT2;
+    HAL_GPIO_Init(BANK_SPDT2, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPDT2, PIN_SPDT2, GPIO_PIN_RESET);
+
+    gpio_init.Pin = PIN_SPDT3;
+    HAL_GPIO_Init(BANK_SPDT3, &gpio_init);
+    HAL_GPIO_WritePin(BANK_SPDT3, PIN_SPDT3, GPIO_PIN_RESET);
 #endif
 }
 

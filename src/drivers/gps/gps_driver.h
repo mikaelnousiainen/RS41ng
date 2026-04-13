@@ -47,6 +47,7 @@
 #define gps_driver_get_current_gps_data(data)   ubxg6010_get_current_gps_data(data)
 #define gps_driver_handle_incoming_byte         ubxg6010_handle_incoming_byte
 #define gps_driver_reset_parser()               ubxg6010_reset_parser()
+#define gps_driver_clear_data()                 ubxg6010_clear_data()
 
 #endif /* GPS_DRIVER_UBXG6010 */
 
@@ -65,6 +66,7 @@
 #define gps_driver_get_current_gps_data(data)   ubxm10050_get_current_gps_data(data)
 #define gps_driver_handle_incoming_byte         ubxm10050_handle_incoming_byte
 #define gps_driver_reset_parser()               ubxm10050_reset_parser()
+#define gps_driver_clear_data()                 ubxm10050_clear_data()
 
 #endif /* GPS_DRIVER_UBXM10050 */
 
