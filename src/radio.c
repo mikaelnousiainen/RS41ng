@@ -669,7 +669,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
 
     log_info("Full payload length: %d\n", radio_current_payload_length);
 
-#ifdef SEMIHOSTING_ENABLE && defined(RADIO_LOGGING_ENABLE)
+#if defined(SEMIHOSTING_ENABLE) && defined(RADIO_LOGGING_ENABLE)
     log_info("Payload: ");
     log_bytes_hex(radio_current_payload_length, (char *) radio_current_payload);
     log_info("\n    ");
