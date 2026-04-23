@@ -10,7 +10,7 @@
 
 uint16_t radio_aprs_position_encode(uint8_t *payload, uint16_t length, telemetry_data *telemetry_data, char *message)
 {
-    uint8_t aprs_packet[RADIO_PAYLOAD_MAX_LENGTH];
+    uint8_t aprs_packet[128];
 
     aprs_generate_position(aprs_packet, sizeof(aprs_packet), telemetry_data,
             APRS_SYMBOL_TABLE, APRS_SYMBOL, false, message);
