@@ -1,4 +1,5 @@
 #include "drivers/hal/system.h"
+#include "drivers/hal/i2c.h"
 #include "drivers/hal/spi.h"
 #include "drivers/hal/usart_gps.h"
 #include "drivers/hal/usart_ext.h"
@@ -16,7 +17,6 @@
 #include "log.h"
 
 #ifdef RS41
-#include "drivers/hal/i2c.h"
 #include "drivers/si4032/si4032.h"
 #endif
 
@@ -143,9 +143,7 @@ int main(void)
     log_info("Pulse counter init\n");
     pulse_counter_init(PULSE_COUNTER_PIN_MODE, PULSE_COUNTER_INTERRUPT_EDGE);
 #else
-    #ifdef RS41 
-        // Only RS41 uses the I2C bus
-        // log_info("I2C init: clock speed %d kHz\n", I2C_BUS_CLOCK_SPEED / 1000);
+    #if SENSOR_BMP280_ENABLE || SENSOR_BME68X_ENABLE || SENSOR_BME690_ENABLE || SENSOR_RADSENS_ENABLE || RADIO_SI5351_ENABLE
         i2c_init();
     #endif
 #endif
