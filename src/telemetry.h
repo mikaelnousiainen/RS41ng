@@ -18,6 +18,8 @@ typedef struct _telemetry_data {
     uint32_t pressure_mbar_100;
     uint32_t humidity_percentage_100;
     uint32_t bme6xx_gas_r;
+    sensor_type ext_sensor_type;
+
     uint16_t pulse_count;
     uint16_t current_milliamps;
     float radiation_intensity_uR_h;

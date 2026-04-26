@@ -109,22 +109,21 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     };
 
 
-    // External temperature & humidity sensors (typically BMP280 -- can expand to others)
-    if (data->temperature_celsius_100 != 0 && data->humidity_percentage_100 != 0) {
+    if(data->ext_sensor_type != NO_EXT_SENSOR) {
         if (data->temperature_celsius_100 >= -10230 && data->temperature_celsius_100 <= 10230) {
             asnMessage.temperatureCelsius_x10.external = CLAMP((int16_t)(data->temperature_celsius_100 / 10), -1023, 1023);
             asnMessage.temperatureCelsius_x10.exist.external = true;
         }
 
-        if (data->humidity_percentage_100 >= 0 && data->humidity_percentage_100 <= 10000) {
+        if (data->humidity_percentage_100 >= 0 && data->humidity_percentage_100 <= 10000 && data->ext_sensor_type != SENSOR_BMP280) {
             asnMessage.humidityPercentage = CLAMP((uint8_t)(data->humidity_percentage_100 / 100), 0, 100);
             asnMessage.exist.humidityPercentage = true;
         }
-    }
 
-    if (data->pressure_mbar_100 > 0 && data->pressure_mbar_100 <= 120000) {
-        asnMessage.pressurehPa_x10 = CLAMP((uint16_t)(data->pressure_mbar_100 / 10), 0, 12000);
-        asnMessage.exist.pressurehPa_x10 = true;
+        if (data->pressure_mbar_100 > 0 && data->pressure_mbar_100 <= 120000) {
+            asnMessage.pressurehPa_x10 = CLAMP((uint16_t)(data->pressure_mbar_100 / 10), 0, 12000);
+            asnMessage.exist.pressurehPa_x10 = true;
+        }
     }
 
     // Add radsens data to packet if enabled
