@@ -33,4 +33,12 @@ extern char *ftjt_message_templates[];
 void set_green_led(bool enabled);
 void set_red_led(bool enabled);
 
+typedef enum _sensor_type {
+    NO_EXT_SENSOR = 0,
+    SENSOR_BMP280,
+    SENSOR_BME280,
+    SENSOR_BME68X,
+    SENSOR_BME690,
+} sensor_type;
+
 #endif
