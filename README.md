@@ -590,6 +590,42 @@ use command `file src/RS41ng.elf`.
 
 NOTE: To save RAM, the heap size has been zeroed out. Dynamic memory allocations (`malloc`, etc.) will not function. Use static or stack-based allocation if needed. 
 
+## Hardware-specific Notes
+
+This section is allocated for documentation of various features and oddities of specific radiosonde types.
+
+### Graw DFM-17 GPS Disciplined Oscillator
+
+RS41ng uses the PPS output of the onboard GPS to trim the oscillator for the radio IC (Si4063). This is possible due to a clock output from the Si4063 (a GPIO pin) being connected the oscillator input pin on the STM32F1. This input uses the HSE_BYPASS feature of the STM32F1. On the STM32F1, a timer is configured to count ticks at a rate of 1,000,000 ticks per second. Each PPS interrupt from the GPS triggers a function to compare the actual number of ticks versus the expected number of ticks (1,000,000). This delta in timing, measured in parts-per-million, is fed to a "perturb and observe" algorithm that makes adjustments to the clock trimming capacitors on the Si4063 radio IC. The perturb-and-observe algorithm was chosen over a standard PLL method due to the non-linear behavior of the clock trimming. 
+
+The realized impact of this feature is that a DFM-17 can be wholly GPS disciplined and maintain frequency stability over a wide range of temperatures. 
+
+NOTE: Obtaining a GPS lock that produces PPS output can take a few minutes, and the algorithm can take approximately 15 minutes to stabilize after power-on in a clear sky environment. The DFM-17 is ready for flight when the GPS has a solid lock, but frequency stability may not be achieved until the perturb-and-observe algorithm has locked as well. See state 3 below. 
+
+If the `TX_DFM_ADDITIONAL_TELEM` feature is enabled in `config.h`, specific values from this P&O loop are transmitted as telemetry on Horus Binary v3. They will be conveyed as:
+* `Cal x 0` -> The absolute value of the clock trimming register (defaults to 98 or 0x62)
+* `Cal x 1` -> The capacitance trim offset -- how many steps away from the default value
+* `Cal x 2` -> Microsecond delta from PPS to onboard clock. `0` means the PPS and onboard clock are in sync. Positive numbers imply the onboard clock is running slow. Negative numbers imply the onboard clock is running fast. 
+* `Cal x 3` -> Perturn-and-observe loop state:
+  * 0 - PO_STARTUP - Collecting initial baseline measurement
+  * 1 - PO_SETTLING - Waiting for a step to take effect on hardware
+  * 2 - PO_OBSERVING - Collecting post-step error samples
+  * 3 - PO_LOCKED - Error within dead band, monitoring for drift
+
+### RS41 RSM4x4/RSM4x5 Notes
+
+The RSM4x4/RSM4x5 revisions of the RS41 have some features that should be noted:
+* GPS PPS is connected to PB6.
+* The U-Blox M10050 (marked rev A0102A) does NOT support PSMCT. Despite many hours spent testing, the power save mode state would never go beyond `acquiring`. 
+
+### RS41 Switch Bypass
+
+A wire can be soldered from the positive battery terminal to a decoupling capacitor on the power supply circuit that bypasses the onboard power switch and power switching circuitry. This applies to two use cases: single-cell battery operation (typically functional down to 0.7V), and to prevent landing impact from turning off the RS41 if the batteries lose contact in the battery holder. 
+
+The location of the wire is shown in orange:
+
+![RS41 Switch Bypass](rs41_bypass.jpg)
+
 ## Si4032 Bell FSK modulation hack for APRS
 
 Notes by Mikael OH3BHX:
