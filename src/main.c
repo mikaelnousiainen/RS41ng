@@ -120,9 +120,9 @@ void set_red_led(bool enabled)
         red_led_strobe_ticks = 5 * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
         red_led_strobe_state = false;
         return;
-    } else {
-        red_led_strobe_ticks = 0;
-        red_led_strobe_state = false;
+    } else if (red_led_strobe_ticks > 0) {
+        // Don't cancel an in-flight error strobe; let it run to completion.
+        return;
     }
 #endif
 
@@ -224,6 +224,9 @@ int main(void)
         }
         log_error("BMP280 init failed, retrying...\n");
     }
+    if (!success) {
+        set_red_led(true);
+    }
 #endif
 
 #if SENSOR_BME68X_ENABLE
@@ -234,6 +237,9 @@ int main(void)
             break;
         }
         log_error("BME68X init failed, retrying...\n");
+    }
+    if (!success) {
+        set_red_led(true);
     }
 #endif
 
@@ -246,6 +252,9 @@ int main(void)
         }
         log_error("BME690 init failed, retrying...\n");
     }
+    if (!success) {
+        set_red_led(true);
+    }
 #endif
 
 #if SENSOR_RADSENS_ENABLE
@@ -256,6 +265,9 @@ int main(void)
             break;
         }
         log_error("RadSens init failed, retrying...\n");
+    }
+    if (!success) {
+        set_red_led(true);
     }
 #endif
 
@@ -268,7 +280,10 @@ int main(void)
         }
         log_error("Si5351 init failed, retrying...\n");
     }
-#endif 
+    if (!success) {
+        set_red_led(true);
+    }
+#endif
 
     //log_info("Radio module init\n");
     radio_init();

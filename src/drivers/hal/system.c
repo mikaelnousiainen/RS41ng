@@ -542,7 +542,7 @@ void system_set_red_led(bool enabled)
     HAL_GPIO_WritePin(BANK_RED_LED, PIN_RED_LED, enabled ? GPIO_PIN_RESET : GPIO_PIN_SET);
 #endif
 #ifdef DFM17
-    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_RED_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(BANK_RED_LED, PIN_RED_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
 #endif
 }
 
@@ -550,7 +550,7 @@ void system_set_yellow_led(bool enabled)
 {
 #ifdef DFM17
     // Only DFM-17 has a yellow LED
-    HAL_GPIO_WritePin(BANK_GREEN_LED, PIN_YELLOW_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(BANK_YELLOW_LED, PIN_YELLOW_LED, enabled ? GPIO_PIN_SET : GPIO_PIN_RESET);
 
 #endif
 }
