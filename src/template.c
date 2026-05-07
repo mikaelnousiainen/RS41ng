@@ -3,6 +3,7 @@
 #include "config.h"
 #include "strlcpy.h"
 #include "template.h"
+#include "codecs/aprs/aprs.h"
 
 size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *data)
 {
@@ -117,6 +118,11 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     snprintf(replacement, sizeof(replacement), "%d", (int) data->gps.updated);
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$gu", replacement);
+
+    // $apc pre-increments the shared APRS packet counter on each substitution
+    snprintf(replacement, sizeof(replacement), "%u", (unsigned int) ++aprs_packet_counter);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$apc", replacement);
 
 #ifdef DFM17
     snprintf(replacement, sizeof(replacement), "%d", (int) data->si4063_capacitance_trim);
