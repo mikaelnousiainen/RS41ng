@@ -108,9 +108,12 @@ Setting, measured RF output power, relative DC power draw
 /* General Settings */
 
 // Disabling LEDs will save power
-// Red LED: Lit during initialization and transmit.
-// Green LED: Blinking fast when there is no GPS fix. Blinking slowly when the GPS has a fix.
-#define LEDS_ENABLE false
+// Green LED: Blinking when not ready for flight (no GPS lock), solid when ready for flight (GPS locked)
+// Yellow LED (DFM only): always on -- power LED (per label)
+// Red LED: Illuminated only for errors.
+#define LEDS_ENABLE true
+// Change the behavior of the red LED to illuminate when transmitting
+#define LEDS_ENABLE_RED_TX false
 
 // Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
 #define LEDS_DISABLE_ALTITUDE_METERS 2000
