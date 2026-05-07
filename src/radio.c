@@ -1133,12 +1133,9 @@ static radio_transmit_entry *radio_find_ready_entry()
     if (radio_current_transmit_entry != NULL &&
         radio_current_transmit_entry->enabled &&
         radio_current_transmit_entry->current_transmit_index != 0) {
-#if LANDED_MODE_ENABLE
-        // In landed mode, honor the post-transmit delay between repeats
-        if (landed_is_active() && radio_post_transmit_delay_counter > 0) {
+        if (radio_post_transmit_delay_counter > 0) {
             return NULL;
         }
-#endif
         return radio_current_transmit_entry;
     }
 
