@@ -28,7 +28,7 @@
 #define RADIO_TX_APRS_9600_COUNT 1
 #define RADIO_TX_HORUS_V2 false
 #define RADIO_TX_HORUS_V2_COUNT 1
-#define RADIO_TX_HORUS_V3 false
+#define RADIO_TX_HORUS_V3 true
 #define RADIO_TX_HORUS_V3_COUNT 5
 #define RADIO_TX_CATS false
 #define RADIO_TX_CATS_COUNT 1
@@ -38,7 +38,7 @@
 
 // Continuous transmit mode can be enabled for *either* Horus V2 or V3, but not both. This disables all other transmission modes.
 #define RADIO_TX_HORUS_V2_CONTINUOUS false
-#define RADIO_TX_HORUS_V3_CONTINUOUS true
+#define RADIO_TX_HORUS_V3_CONTINUOUS false
 
 // Transmit frequencies for the transmitter modes
 #define RADIO_TX_FREQUENCY_CW        432501000
@@ -175,7 +175,7 @@ Setting, measured RF output power, relative DC power draw
  * the landing site disables landed mode if the unit moves; it can re-enter
  * landed mode if it settles again (with a new geofence center).
  */
-#define LANDED_MODE_ENABLE true
+#define LANDED_MODE_ENABLE false
 // Altitude in meters that must be exceeded during ascent to arm landed mode.
 #define LANDED_MODE_ARM_ALTITUDE_METERS 5000
 // Maximum absolute vertical speed in cm/s to consider "stationary" (50 = 0.5 m/s)
@@ -202,13 +202,6 @@ Setting, measured RF output power, relative DC power draw
 // enabled during TRANSMITTING or PIPPING to conserve power.
 #define LANDED_MODE_LEDS_TRANSMIT_ONLY true
 
-// Bench test: auto-enter STABILIZING after this many seconds of uptime,
-// bypassing the altitude arm and descent checks.  Set to 0 for flight mode.
-#define LANDED_MODE_TEST_SECONDS 10800
-
-// GPS sleep test: put GPS to sleep after this many seconds of uptime.
-// Radio and everything else continues normally.  Set to 0 to disable.
-#define GPS_SLEEP_TEST_SECONDS 0
 
 /* Mode specific settings */
 

@@ -19,6 +19,14 @@
 // Experimental fast frequency change routine for Si5351, not tested
 #define SI5351_FAST_ENABLE false
 
+// Bench test: auto-enter STABILIZING after this many seconds of uptime,
+// bypassing the altitude arm and descent checks.  Set to 0 for flight mode.
+#define LANDED_MODE_TEST_SECONDS 0
+
+// GPS sleep test: put GPS to sleep after this many seconds of uptime.
+// Radio and everything else continues normally.  Set to 0 to disable.
+#define GPS_SLEEP_TEST_SECONDS 0
+
 #include <stdbool.h>
 
 extern volatile bool system_initialized;
