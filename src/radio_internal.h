@@ -44,6 +44,12 @@ typedef struct _radio_transmit_entry {
     uint16_t time_sync_seconds;
     uint16_t time_sync_seconds_offset;
 
+    // Last scheduled slot serviced by time-synced scheduling. Used to fire a
+    // time-synced entry exactly once per period, even though the tolerance
+    // window (RADIO_TIME_SYNC_THRESHOLD_MS) spans multiple GPS measurements.
+    // UINT32_MAX = no slot serviced yet.
+    uint32_t last_tx_slot;
+
     uint32_t frequency;
     uint8_t tx_power;
     uint32_t symbol_rate;

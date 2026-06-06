@@ -622,8 +622,6 @@ static volatile uint32_t radio_next_symbol_counter = 0;
 
 static radio_transmit_entry *radio_start_transmit_entry = NULL;
 
-static uint32_t radio_previous_time_sync_scheduled = 0;
-
 char radio_current_payload_message[RADIO_PAYLOAD_MESSAGE_MAX_LENGTH];
 
 uint8_t radio_current_payload[RADIO_PAYLOAD_MAX_LENGTH];
@@ -1146,15 +1144,23 @@ static radio_transmit_entry *radio_find_ready_entry()
     if (gps.updated) {
         uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
 
-        if (time_millis != radio_previous_time_sync_scheduled) {
-            for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
-                radio_transmit_entry *entry = &radio_transmit_schedule[i];
-                if (!entry->enabled || entry->time_sync_seconds == 0) continue;
+        for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
+            radio_transmit_entry *entry = &radio_transmit_schedule[i];
+            if (!entry->enabled || entry->time_sync_seconds == 0) continue;
 
-                if (radio_check_time_sync(entry, time_millis, gps.fix)) {
-                    radio_previous_time_sync_scheduled = time_millis;
-                    return entry;
-                }
+            uint32_t offset_millis = entry->time_sync_seconds_offset * 1000;
+            if (time_millis < offset_millis) continue;
+
+            // The scheduled slot is constant across the whole tolerance window
+            // (RADIO_TIME_SYNC_THRESHOLD_MS) and increments once per period.
+            // Dedup on it so the entry fires exactly once per period, no matter
+            // how many GPS measurements land inside the window.
+            uint32_t slot = (time_millis - offset_millis) / (entry->time_sync_seconds * 1000);
+            if (entry->last_tx_slot == slot) continue;
+
+            if (radio_check_time_sync(entry, time_millis, gps.fix)) {
+                entry->last_tx_slot = slot;
+                return entry;
             }
         }
     }
@@ -1333,6 +1339,7 @@ void radio_init()
         if (entry->transmit_count == 0) {
             entry->transmit_count = 1;
         }
+        entry->last_tx_slot = UINT32_MAX;
     }
 
     // radio_current_transmit_entry starts NULL; radio_find_ready_entry() will
