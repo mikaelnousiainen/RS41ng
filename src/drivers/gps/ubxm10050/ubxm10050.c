@@ -761,6 +761,14 @@ bool ubxm10050_get_current_gps_data(gps_data *data)
     return was_updated;
 }
 
+/* Non-consuming read: leaves the updated flag intact so the transmit
+ * scheduler, which is the sole consumer of the flag, still sees it. */
+bool ubxm10050_peek_current_gps_data(gps_data *data)
+{
+    *data = m10_current_gps_data;
+    return data->updated;
+}
+
 void ubxm10050_request_gpstime(void)
 {
     /* Poll NAV-TIMEGPS by sending an empty poll request */

@@ -51,7 +51,9 @@ void handle_timer_tick()
 
     counter = (counter + 1) % SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND;
     if (counter == 0) {
-        gps_driver_get_current_gps_data(&current_gps_data);
+        // Peek only: consuming the updated flag here would race the transmit
+        // scheduler, which gates time-synced entries on it (see radio.c Tier 2).
+        gps_driver_peek_current_gps_data(&current_gps_data);
     }
 
 #if LEDS_ENABLE && !ENABLE_FOX_MODE
