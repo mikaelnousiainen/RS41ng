@@ -20,6 +20,8 @@ build — and guides you through three steps:
 3. **Flash** — connect an ST-LINK v2 and flash the firmware directly from the browser over WebUSB, or use the
    OpenOCD command line as a fallback.
 
+[![RS41ng Web Configurator](docs/rs41ng-web-firmware-configurator-screenshot.png)](https://mikaelnousiainen.github.io/RS41ng/)
+
 Browser-based flashing (step 3) requires a WebUSB-capable browser such as **Google Chrome** or **Microsoft
 Edge**; Firefox and Safari can still be used for the configure and build steps. The configurator is a
 convenience layer on top of the normal workflow — editing `config.h`/`config.c` by hand as described below
