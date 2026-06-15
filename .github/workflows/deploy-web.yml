@@ -9,7 +9,9 @@ name: Deploy web configurator
 
 on:
   push:
-    branches: [main]
+    # TEMPORARY: web-configurator is included so Pages can be tested from the branch
+    # before merge. Revert to `branches: [main]` once verified.
+    branches: [main, web-configurator]
     paths:
       - "web/**"
       - ".github/workflows/deploy-web.yml"
