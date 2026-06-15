@@ -20,6 +20,7 @@
     "@modyfi/vite-plugin-yaml": "^1.0.0",
     "@tailwindcss/forms": "^0.5.0",
     "@types/js-yaml": "4.0.9",
+    "@types/node": "^20.0.0",
     "@vitejs/plugin-basic-ssl": "^2.1.4",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/test-utils": "^2.4.0",
