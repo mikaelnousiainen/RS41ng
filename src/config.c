@@ -47,6 +47,12 @@
 #include <stdlib.h>
 #include "config.h"
 
+// Build-time notice that the built-in manual configuration is in effect. This file
+// is compiled only when no generated config is present (see src/CMakeLists.txt), so
+// the message is unconditional here. The generated counterpart (config_generated.c)
+// emits the corresponding "GENERATED configuration" notice.
+#pragma message("RS41ng: building with built-in MANUAL configuration (config.c / config.h)")
+
 volatile bool system_initialized = false;
 
 /**

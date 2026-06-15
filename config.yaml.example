@@ -1,0 +1,884 @@
+# RS41ng Firmware Configuration — full reference
+#
+# Lists EVERY configuration section and setting with its default value and
+# documentation. AUTO-GENERATED from web/config-schema.yaml — do not edit by hand.
+# Regenerate with: bun run scripts/generate_example_config.ts
+#
+# Usage:
+#   1. Copy this file to config.yaml in the RS41ng root directory.
+#   2. Edit the values you need (e.g. set your callsign, enable transmit modes
+#      under tx_modes, set frequencies). Values shown here are the defaults.
+#   3. Build with: ./build-firmware.sh   (build-firmware.bat on Windows)
+#
+# When config.yaml is present the build generates src/config_generated.h and
+# src/config_generated.c from it; otherwise the built-in src/config.h is used.
+
+# Template variables usable in message strings (e.g. APRS/CW/FT8 messages):
+#   $cs  Call sign
+#   $loc4  Locator (4 chars)
+#   $loc6  Locator (6 chars)
+#   $loc8  Locator (8 chars)
+#   $loc12  Locator (12 chars)
+#   $bv  Battery voltage in mV (up to 4 chars)
+#   $te  External temperature in C (up to 3 chars)
+#   $ti  Internal temperature in C (up to 3 chars)
+#   $hu  Humidity % (up to 3 chars)
+#   $pr  Pressure in mbar (up to 4 chars)
+#   $tow  GPS time of week in ms
+#   $hh  Current hour (2 chars)
+#   $mm  Current minute (2 chars)
+#   $ss  Current second (2 chars)
+#   $sv  GPS satellites visible (up to 2 chars)
+#   $lat  Latitude in degrees * 1000 (up to 6 chars)
+#   $lon  Longitude in degrees * 1000 (up to 6 chars)
+#   $alt  Altitude in meters (up to 5 chars)
+#   $gs  Ground speed in km/h (up to 3 chars)
+#   $cl  Climb in m/s (up to 2 chars)
+#   $he  Heading in degrees (up to 3 chars)
+#   $pc  Pulse counter value (wraps to zero at 65535, 16-bit unsigned)
+#   $ri  Radiation intensity in uR/h (up to 5 chars)
+#   $dc  Data counter value (wraps to zero at 65535, 16-bit unsigned)
+#   $gu  GPS data update indicator (1 if updated, 0 otherwise)
+#   $ct  Clock calibration trim value (0-31, DFM-17 only)
+#   $cc  Clock calibration change count (DFM-17 only)
+
+
+# ========================================================================
+# Hardware Selection
+# ========================================================================
+hardware:
+  # Hardware Type — Select your radiosonde hardware. RS41_RSM4x4 is for newer RS41 PCB revisions (RSM4x4/4x5, STM32L412-series). DFM-17 support is experimental and requires GPS lock to calibrate its internal oscillator. [simple]
+  #   options: RS41 = Vaisala RS41; RS41_RSM4x4 = Vaisala RS41 RSM4x4/4x5 (newer PCB); DFM17 = Graw DFM-17 (experimental)
+  #   defines RS41
+  type: RS41
+
+# ========================================================================
+# Transmit Modes
+# ========================================================================
+tx_modes:
+  # Post-Transmit Delay (ms) — Delay after transmission for modes without time sync. Zero enables continuous transmit for Horus. Max 200000 ms. [intermediate]
+  #   constraints: range 0..200000
+  #   defines RADIO_POST_TRANSMIT_DELAY_MS
+  post_transmit_delay_ms: 500
+  # Time Sync Threshold (ms) — How far from scheduled time a time-synced transmission is still allowed [advanced]
+  #   constraints: range 100..30000
+  #   defines RADIO_TIME_SYNC_THRESHOLD_MS
+  time_sync_threshold_ms: 2000
+  # Enable CW — Morse code transmission [simple]
+  #   defines RADIO_TX_CW
+  radio_tx_cw: false
+  # CW Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_cw
+  #   defines RADIO_TX_CW_COUNT
+  radio_tx_cw_count: 1
+  # Enable Pip — Short beep to indicate transmitter presence [simple]
+  #   defines RADIO_TX_PIP
+  radio_tx_pip: false
+  # Pip Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_pip
+  #   defines RADIO_TX_PIP_COUNT
+  radio_tx_pip_count: 6
+  # Enable APRS (1200 baud) — APRS 1200 baud position reporting [simple]
+  #   defines RADIO_TX_APRS
+  radio_tx_aprs: false
+  # APRS Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_aprs
+  #   defines RADIO_TX_APRS_COUNT
+  radio_tx_aprs_count: 1
+  # Enable APRS (9600 baud) — APRS 9600 baud position reporting [simple]
+  #   defines RADIO_TX_APRS_9600
+  radio_tx_aprs_9600: false
+  # APRS 9600 Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_aprs_9600
+  #   defines RADIO_TX_APRS_9600_COUNT
+  radio_tx_aprs_9600_count: 1
+  # Enable Horus V2 — Horus 4FSK V2 digital mode (deprecated, use V3) [simple]
+  #   defines RADIO_TX_HORUS_V2
+  radio_tx_horus_v2: false
+  # Horus V2 Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_horus_v2
+  #   defines RADIO_TX_HORUS_V2_COUNT
+  radio_tx_horus_v2_count: 1
+  # Enable Horus V3 — Horus 4FSK V3 digital mode. Recommended primary mode. Use Horus GUI or WebHorus for reception. [simple]
+  #   defines RADIO_TX_HORUS_V3
+  radio_tx_horus_v3: true
+  # Horus V3 Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_horus_v3
+  #   defines RADIO_TX_HORUS_V3_COUNT
+  radio_tx_horus_v3_count: 5
+  # Enable CATS — CATS digital mode -- rapid beacon rate, high channel capacity [simple]
+  #   defines RADIO_TX_CATS
+  radio_tx_cats: false
+  # CATS Repeat Count [simple]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_cats
+  #   defines RADIO_TX_CATS_COUNT
+  radio_tx_cats_count: 1
+  # Enable Long Tone — Transmit a long continuous tone [intermediate]
+  #   defines RADIO_TX_LONG_TONE
+  radio_tx_long_tone: false
+  # Long Tone Repeat Count [intermediate]
+  #   constraints: range 1..50
+  #   applies when: tx_modes.radio_tx_long_tone
+  #   defines RADIO_TX_LONG_TONE_COUNT
+  radio_tx_long_tone_count: 1
+  # Long Tone Duration (s) — Duration of long tone transmission in seconds [intermediate]
+  #   constraints: range 1..600
+  #   applies when: tx_modes.radio_tx_long_tone
+  #   defines RADIO_TX_LONG_TONE_DURATION_SECONDS
+  radio_tx_long_tone_duration_seconds: 10
+  # Horus V2 Continuous TX — Continuous 4FSK preamble between transmissions. Disables all other modes. Mutually exclusive with V3 continuous. [intermediate]
+  #   applies when: tx_modes.radio_tx_horus_v2
+  #   defines RADIO_TX_HORUS_V2_CONTINUOUS
+  radio_tx_horus_v2_continuous: false
+  # Horus V3 Continuous TX — Continuous 4FSK preamble between transmissions. Disables all other modes. Mutually exclusive with V2 continuous. [intermediate]
+  #   applies when: tx_modes.radio_tx_horus_v3
+  #   defines RADIO_TX_HORUS_V3_CONTINUOUS
+  radio_tx_horus_v3_continuous: false
+  # CW Frequency (Hz) [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_cw
+  #   defines RADIO_TX_FREQUENCY_CW
+  radio_tx_frequency_cw: 432501000
+  # Pip Frequency (Hz) [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_pip
+  #   defines RADIO_TX_FREQUENCY_PIP
+  radio_tx_frequency_pip: 432501000
+  # APRS 1200 Frequency (Hz) [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_aprs
+  #   defines RADIO_TX_FREQUENCY_APRS_1200
+  radio_tx_frequency_aprs_1200: 432500000
+  # APRS 9600 Frequency (Hz) [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_aprs_9600
+  #   defines RADIO_TX_FREQUENCY_APRS_9600
+  radio_tx_frequency_aprs_9600: 432500000
+  # Horus V2 Frequency (Hz) — Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_horus_v2
+  #   defines RADIO_TX_FREQUENCY_HORUS_V2
+  radio_tx_frequency_horus_v2: 432501000
+  # Horus V3 Frequency (Hz) — Use a frequency offset to place FSK tones slightly above the defined frequency for SSB reception [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_horus_v3
+  #   defines RADIO_TX_FREQUENCY_HORUS_V3
+  radio_tx_frequency_horus_v3: 432501000
+  # CATS Frequency (Hz) [simple]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_cats
+  #   defines RADIO_TX_FREQUENCY_CATS
+  radio_tx_frequency_cats: 434100000
+  # Long Tone Frequency (Hz) [intermediate]
+  #   constraints: range 100000000..1000000000
+  #   applies when: tx_modes.radio_tx_long_tone
+  #   defines RADIO_TX_FREQUENCY_LONG_TONE
+  radio_tx_frequency_long_tone: 432501000
+  # Wait for GPS Lock Before TX — Require GPS fix before first transmission. Losing lock after initial fix will not prevent TX. [intermediate]
+  #   defines RADIO_TX_WAIT_FOR_GPS_LOCK
+  radio_tx_wait_for_gps_lock: false
+
+# ========================================================================
+# Fox Mode
+# ========================================================================
+fox_mode:
+  # Enable Fox Mode — Disables GPS and follows transmit scheme. Use RADIO_POST_TRANSMIT_DELAY_MS for wait periods. Use CW, PIP and LONG_TONE settings. [intermediate]
+  #   defines ENABLE_FOX_MODE
+  enable_fox_mode: false
+  # Enable FM CW — Change CW modes (CW, PIP, LONG_TONE) to be FM modulated [intermediate]
+  #   applies when: fox_mode.enable_fox_mode
+  #   defines ENABLE_FM_CW
+  enable_fm_cw: false
+  # FM CW TX Delay (ms) — Delay in ms for FM CW transmit [intermediate]
+  #   constraints: range 0..10000
+  #   applies when: fox_mode.enable_fm_cw
+  #   defines FM_CW_TX_DELAY
+  fm_cw_tx_delay: 500
+  # FM Tone Frequency (Hz) — Frequency in Hz of FM CW tone [intermediate]
+  #   constraints: range 100..5000
+  #   applies when: fox_mode.enable_fm_cw
+  #   defines FM_TONE_FREQ
+  fm_tone_freq: 1000
+
+# ========================================================================
+# Callsign & Basics
+# ========================================================================
+global:
+  # Call Sign — Your amateur radio call sign (max 6 characters) [simple]
+  #   constraints: required, max 6 chars, pattern ^[A-Z0-9]+$
+  #   defines CALLSIGN
+  callsign: N0CALL
+  # Enable LEDs — Red LED: lit during initialization and transmit. Green LED: blinks fast with no GPS fix, slowly with fix. Disabling saves power. [intermediate]
+  #   defines LEDS_ENABLE
+  leds_enable: true
+  # Disable LEDs Above Altitude (m) — Disable LEDs above this altitude to save power. Set to 0 to keep LEDs always on. [intermediate]
+  #   constraints: range 0..50000
+  #   defines LEDS_DISABLE_ALTITUDE_METERS
+  leds_disable_altitude_meters: 2000
+  # Allow Power Off via Button — Allow powering off the sonde by pressing the button for over a second (when not transmitting) [intermediate]
+  #   defines ALLOW_POWER_OFF
+  allow_power_off: false
+  # Locator Pair Count — Number of character pairs in Maidenhead locator (max 6 = 12 chars) [advanced]
+  #   constraints: range 1..6
+  #   defines LOCATOR_PAIR_COUNT_FULL
+  locator_pair_count: 6
+
+# ========================================================================
+# Si4032 Radio (RS41)
+# ========================================================================
+radio_si4032:
+  # TX Power — 0=-1dBm, 1=2dBm, 2=5dBm (~3mW), 3=8dBm (~6mW), 4=11dBm (~12mW), 5=14dBm (25mW), 6=17dBm (50mW), 7=20dBm (100mW). Default 5 (14 dBm, 25mW) is good for Horus 4FSK. Use 7 for APRS. Higher power reduces battery life. [simple]
+  #   constraints: range 0..7
+  #   defines RADIO_SI4032_TX_POWER
+  tx_power: 5
+
+# ========================================================================
+# Si4063 Radio (DFM-17)
+# ========================================================================
+radio_si4063:
+  # TX Power — Si4063 transmit power level: 0-127. 7=0dBm, 10=3.3dBm, 14=6.2dBm, 22=10.2dBm, 32=13.2dBm (recommended), 48=16.7dBm, 80=20.1dBm, 127=21.5dBm. [simple]
+  #   constraints: range 0..127
+  #   defines RADIO_SI4063_TX_POWER
+  tx_power: 32
+  # Crystal Capacitance Correction — Use crystal capacitance LUT to better maintain frequency stability over temperature. Recommended for temperature below 0C. [intermediate]
+  #   defines RADIO_SI4063_TX_CORRECT
+  tx_correct: true
+  # DFM Additional Telemetry — Append processor and crystal capacitance values to Horus V3 telemetry [intermediate]
+  #   defines TX_DFM_ADDITIONAL_TELEM
+  tx_dfm_additional_telem: true
+  # DFM17 External USART Port — Select USART for external serial output on DFM17. USART1 (PA9/PA10 on Mini-USB header) is recommended as it does not share pins with I2C bus. USART3 (PB10/PB11 on 4-pin PCB header) shares pins with I2C. [advanced]
+  #   options: 1 = 1 - USART1 (PA9/PA10, recommended); 3 = 3 - USART3 (PB10/PB11, conflicts with I2C)
+  #   applies when: gps.nmea_output_enable
+  #   defines DFM17_USART_EXT_PORT
+  dfm17_usart_ext_port: 1
+
+# ========================================================================
+# Si5351 HF Radio
+# ========================================================================
+radio_si5351:
+  # TX Power (Drive Strength) — 0=2mA, 1=4mA, 2=6mA, 3=8mA [advanced]
+  #   constraints: range 0..3
+  #   defines RADIO_SI5351_TX_POWER
+  tx_power: 3
+  # Enable CW [advanced]
+  #   defines RADIO_SI5351_TX_CW
+  tx_cw: true
+  # CW Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_cw
+  #   defines RADIO_SI5351_TX_CW_COUNT
+  tx_cw_count: 1
+  # Enable Pip [advanced]
+  #   defines RADIO_SI5351_TX_PIP
+  tx_pip: false
+  # Pip Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_pip
+  #   defines RADIO_SI5351_TX_PIP_COUNT
+  tx_pip_count: 6
+  # Enable Horus V2 [advanced]
+  #   defines RADIO_SI5351_TX_HORUS_V2
+  tx_horus_v2: false
+  # Horus V2 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_horus_v2
+  #   defines RADIO_SI5351_TX_HORUS_V2_COUNT
+  tx_horus_v2_count: 4
+  # Enable Horus V3 [advanced]
+  #   defines RADIO_SI5351_TX_HORUS_V3
+  tx_horus_v3: true
+  # Horus V3 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_horus_v3
+  #   defines RADIO_SI5351_TX_HORUS_V3_COUNT
+  tx_horus_v3_count: 4
+  # Enable JT9 [advanced]
+  #   defines RADIO_SI5351_TX_JT9
+  tx_jt9: false
+  # JT9 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_jt9
+  #   defines RADIO_SI5351_TX_JT9_COUNT
+  tx_jt9_count: 1
+  # Enable JT65 [advanced]
+  #   defines RADIO_SI5351_TX_JT65
+  tx_jt65: false
+  # JT65 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_jt65
+  #   defines RADIO_SI5351_TX_JT65_COUNT
+  tx_jt65_count: 1
+  # Enable JT4 [advanced]
+  #   defines RADIO_SI5351_TX_JT4
+  tx_jt4: false
+  # JT4 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_jt4
+  #   defines RADIO_SI5351_TX_JT4_COUNT
+  tx_jt4_count: 1
+  # Enable WSPR [advanced]
+  #   defines RADIO_SI5351_TX_WSPR
+  tx_wspr: false
+  # WSPR Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_wspr
+  #   defines RADIO_SI5351_TX_WSPR_COUNT
+  tx_wspr_count: 1
+  # Enable FSQ [advanced]
+  #   defines RADIO_SI5351_TX_FSQ
+  tx_fsq: false
+  # FSQ Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_fsq
+  #   defines RADIO_SI5351_TX_FSQ_COUNT
+  tx_fsq_count: 1
+  # Enable FT8 [advanced]
+  #   defines RADIO_SI5351_TX_FT8
+  tx_ft8: false
+  # FT8 Repeat Count [advanced]
+  #   constraints: range 1..50
+  #   applies when: radio_si5351.tx_ft8
+  #   defines RADIO_SI5351_TX_FT8_COUNT
+  tx_ft8_count: 1
+  # CW HF Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_cw
+  #   defines RADIO_SI5351_TX_FREQUENCY_CW
+  frequency_cw: 3595000
+  # Pip HF Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_pip
+  #   defines RADIO_SI5351_TX_FREQUENCY_PIP
+  frequency_pip: 3595000
+  # Horus V2 HF Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_horus_v2
+  #   defines RADIO_SI5351_TX_FREQUENCY_HORUS_V2
+  frequency_horus_v2: 3608000
+  # Horus V3 HF Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_horus_v3
+  #   defines RADIO_SI5351_TX_FREQUENCY_HORUS_V3
+  frequency_horus_v3: 3608000
+  # JT9 Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_jt9
+  #   defines RADIO_SI5351_TX_FREQUENCY_JT9
+  frequency_jt9: 14085000
+  # JT65 Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_jt65
+  #   defines RADIO_SI5351_TX_FREQUENCY_JT65
+  frequency_jt65: 14085000
+  # JT4 Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_jt4
+  #   defines RADIO_SI5351_TX_FREQUENCY_JT4
+  frequency_jt4: 14085000
+  # WSPR Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_wspr
+  #   defines RADIO_SI5351_TX_FREQUENCY_WSPR
+  frequency_wspr: 14085000
+  # FSQ Frequency (Hz) — Base freq is 1350 Hz higher than dial freq in USB [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_fsq
+  #   defines RADIO_SI5351_TX_FREQUENCY_FSQ
+  frequency_fsq: 3608350
+  # FT8 Frequency (Hz) [advanced]
+  #   constraints: range 1000000..225000000
+  #   applies when: radio_si5351.tx_ft8
+  #   defines RADIO_SI5351_TX_FREQUENCY_FT8
+  frequency_ft8: 14085000
+
+# ========================================================================
+# APRS
+# ========================================================================
+aprs:
+  # APRS Call Sign — Defaults to global call sign [intermediate]
+  #   defines APRS_CALLSIGN
+  callsign: null
+  # APRS SSID — 0=fixed station, 1-4=generic, 5=other networks, 6=satellite ops, 7=walkie-talkie, 8=boats/RV, 9=primary mobile, A=internet, B=balloons/aircraft, C=RFID/trackers, D=weather, E=truckers, F=generic [simple]
+  #   constraints: pattern ^[0-9A-F]$
+  #   defines APRS_SSID
+  ssid: B
+  # Symbol Table — '/' = primary table, '\\' = alternate table [intermediate]
+  #   defines APRS_SYMBOL_TABLE
+  symbol_table: /
+  # Symbol Character — APRS symbol code. 'O' = balloon. See aprs.org/symbols/symbolsX.txt [intermediate]
+  #   defines APRS_SYMBOL
+  symbol: O
+  # APRS Comment — Comment string included in APRS packets. Keep under 100 characters. [intermediate]
+  #   constraints: max 127 chars
+  #   defines APRS_COMMENT
+  comment: https://amateur.sondehub.org/
+  # APRS Relays (Digipeater Path) — No spaces. Highly discouraged for balloons. [intermediate]
+  #   constraints: max 40 chars
+  #   defines APRS_RELAYS
+  relays: ''
+  # APRS Destination — APRS destination address. APZ41N = experimental RS41ng. [intermediate]
+  #   constraints: max 6 chars
+  #   defines APRS_DESTINATION
+  destination: APZ41N
+  # Destination SSID [intermediate]
+  #   defines APRS_DESTINATION_SSID
+  destination_ssid: '0'
+  # Weather Report Mode — Generate weather report instead of position report. Overrides APRS symbol. [intermediate]
+  #   defines APRS_WEATHER_REPORT_ENABLE
+  weather_report_enable: false
+  # APRS 1200 Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_aprs
+  #   defines APRS_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # APRS 1200 Time Sync Offset (s) — Delay from scheduled time [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_aprs
+  #   defines APRS_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+  # APRS 9600 Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_aprs_9600
+  #   defines APRS_9600_TIME_SYNC_SECONDS
+  aprs_9600_time_sync_seconds: 0
+  # APRS 9600 Time Sync Offset (s) — Delay from scheduled time [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_aprs_9600
+  #   defines APRS_9600_TIME_SYNC_OFFSET_SECONDS
+  aprs_9600_time_sync_offset_seconds: 0
+  # APRS Comment Messages — APRS comment field. Keep under 100 characters. Supports template variables. [simple]
+  #   constraints: max 127 chars/item
+  #   defines aprs_comment_templates
+  messages:
+    - RS41ng radiosonde firmware
+
+# ========================================================================
+# Horus Common
+# ========================================================================
+horus_common:
+  # Frequency Offset Si4032 (Hz) [advanced]
+  #   applies when: hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4'
+  #   defines HORUS_FREQUENCY_OFFSET_SI4032
+  frequency_offset_si4032: 0
+  # Frequency Offset Si4063 (Hz) [advanced]
+  #   applies when: hardware.type == 'DFM17'
+  #   defines HORUS_FREQUENCY_OFFSET_SI4063
+  frequency_offset_si4063: 0
+
+# ========================================================================
+# Horus V2
+# ========================================================================
+horus_v2:
+  # Payload ID — 256 = 4FSKTEST-V2 (testing only). Request a new ID at github.com/projecthorus/horusdemodlib [simple]
+  #   constraints: range 0..65535
+  #   defines HORUS_V2_PAYLOAD_ID
+  payload_id: 256
+  # Baud Rate (Si4032) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4'
+  #   defines HORUS_V2_BAUD_RATE_SI4032
+  baud_rate_si4032: 100
+  # Baud Rate (Si4063) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: hardware.type == 'DFM17'
+  #   defines HORUS_V2_BAUD_RATE_SI4063
+  baud_rate_si4063: 100
+  # Baud Rate (Si5351) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: (hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4') && sensors.si5351_enable
+  #   defines HORUS_V2_BAUD_RATE_SI5351
+  baud_rate_si5351: 50
+  # Preamble Length [advanced]
+  #   constraints: range 4..128
+  #   defines HORUS_V2_PREAMBLE_LENGTH
+  preamble_length: 4
+  # Tone Spacing Si5351 (Hz) [advanced]
+  #   constraints: range 50..1000
+  #   applies when: (hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4') && sensors.si5351_enable
+  #   defines HORUS_V2_TONE_SPACING_HZ_SI5351
+  tone_spacing_hz_si5351: 270
+  # Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
+  #   constraints: range 0..3600
+  #   defines HORUS_V2_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # Time Sync Offset (s) [intermediate]
+  #   constraints: range 0..3600
+  #   defines HORUS_V2_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+
+# ========================================================================
+# Horus V3
+# ========================================================================
+horus_v3:
+  # Horus V3 Payload Callsign — Defaults to global call sign. Every character adds 6 bits to packet size; limit to 5-8 characters. [simple]
+  #   defines HORUS_V3_PAYLOAD_CALLSIGN
+  payload_callsign: null
+  # Callsign Suffix — Appended to payload callsign. Example: '-11' [simple]
+  #   constraints: max 10 chars
+  #   defines HORUS_V3_CALLSIGN_SUFFIX
+  callsign_suffix: ''
+  # Baud Rate (Si4032) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4'
+  #   defines HORUS_V3_BAUD_RATE_SI4032
+  baud_rate_si4032: 100
+  # Baud Rate (Si4063) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: hardware.type == 'DFM17'
+  #   defines HORUS_V3_BAUD_RATE_SI4063
+  baud_rate_si4063: 100
+  # Baud Rate (Si5351) [advanced]
+  #   constraints: range 10..1000
+  #   applies when: (hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4') && sensors.si5351_enable
+  #   defines HORUS_V3_BAUD_RATE_SI5351
+  baud_rate_si5351: 50
+  # Preamble Length [advanced]
+  #   constraints: range 4..128
+  #   defines HORUS_V3_PREAMBLE_LENGTH
+  preamble_length: 4
+  # Tone Spacing Si5351 (Hz) [advanced]
+  #   constraints: range 50..1000
+  #   applies when: (hardware.type == 'RS41' || hardware.type == 'RS41_RSM4x4') && sensors.si5351_enable
+  #   defines HORUS_V3_TONE_SPACING_HZ_SI5351
+  tone_spacing_hz_si5351: 270
+  # Disable SondeHub Upload — Disable uploading telemetry to SondeHub [intermediate]
+  #   defines HORUS_V3_NOHUB
+  nohub: false
+  # Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
+  #   constraints: range 0..3600
+  #   defines HORUS_V3_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # Time Sync Offset (s) — Delay from scheduled time [intermediate]
+  #   constraints: range 0..3600
+  #   defines HORUS_V3_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+
+# ========================================================================
+# CATS
+# ========================================================================
+cats:
+  # CATS Call Sign — Defaults to global call sign [intermediate]
+  #   defines CATS_CALLSIGN
+  callsign: null
+  # CATS SSID — 0-255. No special meaning (unlike APRS). Keep below 100 for APRS gateway compatibility. [simple]
+  #   constraints: range 0..255
+  #   defines CATS_SSID
+  ssid: 11
+  # CATS Icon — 0=none, 2=car, 3=house, 13=balloon, 14=airplane, 18=person, 21=satellite, 22=computer [simple]
+  #   constraints: range 0..255
+  #   defines CATS_ICON
+  icon: 13
+  # CATS Comment — Max ~100 characters in RS41ng (CATS standard allows 255) [intermediate]
+  #   constraints: max 100 chars
+  #   defines CATS_COMMENT
+  comment: RS41ng radiosonde firmware
+  # Reported TX Power (dBm) [intermediate]
+  #   constraints: range 0..40
+  #   defines CATS_REPORTED_TX_POWER_DBM
+  reported_tx_power_dbm: 17
+  # Is Balloon — Set true for balloon payloads so they appear correctly on FELINET [simple]
+  #   defines CATS_IS_BALLOON
+  is_balloon: true
+  # Time Sync Interval (s) — 0 = no time sync [intermediate]
+  #   constraints: range 0..3600
+  #   defines CATS_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # Time Sync Offset (s) [intermediate]
+  #   constraints: range 0..3600
+  #   defines CATS_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+  # CATS Comment Messages — Max ~100 characters in RS41ng. Supports template variables. [simple]
+  #   constraints: max 100 chars/item
+  #   defines cats_comment_templates
+  messages:
+    - RS41ng radiosonde firmware
+
+# ========================================================================
+# CW / Morse / Long Tone
+# ========================================================================
+cw:
+  # CW Speed (WPM) — Words per minute, range 5-40 [intermediate]
+  #   constraints: range 5..40
+  #   defines CW_SPEED_WPM
+  speed_wpm: 12
+  # CW Time Sync Interval (s) — 0 = no time sync [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_cw
+  #   defines CW_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # CW Time Sync Offset (s) [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_cw
+  #   defines CW_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+  # Long Tone Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_long_tone
+  #   defines LONG_TONE_TIME_SYNC_SECONDS
+  long_tone_time_sync_seconds: 0
+  # Long Tone Time Sync Offset (s) — Delay from scheduled time [intermediate]
+  #   constraints: range 0..3600
+  #   applies when: tx_modes.radio_tx_long_tone
+  #   defines LONG_TONE_TIME_SYNC_OFFSET_SECONDS
+  long_tone_time_sync_offset_seconds: 0
+  # CW Messages — Max 64 characters per message. Supports template variables. [simple]
+  #   constraints: max 64 chars/item
+  #   defines cw_message_templates
+  messages:
+    - $cs $loc6 $altm
+
+# ========================================================================
+# Pip (Beacon Beep)
+# ========================================================================
+pip:
+  # Pip Speed (WPM) — Pip speed defined as CW WPM, range 5-40 [intermediate]
+  #   constraints: range 5..40
+  #   defines PIP_SPEED_WPM
+  speed_wpm: 18
+  # Time Sync Interval (s) — 0 = no time sync [intermediate]
+  #   constraints: range 0..3600
+  #   defines PIP_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # Time Sync Offset (s) [intermediate]
+  #   constraints: range 0..3600
+  #   defines PIP_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+  # Pip Messages — Transmitted as CW. 'E' = single pip. Supports template variables. [intermediate]
+  #   constraints: max 64 chars/item
+  #   defines pip_message_templates
+  messages:
+    - E
+
+# ========================================================================
+# GPS
+# ========================================================================
+gps:
+  # GPS Leap Seconds — Leap seconds to add to raw GPS time. Overridden if GPS data includes leap second info. [advanced]
+  #   constraints: range 0..30
+  #   defines GPS_TIME_LEAP_SECONDS
+  leap_seconds: 18
+  # Require 3D Fix — Require altitude fix (3D). Enable for airborne use. [advanced]
+  #   defines GPS_REQUIRE_3D_FIX
+  require_3d_fix: true
+  # GPS Power Saving — Selective power saving mode. Reduces consumption by ~30-40 mA. Automatically exits low-power when fix is lost. Only activates after first good fix. Not necessary for short flights (< 6 hours). WARNING: NOT recommended for RSM4x4-series PCBs -- the u-blox M10050 does not properly enter a power-saving tracking state, so no power savings are realized. [advanced]
+  #   defines GPS_POWER_SAVING_ENABLE
+  power_saving_enable: false
+  # NMEA Output via Serial — Enable NMEA output from GPS via external serial port. On RS41, uses USART3 (PB10/PB11) which shares pins with I2C bus (Si5351 and sensors). On DFM17, can use USART1 or USART3 (see DFM17 USART Port setting). WARNING on RS41: Disables I2C bus (Si5351, BMP280, RadSens). [advanced]
+  #   defines GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
+  nmea_output_enable: false
+  # Dynamic Platform Model — GPS dynamic model for filtering. Use 6 (Airborne <1g) for high-altitude balloons. [advanced]
+  #   options: 0 = 0 - Portable; 2 = 2 - Stationary; 3 = 3 - Pedestrian; 4 = 4 - Automotive; 5 = 5 - Sea; 6 = 6 - Airborne <1g (recommended for balloons); 7 = 7 - Airborne <2g; 8 = 8 - Airborne <4g
+  #   defines GPS_DYNAMIC_MODEL
+  dynamic_model: 6
+  # Position Fixing Mode — GPS fix mode. Use 3D only for airborne use. [advanced]
+  #   options: 1 = 1 - 2D only; 2 = 2 - 3D only (recommended); 3 = 3 - Auto 2D/3D
+  #   defines GPS_POSITION_FIXING_MODE
+  position_fixing_mode: 2
+  # Measurement Rate (ms) — GPS measurement interval. UBX-G6010 supports down to 200ms (5 Hz). 1000ms recommended. RSM4x4 platform does not seem to accept values above 1000. [advanced]
+  #   constraints: range 200..10000
+  #   defines GPS_MEASUREMENT_RATE
+  measurement_rate: 1000
+  # Position Message Rate — Messages per measurement. 1 = every measurement, 5 = every 5th. [advanced]
+  #   constraints: range 1..60
+  #   defines GPS_POSITION_MESSAGE_RATE
+  position_message_rate: 1
+  # Time Message Rate — Time messages per measurement. 1 = every measurement. [advanced]
+  #   constraints: range 1..60
+  #   defines GPS_TIME_MESSAGE_RATE
+  time_message_rate: 1
+
+# ========================================================================
+# I2C & Sensors
+# ========================================================================
+sensors:
+  # I2C Bus Clock Speed (Hz) — 100000 (100 kHz) for Si5351. Some BMP280 sensors may need 10000 (10 kHz). Old RS41 only. [advanced]
+  #   constraints: range 10000..400000
+  #   applies when: hardware.type == 'RS41'
+  #   defines I2C_BUS_CLOCK_SPEED
+  i2c_bus_clock_speed: 100000
+  # I2C Bus Timing Register — STM32L4 I2C timing configuration for RSM4x4 series. 0x20422727 = 100 kHz, 0x9044A747 = 10 kHz. [advanced]
+  #   applies when: hardware.type == 'RS41_RSM4x4'
+  #   defines I2C_BUS_TIMING
+  i2c_bus_timing: '0x20422727'
+  # Enable BMP280/BME280 Sensor — External I2C atmospheric sensor. BME280 also reports humidity. [advanced]
+  #   defines SENSOR_BMP280_ENABLE
+  bmp280_enable: false
+  # BMP280 I2C Address — Usually 0x76 or 0x77 [advanced]
+  #   applies when: sensors.bmp280_enable
+  #   defines SENSOR_BMP280_I2C_ADDRESS
+  bmp280_i2c_address: '0x77'
+  # Enable BME680/688 Sensor — External I2C BME680/688 atmospheric sensor with gas measurement [advanced]
+  #   defines SENSOR_BME68X_ENABLE
+  bme68x_enable: false
+  # BME68x I2C Address — Usually 0x76 or 0x77 [advanced]
+  #   applies when: sensors.bme68x_enable
+  #   defines SENSOR_BME68X_I2C_ADDRESS
+  bme68x_i2c_address: '0x77'
+  # Enable BME690 Sensor — External I2C BME690 atmospheric sensor with gas measurement [advanced]
+  #   defines SENSOR_BME690_ENABLE
+  bme690_enable: false
+  # BME690 I2C Address — Usually 0x76 or 0x77 [advanced]
+  #   applies when: sensors.bme690_enable
+  #   defines SENSOR_BME690_I2C_ADDRESS
+  bme690_i2c_address: '0x77'
+  # Enable Gas Measurement — Enable gas resistance measurement on BME680/688/690 [advanced]
+  #   applies when: sensors.bme68x_enable || sensors.bme690_enable
+  #   defines SENSOR_BME_6XX_GAS_MEASUREMENT
+  gas_measurement: false
+  # Gas Heater Duration (ms) — Gas heater duration in milliseconds [advanced]
+  #   constraints: range 1..4032
+  #   applies when: sensors.gas_measurement
+  #   defines SENSOR_BME_6XX_GAS_HEATER_DURATION
+  gas_heater_duration: 100
+  # Gas Heater Temperature (C) — Gas heater temperature in degrees Celsius [advanced]
+  #   constraints: range 200..400
+  #   applies when: sensors.gas_measurement
+  #   defines SENSOR_BME_6XX_GAS_HEATER_TEMP
+  gas_heater_temp: 300
+  # Enable RadSens Radiation Sensor — External I2C RadSens radiation sensor [advanced]
+  #   defines SENSOR_RADSENS_ENABLE
+  radsens_enable: false
+  # RadSens Chip ID — Expected chip ID for verification. Default 0x7D. [advanced]
+  #   applies when: sensors.radsens_enable
+  #   defines SENSOR_RADSENS_CHIP_ID
+  radsens_chip_id: '0x7D'
+  # RadSens I2C Address — Default 0x66 [advanced]
+  #   applies when: sensors.radsens_enable
+  #   defines SENSOR_RADSENS_I2C_ADDRESS
+  radsens_i2c_address: '0x66'
+  # RadSens Sensitivity (imp/MKR) — Stored in non-volatile memory. Default 105. [advanced]
+  #   constraints: range 1..65535
+  #   applies when: sensors.radsens_enable
+  #   defines SENSOR_RADSENS_SENSITIVITY
+  radsens_sensitivity: 105
+  # Enable Si5351 HF Radio — External I2C Si5351 clock generator for HF transmissions (WSPR, FT8, JT modes) [advanced]
+  #   defines RADIO_SI5351_ENABLE
+  si5351_enable: false
+  # Enable Pulse Counter — Pulse counting via expansion header pin (e.g. Geiger counter). WARNING: Disables I2C bus and serial port. Adds pulse count to Horus data. [advanced]
+  #   defines PULSE_COUNTER_ENABLE
+  pulse_counter_enable: false
+  # Pulse Counter Pin Mode — Internal pull-up/down resistor on expansion header pin. Set floating if external circuit has its own. [advanced]
+  #   options: PULSE_COUNTER_PIN_MODE_FLOATING = Floating; PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP = Internal Pull-up; PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_DOWN = Internal Pull-down
+  #   applies when: sensors.pulse_counter_enable
+  #   defines PULSE_COUNTER_PIN_MODE
+  pulse_counter_pin_mode: PULSE_COUNTER_PIN_MODE_INTERNAL_PULL_UP
+  # Pulse Counter Interrupt Edge — Trigger on falling or rising edge of pulse [advanced]
+  #   options: PULSE_COUNTER_INTERRUPT_EDGE_FALLING = Falling Edge; PULSE_COUNTER_INTERRUPT_EDGE_RISING = Rising Edge
+  #   applies when: sensors.pulse_counter_enable
+  #   defines PULSE_COUNTER_INTERRUPT_EDGE
+  pulse_counter_interrupt_edge: PULSE_COUNTER_INTERRUPT_EDGE_FALLING
+
+# ========================================================================
+# WSPR
+# ========================================================================
+wspr:
+  # WSPR Call Sign — Defaults to global call sign [advanced]
+  #   defines WSPR_CALLSIGN
+  callsign: null
+  # Use Fixed Locator — Use a fixed locator instead of GPS-derived [advanced]
+  #   defines WSPR_LOCATOR_FIXED_ENABLED
+  locator_fixed_enabled: false
+  # Fixed Locator — 4-character Maidenhead grid locator [advanced]
+  #   constraints: max 4 chars, pattern ^[A-R]{2}[0-9]{2}$
+  #   applies when: wspr.locator_fixed_enabled
+  #   defines WSPR_LOCATOR_FIXED
+  locator_fixed: AA00
+  # WSPR Power (dBm) [advanced]
+  #   constraints: range 0..60
+  #   defines WSPR_DBM
+  dbm: 10
+  # Time Sync Interval (s) — WSPR requires time sync. 120 seconds is standard. [advanced]
+  #   constraints: range 0..3600
+  #   defines WSPR_TIME_SYNC_SECONDS
+  time_sync_seconds: 120
+  # Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines WSPR_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 1
+
+# ========================================================================
+# FSQ
+# ========================================================================
+fsq:
+  # FSQ Call Sign — Defaults to global call sign [advanced]
+  #   defines FSQ_CALLSIGN_FROM
+  callsign: null
+  # FSQ Submode [advanced]
+  #   options: RADIO_DATA_MODE_FSQ_2 = FSQ-2; RADIO_DATA_MODE_FSQ_3 = FSQ-3; RADIO_DATA_MODE_FSQ_4_5 = FSQ-4.5; RADIO_DATA_MODE_FSQ_6 = FSQ-6
+  #   defines FSQ_SUBMODE
+  submode: RADIO_DATA_MODE_FSQ_3
+  # Time Sync Interval (s) — 0 = no time sync [advanced]
+  #   constraints: range 0..3600
+  #   defines FSQ_TIME_SYNC_SECONDS
+  time_sync_seconds: 0
+  # Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines FSQ_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 0
+  # FSQ Comment Messages — Max 130 characters. Supports template variables. [advanced]
+  #   constraints: max 130 chars/item
+  #   defines fsq_comment_templates
+  messages: []
+
+# ========================================================================
+# FT8
+# ========================================================================
+ft8:
+  # FT8 Time Sync Interval (s) — FT8 standard: 15 seconds [advanced]
+  #   constraints: range 0..3600
+  #   defines FT8_TIME_SYNC_SECONDS
+  time_sync_seconds: 15
+  # FT8 Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines FT8_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 1
+  # FT8/JT Message Templates — Max 13 characters (protocol limit). Shared across FT8, JT9, JT4, JT65. Supports template variables. [advanced]
+  #   constraints: max 13 chars/item
+  #   defines ftjt_message_templates
+  messages: []
+
+# ========================================================================
+# JT9
+# ========================================================================
+jt9:
+  # Time Sync Interval (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT9_TIME_SYNC_SECONDS
+  time_sync_seconds: 60
+  # Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT9_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 1
+
+# ========================================================================
+# JT4
+# ========================================================================
+jt4:
+  # Time Sync Interval (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT4_TIME_SYNC_SECONDS
+  time_sync_seconds: 60
+  # Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT4_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 1
+
+# ========================================================================
+# JT65
+# ========================================================================
+jt65:
+  # Time Sync Interval (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT65_TIME_SYNC_SECONDS
+  time_sync_seconds: 60
+  # Time Sync Offset (s) [advanced]
+  #   constraints: range 0..3600
+  #   defines JT65_TIME_SYNC_OFFSET_SECONDS
+  time_sync_offset_seconds: 1

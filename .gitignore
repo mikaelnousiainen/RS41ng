@@ -1,7 +1,30 @@
 /.idea
+/.cursor/
 /cmake-build-debug
+/cmake-build-debug-arm-none-eabi
 /build
 /samples
 *~
 .vscode/
 .DS_Store
+
+# Local scratch: personal configs and firmware binaries copied out of build/
+/temp/
+/*.bin
+
+# User firmware config (generated from web configurator - do not commit personal config)
+# config.yaml.example is intentionally NOT ignored (it is the committed template).
+/config.yaml
+/config-*.yaml
+
+# Local-only planning/scratch notes (not part of the repo)
+/tasks/
+
+# Ephemeral outputs from scripts/generate_config.ts (removed after firmware POST_BUILD when used)
+/src/config_generated.c
+/src/config_generated.h
+
+# Node/Bun dependencies (bun.lock files are committed — Bun is the canonical package manager)
+/node_modules/
+/web/node_modules/
+/web/dist/

@@ -1,0 +1,13 @@
+{
+  "name": "rs41ng-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build tools for RS41ng firmware (config generator)",
+  "dependencies": {
+    "js-yaml": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.9",
+    "@types/js-yaml": "4.0.9"
+  }
+}

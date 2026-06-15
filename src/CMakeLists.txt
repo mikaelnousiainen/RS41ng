@@ -37,6 +37,19 @@ endif()
 
 # Filter out the unused HAL
 list(FILTER SOURCES EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
+# config.c is legacy/unused; exactly one of config.c / config_generated.c is built
+list(FILTER SOURCES EXCLUDE REGEX ".*/config\\.c$")
+list(FILTER SOURCES EXCLUDE REGEX ".*/config_generated\\.c$")
+
+set(RS41NG_USE_GENERATED_CONFIG 0)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/config_generated.c")
+    set(RS41NG_USE_GENERATED_CONFIG 1)
+    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/config_generated.c")
+    message(STATUS "Using generated config: config_generated.c / config_generated.h")
+else()
+    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/config.c")
+    message(STATUS "Using built-in config: config.c / config.h")
+endif()
 list(FILTER SOURCES_ASM EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
 list(FILTER SOURCES_CXX EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
 list(FILTER HEADERS EXCLUDE REGEX "${EXCLUDE_HAL_DIR}/.*")
@@ -57,13 +70,17 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
-target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+set(CONFIG_PRIV_DEFS
     ${MCU_DEFINE}
     ${HW_DEFINES}
     ${HSE_DEFINES}
     SUPPORT_CPLUSPLUS
     __ASSEMBLY__
 )
+if(RS41NG_USE_GENERATED_CONFIG)
+    list(APPEND CONFIG_PRIV_DEFS RS41NG_USE_GENERATED_CONFIG)
+endif()
+target_compile_definitions(${PROJECT_NAME}.elf PRIVATE ${CONFIG_PRIV_DEFS})
 
 target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=${MCU_CPU}
@@ -111,3 +128,12 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${PROJECT_NAME}.elf>
     COMMENT "Building ${HEX_FILE}\nBuilding ${BIN_FILE}"
 )
+
+if(RS41NG_USE_GENERATED_CONFIG)
+    add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -f
+            "${CMAKE_CURRENT_SOURCE_DIR}/config_generated.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/config_generated.h"
+        COMMENT "Removing temporary config_generated.c / config_generated.h"
+    )
+endif()
