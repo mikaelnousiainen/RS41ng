@@ -10,14 +10,14 @@ If you've installed RS41ng before, edit your config.h and jump down to the [Flas
 
 If you are new to RS41ng, the **[web configurator](https://mikaelnousiainen.github.io/RS41ng/)** is the
 recommended way to build and flash the firmware. It runs entirely in your browser — no account and no cloud
-build — and guides you through three steps:
+build — and guides you through four steps:
 
-1. **Configure** — pick your hardware (RS41 or DFM-17), choose a preset or adjust settings through a form,
-   and download a `config.yaml` file.
-2. **Build** — place `config.yaml` in the root of the RS41ng source directory and run the Docker build. The
-   build automatically generates the firmware configuration from `config.yaml` and selects the correct
-   hardware target, so you do not need to edit `config.h` or pass a `-D` flag by hand.
-3. **Flash** — connect an ST-LINK v2 and flash the firmware directly from the browser over WebUSB, or use the
+1. **Hardware** — pick your hardware (RS41 or DFM-17).
+2. **Configure** — choose a preset or adjust settings through a form.
+3. **Build** — download the settings file (`config.yaml`) and place it in the root of the RS41ng source directory.
+   Then run the Docker build. The build automatically generates the firmware configuration from `config.yaml` settings
+   and selects the correct hardware target, so you do not need to edit `config.h` or pass a `-D` flag by hand to the build command.
+4. **Flash** — connect an ST-LINK v2 and flash the firmware directly from the browser over WebUSB, or use the
    OpenOCD command line as a fallback.
 
 [![RS41ng Web Configurator](docs/rs41ng-web-firmware-configurator-screenshot.png)](https://mikaelnousiainen.github.io/RS41ng/)
