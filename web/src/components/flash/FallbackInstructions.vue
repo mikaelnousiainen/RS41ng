@@ -94,6 +94,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useUiStore, variantToMcuFamily } from "@/stores/ui";
+import { isWebUsbSupported } from "@/utils/webusb";
 import CommandBlock from "@/components/build/CommandBlock.vue";
 
 const ui = useUiStore();
@@ -106,7 +107,7 @@ const HARDWARE_LABELS: Record<string, string> = {
 
 // Auto-expand this fallback when WebUSB is unavailable (the in-browser flasher is
 // hidden in that case, so OpenOCD is the only option).
-const webUsbSupported = computed(() => typeof navigator !== "undefined" && "usb" in navigator);
+const webUsbSupported = computed(() => isWebUsbSupported());
 
 // The flash step is only reachable once hardware is selected; default to F1 defensively.
 const family = computed(() => (ui.hardwareVariant ? variantToMcuFamily(ui.hardwareVariant) : "F1"));

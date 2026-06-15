@@ -23,8 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { isWebUsbSupported } from "@/utils/webusb";
 
-const webUsbSupported = computed(() =>
-  typeof navigator !== "undefined" && "usb" in navigator
-);
+const webUsbSupported = computed(() => isWebUsbSupported());
 </script>

@@ -91,15 +91,14 @@ import FlashProgress from "@/components/flash/FlashProgress.vue";
 import FlashLog from "@/components/flash/FlashLog.vue";
 import FallbackInstructions from "@/components/flash/FallbackInstructions.vue";
 import WiringInstructions from "@/components/flash/WiringInstructions.vue";
+import { isWebUsbSupported } from "@/utils/webusb";
 
 const ui = useUiStore();
 const flasher = useFlasherStore();
 
 // WebUSB availability gates the in-browser flasher UI; without it, only the
 // OpenOCD command-line fallback is usable.
-const webUsbSupported = computed(
-  () => typeof navigator !== "undefined" && "usb" in navigator
-);
+const webUsbSupported = computed(() => isWebUsbSupported());
 
 const isProtected = computed(() => {
   const ps = flasher.protectionStatus;

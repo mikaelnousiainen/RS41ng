@@ -20,6 +20,31 @@
       </p>
     </div>
 
+    <!-- WebUSB browser-support note -->
+    <div class="rounded-md bg-blue-900/20 border border-blue-700/40 p-4 flex items-start gap-3">
+      <svg class="w-5 h-5 text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v5M12 8h.01" stroke-linecap="round" />
+      </svg>
+      <div class="text-sm text-blue-200/90 space-y-0.5">
+        <p class="font-medium text-blue-300">In-browser flashing requires a WebUSB-capable browser</p>
+        <p>
+          The final step can flash firmware directly from your browser over WebUSB, which is supported in
+          <strong class="text-blue-200">Google Chrome</strong> and <strong class="text-blue-200">Microsoft Edge</strong>.
+          <strong class="text-blue-200">Firefox</strong> and <strong class="text-blue-200">Safari</strong> do not support
+          WebUSB &mdash; in those browsers you can still configure and build the firmware here, then flash it with the
+          OpenOCD command-line method shown on the Flash step.
+        </p>
+        <p
+          class="flex items-center gap-2 pt-1 font-medium"
+          :class="webUsbSupported ? 'text-green-400' : 'text-red-400'"
+        >
+          <span class="text-base leading-none" aria-hidden="true">{{ webUsbSupported ? "✓" : "✗" }}</span>
+          In-browser flashing using WebUSB {{ webUsbSupported ? "is" : "is not" }} supported in this browser
+        </p>
+      </div>
+    </div>
+
     <div>
       <h1 class="text-xl font-semibold text-gray-100">Select Hardware</h1>
       <p class="mt-1 text-sm text-gray-400">
@@ -261,15 +286,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import {
   useUiStore,
   variantToHardwareType,
   type HardwareVariant,
 } from "@/stores/ui";
 import { useConfigStore } from "@/stores/config";
+import { isWebUsbSupported } from "@/utils/webusb";
 
 const ui = useUiStore();
+
+// Live WebUSB support in the current browser (shown as a green/red indicator).
+const webUsbSupported = computed(() => isWebUsbSupported());
 const configStore = useConfigStore();
 
 // Hardware identification photos live in src/assets/hardware/, named by variant

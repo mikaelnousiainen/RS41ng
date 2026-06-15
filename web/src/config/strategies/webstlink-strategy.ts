@@ -11,6 +11,7 @@ import type {
   FlashProtectionInfoF1,
   FlashProtectionInfoL4,
 } from "@/lib/webstlink/webstlink";
+import { isWebUsbSupported } from "@/utils/webusb";
 
 const FLASH_START = 0x08000000;
 const VERIFY_CHUNK_SIZE = 4096; // 4 KB read-back chunks
@@ -339,7 +340,7 @@ export class WebStlinkStrategy implements FlashStrategy {
   private usbDevice: USBDevice | null = null;
 
   get available(): boolean {
-    return typeof navigator !== "undefined" && "usb" in navigator;
+    return isWebUsbSupported();
   }
 
   async connect(store: FlasherStore): Promise<void> {
