@@ -1,6 +1,15 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+// When a generated configuration is present (built from config.yaml by the config
+// generator / Docker build), use it instead of the defaults below. The build system
+// defines RS41NG_USE_GENERATED_CONFIG only when src/config_generated.h exists.
+// config_generated.h is a self-contained replacement for the body of this file and
+// also includes config_internal.h, so we skip the defaults entirely in that case.
+#ifdef RS41NG_USE_GENERATED_CONFIG
+#include "config_generated.h"
+#else
+
 // Note: these defines for radiosonde type (RS41, DFM17) are no longer used in this config file.  They are defined in your compile
 // command line as noted in the README.md.  Do not set them here.  
 
@@ -563,4 +572,6 @@ Setting, measured RF output power, relative DC power draw
 
 #include "config_internal.h"
 
-#endif
+#endif // RS41NG_USE_GENERATED_CONFIG
+
+#endif // __CONFIG_H
