@@ -27,6 +27,11 @@
 // Radio and everything else continues normally.  Set to 0 to disable.
 #define GPS_SLEEP_TEST_SECONDS 0
 
+// Number of consecutive failed GPS init attempts before the red error strobe is
+// armed at startup. A cold GPS commonly needs a retry or two to ACK, which is
+// normal, so the first few failures stay silent to avoid a spurious 5s strobe.
+#define GPS_INIT_RED_LED_RETRY_THRESHOLD 3
+
 #include <stdbool.h>
 
 extern volatile bool system_initialized;

@@ -195,12 +195,16 @@ int main(void)
 #endif
 
 #if !ENABLE_FOX_MODE
+        // Debounce GPS failure indication -- allow 1 failure before firing red LED
+        unsigned gps_init_attempts = 0;
         gps_init:
         log_info("GPS init\n");
         success = gps_driver_init();
         if (!success) {
             set_green_led(false);
-            set_red_led(true);
+            if (++gps_init_attempts >= GPS_INIT_RED_LED_RETRY_THRESHOLD) {
+                set_red_led(true);
+            }
             log_error("GPS initialization failed, retrying...\n");
             delay_ms(1000);
             goto gps_init;
