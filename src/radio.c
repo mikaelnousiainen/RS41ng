@@ -784,8 +784,17 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_RTTY:
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            // GPS uses DMA (no USART interrupts), so it won't disturb APRS timing
-            enable_gps_during_transmit = true;
+            // APRS-1200 is bit-banged in thread mode with delay_us_loop() for symbol
+            // timing, which measures real time and so is corrupted by any ISR that
+            // preempts the loop. The Bell-202 symbol loop therefore stops the TIM6
+            // scheduler tick for the duration of TX (see radio_si4032.c). Disable the
+            // GPS DMA drain too: it cannot run while the tick is stopped, and leaving
+            // it enabled would let stale bytes accumulate. The circular DMA buffer
+            // wraps during TX and dma_rd_pos is resynced on re-enable in
+            // radio_stop_transmit(). Position is already captured by telemetry_collect
+            // before TX, and the time-sync scheduler keys off GPS time-of-week, so
+            // pausing GPS for the packet does not drift the schedule.
+            enable_gps_during_transmit = false;
 
             // TODO: make bell tones and flag field count configurable
             bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, BELL_FLAG_FIELD_COUNT_1200, bell202_tones);

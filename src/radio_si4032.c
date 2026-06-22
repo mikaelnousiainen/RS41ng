@@ -295,16 +295,26 @@ static void radio_handle_main_loop_manual_si4032(radio_transmit_entry *entry, ra
 
     switch (entry->data_mode) {
         case RADIO_DATA_MODE_APRS_1200: {
-            // Don't disable system tick: GPS DMA drain runs in the tick handler
-            // and the TIM15 PWM ISR (priority 2,1) preempts TIM6 (priority 3,3)
-            // so tone generation is unaffected.
+            // Bell-202 symbols are bit-banged here in thread mode, with the symbol
+            // period timed by delay_us_loop() (a busy spin on the TIM1 hardware
+            // counter, i.e. real elapsed time). Any ISR that preempts this loop and
+            // overruns a symbol boundary stretches that symbol and corrupts the
+            // 1200-baud timing, breaking the decode. The 10 kHz TIM6 scheduler tick
+            // (and the GPS DMA drain it runs) is the dominant offender, so stop it
+            // for the duration of the packet. The tone itself keeps coming out of
+            // hardware TIM15, and SysTick (1 kHz, trivial) is harmless. GPS is paused
+            // during TX (radio.c) and resynced afterward.
             int8_t tone_index;
+
+            system_disable_tick();
 
             while ((tone_index = fsk_encoder_api->next_tone(fsk_enc)) >= 0) {
                 pwm_timer_set_frequency(precalculated_pwm_periods[tone_index]);
                 shared_state->radio_symbol_count_loop++;
                 delay_us_loop(symbol_delay_bell_202_1200bps_us);
             }
+
+            system_enable_tick();
 
             radio_si4032_state_change = false;
             shared_state->radio_transmission_finished = true;
