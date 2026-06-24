@@ -238,6 +238,7 @@ Setting, measured RF output power, relative DC power draw
 #define APRS_SYMBOL 'O'
 // Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
 // Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
+// The max APRS packet length (including all settings below) cannot exceed 192 characters. 
 #define APRS_COMMENT "https://amateur.sondehub.org/" CALLSIGN
 #define APRS_RELAYS "" // No spaces. This is where you can define "WIDE1-1,WIDE2-1" etc, but it is highly discouraged for balloons.
 #define APRS_DESTINATION "APZ41N"
