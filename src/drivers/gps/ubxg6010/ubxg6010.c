@@ -575,7 +575,7 @@ bool ubxg6010_init()
     log_info("GPS: Initializing USART with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     usart_gps_set_baud_rate(GPS_INITIAL_BAUD_RATE);
     delay_ms(100);
-    
+
     delay_ms(1000);
     log_info("GPS: Resetting GPS chip with baud rate %d\n", GPS_INITIAL_BAUD_RATE);
     ubxg6010_send_packet(&msgcfgrst);
@@ -725,7 +725,7 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
 
     if (cksum.ck_a != checksum->ck_a || cksum.ck_b != checksum->ck_b) {
         ubxg6010_current_gps_data.bad_packets += 1;
-#ifdef GPS_LOGGING_ENABLE 
+#ifdef GPS_LOGGING_ENABLE
         log_info("GPS checksum FAIL (bad=%i) class=0x%02X id=0x%02X payloadSize=%u\n",
                  ubxg6010_current_gps_data.bad_packets,
                  pkt->header.messageClass, pkt->header.messageId,
@@ -734,12 +734,12 @@ static void ubxg6010_handle_packet(uBloxPacket *pkt)
         return;
     }
 
-#ifdef GPS_LOGGING_ENABLE 
+#ifdef GPS_LOGGING_ENABLE
     log_info("GPS message: class=0x%02X id=0x%02X\n", pkt->header.messageClass, pkt->header.messageId);
 #endif
 
     if (pkt->header.messageClass == 0x01 && pkt->header.messageId == 0x07) {
-        // TODO: It seems NAV PVT message is not supported by UBXG6010, confirm this
+        // NOTE: NAV-PVT message is not supported by the older UBX-G6010 chip, but only the newer UBX-M10050
         ubxg6010_current_gps_data.ok_packets += 1;
         ubxg6010_current_gps_data.time_of_week_millis = pkt->data.navpvt.iTOW;
         ubxg6010_current_gps_data.year = pkt->data.navpvt.year;
@@ -891,9 +891,9 @@ void ubxg6010_handle_incoming_byte(uint8_t data, uint8_t reset)
             sync_ubx = 1;
             buffer_pos = 2;
             incoming_packet->header.sc2 = data;
-        } 
+        }
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
-        else 
+        else
         {
             ubxg6010_handle_nmea_sentence_start(data);
             buffer_pos = 0;
