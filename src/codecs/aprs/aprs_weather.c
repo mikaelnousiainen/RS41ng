@@ -8,6 +8,8 @@
 size_t aprs_generate_weather_report(uint8_t *payload, size_t length, telemetry_data *data,
         bool include_timestamp, char *comment)
 {
+    aprs_packet_counter++;
+    
     char timestamp[12];
 
     int16_t la_degrees, lo_degrees;
