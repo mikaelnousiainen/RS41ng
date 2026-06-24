@@ -110,6 +110,7 @@ The main features the RS41ng firmware are:
 * Support for counting pulses on expansion header (I2C2_SDA (PB11) / UART3 RX) for use with sensors like Geiger counters
 * GPS NMEA data output via the external serial port (see below). RS41 only -- This disables use of I²C devices as the serial port pins are shared with the I²C bus pins.
   * This allows using the sonde GPS data in external tracker hardware, such as Raspberry Pi or other microcontrollers.
+* Support for "landed mode" to increase chances of recovery days after a sonde has landed by reducing power consumption. 
 
 
 ### Transmission modes
@@ -181,6 +182,12 @@ Recommended Fox Mode settings in `config.h`:
 ```
 
 NOTE: See `config.c` (not `.h`) for CW string options. Many different parameters can be transmitted.
+
+### Landed Mode
+
+When enabled, landed mode conserves battery after the balloon has landed. It is armed when altitude exceeds the arm threshold during ascent, then requires the altitude to drop back below the arm threshold before landing detection begins (prevents false triggers during float). After landing (velocity near zero for the stationary period), the GPS and radio are put to sleep. Periodically the system wakes, acquires a fix, transmits all enabled modes once, then sleeps again. An auto-detected geofence around the landing site disables landed mode if the unit moves; it can re-enter landed mode if it settles again (with a new geofence center). 
+
+Landed mode is recommended on launches that will not be immediately chased or if a delayed recovery is expected. Preliminary testing indicates that landed mode can allow transmissions to exceed 72 hours with Lithium AA batteries.
 
 ### External sensors
 
