@@ -9,6 +9,7 @@ void usart_gps_set_baud_rate(uint32_t baud_rate);
 void usart_gps_uninit();
 void usart_gps_enable(bool enabled);
 void usart_gps_send_byte(uint8_t data);
+void usart_gps_send_break(void);
 void usart_gps_drain_dma(void);
 
 extern void (*usart_gps_handle_incoming_byte)(uint8_t data, uint8_t reset);

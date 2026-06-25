@@ -608,6 +608,18 @@ void ubxm10050_reset_parser(void)
 #endif
 }
 
+void ubxm10050_clear_data(void)
+{
+    /* Preserve diagnostic packet counters across sleep/wake cycles so it's
+     * possible to tell whether the receiver is communicating after wake.
+     * Zero only the position/time/fix fields. */
+    uint16_t saved_ok  = m10_current_gps_data.ok_packets;
+    uint16_t saved_bad = m10_current_gps_data.bad_packets;
+    memset(&m10_current_gps_data, 0, sizeof(gps_data));
+    m10_current_gps_data.ok_packets  = saved_ok;
+    m10_current_gps_data.bad_packets = saved_bad;
+}
+
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE
 static void ubxm10050_handle_nmea_sentence_start(uint8_t data)
 {
@@ -747,6 +759,14 @@ bool ubxm10050_get_current_gps_data(gps_data *data)
     *data = m10_current_gps_data;
     m10_current_gps_data.updated = false;
     return was_updated;
+}
+
+/* Non-consuming read: leaves the updated flag intact so the transmit
+ * scheduler, which is the sole consumer of the flag, still sees it. */
+bool ubxm10050_peek_current_gps_data(gps_data *data)
+{
+    *data = m10_current_gps_data;
+    return data->updated;
 }
 
 void ubxm10050_request_gpstime(void)

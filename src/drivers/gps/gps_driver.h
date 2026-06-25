@@ -19,6 +19,7 @@
  *   gps_driver_sleep()
  *   gps_driver_request_gpstime()
  *   gps_driver_get_current_gps_data(data)
+ *   gps_driver_peek_current_gps_data(data)
  *   gps_driver_handle_incoming_byte(byte)
  *   gps_driver_reset_parser()
  */
@@ -45,8 +46,10 @@
 #define gps_driver_sleep()                      ubxg6010_sleep()
 #define gps_driver_request_gpstime()            ubxg6010_request_gpstime()
 #define gps_driver_get_current_gps_data(data)   ubxg6010_get_current_gps_data(data)
+#define gps_driver_peek_current_gps_data(data)  ubxg6010_peek_current_gps_data(data)
 #define gps_driver_handle_incoming_byte         ubxg6010_handle_incoming_byte
 #define gps_driver_reset_parser()               ubxg6010_reset_parser()
+#define gps_driver_clear_data()                 ubxg6010_clear_data()
 
 #endif /* GPS_DRIVER_UBXG6010 */
 
@@ -63,8 +66,10 @@
 #define gps_driver_sleep()                      ubxm10050_sleep()
 #define gps_driver_request_gpstime()            ubxm10050_request_gpstime()
 #define gps_driver_get_current_gps_data(data)   ubxm10050_get_current_gps_data(data)
+#define gps_driver_peek_current_gps_data(data)  ubxm10050_peek_current_gps_data(data)
 #define gps_driver_handle_incoming_byte         ubxm10050_handle_incoming_byte
 #define gps_driver_reset_parser()               ubxm10050_reset_parser()
+#define gps_driver_clear_data()                 ubxm10050_clear_data()
 
 #endif /* GPS_DRIVER_UBXM10050 */
 

@@ -30,7 +30,7 @@
 #define RADIO_TX_CW false
 #define RADIO_TX_CW_COUNT 1
 #define RADIO_TX_PIP false
-#define RADIO_TX_PIP_COUNT 6
+#define RADIO_TX_PIP_COUNT 1
 #define RADIO_TX_APRS false
 #define RADIO_TX_APRS_COUNT 1
 #define RADIO_TX_APRS_9600 false
@@ -82,6 +82,7 @@
 // RS41 only: Built-in Si4032 radio chip transmission configuration
 // Si4032 transmit power: 0..7
 // 0 = -1dBm, 1 = 2dBm, 2 = 5dBm (~3 mW), 3 = 8dBm (~6 mW), 4 = 11dBm (~12 mW), 5 = 14dBm (25 mW), 6 = 17dBm (50 mW), 7 = 20dBm (100 mW)
+// @ 3.0V, 0: 12mA, 1: 16mA, 2: 19mA, 3: 26mA, 4: 34mA, 5: 45mA, 6: 57mA, 7: 73mA
 // This defaults to 5 (14 dBm, 25 mW), which is a good setting for Horus 4FSK transmissions and it saves power.
 // For APRS usage, you might want to use maximum power setting of 7 (20 dBm, 100 mW). Note that this setting reduces battery life.
 // See the README for details about power consumption.
@@ -116,9 +117,12 @@ Setting, measured RF output power, relative DC power draw
 /* General Settings */
 
 // Disabling LEDs will save power
-// Red LED: Lit during initialization and transmit.
-// Green LED: Blinking fast when there is no GPS fix. Blinking slowly when the GPS has a fix.
+// Green LED: Blinking when not ready for flight (no GPS lock), solid when ready for flight (GPS locked)
+// Yellow LED (DFM only): always on -- power LED (per label)
+// Red LED: Illuminated only for errors.
 #define LEDS_ENABLE true
+// Change the behavior of the red LED to illuminate when transmitting
+#define LEDS_ENABLE_RED_TX false
 
 // Disable LEDs above the specified altitude (in meters) to save power. Set to zero to disable this behavior.
 #define LEDS_DISABLE_ALTITUDE_METERS 2000
@@ -170,6 +174,47 @@ Setting, measured RF output power, relative DC power draw
 #error GPS NMEA output via USART3 cannot be enabled simultaneously with the I2C bus on DFM17 (shared PB10/PB11 pins).
 #endif
 
+/**
+ * Landed mode battery conservation settings
+ *
+ * When enabled, landed mode conserves battery after the balloon has landed.
+ * It is armed when altitude exceeds the arm threshold during ascent, then
+ * requires the altitude to drop back below the arm threshold before landing
+ * detection begins (prevents false triggers during float).  After landing
+ * (velocity near zero for the stationary period), the GPS and radio are put
+ * to sleep.  Periodically the system wakes, acquires a fix, transmits all
+ * enabled modes once, then sleeps again.  An auto-detected geofence around
+ * the landing site disables landed mode if the unit moves; it can re-enter
+ * landed mode if it settles again (with a new geofence center).
+ */
+#define LANDED_MODE_ENABLE false
+// Altitude in meters that must be exceeded during ascent to arm landed mode.
+#define LANDED_MODE_ARM_ALTITUDE_METERS 5000
+// Maximum absolute vertical speed in cm/s to consider "stationary" (50 = 0.5 m/s)
+#define LANDED_MODE_CLIMB_THRESHOLD_CM_S 50
+// Maximum ground speed in cm/s to consider "stationary" (50 = 0.5 m/s)
+#define LANDED_MODE_SPEED_THRESHOLD_CM_S 50
+// Number of consecutive seconds the unit must be stationary before entering landed mode.
+#define LANDED_MODE_STATIONARY_SECONDS 600
+// Sleep duration in seconds between wake-transmit cycles while in landed mode.
+#define LANDED_MODE_SLEEP_SECONDS 300
+// Maximum time in seconds to wait for GPS fix after waking before transmitting anyway.
+#define LANDED_MODE_GPS_FIX_TIMEOUT_SECONDS 120
+// Safety maximum time in seconds for the transmit cycle (normally the cycle completes on its own).
+#define LANDED_MODE_TRANSMIT_SECONDS 30
+// Geofence radius in meters from the landing point.  If the unit moves beyond this radius,
+// landed mode is disabled (returns to armed).  Set to 0 to disable the geofence.
+#define LANDED_MODE_GEOFENCE_RADIUS_METERS 100
+
+// Emit a PIP at this interval (seconds) while sleeping, without waking the GPS.
+// Uses the existing PIP radio infrastructure (morse 'E' character).
+#define LANDED_MODE_PIP_ENABLE true
+#define LANDED_MODE_PIP_INTERVAL_SECONDS 10
+// When true, LEDs are forced off during landed sleep/acquire states and only
+// enabled during TRANSMITTING or PIPPING to conserve power.
+#define LANDED_MODE_LEDS_TRANSMIT_ONLY true
+
+
 /* Mode specific settings */
 
 /**
@@ -202,6 +247,7 @@ Setting, measured RF output power, relative DC power draw
 #define APRS_SYMBOL 'O'
 // Maximum length: depends on the packet contents, but keeping this under 100 characters is usually safe.
 // Note that many hardware APRS receivers show a limited number of APRS comment characters, such as 43 or 67 chars.
+// The max APRS packet length (including all settings below) cannot exceed 192 characters. 
 #define APRS_COMMENT "https://amateur.sondehub.org/" CALLSIGN
 #define APRS_RELAYS "" // No spaces. This is where you can define "WIDE1-1,WIDE2-1" etc, but it is highly discouraged for balloons.
 #define APRS_DESTINATION "APZ41N"

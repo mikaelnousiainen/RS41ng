@@ -10,6 +10,7 @@
  * $loc8 - Locator (8 chars)
  * $loc12 - Locator (12 chars)
  * $bv - Battery voltage in millivolts (up to 4 chars)
+ * $bu - Button ADC value in raw units
  * $te - External temperature in C (up to 3 chars)
  * $ti - Internal temperature in C (up to 3 chars)
  * $hu - Humidity percentage (up to 3 chars)
@@ -32,6 +33,7 @@
  * $gu - GPS data update indicator, 1 if GPS data was updated since time telemetry was read, 0 otherwise
  * $ct - Clock calibration trim value (0-31, only for DFM-17)
  * $cc - Clock calibration change count (only for DFM-17)
+ * $apc - APRS packet counter value -- increments on each APRS packet generation
  *
  * Allowed message lengths:
  *
@@ -88,6 +90,7 @@ char *aprs_comment_templates[] = {
 //        " B$bu $loc12 $hh:$mm:$ss - " APRS_COMMENT,
 //        " $loc12 - " APRS_COMMENT,
 //        " $teC $hu% $prmb PC $pc RI $ri uR/h - " APRS_COMMENT,
+        // "/P$apcS$svT$tiV$bvC$clA$bu " APRS_COMMENT,
         " " APRS_COMMENT,
         NULL
 };

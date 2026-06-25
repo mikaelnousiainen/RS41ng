@@ -67,6 +67,7 @@ bool bmp280_read_telemetry(telemetry_data *data)
             data->temperature_celsius_100 = 0;
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
+            data->ext_sensor_type = NO_EXT_SENSOR;
             return false;
         } else if(LEDS_ENABLE) {
             set_red_led(false);
@@ -91,9 +92,14 @@ bool bmp280_read_telemetry(telemetry_data *data)
             data->temperature_celsius_100 = 0;
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
+            data->ext_sensor_type = NO_EXT_SENSOR;
         } else if(LEDS_ENABLE) {
             set_red_led(false);
         }
+    }
+
+    if(success) {
+        data->ext_sensor_type = (bmp280_dev.id == BMP280_CHIP_ID) ? SENSOR_BMP280 : SENSOR_BME280;
     }
 
     bmp280_initialization_required = !success;

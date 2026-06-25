@@ -8,6 +8,8 @@
 size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *data,
         char symbol_table, char symbol, bool include_timestamp, char *comment)
 {
+    aprs_packet_counter++;
+
     char timestamp[12];
 
     int16_t la_degrees, lo_degrees;
@@ -26,11 +28,9 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
         strncpy(timestamp, "!", sizeof(timestamp));
     }
 
-    aprs_packet_counter++;
-
     return snprintf((char *) payload,
             length,
-            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06d/P%dS%dT%02dV%04dC%02dA%04d%s"),
+            ("%s%02d%02d.%02u%c%c%03d%02u.%02u%c%c%03d/%03d/A=%06d%s"),
             timestamp,
             abs(la_degrees), la_minutes, la_h_minutes,
             la_degrees > 0 ? 'N' : 'S',
@@ -41,12 +41,6 @@ size_t aprs_generate_position(uint8_t *payload, size_t length, telemetry_data *d
             heading_degrees,
             ground_speed_knots,
             (int) altitude_feet,
-            aprs_packet_counter,
-            data->gps.satellites_visible,
-            (int) data->internal_temperature_celsius_100 / 100,
-            data->battery_voltage_millivolts,
-            (int16_t) ((float) data->gps.climb_cm_per_second / 100.0f),
-            (int16_t) data->button_adc_value,
             comment
     );
 }

@@ -274,15 +274,15 @@ void usart_gps_init(uint32_t baud_rate, bool enable_irq)
 #endif //RS41_RSM4x4
     HAL_GPIO_Init(BANK_USART_RX, &gpio_init);
 
-#ifdef RS41  // both models of RS41 have a GPS power pin.  Unclear whether it's needed.
+#ifdef RS41  // both models of RS41 have a GPS reset_n pin. This must be asserted for the GPS to boot.
     // USART PWR
-    gpio_init.Pin = PIN_USART_PWR;
+    gpio_init.Pin = GPS_RESET_N;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(BANK_USART_PWR, &gpio_init);
 
     // Enable GPS
-    HAL_GPIO_WritePin(BANK_USART_PWR, PIN_USART_PWR, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(BANK_USART_PWR, GPS_RESET_N, GPIO_PIN_SET);
 #endif //RS41 power pin
 
     gps_usart.Init.BaudRate = baud_rate;
@@ -338,9 +338,9 @@ void usart_gps_uninit()
     HAL_DMA_DeInit(&hdma_usart_rx);
     GPS_USART_CLK_DISABLE();
 
-#ifdef RS41  // both models of RS41 have a GPS power pin
+#ifdef RS41  // both models of RS41 have a GPS reset_n pin
     // Disable GPS
-    HAL_GPIO_WritePin(BANK_USART_PWR, PIN_USART_PWR, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(BANK_USART_PWR, GPS_RESET_N, GPIO_PIN_RESET);
 #endif //RS41 power pin
 }
 
@@ -365,4 +365,20 @@ void usart_gps_send_byte(uint8_t data)
 #endif
     // optional: wait for TC if absolutely needed
     while ((__HAL_UART_GET_FLAG(&gps_usart, USART_FLAG_TC)) == RESET) {}
+}
+
+/* Send a UART break frame: continuous low on TX for 10-11 bit times.
+ * Used as a strong wake signal for the GPS in backup mode. */
+void usart_gps_send_break(void)
+{
+    /* Drain any in-flight byte first so the break frame isn't truncated. */
+    while ((__HAL_UART_GET_FLAG(&gps_usart, USART_FLAG_TC)) == RESET) {}
+#ifdef RS41_RSM4x4
+    /* L4: write SBKRQ in RQR. Self-clearing once the break has been sent. */
+    gps_usart.Instance->RQR = USART_RQR_SBKRQ;
+#else
+    /* F1: set SBK in CR1. Hardware clears it once the break is sent. */
+    gps_usart.Instance->CR1 |= USART_CR1_SBK;
+    while (gps_usart.Instance->CR1 & USART_CR1_SBK) {}
+#endif
 }

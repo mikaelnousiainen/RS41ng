@@ -343,6 +343,17 @@ bool ubxg6010_get_current_gps_data(gps_data *data)
     return data->updated;
 }
 
+// Non-consuming read: leaves the updated flag intact so the transmit
+// scheduler, which is the sole consumer of the flag, still sees it.
+bool ubxg6010_peek_current_gps_data(gps_data *data)
+{
+    system_disable_irq();
+    memcpy(data, &ubxg6010_current_gps_data, sizeof(gps_data));
+    system_enable_irq();
+
+    return data->updated;
+}
+
 const uBloxPacket msgcfgrst = {
         .header = {
                 0xb5,
@@ -821,6 +832,11 @@ void ubxg6010_reset_parser()
 {
     sync_ubx = 0;
     sync_nmea = 0;
+}
+
+void ubxg6010_clear_data()
+{
+    memset(&ubxg6010_current_gps_data, 0, sizeof(gps_data));
 }
 
 #if GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE

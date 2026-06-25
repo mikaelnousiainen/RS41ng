@@ -15,6 +15,7 @@
 #include "gps.h"
 #include "drivers/gps/gps_driver.h"
 #include "radio_internal.h"
+#include "landed.h"
 #ifdef RS41
 #include "radio_si4032.h"
 #endif
@@ -37,7 +38,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
     // Si4032
     #if RADIO_TX_HORUS_V2_CONTINUOUS
         {
-                .enabled = RADIO_TX_HORUS_V2,
+                .enabled = true,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_HORUS_V2,
                 .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
@@ -48,9 +49,24 @@ radio_transmit_entry radio_transmit_schedule[] = {
                 .payload_encoder = &radio_horus_v2_payload_encoder,
                 .fsk_encoder_api = &mfsk_fsk_encoder_api,
         },
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,
+                        .radio_type = RADIO_TYPE_SI4032,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4032_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
     #elif RADIO_TX_HORUS_V3_CONTINUOUS
         {
-                .enabled = RADIO_TX_HORUS_V3,
+                .enabled = true,
                 .radio_type = RADIO_TYPE_SI4032,
                 .data_mode = RADIO_DATA_MODE_HORUS_V3,
                 .time_sync_seconds = HORUS_V3_TIME_SYNC_SECONDS,
@@ -75,6 +91,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .fsk_encoder_api = &mfsk_fsk_encoder_api,
             },
         #endif
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,
+                        .radio_type = RADIO_TYPE_SI4032,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4032_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
     #else // (not) HORUS Continuous
         #if RADIO_TX_PIP
                 {
@@ -84,6 +115,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                         .transmit_count = RADIO_TX_PIP_COUNT,
                         .time_sync_seconds = PIP_TIME_SYNC_SECONDS,
                         .time_sync_seconds_offset = PIP_TIME_SYNC_OFFSET_SECONDS,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4032_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,  // Landed module enables this during PIPPING
+                        .radio_type = RADIO_TYPE_SI4032,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
                         .frequency = RADIO_TX_FREQUENCY_PIP,
                         .tx_power = RADIO_SI4032_TX_POWER,
                         .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
@@ -218,7 +264,7 @@ radio_transmit_entry radio_transmit_schedule[] = {
     // Si4063
     #if RADIO_TX_HORUS_V2_CONTINUOUS
             {
-                    .enabled = RADIO_TX_HORUS_V2,
+                    .enabled = true,
                     .radio_type = RADIO_TYPE_SI4063,
                     .data_mode = RADIO_DATA_MODE_HORUS_V2,
                     .time_sync_seconds = HORUS_V2_TIME_SYNC_SECONDS,
@@ -229,9 +275,24 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .payload_encoder = &radio_horus_v2_payload_encoder,
                     .fsk_encoder_api = &mfsk_fsk_encoder_api,
             },
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,
+                        .radio_type = RADIO_TYPE_SI4063,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4063_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
     #elif RADIO_TX_HORUS_V3_CONTINUOUS
             {
-                    .enabled = RADIO_TX_HORUS_V3,
+                    .enabled = true,
                     .radio_type = RADIO_TYPE_SI4063,
                     .data_mode = RADIO_DATA_MODE_HORUS_V3,
                     .time_sync_seconds = HORUS_V3_TIME_SYNC_SECONDS,
@@ -242,6 +303,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                     .payload_encoder = &radio_horus_v3_payload_encoder,
                     .fsk_encoder_api = &mfsk_fsk_encoder_api,
             },
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,
+                        .radio_type = RADIO_TYPE_SI4063,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4063_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
     #else // (not) HORUS Continuous
         #if RADIO_TX_PIP
                 {
@@ -251,6 +327,21 @@ radio_transmit_entry radio_transmit_schedule[] = {
                         .transmit_count = RADIO_TX_PIP_COUNT,
                         .time_sync_seconds = PIP_TIME_SYNC_SECONDS,
                         .time_sync_seconds_offset = PIP_TIME_SYNC_OFFSET_SECONDS,
+                        .frequency = RADIO_TX_FREQUENCY_PIP,
+                        .tx_power = RADIO_SI4063_TX_POWER,
+                        .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
+                        .payload_encoder = &radio_cw_payload_encoder,
+                        .fsk_encoder_api = &morse_fsk_encoder_api,
+                },
+        #endif
+        #if LANDED_MODE_ENABLE && LANDED_MODE_PIP_ENABLE
+                {
+                        .enabled = false,  // Landed module enables this during PIPPING
+                        .radio_type = RADIO_TYPE_SI4063,
+                        .data_mode = RADIO_DATA_MODE_PIP,
+                        .transmit_count = RADIO_TX_PIP_COUNT,
+                        .time_sync_seconds = 0,
+                        .time_sync_seconds_offset = 0,
                         .frequency = RADIO_TX_FREQUENCY_PIP,
                         .tx_power = RADIO_SI4063_TX_POWER,
                         .symbol_rate = MORSE_WPM_TO_SYMBOL_RATE(PIP_SPEED_WPM),
@@ -523,15 +614,13 @@ static volatile bool radio_module_initialized = false;
 const bool wspr_locator_fixed_enabled = WSPR_LOCATOR_FIXED_ENABLED;
 
 radio_transmit_entry *radio_current_transmit_entry = NULL;
-static uint8_t radio_transmit_entry_count = 0;
+uint8_t radio_transmit_entry_count = 0;
 static uint8_t radio_next_non_synced_index = 0;
 
 static volatile uint32_t radio_post_transmit_delay_counter = 0;
 static volatile uint32_t radio_next_symbol_counter = 0;
 
 static radio_transmit_entry *radio_start_transmit_entry = NULL;
-
-static uint32_t radio_previous_time_sync_scheduled = 0;
 
 char radio_current_payload_message[RADIO_PAYLOAD_MESSAGE_MAX_LENGTH];
 
@@ -645,7 +734,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
             return false;
         }
 
-#if LEDS_ENABLE && ENABLE_FOX_MODE
+#if LEDS_ENABLE && (ENABLE_FOX_MODE || LEDS_ENABLE_RED_TX)
         set_red_led(true);
 #endif
 
@@ -695,8 +784,17 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         case RADIO_DATA_MODE_RTTY:
             break;
         case RADIO_DATA_MODE_APRS_1200:
-            // GPS uses DMA (no USART interrupts), so it won't disturb APRS timing
-            enable_gps_during_transmit = true;
+            // APRS-1200 is bit-banged in thread mode with delay_us_loop() for symbol
+            // timing, which measures real time and so is corrupted by any ISR that
+            // preempts the loop. The Bell-202 symbol loop therefore stops the TIM6
+            // scheduler tick for the duration of TX (see radio_si4032.c). Disable the
+            // GPS DMA drain too: it cannot run while the tick is stopped, and leaving
+            // it enabled would let stale bytes accumulate. The circular DMA buffer
+            // wraps during TX and dma_rd_pos is resynced on re-enable in
+            // radio_stop_transmit(). Position is already captured by telemetry_collect
+            // before TX, and the time-sync scheduler keys off GPS time-of-week, so
+            // pausing GPS for the packet does not drift the schedule.
+            enable_gps_during_transmit = false;
 
             // TODO: make bell tones and flag field count configurable
             bell_encoder_new(&entry->fsk_encoder, entry->symbol_rate, BELL_FLAG_FIELD_COUNT_1200, bell202_tones);
@@ -803,7 +901,7 @@ static bool radio_start_transmit(radio_transmit_entry *entry)
         return false;
     }
 
-#if LEDS_ENABLE && ENABLE_FOX_MODE
+#if LEDS_ENABLE && (ENABLE_FOX_MODE || LEDS_ENABLE_RED_TX)
     set_red_led(true);
 #endif
 
@@ -896,7 +994,7 @@ static bool radio_stop_transmit(radio_transmit_entry *entry)
 
     usart_gps_enable(true);
 
-#if LEDS_ENABLE && ENABLE_FOX_MODE
+#if LEDS_ENABLE && (ENABLE_FOX_MODE || LEDS_ENABLE_RED_TX)
     set_red_led(false);
 #endif
 
@@ -937,6 +1035,12 @@ static bool radio_transmit_symbol(radio_transmit_entry *entry)
 static void radio_reset_transmit_delay_counter()
 {
 #if RADIO_TX_HORUS_V2_CONTINUOUS || RADIO_TX_HORUS_V3_CONTINUOUS
+  #if LANDED_MODE_ENABLE
+    if (landed_is_active()) {
+        radio_post_transmit_delay_counter = RADIO_POST_TRANSMIT_DELAY_MS * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 1000;
+        return;
+    }
+  #endif
     radio_post_transmit_delay_counter = 0;
 #else
     radio_post_transmit_delay_counter = RADIO_POST_TRANSMIT_DELAY_MS * SYSTEM_SCHEDULER_TIMER_TICKS_PER_SECOND / 1000;
@@ -950,6 +1054,22 @@ static void radio_next_transmit_entry()
 
     radio_current_transmit_entry->current_transmit_index =
             (radio_current_transmit_entry->current_transmit_index + 1) % radio_current_transmit_entry->transmit_count;
+
+    if (radio_current_transmit_entry->current_transmit_index == 0) {
+        radio_current_transmit_entry->pass_completed = true;
+#if LANDED_MODE_ENABLE
+        /* In landed PIPPING/TRANSMITTING, disable the entry immediately
+         * so the radio cannot start another pass before landed_update()
+         * runs.  Do NOT disable during STABILIZING — the radio should
+         * still operate normally while confirming landing. */
+        {
+            landed_state ls = landed_get_state();
+            if (ls == LANDED_STATE_PIPPING || ls == LANDED_STATE_TRANSMITTING) {
+                radio_current_transmit_entry->enabled = false;
+            }
+        }
+#endif
+    }
 
     radio_reset_transmit_delay_counter();
 }
@@ -1020,6 +1140,9 @@ static radio_transmit_entry *radio_find_ready_entry()
     if (radio_current_transmit_entry != NULL &&
         radio_current_transmit_entry->enabled &&
         radio_current_transmit_entry->current_transmit_index != 0) {
+        if (radio_post_transmit_delay_counter > 0) {
+            return NULL;
+        }
         return radio_current_transmit_entry;
     }
 
@@ -1030,15 +1153,23 @@ static radio_transmit_entry *radio_find_ready_entry()
     if (gps.updated) {
         uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
 
-        if (time_millis != radio_previous_time_sync_scheduled) {
-            for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
-                radio_transmit_entry *entry = &radio_transmit_schedule[i];
-                if (!entry->enabled || entry->time_sync_seconds == 0) continue;
+        for (uint8_t i = 0; i < radio_transmit_entry_count; i++) {
+            radio_transmit_entry *entry = &radio_transmit_schedule[i];
+            if (!entry->enabled || entry->time_sync_seconds == 0) continue;
 
-                if (radio_check_time_sync(entry, time_millis, gps.fix)) {
-                    radio_previous_time_sync_scheduled = time_millis;
-                    return entry;
-                }
+            uint32_t offset_millis = entry->time_sync_seconds_offset * 1000;
+            if (time_millis < offset_millis) continue;
+
+            // The scheduled slot is constant across the whole tolerance window
+            // (RADIO_TIME_SYNC_THRESHOLD_MS) and increments once per period.
+            // Dedup on it so the entry fires exactly once per period, no matter
+            // how many GPS measurements land inside the window.
+            uint32_t slot = (time_millis - offset_millis) / (entry->time_sync_seconds * 1000);
+            if (entry->last_tx_slot == slot) continue;
+
+            if (radio_check_time_sync(entry, time_millis, gps.fix)) {
+                entry->last_tx_slot = slot;
+                return entry;
             }
         }
     }
@@ -1077,8 +1208,9 @@ void radio_handle_main_loop()
             log_info("Fix: %d, Sats: %d, OK packets: %d, Bad packets: %d\n",
                     current_telemetry_data.gps.fix, current_telemetry_data.gps.satellites_visible,
                     current_telemetry_data.gps.ok_packets, current_telemetry_data.gps.bad_packets);
-            log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
-                     drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
+            // Not needed since this is working well
+            // log_info("Drain:  Interrupted: %lu, Not_Enabled: %lu, Null: %lu, Dma_not_running: %lu, Byte_Calls: %lu\n",
+            //          drain_interrupted, drain_not_enabled, drain_null_instance, drain_dma_not_running, drain_byte_calls);
             log_info("Lat: %ld *1M, Lon: %ld *1M, Alt: %ld m\n",
                     current_telemetry_data.gps.latitude_degrees_10000000 / 10,
                     current_telemetry_data.gps.longitude_degrees_10000000 / 10,
@@ -1216,6 +1348,7 @@ void radio_init()
         if (entry->transmit_count == 0) {
             entry->transmit_count = 1;
         }
+        entry->last_tx_slot = UINT32_MAX;
     }
 
     // radio_current_transmit_entry starts NULL; radio_find_ready_entry() will
