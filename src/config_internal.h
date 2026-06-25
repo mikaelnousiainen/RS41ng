@@ -10,6 +10,8 @@
 #define RADIO_SYMBOL_DATA_MAX_LENGTH 256
 #define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 64
 
+#define RADIO_APRS_PAYLOAD_MAX_LENGTH 192
+
 #define HORUS_UNCODED_BUFFER_SIZE 128
 #define HORUS_CODED_BUFFER_SIZE 256
 
@@ -43,8 +45,16 @@ extern char *cats_comment_templates[];
 extern char *fsq_comment_templates[];
 extern char *ftjt_message_templates[];
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void set_green_led(bool enabled);
 void set_red_led(bool enabled);
+
+#ifdef __cplusplus
+}
+#endif
 
 typedef enum _sensor_type {
     NO_EXT_SENSOR = 0,
