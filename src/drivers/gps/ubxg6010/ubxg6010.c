@@ -523,6 +523,7 @@ bool ubxg6010_enable_power_save_mode()
     success = ubxg6010_wait_for_ack();
     if (!success) {
         log_error("GPS: Entering power-saving mode failed\n");
+        set_error_code(ERROR_GPS_POWER_SAVE);
     }
 
     return success;

@@ -655,6 +655,20 @@ use command `file src/RS41ng.elf`.
 
 NOTE: To save RAM, the heap size has been zeroed out. Dynamic memory allocations (`malloc`, etc.) will not function. Use static or stack-based allocation if needed.
 
+## Building and running unit tests
+
+```bash
+# Configure tests (defaults to -DRS41=1)
+cmake -S tests -B build-tests
+# Build all tests
+cmake --build build-tests
+# Run all tests
+ctest --test-dir build-tests --output-on-failure
+
+# Run a single test
+ctest --test-dir build-tests -R template_test --output-on-failure
+```
+
 ## Hardware-specific Notes
 
 This section is allocated for documentation of various features and oddities of specific radiosonde types.

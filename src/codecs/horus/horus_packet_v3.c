@@ -284,6 +284,31 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
     }
 #endif
 
+#if HORUS_V3_TX_ERROR_CODE
+    // Add the system error code (see errors.h) as an "err" extra sensor field
+    if (asnMessage.extraSensors.nCount < 4) {
+        asnMessage.exist.extraSensors = true;
+        horusAdditionalSensorType error_struct = {
+            .name = "err",
+            .exist = {
+                .name = 1,
+                .values = 1
+            },
+            .values = {
+                .kind = horusInt_PRESENT,
+                .u = {
+                    .horusInt = {
+                        .nCount = 1,
+                        .arr[0] = data->error_code
+                    }
+                }
+            }
+        };
+        asnMessage.extraSensors.arr[asnMessage.extraSensors.nCount] = error_struct;
+        asnMessage.extraSensors.nCount += 1;
+    }
+#endif
+
     memset(&encodedMessage, 0, sizeof(encodedMessage));
 
     // The Encoder may fail and update an error code
@@ -316,6 +341,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
             log_error("[error]: HORUS v3 Assert Failure, maybe hit buffer size limit\n");
         }
         // Need to check what happens here.
+        set_error_code(ERROR_HORUS_V3_ENCODE);
         return 0;
     } else {
         // Encoding was successful!
@@ -347,6 +373,7 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
                 log_error("[error]: HORUS v3 Extension Assert Failure, maybe hit buffer size limit\n");
             }
             // Need to check what happens here.
+            set_error_code(ERROR_HORUS_V3_EXT_ENCODE);
             return 0;
         }
 
@@ -377,6 +404,10 @@ size_t horus_packet_v3_create(uint8_t *payload, telemetry_data *data){
         memcpy(payload, &packetCrc, sizeof(packetCrc));  // little‑endian on STM32
 
         log_info("HORUS v3 ASN1: %i Frame: %i\n", encodedSize, frameSize);
+
+        // Encoding succeeded - clear any Horus encode error
+        clear_error_code(ERROR_HORUS_V3_ENCODE);
+        clear_error_code(ERROR_HORUS_V3_EXT_ENCODE);
 
         return frameSize;
     }

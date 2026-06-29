@@ -1,24 +1,69 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.13)
 
-#SET(CMAKE_SYSTEM_NAME Linux)
-#SET(CMAKE_SYSTEM_VERSION 1)
+# Standalone NATIVE test project. Do not configure this via the firmware's ARM
+# toolchain - the tests are meant to be compiled and run on the host machine:
+#
+#   cmake -S tests -B build-tests
+#   cmake --build build-tests
+#   ctest --test-dir build-tests --output-on-failure
+#
+# Build/run a single test:
+#   cmake --build build-tests --target template_test
+#   ./build-tests/template_test
+project(RS41ng_tests C CXX)
 
-project(RS41ng_test C CXX)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(BINARY ${CMAKE_PROJECT_NAME})
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
-SET(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
+# The firmware requires a hardware type to be defined. Default to RS41 for the
+# host tests; override with -DDFM17=1 or -DRS41_RSM4X4=1 when configuring.
+if(NOT DEFINED RS41 AND NOT DEFINED DFM17 AND NOT DEFINED RS41_RSM4X4)
+    set(RS41 1)
+endif()
+foreach(hw RS41 RS41_RSM4X4 DFM17)
+    if(DEFINED ${hw} AND ${hw})
+        add_compile_definitions(${hw}=1)
+    endif()
+endforeach()
 
-file(GLOB_RECURSE USER_SOURCES "../src/config.c" "../src/codecs/*.c" "../src/template.c" "../src/utils.c" "../src/strlcpy.c")
-file(GLOB_RECURSE USER_SOURCES_CXX "../src/codecs/*.cpp")
-file(GLOB_RECURSE USER_HEADERS "../src/codecs/*.h" "../src/template.h" "../src/utils.h" "../src/config.h" "../src/strlcpy.h")
+# On macOS the libc <string.h> defines a fortifying strlcpy(...) macro that
+# clashes with the project's own strlcpy declaration. Disable fortification so
+# the host build matches the firmware's plain libc behaviour.
+if(APPLE)
+    add_compile_definitions(_FORTIFY_SOURCE=0)
+endif()
 
-file(GLOB_RECURSE TEST_SOURCES "*.c")
-file(GLOB_RECURSE TEST_SOURCES_CXX "*.cpp")
-file(GLOB_RECURSE TEST_HEADERS "*.h")
+include_directories(${SRC_DIR})
 
-set(SOURCES ${TEST_SOURCES})
+# Host-compilable firmware sources shared by the tests (no HAL / hardware deps).
+set(COMMON_SOURCES
+        ${SRC_DIR}/config.c
+        ${SRC_DIR}/template.c
+        ${SRC_DIR}/utils.c
+        ${SRC_DIR}/strlcpy.c
+        ${SRC_DIR}/codecs/aprs/aprs.c
+        ${SRC_DIR}/codecs/aprs/aprs_position.c
+        ${SRC_DIR}/codecs/ax25/ax25.c
+        ${SRC_DIR}/codecs/bell/bell.c
+        ${SRC_DIR}/codecs/morse/morse.c
+)
 
-add_executable(${BINARY} ${TEST_SOURCES} ${USER_SOURCES})
+enable_testing()
 
-add_test(NAME ${BINARY} COMMAND ${BINARY})
+# One executable + one ctest per *_test.c file that defines a real entry point.
+# Tests can be parked by renaming main() (e.g. bell_test.c uses main2()); those
+# are skipped automatically.
+file(GLOB TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*_test.c)
+foreach(test_src ${TEST_SOURCES})
+    file(READ ${test_src} test_contents)
+    if(test_contents MATCHES "int[ \t\r\n]+main[ \t]*\\(")
+        get_filename_component(test_name ${test_src} NAME_WE)
+        add_executable(${test_name} ${test_src} ${COMMON_SOURCES})
+        add_test(NAME ${test_name} COMMAND ${test_name})
+    else()
+        get_filename_component(test_name ${test_src} NAME_WE)
+        message(STATUS "Skipping ${test_name}: no main() entry point")
+    endif()
+endforeach()

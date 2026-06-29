@@ -92,6 +92,7 @@ void i2c_init()
     }
     if (count == 0) {
         log_error("ERROR: I²C bus busy during initialization\n");
+        set_error_code(ERROR_I2C_BUS_BUSY);
     }
 }
 

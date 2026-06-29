@@ -150,6 +150,7 @@ bool radsens_read_telemetry(telemetry_data *data)
         if (!success) {
             // Pulse counter does not need to be zeroed
             data->radiation_intensity_uR_h = 0;
+            set_error_code(ERROR_RADSENS_READ);
             return false;
         }
     }
@@ -157,8 +158,9 @@ bool radsens_read_telemetry(telemetry_data *data)
     success = radsens_read(&data->pulse_count, &data->radiation_intensity_uR_h, NULL);
 
     if (!success) {
-        if(LEDS_ENABLE)
+        if (LEDS_ENABLE) {
             set_red_led(true);
+        }
 
         log_info("RadSens re-init\n");
         success = radsens_handler_init_sensor();
@@ -171,8 +173,15 @@ bool radsens_read_telemetry(telemetry_data *data)
             data->radiation_intensity_uR_h = 0;
         }
 
-        if(LEDS_ENABLE)
+        if (LEDS_ENABLE) {
             set_red_led(false);
+        }
+    }
+
+    if (success) {
+        clear_error_code(ERROR_RADSENS_READ);
+    } else {
+        set_error_code(ERROR_RADSENS_READ);
     }
 
     radsens_initialization_required = !success;
