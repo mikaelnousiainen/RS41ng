@@ -119,6 +119,11 @@ size_t template_replace(char *dest, size_t dest_len, char *src, telemetry_data *
     strlcpy(temp, dest, dest_len);
     str_replace(dest, dest_len, temp, "$gu", replacement);
 
+    // System error code (see errors.h), zero-padded decimal
+    snprintf(replacement, sizeof(replacement), "%02d", (int) data->error_code);
+    strlcpy(temp, dest, dest_len);
+    str_replace(dest, dest_len, temp, "$err", replacement);
+
     // $apc pre-increments the shared APRS packet counter on each substitution
     snprintf(replacement, sizeof(replacement), "%u", (unsigned int) aprs_packet_counter);
     strlcpy(temp, dest, dest_len);

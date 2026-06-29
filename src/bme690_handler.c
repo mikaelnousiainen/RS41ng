@@ -152,18 +152,20 @@ bool bme690_read_telemetry(telemetry_data *data)
     bool success;
 
     if (bme690_initialization_required) {
-        if(LEDS_ENABLE)
+        if (LEDS_ENABLE) {
             set_red_led(true);
+        }
 
-        log_info("BME re-init\n");
+        log_info("BME690 re-init\n");
         success = bme690_handler_init();
-        log_info("BME re-init: %d\n", success);
+        log_info("BME690 re-init: %d\n", success);
         if (!success) {
             data->temperature_celsius_100 = 0;
             data->pressure_mbar_100 = 0;
             data->humidity_percentage_100 = 0;
             data->bme6xx_gas_r = 0;
             data->ext_sensor_type = NO_EXT_SENSOR;
+            set_error_code(ERROR_BME690_READ);
             return false;
         } else if(LEDS_ENABLE) {
             set_red_led(false);
@@ -173,12 +175,13 @@ bool bme690_read_telemetry(telemetry_data *data)
     success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->bme6xx_gas_r);
 
     if (!success) {
-        if(LEDS_ENABLE)
+        if (LEDS_ENABLE) {
             set_red_led(true);
+        }
 
-        log_info("BME re-init\n");
+        log_info("BME690 re-init\n");
         success = bme690_handler_init();
-        log_info("BME re-init: %d\n", success);
+        log_info("BME690 re-init: %d\n", success);
 
         if (success) {
             success = bme690_read(&data->temperature_celsius_100, &data->pressure_mbar_100, &data->humidity_percentage_100, &data->bme6xx_gas_r);
@@ -197,6 +200,9 @@ bool bme690_read_telemetry(telemetry_data *data)
 
     if(success) {
         data->ext_sensor_type = SENSOR_BME690;
+        clear_error_code(ERROR_BME690_READ);
+    } else {
+        set_error_code(ERROR_BME690_READ);
     }
 
     bme690_initialization_required = !success;

@@ -1,54 +1,83 @@
 #include "utils.h"
 
+// Replaces every occurrence of "rep" in "orig" with "with", writing the result
+// into "dest" (a buffer of dest_len bytes, including the terminating NUL).
+//
+// The output is always NUL-terminated and never exceeds dest_len. If the fully
+// expanded result would not fit, it is truncated to fill the buffer rather than
+// dropped: replacements are still performed up to the point the buffer fills,
+// so the destination never contains unexpanded "rep" tokens that could have
+// been replaced within the available space. This matters for templated radio
+// payloads (e.g. APRS comments), where a buffer-sized message must contain the
+// substituted values, not the literal template variables.
+//
+// Returns the length (excluding NUL) of the string written to dest.
 size_t str_replace(char *dest, size_t dest_len, char *orig, char *rep, char *with)
 {
-    char *ins;    // the next insert point
-    char *tmp;    // varies
-    size_t len_rep;  // length of rep (the string to remove)
-    size_t len_with; // length of with (the string to replace rep with)
-    size_t len_front; // distance between rep and end of last rep
-    size_t count;    // number of replacements
-
-    // sanity checks and initialization
-    if (!orig || !rep) {
+    if (!dest || dest_len == 0) {
         return 0;
     }
-    len_rep = strlen(rep);
-    if (len_rep == 0) {
-        return 0; // empty rep causes infinite loop during count
+
+    if (!orig || !rep) {
+        dest[0] = '\0';
+        return 0;
     }
+
+    size_t len_rep = strlen(rep);
+    char *out = dest;
+    size_t remaining = dest_len - 1; // reserve space for the terminating NUL
+
+    // An empty "rep" would match endlessly; just copy orig verbatim (truncated).
+    if (len_rep == 0) {
+        size_t n = strlen(orig);
+        if (n > remaining) {
+            n = remaining;
+        }
+        memcpy(out, orig, n);
+        out += n;
+        *out = '\0';
+        return (size_t) (out - dest);
+    }
+
     if (!with) {
         with = "";
     }
-    len_with = strlen(with);
+    size_t len_with = strlen(with);
 
-    // count the number of replacements needed
-    ins = orig;
-    for (count = 0; (tmp = strstr(ins, rep)); ++count) {
-        ins = tmp + len_rep;
+    char *cursor = orig;
+    char *match;
+    while (remaining > 0 && (match = strstr(cursor, rep)) != NULL) {
+        // Copy the literal segment preceding the match.
+        size_t front = (size_t) (match - cursor);
+        if (front > remaining) {
+            front = remaining;
+        }
+        memcpy(out, cursor, front);
+        out += front;
+        remaining -= front;
+        if (remaining == 0) {
+            break;
+        }
+
+        // Copy the replacement, truncating it if the buffer is nearly full.
+        size_t with_copy = len_with > remaining ? remaining : len_with;
+        memcpy(out, with, with_copy);
+        out += with_copy;
+        remaining -= with_copy;
+
+        cursor = match + len_rep;
     }
 
-    size_t required_len = strlen(orig) + (len_with - len_rep) * count + 1;
-    if (dest_len < required_len) {
-        return 0;
+    // Copy whatever remains after the last match (or all of orig if no match).
+    if (remaining > 0) {
+        size_t tail = strlen(cursor);
+        if (tail > remaining) {
+            tail = remaining;
+        }
+        memcpy(out, cursor, tail);
+        out += tail;
     }
 
-    tmp = dest;
-
-    // first time through the loop, all the variable are set correctly
-    // from here on,
-    //    tmp points to the end of the result string
-    //    ins points to the next occurrence of rep in orig
-    //    orig points to the remainder of orig after "end of rep"
-    while (count--) {
-        ins = strstr(orig, rep);
-        len_front = ins - orig;
-        tmp = strncpy(tmp, orig, len_front) + len_front;
-        tmp = strcpy(tmp, with) + len_with;
-        orig += len_front + len_rep; // move to next "end of rep"
-    }
-
-    strcpy(tmp, orig);
-
-    return required_len - 1;
+    *out = '\0';
+    return (size_t) (out - dest);
 }

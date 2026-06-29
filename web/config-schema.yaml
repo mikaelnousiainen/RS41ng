@@ -1287,6 +1287,14 @@ horus_v3:
     default: false
     tier: intermediate
 
+  error_code:
+    define: HORUS_V3_TX_ERROR_CODE
+    label: "Transmit Error Code"
+    description: "Transmit the system error code (see errors.h, also available as $err) as an \"err\" extra sensor field"
+    type: bool
+    default: false
+    tier: intermediate
+
   time_sync_seconds:
     define: HORUS_V3_TIME_SYNC_SECONDS
     label: "Time Sync Interval (s)"
@@ -2146,6 +2154,149 @@ jt65:
       min: 0
       max: 3600
 
+# ------------------------------------------------------------------------------
+# Landed Mode Settings
+# ------------------------------------------------------------------------------
+landed:
+  _section: "Landed Mode"
+  _description: "Battery conservation after landing. When enabled, landed mode is armed once altitude exceeds the arm threshold during ascent, then requires altitude to drop back below it before landing detection begins. After landing (velocity near zero for the stationary period), GPS and radio sleep; the system periodically wakes, acquires a fix, transmits all enabled modes once, then sleeps again. An auto-detected geofence around the landing site disables landed mode if the unit moves."
+  _tier: intermediate
+  _order: 22
+
+  enable:
+    define: LANDED_MODE_ENABLE
+    label: "Enable Landed Mode"
+    description: "Enable battery conservation after the balloon has landed."
+    type: bool
+    default: false
+    tier: intermediate
+
+  arm_altitude_meters:
+    define: LANDED_MODE_ARM_ALTITUDE_METERS
+    label: "Arm Altitude (m)"
+    description: "Altitude in meters that must be exceeded during ascent to arm landed mode."
+    type: integer
+    default: 5000
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 50000
+
+  climb_threshold_cm_s:
+    define: LANDED_MODE_CLIMB_THRESHOLD_CM_S
+    label: "Climb Threshold (cm/s)"
+    description: "Maximum absolute vertical speed in cm/s to consider \"stationary\" (50 = 0.5 m/s)."
+    type: integer
+    default: 50
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 10000
+
+  speed_threshold_cm_s:
+    define: LANDED_MODE_SPEED_THRESHOLD_CM_S
+    label: "Speed Threshold (cm/s)"
+    description: "Maximum ground speed in cm/s to consider \"stationary\" (50 = 0.5 m/s)."
+    type: integer
+    default: 50
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 10000
+
+  stationary_seconds:
+    define: LANDED_MODE_STATIONARY_SECONDS
+    label: "Stationary Time (s)"
+    description: "Number of consecutive seconds the unit must be stationary before entering landed mode."
+    type: integer
+    default: 600
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 86400
+
+  sleep_seconds:
+    define: LANDED_MODE_SLEEP_SECONDS
+    label: "Sleep Duration (s)"
+    description: "Sleep duration in seconds between wake-transmit cycles while in landed mode."
+    type: integer
+    default: 300
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 86400
+
+  gps_fix_timeout_seconds:
+    define: LANDED_MODE_GPS_FIX_TIMEOUT_SECONDS
+    label: "GPS Fix Timeout (s)"
+    description: "Maximum time in seconds to wait for GPS fix after waking before transmitting anyway."
+    type: integer
+    default: 120
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 3600
+
+  transmit_seconds:
+    define: LANDED_MODE_TRANSMIT_SECONDS
+    label: "Transmit Cycle Timeout (s)"
+    description: "Safety maximum time in seconds for the transmit cycle (normally the cycle completes on its own)."
+    type: integer
+    default: 30
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 3600
+
+  geofence_radius_meters:
+    define: LANDED_MODE_GEOFENCE_RADIUS_METERS
+    label: "Geofence Radius (m)"
+    description: "Geofence radius in meters from the landing point. If the unit moves beyond this radius, landed mode is disabled (returns to armed). Set to 0 to disable the geofence."
+    type: integer
+    default: 100
+    tier: advanced
+    visible_when: "landed.enable"
+    validation:
+      min: 0
+      max: 100000
+
+  pip_enable:
+    define: LANDED_MODE_PIP_ENABLE
+    label: "Enable Pip While Sleeping"
+    description: "Emit a PIP at the configured interval while sleeping, without waking the GPS. Uses the existing PIP radio infrastructure (morse 'E' character)."
+    type: bool
+    default: true
+    tier: advanced
+    visible_when: "landed.enable"
+
+  pip_interval_seconds:
+    define: LANDED_MODE_PIP_INTERVAL_SECONDS
+    label: "Pip Interval (s)"
+    description: "Interval in seconds between pips while sleeping in landed mode."
+    type: integer
+    default: 10
+    tier: advanced
+    visible_when: "landed.enable && landed.pip_enable"
+    validation:
+      min: 1
+      max: 3600
+
+  leds_transmit_only:
+    define: LANDED_MODE_LEDS_TRANSMIT_ONLY
+    label: "LEDs Only During Transmit"
+    description: "When true, LEDs are forced off during landed sleep/acquire states and only enabled during TRANSMITTING or PIPPING to conserve power."
+    type: bool
+    default: true
+    tier: advanced
+    visible_when: "landed.enable"
+
 # ==============================================================================
 # Template variables reference (for UI help text)
 # ==============================================================================
@@ -2156,6 +2307,7 @@ _template_variables:
   - { var: "$loc8", description: "Locator (8 chars)" }
   - { var: "$loc12", description: "Locator (12 chars)" }
   - { var: "$bv", description: "Battery voltage in mV (up to 4 chars)" }
+  - { var: "$bu", description: "Button ADC value (raw reading, up to 4 chars)" }
   - { var: "$te", description: "External temperature in C (up to 3 chars)" }
   - { var: "$ti", description: "Internal temperature in C (up to 3 chars)" }
   - { var: "$hu", description: "Humidity % (up to 3 chars)" }
@@ -2174,6 +2326,8 @@ _template_variables:
   - { var: "$pc", description: "Pulse counter value (wraps to zero at 65535, 16-bit unsigned)" }
   - { var: "$ri", description: "Radiation intensity in uR/h (up to 5 chars)" }
   - { var: "$dc", description: "Data counter value (wraps to zero at 65535, 16-bit unsigned)" }
+  - { var: "$apc", description: "APRS packet counter value (16-bit unsigned)" }
   - { var: "$gu", description: "GPS data update indicator (1 if updated, 0 otherwise)" }
+  - { var: "$err", description: "System error code, zero-padded to 2 digits (see errors.h; 0 = no error)" }
   - { var: "$ct", description: "Clock calibration trim value (0-31, DFM-17 only)" }
   - { var: "$cc", description: "Clock calibration change count (DFM-17 only)" }

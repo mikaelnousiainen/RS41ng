@@ -32,6 +32,9 @@ typedef struct _telemetry_data {
     int cap_trim_offset;
     int32_t timepulse_error_us;
     uint8_t po_state;
+
+    // Most recent system error code (see errors.h)
+    uint8_t error_code;
 } telemetry_data;
 
 void telemetry_collect(telemetry_data *data);

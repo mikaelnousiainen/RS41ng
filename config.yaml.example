@@ -20,6 +20,7 @@
 #   $loc8  Locator (8 chars)
 #   $loc12  Locator (12 chars)
 #   $bv  Battery voltage in mV (up to 4 chars)
+#   $bu  Button ADC value (raw reading, up to 4 chars)
 #   $te  External temperature in C (up to 3 chars)
 #   $ti  Internal temperature in C (up to 3 chars)
 #   $hu  Humidity % (up to 3 chars)
@@ -38,7 +39,9 @@
 #   $pc  Pulse counter value (wraps to zero at 65535, 16-bit unsigned)
 #   $ri  Radiation intensity in uR/h (up to 5 chars)
 #   $dc  Data counter value (wraps to zero at 65535, 16-bit unsigned)
+#   $apc  APRS packet counter value (16-bit unsigned)
 #   $gu  GPS data update indicator (1 if updated, 0 otherwise)
+#   $err  System error code, zero-padded to 2 digits (see errors.h; 0 = no error)
 #   $ct  Clock calibration trim value (0-31, DFM-17 only)
 #   $cc  Clock calibration change count (DFM-17 only)
 
@@ -551,6 +554,9 @@ horus_v3:
   # Disable SondeHub Upload — Disable uploading telemetry to SondeHub [intermediate]
   #   defines HORUS_V3_NOHUB
   nohub: false
+  # Transmit Error Code — Transmit the system error code (see errors.h, also available as $err) as an "err" extra sensor field [intermediate]
+  #   defines HORUS_V3_TX_ERROR_CODE
+  error_code: false
   # Time Sync Interval (s) — Transmit every N seconds from top of hour. 0 = no time sync. [intermediate]
   #   constraints: range 0..3600
   #   defines HORUS_V3_TIME_SYNC_SECONDS
@@ -882,3 +888,64 @@ jt65:
   #   constraints: range 0..3600
   #   defines JT65_TIME_SYNC_OFFSET_SECONDS
   time_sync_offset_seconds: 1
+
+# ========================================================================
+# Landed Mode
+# ========================================================================
+landed:
+  # Enable Landed Mode — Enable battery conservation after the balloon has landed. [intermediate]
+  #   defines LANDED_MODE_ENABLE
+  enable: false
+  # Arm Altitude (m) — Altitude in meters that must be exceeded during ascent to arm landed mode. [advanced]
+  #   constraints: range 0..50000
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_ARM_ALTITUDE_METERS
+  arm_altitude_meters: 5000
+  # Climb Threshold (cm/s) — Maximum absolute vertical speed in cm/s to consider "stationary" (50 = 0.5 m/s). [advanced]
+  #   constraints: range 0..10000
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_CLIMB_THRESHOLD_CM_S
+  climb_threshold_cm_s: 50
+  # Speed Threshold (cm/s) — Maximum ground speed in cm/s to consider "stationary" (50 = 0.5 m/s). [advanced]
+  #   constraints: range 0..10000
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_SPEED_THRESHOLD_CM_S
+  speed_threshold_cm_s: 50
+  # Stationary Time (s) — Number of consecutive seconds the unit must be stationary before entering landed mode. [advanced]
+  #   constraints: range 0..86400
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_STATIONARY_SECONDS
+  stationary_seconds: 600
+  # Sleep Duration (s) — Sleep duration in seconds between wake-transmit cycles while in landed mode. [advanced]
+  #   constraints: range 0..86400
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_SLEEP_SECONDS
+  sleep_seconds: 300
+  # GPS Fix Timeout (s) — Maximum time in seconds to wait for GPS fix after waking before transmitting anyway. [advanced]
+  #   constraints: range 0..3600
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_GPS_FIX_TIMEOUT_SECONDS
+  gps_fix_timeout_seconds: 120
+  # Transmit Cycle Timeout (s) — Safety maximum time in seconds for the transmit cycle (normally the cycle completes on its own). [advanced]
+  #   constraints: range 0..3600
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_TRANSMIT_SECONDS
+  transmit_seconds: 30
+  # Geofence Radius (m) — Geofence radius in meters from the landing point. If the unit moves beyond this radius, landed mode is disabled (returns to armed). Set to 0 to disable the geofence. [advanced]
+  #   constraints: range 0..100000
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_GEOFENCE_RADIUS_METERS
+  geofence_radius_meters: 100
+  # Enable Pip While Sleeping — Emit a PIP at the configured interval while sleeping, without waking the GPS. Uses the existing PIP radio infrastructure (morse 'E' character). [advanced]
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_PIP_ENABLE
+  pip_enable: true
+  # Pip Interval (s) — Interval in seconds between pips while sleeping in landed mode. [advanced]
+  #   constraints: range 1..3600
+  #   applies when: landed.enable && landed.pip_enable
+  #   defines LANDED_MODE_PIP_INTERVAL_SECONDS
+  pip_interval_seconds: 10
+  # LEDs Only During Transmit — When true, LEDs are forced off during landed sleep/acquire states and only enabled during TRANSMITTING or PIPPING to conserve power. [advanced]
+  #   applies when: landed.enable
+  #   defines LANDED_MODE_LEDS_TRANSMIT_ONLY
+  leds_transmit_only: true

@@ -33,6 +33,9 @@ void telemetry_collect(telemetry_data *data)
 {
     log_info("Collecting telemetry...\n");
 
+    // Snapshot the latest system error code for $err and Horus v3 telemetry
+    data->error_code = system_error_code;
+
     data->button_adc_value = system_get_button_adc_value();
     data->battery_voltage_millivolts = system_get_battery_voltage_millivolts();
     log_info("Battery voltage: %u mV\n", data->battery_voltage_millivolts);

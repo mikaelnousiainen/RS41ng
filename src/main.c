@@ -204,12 +204,14 @@ int main(void)
             set_green_led(false);
             if (++gps_init_attempts >= GPS_INIT_RED_LED_RETRY_THRESHOLD) {
                 set_red_led(true);
+                set_error_code(ERROR_GPS_INIT);
             }
             log_error("GPS initialization failed, retrying...\n");
             delay_ms(1000);
             goto gps_init;
         }
         set_red_led(false);
+        clear_error_code(ERROR_GPS_INIT);
 
     #ifdef DFM17
         log_info("Timepulse init\n");
@@ -232,6 +234,7 @@ int main(void)
     }
     if (!success) {
         set_red_led(true);
+        set_error_code(ERROR_BMP280_INIT);
     }
 #endif
 
@@ -246,6 +249,7 @@ int main(void)
     }
     if (!success) {
         set_red_led(true);
+        set_error_code(ERROR_BME68X_INIT);
     }
 #endif
 
@@ -260,6 +264,7 @@ int main(void)
     }
     if (!success) {
         set_red_led(true);
+        set_error_code(ERROR_BME690_INIT);
     }
 #endif
 
@@ -274,6 +279,7 @@ int main(void)
     }
     if (!success) {
         set_red_led(true);
+        set_error_code(ERROR_RADSENS_INIT);
     }
 #endif
 
@@ -288,6 +294,7 @@ int main(void)
     }
     if (!success) {
         set_red_led(true);
+        set_error_code(ERROR_SI5351_INIT);
     }
 #endif
 

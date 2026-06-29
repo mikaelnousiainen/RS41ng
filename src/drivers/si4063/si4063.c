@@ -110,6 +110,7 @@ static int si4063_wait_for_cts()
 
     if (timeout == 0) {
         log_error("ERROR: Si4063 timeout\n");
+        set_error_code(ERROR_SI4063_TIMEOUT);
     }
 
     return timeout > 0 ? HAL_OK : HAL_ERROR;
@@ -135,6 +136,7 @@ static int si4063_read_response(uint8_t length, uint8_t *data)
 
     if (timeout == 0) {
         log_error("ERROR: Si4063 timeout\n");
+        set_error_code(ERROR_SI4063_TIMEOUT);
         si4063_set_chip_select(false);
         return HAL_ERROR;
     }
@@ -814,6 +816,7 @@ int si4063_init()
 
     if (si4063_power_up() != HAL_OK) {
         log_error("ERROR: Error powering up Si4063\n");
+        set_error_code(ERROR_SI4063_POWERUP);
         return HAL_ERROR;
     }
 
@@ -821,6 +824,7 @@ int si4063_init()
     uint16_t part = si4063_read_part_info();
     if (part != 0x4063) {
         log_error("ERROR: Unknown or missing Si4063 part number: 0x%04x\n", part);
+        set_error_code(ERROR_SI4063_PART_NUMBER);
         return HAL_ERROR;
     }
 

@@ -823,6 +823,7 @@ bool ubxm10050_enable_power_save_mode(void)
     log_info("GPS M10: OPERATEMODE=2: %s\n", success ? "ACK" : "NAK");
     if (!success) {
         log_error("GPS M10: Failed to enable PSMCT\n");
+        set_error_code(ERROR_GPS_POWER_SAVE);
         return false;
     }
 
@@ -904,6 +905,7 @@ bool ubxm10050_init(void)
                                        (uint32_t)GPS_SERIAL_PORT_BAUD_RATE);
         if (!success) {
             log_error("GPS M10: Failed to set baud rate\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
         delay_ms(100);
@@ -929,6 +931,7 @@ bool ubxm10050_init(void)
                                              sizeof(proto_items) / sizeof(proto_items[0]));
         if (!success) {
             log_error("GPS M10: Protocol config failed\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
     }
@@ -955,6 +958,7 @@ bool ubxm10050_init(void)
                                              sizeof(nav_items) / sizeof(nav_items[0]));
         if (!success) {
             log_error("GPS M10: Nav config failed\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
     }
@@ -967,6 +971,7 @@ bool ubxm10050_init(void)
                                        GPS_MEASUREMENT_RATE);
         if (!success) {
             log_error("GPS M10: Measurement rate config failed\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
     }
@@ -1034,6 +1039,7 @@ bool ubxm10050_init(void)
                                              sizeof(msg_items) / sizeof(msg_items[0]));
         if (!success) {
             log_error("GPS M10: Message rate config failed\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
     }
@@ -1055,6 +1061,7 @@ bool ubxm10050_init(void)
                                              sizeof(nmea_items) / sizeof(nmea_items[0]));
         if (!success) {
             log_error("GPS M10: NMEA message rate config failed\n");
+            set_error_code(ERROR_GPS_CONFIG);
             return false;
         }
     }

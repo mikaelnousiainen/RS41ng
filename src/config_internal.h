@@ -8,7 +8,12 @@
 
 #define RADIO_PAYLOAD_MAX_LENGTH 512
 #define RADIO_SYMBOL_DATA_MAX_LENGTH 256
+#ifdef RS41_RSM4x4
+// RSM4x4 has more space for the payload message
+#define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 128
+#else
 #define RADIO_PAYLOAD_MESSAGE_MAX_LENGTH 64
+#endif
 
 #define RADIO_APRS_PAYLOAD_MAX_LENGTH 192
 
@@ -35,6 +40,16 @@
 #define GPS_INIT_RED_LED_RETRY_THRESHOLD 3
 
 #include <stdbool.h>
+
+// System error codes and the set_error_code() / clear_error_code() API
+#include "errors.h"
+
+// Transmit the system error code in Horus v3 as an "err" extra sensor field.
+// Defaults to off here so generated configs (config_generated.h) that don't set
+// it still build; manual config.h overrides this.
+#ifndef HORUS_V3_TX_ERROR_CODE
+#define HORUS_V3_TX_ERROR_CODE 0
+#endif
 
 extern volatile bool system_initialized;
 

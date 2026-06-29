@@ -304,6 +304,8 @@ Setting, measured RF output power, relative DC power draw
 #define HORUS_V3_PREAMBLE_LENGTH 4
 #define HORUS_V3_TONE_SPACING_HZ_SI5351 270
 #define HORUS_V3_NOHUB false // Disable uploading to SondeHub
+// Transmit the system error code (see errors.h, also available as $err) as an "err" extra sensor field
+#define HORUS_V3_TX_ERROR_CODE false
 
 // Schedule transmission every N seconds, counting from beginning of an hour (based on GPS time). Set to zero to disable time sync.
 // See the README file for more detailed documentation about time sync and its offset setting
