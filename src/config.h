@@ -394,6 +394,20 @@ Setting, measured RF output power, relative DC power draw
 // Asymmetric duty cycle: 70% high / 30% low compensates for slow rise time with internal pull-ups
 // 0x9044A747
 
+// Enable reading the radiosonde's built-in Vaisala boom sensors (air temperature,
+// humidity and -- on RS41-SGP -- RPM411 barometric pressure). Clean-room module,
+// see vaisala_boom.c. Uses TIM2 input capture on PA1 + multiplexer GPIOs (and, on
+// STM32F1, USART3), so it conflicts with the external I2C bus / Si5351 / serial.
+#define SENSOR_VAISALA_BOOM_ENABLE false
+// Also read the RPM411 barometric pressure board (RS41-SGP only). Shares SPI2 with
+// the radio (CS on PB2) and needs the HSI measurement clock on MCO1/PA8.
+#define SENSOR_VAISALA_BOOM_PRESSURE_ENABLE false
+// Boom temperature/humidity calibration: 1 = approximate (ratiometric, no per-sonde
+// data); 2 = factory (Vaisala) -- fill vaisala_boom_cal.h with your sonde's
+// coefficients (from SondeHub) for absolute accuracy.
+#define SENSOR_VAISALA_BOOM_CAL_MODE 1
+#include "vaisala_boom_cal.h"
+
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
 // NOTE: Only BME280 sensors will report humidity. For BMP280 humidity readings will be zero.
 #define SENSOR_BMP280_ENABLE false
@@ -613,6 +627,18 @@ Setting, measured RF output power, relative DC power draw
 #endif
 #if defined(RS41) && defined(DFM17)
 #error "Please define either RS41 or DFM17."
+#endif
+
+// The Vaisala boom reader uses TIM2 input capture on PA1, the boom multiplexer
+// GPIOs and (on STM32F1) USART3, which overlap the external I2C bus / Si5351 /
+// GPS serial / pulse-counter pins. It also requires RS41 hardware.
+#if (SENSOR_VAISALA_BOOM_ENABLE)
+#if !defined(RS41)
+#error SENSOR_VAISALA_BOOM_ENABLE requires RS41 hardware.
+#endif
+#if (SENSOR_BMP280_ENABLE) || (SENSOR_BME68X_ENABLE) || (SENSOR_BME690_ENABLE) || (SENSOR_RADSENS_ENABLE) || (RADIO_SI5351_ENABLE) || (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (PULSE_COUNTER_ENABLE)
+#error SENSOR_VAISALA_BOOM_ENABLE conflicts with the external I2C bus / Si5351 / GPS serial / pulse counter (shared pins). Disable those to use the Vaisala boom sensors.
+#endif
 #endif
 
 

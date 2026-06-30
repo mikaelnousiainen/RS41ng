@@ -6,6 +6,7 @@
 #include "bme68x_handler.h"
 #include "bme690_handler.h"
 #include "radsens_handler.h"
+#include "vaisala_boom.h"
 #include "locator.h"
 #include "config.h"
 #include "log.h"
@@ -60,6 +61,10 @@ void telemetry_collect(telemetry_data *data)
 
 #if SENSOR_RADSENS_ENABLE
     radsens_read_telemetry(data);
+#endif
+
+#if SENSOR_VAISALA_BOOM_ENABLE
+    vaisala_boom_read(data);
 #endif
 
 #if PULSE_COUNTER_ENABLE
