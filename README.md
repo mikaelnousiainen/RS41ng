@@ -224,6 +224,33 @@ The following sensors are currently supported:
 
 Sensor driver code contributions are welcome!
 
+### Vaisala built-in boom sensors (experimental)
+
+RS41ng can also read the radiosonde's **own Vaisala boom sensors** instead of an
+external I²C sensor:
+
+* Air temperature (PT1000)
+* Relative humidity (capacitive sensor) — currently an approximate/relative value
+* Barometric pressure on RS41-**SGP** models (RPM411 board)
+
+Enable with `SENSOR_VAISALA_BOOM_ENABLE` (and `SENSOR_VAISALA_BOOM_PRESSURE_ENABLE`
+for the RPM411). The readings populate the existing temperature / humidity /
+pressure telemetry fields, so no receiver-side changes are needed.
+
+Notes:
+
+* The boom reader uses TIM2 input capture (PA1) and the boom multiplexer GPIOs,
+  and on STM32F1 boards it also uses USART3. It therefore **cannot be combined**
+  with the external I²C bus / Si5351 / GPS serial output / pulse counter (the
+  firmware enforces this with a compile-time check).
+* The RPM411 pressure board needs its measurement clock, which the firmware
+  outputs on MCO1 (PA8).
+* This is a **clean-room implementation** written from public RS41 hardware
+  documentation ([bazjo/radiosonde_hardware](https://github.com/bazjo/radiosonde_hardware))
+  and standard physics. Temperature is absolute (ratiometric PT1000); humidity is
+  approximate for now (an absolute factory-calibration mode is planned). Tested on
+  RSM4x4; the STM32F1 pin map is included but should be verified on hardware.
+
 ### Planned features
 
 - Configurable transmission frequencies and schedules based on location / altitude
