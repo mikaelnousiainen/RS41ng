@@ -8,6 +8,7 @@
 #include "drivers/gps/gps_driver.h"
 #include "drivers/pulse_counter/pulse_counter.h"
 #include "bmp280_handler.h"
+#include "vaisala_boom.h"
 #include "bme68x_handler.h"
 #include "bme690_handler.h"
 #include "radsens_handler.h"
@@ -176,6 +177,13 @@ int main(void)
     #if SENSOR_BMP280_ENABLE || SENSOR_BME68X_ENABLE || SENSOR_BME690_ENABLE || SENSOR_RADSENS_ENABLE || RADIO_SI5351_ENABLE
         i2c_init();
     #endif
+#endif
+
+#if SENSOR_VAISALA_BOOM_ENABLE
+    // Set up the boom GPIOs before any SPI traffic: the RPM411 chip-select (PB2,
+    // pulled low by the BOOT1 pull-down) must be parked high before the radio
+    // uses the shared SPI2 bus.
+    vaisala_boom_init();
 #endif
 
     //log_info("SPI init\n");

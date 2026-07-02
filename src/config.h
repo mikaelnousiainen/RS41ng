@@ -405,7 +405,7 @@ Setting, measured RF output power, relative DC power draw
 // Boom temperature/humidity calibration: 1 = approximate (ratiometric, no per-sonde
 // data); 2 = factory (Vaisala) -- fill vaisala_boom_cal.h with your sonde's
 // coefficients (from SondeHub) for absolute accuracy.
-#define SENSOR_VAISALA_BOOM_CAL_MODE 1
+#define SENSOR_VAISALA_BOOM_CAL_MODE 2
 #include "vaisala_boom_cal.h"
 
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
@@ -629,16 +629,13 @@ Setting, measured RF output power, relative DC power draw
 #error "Please define either RS41 or DFM17."
 #endif
 
-// The Vaisala boom reader uses TIM2 input capture on PA1, the boom multiplexer
-// GPIOs and (on STM32F1) USART3, which overlap the external I2C bus / Si5351 /
-// GPS serial / pulse-counter pins. It also requires RS41 hardware.
-#if (SENSOR_VAISALA_BOOM_ENABLE)
-#if !defined(RS41)
+// The Vaisala boom reader uses TIM2 input capture on PA1 plus the boom
+// multiplexer GPIOs (PA2/PA3, PB3/PB12, PC10-PC12, PC14/PC15; PB2 and PA8 for
+// the RPM411 pressure board). None of these overlap the external I2C bus / GPS
+// serial / pulse-counter pins (PB10/PB11), so the boom can be combined with the
+// external sensors. It requires RS41 hardware.
+#if (SENSOR_VAISALA_BOOM_ENABLE) && !defined(RS41)
 #error SENSOR_VAISALA_BOOM_ENABLE requires RS41 hardware.
-#endif
-#if (SENSOR_BMP280_ENABLE) || (SENSOR_BME68X_ENABLE) || (SENSOR_BME690_ENABLE) || (SENSOR_RADSENS_ENABLE) || (RADIO_SI5351_ENABLE) || (GPS_NMEA_OUTPUT_VIA_SERIAL_PORT_ENABLE) || (PULSE_COUNTER_ENABLE)
-#error SENSOR_VAISALA_BOOM_ENABLE conflicts with the external I2C bus / Si5351 / GPS serial / pulse counter (shared pins). Disable those to use the Vaisala boom sensors.
-#endif
 #endif
 
 

@@ -88,6 +88,13 @@ void vaisala_boom_init(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
+#if !defined(RS41_RSM4x4)
+    // F100: PB3/PB4 (SPDT switches) default to JTAG (JTDO/NJTRST) after reset;
+    // release them for GPIO while keeping SWD alive.
+    __HAL_RCC_AFIO_CLK_ENABLE();
+    __HAL_AFIO_REMAP_SWJ_NOJTAG();
+#endif
+
     out_pin(OSC_EN_TEMP_PORT, OSC_EN_TEMP_PIN);
     out_pin(OSC_EN_HYG_PORT,  OSC_EN_HYG_PIN);
     for (int c = 0; c < BOOM_CHANNEL_COUNT; c++) {
@@ -104,14 +111,16 @@ void vaisala_boom_init(void)
     out_pin(RPM411_CS_PORT, RPM411_CS_PIN);
     HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_SET);
     __HAL_RCC_HSI_ENABLE();
-    while (!__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY));
+    for (uint32_t to = 100000; !__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY); to--) {
+        if (to == 0) return;          // no HSI -> no pressure clock; T/RH still work
+    }
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
 #endif
 }
 
 /* Select exactly one channel: enable the matching oscillator and close only that
- * channel's switch. Switch inputs are active-high; the P-MOSFET oscillator
- * enables are active-low (gate low = oscillator powered). */
+ * channel's switch. Switch inputs and oscillator enables are active-high
+ * (verified on hardware). */
 static void boom_select(vaisala_boom_channel channel)
 {
     for (int c = 0; c < BOOM_CHANNEL_COUNT; c++) {
@@ -142,17 +151,20 @@ static uint32_t boom_tim_clock(void)
 float vaisala_boom_frequency(vaisala_boom_channel channel)
 {
     const int edges = 64;             // intervals to average
-    const uint32_t poll_timeout = 200000u;
 
     boom_select(channel);
     delay_ms(2);                      // let the oscillator settle
 
     // PA1 -> TIM2_CH2, alternate function input.
     GPIO_InitTypeDef g = {0};
-    g.Pin = OSC_OUT_PIN; g.Mode = GPIO_MODE_AF_PP; g.Pull = GPIO_NOPULL;
+    g.Pin = OSC_OUT_PIN; g.Pull = GPIO_NOPULL;
     g.Speed = GPIO_SPEED_FREQ_HIGH;
 #if defined(RS41_RSM4x4)
+    g.Mode = GPIO_MODE_AF_PP;         // L4: AF mode, direction owned by TIM2
     g.Alternate = GPIO_AF1_TIM2;
+#else
+    g.Mode = GPIO_MODE_AF_INPUT;      // F1: input capture needs AF *input* (AF_PP
+                                      // would enable the output driver on PA1)
 #endif
     HAL_GPIO_Init(OSC_OUT_PORT, &g);
 
@@ -172,22 +184,35 @@ float vaisala_boom_frequency(vaisala_boom_channel channel)
     if (HAL_TIM_IC_ConfigChannel(&boom_tim, &ic, TIM_CHANNEL_2) != HAL_OK) return 0.0f;
     HAL_TIM_IC_Start(&boom_tim, TIM_CHANNEL_2);
 
-    uint32_t first = 0, last = 0;
+    // Accumulate the tick count interval by interval: each single oscillator
+    // period fits a 16-bit count (down to ~370 Hz at 24 MHz), so this stays
+    // wrap-safe on the F1's 16-bit TIM2 as well as on the L4's 32-bit one.
+    // One SHARED poll budget bounds the whole IRQ-off window: a healthy capture
+    // uses a small fraction of it, a dead channel aborts after ~10-25 ms instead
+    // of spinning per edge (which could mask interrupts for hundreds of ms).
+    uint32_t prev = 0, ticks = 0;
+    uint32_t budget = 60000u;         // total poll iterations for all edges
     int got = 0;
     __disable_irq();                  // avoid ISR jitter during the short capture
     for (int i = 0; i <= edges; i++) {
-        uint32_t to = poll_timeout;
         __HAL_TIM_CLEAR_FLAG(&boom_tim, TIM_FLAG_CC2);
         while (!__HAL_TIM_GET_FLAG(&boom_tim, TIM_FLAG_CC2)) {
-            if (--to == 0) { __enable_irq(); HAL_TIM_IC_Stop(&boom_tim, TIM_CHANNEL_2); return 0.0f; }
+            if (--budget == 0) { __enable_irq(); HAL_TIM_IC_Stop(&boom_tim, TIM_CHANNEL_2); return 0.0f; }
         }
         uint32_t cc = HAL_TIM_ReadCapturedValue(&boom_tim, TIM_CHANNEL_2);
-        if (i == 0) first = cc; else { last = cc; got++; }
+        if (i > 0) {
+#if defined(RS41_RSM4x4)
+            ticks += cc - prev;                 // 32-bit counter
+#else
+            ticks += (uint16_t) (cc - prev);    // 16-bit counter on the F1
+#endif
+            got++;
+        }
+        prev = cc;
     }
     __enable_irq();
     HAL_TIM_IC_Stop(&boom_tim, TIM_CHANNEL_2);
 
-    uint32_t ticks = last - first;    // unsigned wrap-safe (32-bit on L4)
     if (got == 0 || ticks == 0) return 0.0f;
     return (float) got * (float) boom_tim_clock() / (float) ticks;
 }
@@ -260,17 +285,29 @@ static float vapor_sat_p(float Tc)
  * correction. cap is the measured capacitance (pF); coefficients per-sonde. */
 static float factory_humidity(float cap, float t_air, float t_module, float p_hpa)
 {
-    if (VBCAL_H_U0 == 0.0f) return -1.0f;            // coefficients not filled in
     static const float mtx[42] = VBCAL_H_MATRIX;
+    static const float corP[3] = VBCAL_H_CORP;
+    static const float corT[12] = VBCAL_H_CORT;
+
+    // Refuse to compute with an unfilled/partial calibration: U0, U1 and at
+    // least one matrix entry must be set, otherwise a confident-looking 0 %RH
+    // would be reported instead of "no humidity".
+    if (VBCAL_H_U0 == 0.0f || VBCAL_H_U1 == 0.0f) return -1.0f;
+    bool mtx_ok = false;
+    for (int i = 0; i < 42 && !mtx_ok; i++) mtx_ok = (mtx[i] != 0.0f);
+    if (!mtx_ok) return -1.0f;
+
     double Cp = ((double) cap / VBCAL_H_U0 - 1.0) * VBCAL_H_U1;
     double Trh = ((double) t_module - 20.0) / 180.0;
 
     double b[6], bk = 1.0;
     for (int k = 0; k < 6; k++) { b[k] = bk; bk *= Trh; }
 
-    if (p_hpa > 0.0f) {
-        static const float corP[3] = VBCAL_H_CORP;
-        static const float corT[12] = VBCAL_H_CORT;
+    // The pressure correction only exists when its coefficients are filled in;
+    // otherwise fall back to the empirical low-temperature term below, exactly
+    // as in the no-pressure case.
+    bool have_cor = (corP[0] != 0.0f || corP[1] != 0.0f || corP[2] != 0.0f);
+    if (p_hpa > 0.0f && have_cor) {
         double p = (double) p_hpa / 1000.0;
         double cpj = 1.0, corr = 0.0;
         for (int j = 0; j < 3; j++) {
@@ -288,8 +325,8 @@ static float factory_humidity(float cap, float t_air, float t_module, float p_hp
         for (int k = 0; k < 6; k++) rh += aj * b[k] * mtx[6 * j + k];
         aj *= Cp;
     }
-    if (p_hpa <= 0.0f && t_air < -40.0f)
-        rh += ((double) t_air + 40.0) / 12.0;        // low-temp substitute (no P)
+    if ((p_hpa <= 0.0f || !have_cor) && t_air < -40.0f)
+        rh += ((double) t_air + 40.0) / 12.0;        // low-temp substitute
     rh *= vapor_sat_p(t_module) / vapor_sat_p(t_air);
     if (rh < 0.0) rh = 0.0;
     if (rh > 100.0) rh = 100.0;
@@ -305,9 +342,9 @@ static float factory_humidity(float cap, float t_air, float t_module, float p_hp
  * with Clo = 0 pF (baseline) and Chi the on-board reference capacitor.
  *
  * Converting capacitance to %RH accurately needs the per-sonde factory matrix
- * (planned step 3b, from the publicly documented RS41 calibration). For now a
- * simple span model is used: RH = (C - C0) / span * 100, with C0 (the 0 %RH
- * capacitance) auto-captured at the first read. This is APPROXIMATE / RELATIVE. */
+ * (calibration mode 2, factory_humidity above). Mode 1 uses a simple span model
+ * instead: RH = (C - C0) / span * 100, with C0 (the 0 %RH capacitance)
+ * auto-captured at the first read -- APPROXIMATE / RELATIVE only. */
 
 #define BOOM_REF_C_HI_PF  47.0f     // SPDT1 reference capacitor (RS41 board value)
 #if SENSOR_VAISALA_BOOM_CAL_MODE != 2
@@ -336,37 +373,54 @@ static float capacitance_ratiometric(float f, float f_lo, float f_hi)
 static const uint8_t rpm411_pre[5]     = { 0x01, 0x00, 0x3E, 0x2E, 0x00 };
 static const uint8_t rpm411_trigger[5] = { 0x02, 0x00, 0x6D, 0x7B, 0x00 };
 
-static uint8_t rpm411_spi(uint8_t tx)
+/* One byte exchanged in its own chip-select window (the RPM411 expects CS to
+ * frame every byte). All CS timing lives here. */
+static uint8_t rpm411_xfer(uint8_t tx)
 {
     uint8_t rx = 0;
-    while (__HAL_SPI_GET_FLAG(&hspi, SPI_FLAG_BSY) == SET);
+    HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_RESET);
+    delay_us(100);
     HAL_SPI_TransmitReceive(&hspi, &tx, &rx, 1, 10);
+    HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_SET);
+    delay_us(100);
     return rx;
 }
 
-static bool rpm411_read_pressure(float *hpa)
+/* The ~250 ms conversion is pipelined across telemetry cycles: each read first
+ * collects the result of the conversion started on the PREVIOUS cycle, then
+ * starts the next one -- so the telemetry path never busy-waits 250 ms (the
+ * first cycle after boot simply has no pressure yet). */
+static bool rpm411_conversion_pending = false;
+static uint32_t rpm411_conversion_tick = 0;
+
+static void rpm411_start_conversion(void)
+{
+    for (int i = 0; i < 5; i++) rpm411_xfer(rpm411_pre[i]);
+    rpm411_conversion_pending = true;
+    rpm411_conversion_tick = HAL_GetTick();
+}
+
+static bool rpm411_collect_pressure(float *hpa)
 {
     uint8_t d[33];
     bool ok = false;
 
+    if (!rpm411_conversion_pending) return false;
+    rpm411_conversion_pending = false;
+
+    // Telemetry cycles are normally much longer than the conversion; only wait
+    // out the remainder if two reads ever come back-to-back.
+    uint32_t elapsed = HAL_GetTick() - rpm411_conversion_tick;
+    if (elapsed < 250) delay_ms(250 - elapsed);
+
     for (int i = 0; i < 5; i++) {
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_RESET); delay_us(100);
-        rpm411_spi(rpm411_pre[i]);
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_SET);   delay_us(100);
-    }
-    delay_ms(250);                              // conversion time
-    for (int i = 0; i < 5; i++) {
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_RESET); delay_us(100);
-        d[i] = rpm411_spi(rpm411_trigger[i]);
+        d[i] = rpm411_xfer(rpm411_trigger[i]);
         if (d[i] != 0xFF) ok = true;
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_SET);   delay_us(100);
     }
     delay_us(450);
     for (int i = 5; i < 33; i++) {
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_RESET); delay_us(100);
-        d[i] = rpm411_spi(0x00);
+        d[i] = rpm411_xfer(0x00);
         if (d[i] != 0xFF) ok = true;
-        HAL_GPIO_WritePin(RPM411_CS_PORT, RPM411_CS_PIN, GPIO_PIN_SET);   delay_us(100);
     }
     if (!ok) return false;
 
@@ -377,9 +431,6 @@ static bool rpm411_read_pressure(float *hpa)
 
 bool vaisala_boom_read(telemetry_data *data)
 {
-    static bool initialised = false;
-    if (!initialised) { vaisala_boom_init(); initialised = true; }
-
     bool any = false;
 
     float f_ref1 = vaisala_boom_frequency(BOOM_REF_R1);
@@ -391,41 +442,55 @@ bool vaisala_boom_read(telemetry_data *data)
     float air_temp_c = -300.0f;
     if (r_air > 0.0f) {
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
-        float t = factory_temperature(r_air, VBCAL_T_T0, VBCAL_T_T1, VBCAL_T_T2,
-                                      VBCAL_T_CAL, VBCAL_T_POLY0, VBCAL_T_POLY1);
+        // Refuse to compute with an unfilled calibration (all-zero template):
+        // it would yield a confident-looking constant 0.00 C.
+        if (VBCAL_T_T1 != 0.0f && VBCAL_T_CAL != 0.0f) {
+            air_temp_c = factory_temperature(r_air, VBCAL_T_T0, VBCAL_T_T1, VBCAL_T_T2,
+                                             VBCAL_T_CAL, VBCAL_T_POLY0, VBCAL_T_POLY1);
+        }
 #else
-        float t = pt1000_temperature(r_air);
+        air_temp_c = pt1000_temperature(r_air);
 #endif
-        air_temp_c = t;
-        data->temperature_celsius_100 = (int32_t) (t * 100.0f);
-        log_info("Vaisala boom: T_air = %d (x100 C), R = %d mOhm\n",
-                 (int) (t * 100.0f), (int) (r_air * 1000.0f));
-        any = true;
+        if (air_temp_c > -273.0f) {
+            data->temperature_celsius_100 = (int32_t) (air_temp_c * 100.0f);
+            log_info("Vaisala boom: T_air = %d (x100 C), R = %d mOhm\n",
+                     (int) (air_temp_c * 100.0f), (int) (r_air * 1000.0f));
+            any = true;
+        }
     }
     (void) air_temp_c;   // used by the factory humidity (mode 2)
 
     // Humidity-module (heater) temperature -- same PT1000 ratiometric path.
     float f_heat = vaisala_boom_frequency(BOOM_T_HEATER);
     float r_heat = resistance_ratiometric(f_heat, f_ref1, f_ref2);
+    bool t_module_valid = false;
+    float t_module = 0.0f;
+    if (r_heat > 0.0f) {
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
-    float t_module = (r_heat > 0.0f)
-        ? factory_temperature(r_heat, VBCAL_TU_T0, VBCAL_TU_T1, VBCAL_TU_T2,
-                              VBCAL_TU_CAL, VBCAL_TU_POLY0, VBCAL_TU_POLY1) : 0.0f;
+        if (VBCAL_TU_T1 != 0.0f && VBCAL_TU_CAL != 0.0f) {
+            t_module = factory_temperature(r_heat, VBCAL_TU_T0, VBCAL_TU_T1, VBCAL_TU_T2,
+                                           VBCAL_TU_CAL, VBCAL_TU_POLY0, VBCAL_TU_POLY1);
+            t_module_valid = true;
+        }
 #else
-    float t_module = (r_heat > 0.0f) ? pt1000_temperature(r_heat) : 0.0f;
+        t_module = pt1000_temperature(r_heat);
+        t_module_valid = true;
 #endif
-    (void) t_module;   // feeds the RH temperature correction in the humidity factory mode
+    }
+    (void) t_module; (void) t_module_valid;   // used by the factory humidity (mode 2)
 
     // Pressure first: the factory humidity uses it for its correction term.
+    // The conversion was started at the end of the previous read (pipelined).
     float p_hpa = 0.0f;
 #if SENSOR_VAISALA_BOOM_PRESSURE_ENABLE
-    if (rpm411_read_pressure(&p_hpa) && p_hpa > 300.0f && p_hpa < 1200.0f) {
+    if (rpm411_collect_pressure(&p_hpa) && p_hpa > 300.0f && p_hpa < 1200.0f) {
         data->pressure_mbar_100 = (uint32_t) (p_hpa * 100.0f);
         log_info("Vaisala boom: pressure = %d (x100 hPa)\n", (int) data->pressure_mbar_100);
         any = true;
     } else {
         p_hpa = 0.0f;
     }
+    rpm411_start_conversion();        // result is collected on the next read
 #endif
     (void) p_hpa;
 
@@ -436,7 +501,12 @@ bool vaisala_boom_read(telemetry_data *data)
     float c_hum = capacitance_ratiometric(f_hum, f_clo, f_chi);
     if (c_hum > 0.0f) {
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
-        float rh = factory_humidity(c_hum, air_temp_c, t_module, p_hpa);
+        // The factory conversion needs valid air and module temperatures; with
+        // either sensor path broken, report no humidity rather than a value
+        // computed against a fabricated temperature.
+        float rh = -1.0f;
+        if (air_temp_c > -273.0f && t_module_valid)
+            rh = factory_humidity(c_hum, air_temp_c, t_module, p_hpa);
 #else
         if (!rh_c0_captured) { rh_c0_pf = c_hum; rh_c0_captured = true; }
         float rh = (c_hum - rh_c0_pf) / BOOM_RH_SPAN_PF * 100.0f;

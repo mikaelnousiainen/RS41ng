@@ -239,10 +239,10 @@ pressure telemetry fields, so no receiver-side changes are needed.
 
 Notes:
 
-* The boom reader uses TIM2 input capture (PA1) and the boom multiplexer GPIOs,
-  and on STM32F1 boards it also uses USART3. It therefore **cannot be combined**
-  with the external I²C bus / Si5351 / GPS serial output / pulse counter (the
-  firmware enforces this with a compile-time check).
+* The boom reader uses TIM2 input capture (PA1) and the boom multiplexer GPIOs
+  (PA2/PA3, PB3/PB12, PC10–PC12, PC14/PC15). These do not overlap the external
+  I²C bus / GPS serial pins (PB10/PB11), so it can be combined with the external
+  sensors. During each measurement interrupts are briefly (a few ms) disabled.
 * The RPM411 pressure board needs its measurement clock, which the firmware
   outputs on MCO1 (PA8).
 * This is a **clean-room implementation** written from public RS41 hardware
