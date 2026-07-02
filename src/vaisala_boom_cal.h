@@ -29,13 +29,16 @@
 #define VBCAL_T_POLY0  0.0f
 #define VBCAL_T_POLY1  0.0f
 
-// Humidity-module (heater) temperature: same Taylor terms, own scale/poly.
+// Humidity-module (heater) temperature: own Taylor terms and scale/poly
+// (subframes 0x12/0x13; for many sondes the Taylor terms equal the air ones).
+#define VBCAL_TU_T0    0.0f
+#define VBCAL_TU_T1    0.0f
+#define VBCAL_TU_T2    0.0f
 #define VBCAL_TU_CAL   0.0f
 #define VBCAL_TU_POLY0 0.0f
 #define VBCAL_TU_POLY1 0.0f
 
-// Humidity (mode 2, used in step "humidity factory"): capacitance normalisation
-// + 7x6 calibration matrix (filled when the absolute-humidity mode is wired up).
+// Humidity: capacitance normalisation (U0, U1) + 7x6 calibration matrix.
 #define VBCAL_H_U0     0.0f
 #define VBCAL_H_U1     0.0f
 #define VBCAL_H_MATRIX { \
@@ -46,5 +49,14 @@
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, \
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, \
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+
+// Humidity pressure-correction terms (subframe 0x2A6 / 0x2BA). Optional: with
+// these left at zero the correction vanishes and the plain matrix result is
+// used. Only applied when a pressure reading is available (RS41-SGP).
+#define VBCAL_H_CORP { 0.0f, 0.0f, 0.0f }
+#define VBCAL_H_CORT { \
+    0.0f, 0.0f, 0.0f, 0.0f, \
+    0.0f, 0.0f, 0.0f, 0.0f, \
+    0.0f, 0.0f, 0.0f, 0.0f }
 
 #endif

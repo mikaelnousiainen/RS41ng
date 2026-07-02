@@ -230,12 +230,13 @@ static float pt1000_temperature(float r)
 /* Factory (Vaisala) temperature from the ratiometric resistance Rc, per the
  * publicly documented RS41 PTU algorithm (rs1729 get_T):
  *   R = Rc * calT;  T = (T0 + T1*R + T2*R^2 + poly0) * (1 + poly1)
- * The Taylor terms (T0..T2) are shared; the air and heater sensors use their own
- * calT/poly. Per-sonde coefficients live in vaisala_boom_cal.h. */
-static float factory_temperature(float rc, float cal, float poly0, float poly1)
+ * The air and humidity-module sensors each have their own full coefficient set
+ * (subframes 0x12/0x13 for the module). Per-sonde data in vaisala_boom_cal.h. */
+static float factory_temperature(float rc, float t0, float t1, float t2,
+                                 float cal, float poly0, float poly1)
 {
     float R = rc * cal;
-    return (VBCAL_T_T0 + VBCAL_T_T1 * R + VBCAL_T_T2 * R * R + poly0) * (1.0f + poly1);
+    return (t0 + t1 * R + t2 * R * R + poly0) * (1.0f + poly1);
 }
 
 /* Saturation vapour pressure (Hyland-Wexler), Tc in deg C -> Pa-ish (units cancel
@@ -248,12 +249,16 @@ static float vapor_sat_p(float Tc)
 }
 
 /* Factory (Vaisala) relative humidity per the documented RS41 PTU algorithm
- * (rs1729 get_RH2adv), pressure-correction term omitted (the P<=0 path):
+ * (rs1729 get_RH2adv):
  *   Cp = (cap/U0 - 1)*U1;  Trh = (Tmodule-20)/180;
+ *   with pressure available (hPa), Cp is first pressure-corrected:
+ *     Cp -= sum_{j<3} corP[j]*(p/(1+corP[j]*p) - Cp^j/(1+corP[j]))
+ *                     * sum_{k<4} corT[4j+k]*Trh^k       (p in bar)
  *   rh = sum_{j=0..6,k=0..5} Cp^j * Trh^k * mtxH[6j+k];
  *   rh *= vaporSatP(Tmodule)/vaporSatP(Tair).
- * cap is the measured humidity capacitance (pF); coefficients per-sonde. */
-static float factory_humidity(float cap, float t_air, float t_module)
+ * Without pressure, an empirical low-temperature term substitutes for the
+ * correction. cap is the measured capacitance (pF); coefficients per-sonde. */
+static float factory_humidity(float cap, float t_air, float t_module, float p_hpa)
 {
     if (VBCAL_H_U0 == 0.0f) return -1.0f;            // coefficients not filled in
     static const float mtx[42] = VBCAL_H_MATRIX;
@@ -263,12 +268,28 @@ static float factory_humidity(float cap, float t_air, float t_module)
     double b[6], bk = 1.0;
     for (int k = 0; k < 6; k++) { b[k] = bk; bk *= Trh; }
 
+    if (p_hpa > 0.0f) {
+        static const float corP[3] = VBCAL_H_CORP;
+        static const float corT[12] = VBCAL_H_CORT;
+        double p = (double) p_hpa / 1000.0;
+        double cpj = 1.0, corr = 0.0;
+        for (int j = 0; j < 3; j++) {
+            double bpj = corP[j] * (p / (1.0 + corP[j] * p) - cpj / (1.0 + corP[j]));
+            double bt = 0.0;
+            for (int k = 0; k < 4; k++) bt += corT[4 * j + k] * b[k];
+            corr += bpj * bt;
+            cpj *= Cp;
+        }
+        Cp -= corr;
+    }
+
     double rh = 0.0, aj = 1.0;
     for (int j = 0; j < 7; j++) {
         for (int k = 0; k < 6; k++) rh += aj * b[k] * mtx[6 * j + k];
         aj *= Cp;
     }
-    if (t_air < -40.0f) rh += ((double) t_air + 40.0) / 12.0;   // low-temp term (P<=0)
+    if (p_hpa <= 0.0f && t_air < -40.0f)
+        rh += ((double) t_air + 40.0) / 12.0;        // low-temp substitute (no P)
     rh *= vapor_sat_p(t_module) / vapor_sat_p(t_air);
     if (rh < 0.0) rh = 0.0;
     if (rh > 100.0) rh = 100.0;
@@ -370,7 +391,8 @@ bool vaisala_boom_read(telemetry_data *data)
     float air_temp_c = -300.0f;
     if (r_air > 0.0f) {
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
-        float t = factory_temperature(r_air, VBCAL_T_CAL, VBCAL_T_POLY0, VBCAL_T_POLY1);
+        float t = factory_temperature(r_air, VBCAL_T_T0, VBCAL_T_T1, VBCAL_T_T2,
+                                      VBCAL_T_CAL, VBCAL_T_POLY0, VBCAL_T_POLY1);
 #else
         float t = pt1000_temperature(r_air);
 #endif
@@ -387,11 +409,25 @@ bool vaisala_boom_read(telemetry_data *data)
     float r_heat = resistance_ratiometric(f_heat, f_ref1, f_ref2);
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
     float t_module = (r_heat > 0.0f)
-        ? factory_temperature(r_heat, VBCAL_TU_CAL, VBCAL_TU_POLY0, VBCAL_TU_POLY1) : 0.0f;
+        ? factory_temperature(r_heat, VBCAL_TU_T0, VBCAL_TU_T1, VBCAL_TU_T2,
+                              VBCAL_TU_CAL, VBCAL_TU_POLY0, VBCAL_TU_POLY1) : 0.0f;
 #else
     float t_module = (r_heat > 0.0f) ? pt1000_temperature(r_heat) : 0.0f;
 #endif
     (void) t_module;   // feeds the RH temperature correction in the humidity factory mode
+
+    // Pressure first: the factory humidity uses it for its correction term.
+    float p_hpa = 0.0f;
+#if SENSOR_VAISALA_BOOM_PRESSURE_ENABLE
+    if (rpm411_read_pressure(&p_hpa) && p_hpa > 300.0f && p_hpa < 1200.0f) {
+        data->pressure_mbar_100 = (uint32_t) (p_hpa * 100.0f);
+        log_info("Vaisala boom: pressure = %d (x100 hPa)\n", (int) data->pressure_mbar_100);
+        any = true;
+    } else {
+        p_hpa = 0.0f;
+    }
+#endif
+    (void) p_hpa;
 
     // Relative humidity (approximate -- see note above).
     float f_hum = vaisala_boom_frequency(BOOM_HUMIDITY);
@@ -400,7 +436,7 @@ bool vaisala_boom_read(telemetry_data *data)
     float c_hum = capacitance_ratiometric(f_hum, f_clo, f_chi);
     if (c_hum > 0.0f) {
 #if SENSOR_VAISALA_BOOM_CAL_MODE == 2
-        float rh = factory_humidity(c_hum, air_temp_c, t_module);
+        float rh = factory_humidity(c_hum, air_temp_c, t_module, p_hpa);
 #else
         if (!rh_c0_captured) { rh_c0_pf = c_hum; rh_c0_captured = true; }
         float rh = (c_hum - rh_c0_pf) / BOOM_RH_SPAN_PF * 100.0f;
@@ -414,17 +450,6 @@ bool vaisala_boom_read(telemetry_data *data)
             any = true;
         }
     }
-
-#if SENSOR_VAISALA_BOOM_PRESSURE_ENABLE
-    {
-        float p_hpa = 0.0f;
-        if (rpm411_read_pressure(&p_hpa) && p_hpa > 300.0f && p_hpa < 1200.0f) {
-            data->pressure_mbar_100 = (uint32_t) (p_hpa * 100.0f);
-            log_info("Vaisala boom: pressure = %d (x100 hPa)\n", (int) data->pressure_mbar_100);
-            any = true;
-        }
-    }
-#endif
 
     // Leave both oscillators disabled when idle (active-high enables low).
     HAL_GPIO_WritePin(OSC_EN_TEMP_PORT, OSC_EN_TEMP_PIN, GPIO_PIN_RESET);
