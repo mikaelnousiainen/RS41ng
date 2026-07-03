@@ -144,17 +144,13 @@ static uint32_t boom_tim_clock(void)
     return (clk.APB1CLKDivider == RCC_HCLK_DIV1) ? pclk1 : pclk1 * 2u;
 }
 
-/* Measure the selected channel's ring-oscillator frequency by timing a fixed
- * number of rising edges with TIM2 input capture on PA1. Returns Hz, 0 on error.
- * Ratiometric users only need the ratio of two channels, where the timer clock
- * cancels out. */
-float vaisala_boom_frequency(vaisala_boom_channel channel)
+/* Configure PA1 + TIM2 CH2 for input capture. Done once per telemetry read (not
+ * per channel): the radio's data timer may reprogram TIM2 between reads, so
+ * vaisala_boom_read() re-arms this and drops the flag when it is done. */
+static bool capture_ready = false;
+
+static bool boom_capture_setup(void)
 {
-    const int edges = 64;             // intervals to average
-
-    boom_select(channel);
-    delay_ms(2);                      // let the oscillator settle
-
     // PA1 -> TIM2_CH2, alternate function input.
     GPIO_InitTypeDef g = {0};
     g.Pin = OSC_OUT_PIN; g.Pull = GPIO_NOPULL;
@@ -174,14 +170,32 @@ float vaisala_boom_frequency(vaisala_boom_channel channel)
     boom_tim.Init.CounterMode = TIM_COUNTERMODE_UP;
     boom_tim.Init.Period = 0xFFFFFFFFu;       // 32-bit on L4; F1 caps at 0xFFFF
     boom_tim.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_IC_Init(&boom_tim) != HAL_OK) return 0.0f;
+    if (HAL_TIM_IC_Init(&boom_tim) != HAL_OK) return false;
 
     TIM_IC_InitTypeDef ic = {0};
     ic.ICPolarity = TIM_ICPOLARITY_RISING;
     ic.ICSelection = TIM_ICSELECTION_DIRECTTI;
     ic.ICPrescaler = TIM_ICPSC_DIV1;
     ic.ICFilter = 0;
-    if (HAL_TIM_IC_ConfigChannel(&boom_tim, &ic, TIM_CHANNEL_2) != HAL_OK) return 0.0f;
+    if (HAL_TIM_IC_ConfigChannel(&boom_tim, &ic, TIM_CHANNEL_2) != HAL_OK) return false;
+
+    capture_ready = true;
+    return true;
+}
+
+/* Measure the selected channel's ring-oscillator frequency by timing a fixed
+ * number of rising edges with TIM2 input capture on PA1. Returns Hz, 0 on error.
+ * Ratiometric users only need the ratio of two channels, where the timer clock
+ * cancels out. */
+float vaisala_boom_frequency(vaisala_boom_channel channel)
+{
+    const int edges = 64;             // intervals to average
+
+    if (!capture_ready && !boom_capture_setup()) return 0.0f;
+
+    boom_select(channel);
+    delay_ms(2);                      // let the oscillator settle
+
     HAL_TIM_IC_Start(&boom_tim, TIM_CHANNEL_2);
 
     // Accumulate the tick count interval by interval: each single oscillator
@@ -265,12 +279,14 @@ static float factory_temperature(float rc, float t0, float t1, float t2,
 }
 
 /* Saturation vapour pressure (Hyland-Wexler), Tc in deg C -> Pa-ish (units cancel
- * in the ratio below). Same closed form used by the documented RS41 decoder. */
+ * in the ratio below). Same closed form used by the documented RS41 decoder.
+ * Single precision throughout: the M4F FPU has no double hardware, and the value
+ * is only used as a ratio of two nearby temperatures. */
 static float vapor_sat_p(float Tc)
 {
-    double T = (double) Tc + 273.15;
-    return (float) exp(-5800.2206 / T + 1.3914993 + 6.5459673 * log(T)
-                       - 4.8640239e-2 * T + 4.1764768e-5 * T * T - 1.4452093e-8 * T * T * T);
+    float T = Tc + 273.15f;
+    return expf(-5800.2206f / T + 1.3914993f + 6.5459673f * logf(T)
+                - 4.8640239e-2f * T + 4.1764768e-5f * T * T - 1.4452093e-8f * T * T * T);
 }
 
 /* Factory (Vaisala) relative humidity per the documented RS41 PTU algorithm
@@ -297,10 +313,10 @@ static float factory_humidity(float cap, float t_air, float t_module, float p_hp
     for (int i = 0; i < 42 && !mtx_ok; i++) mtx_ok = (mtx[i] != 0.0f);
     if (!mtx_ok) return -1.0f;
 
-    double Cp = ((double) cap / VBCAL_H_U0 - 1.0) * VBCAL_H_U1;
-    double Trh = ((double) t_module - 20.0) / 180.0;
+    float Cp = (cap / VBCAL_H_U0 - 1.0f) * VBCAL_H_U1;
+    float Trh = (t_module - 20.0f) / 180.0f;
 
-    double b[6], bk = 1.0;
+    float b[6], bk = 1.0f;
     for (int k = 0; k < 6; k++) { b[k] = bk; bk *= Trh; }
 
     // The pressure correction only exists when its coefficients are filled in;
@@ -308,11 +324,11 @@ static float factory_humidity(float cap, float t_air, float t_module, float p_hp
     // as in the no-pressure case.
     bool have_cor = (corP[0] != 0.0f || corP[1] != 0.0f || corP[2] != 0.0f);
     if (p_hpa > 0.0f && have_cor) {
-        double p = (double) p_hpa / 1000.0;
-        double cpj = 1.0, corr = 0.0;
+        float p = p_hpa / 1000.0f;
+        float cpj = 1.0f, corr = 0.0f;
         for (int j = 0; j < 3; j++) {
-            double bpj = corP[j] * (p / (1.0 + corP[j] * p) - cpj / (1.0 + corP[j]));
-            double bt = 0.0;
+            float bpj = corP[j] * (p / (1.0f + corP[j] * p) - cpj / (1.0f + corP[j]));
+            float bt = 0.0f;
             for (int k = 0; k < 4; k++) bt += corT[4 * j + k] * b[k];
             corr += bpj * bt;
             cpj *= Cp;
@@ -320,17 +336,17 @@ static float factory_humidity(float cap, float t_air, float t_module, float p_hp
         Cp -= corr;
     }
 
-    double rh = 0.0, aj = 1.0;
+    float rh = 0.0f, aj = 1.0f;
     for (int j = 0; j < 7; j++) {
         for (int k = 0; k < 6; k++) rh += aj * b[k] * mtx[6 * j + k];
         aj *= Cp;
     }
     if ((p_hpa <= 0.0f || !have_cor) && t_air < -40.0f)
-        rh += ((double) t_air + 40.0) / 12.0;        // low-temp substitute
+        rh += (t_air + 40.0f) / 12.0f;               // low-temp substitute
     rh *= vapor_sat_p(t_module) / vapor_sat_p(t_air);
-    if (rh < 0.0) rh = 0.0;
-    if (rh > 100.0) rh = 100.0;
-    return (float) rh;
+    if (rh < 0.0f) rh = 0.0f;
+    if (rh > 100.0f) rh = 100.0f;
+    return rh;
 }
 #endif
 
@@ -433,6 +449,9 @@ bool vaisala_boom_read(telemetry_data *data)
 {
     bool any = false;
 
+    // Arm the capture once for all seven channel measurements below.
+    if (!boom_capture_setup()) return false;
+
     float f_ref1 = vaisala_boom_frequency(BOOM_REF_R1);
     float f_ref2 = vaisala_boom_frequency(BOOM_REF_R2);
 
@@ -510,6 +529,13 @@ bool vaisala_boom_read(telemetry_data *data)
 #else
         if (!rh_c0_captured) { rh_c0_pf = c_hum; rh_c0_captured = true; }
         float rh = (c_hum - rh_c0_pf) / BOOM_RH_SPAN_PF * 100.0f;
+        // Empirical temperature corrections for the span model (same terms as
+        // the documented RS41 decoder's approximate mode).
+        if (air_temp_c > -273.0f) {
+            rh -= air_temp_c / 5.5f;
+            if (air_temp_c < -20.0f) rh *= 1.0f + (-20.0f - air_temp_c) / 100.0f;
+            if (air_temp_c < -40.0f) rh *= 1.0f + (-40.0f - air_temp_c) / 120.0f;
+        }
         if (rh < 0.0f) rh = 0.0f;
         if (rh > 100.0f) rh = 100.0f;
 #endif
@@ -521,9 +547,12 @@ bool vaisala_boom_read(telemetry_data *data)
         }
     }
 
-    // Leave both oscillators disabled when idle (active-high enables low).
+    // Leave both oscillators disabled when idle (active-high enables low), and
+    // drop the capture config: the radio's data timer may reprogram TIM2 before
+    // the next read.
     HAL_GPIO_WritePin(OSC_EN_TEMP_PORT, OSC_EN_TEMP_PIN, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(OSC_EN_HYG_PORT,  OSC_EN_HYG_PIN,  GPIO_PIN_RESET);
+    capture_ready = false;
     return any;
 }
 
