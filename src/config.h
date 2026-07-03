@@ -405,7 +405,7 @@ Setting, measured RF output power, relative DC power draw
 // Boom temperature/humidity calibration: 1 = approximate (ratiometric, no per-sonde
 // data); 2 = factory (Vaisala) -- fill vaisala_boom_cal.h with your sonde's
 // coefficients (from SondeHub) for absolute accuracy.
-#define SENSOR_VAISALA_BOOM_CAL_MODE 2
+#define SENSOR_VAISALA_BOOM_CAL_MODE 1
 #include "vaisala_boom_cal.h"
 
 // Enable use of an externally connected I²C BMP280/BME280 atmospheric sensor
