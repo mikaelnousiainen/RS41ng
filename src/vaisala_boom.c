@@ -530,10 +530,11 @@ bool vaisala_boom_read(telemetry_data *data)
 #else
         if (!rh_c0_captured) { rh_c0_pf = c_hum; rh_c0_captured = true; }
         float rh = (c_hum - rh_c0_pf) / BOOM_RH_SPAN_PF * 100.0f;
-        // Empirical temperature corrections for the span model (same terms as
-        // the documented RS41 decoder's approximate mode).
+        // Empirical cold-range corrections (documented RS41 decoder approximate
+        // mode). Only the multiplicative low-temperature terms apply here: the
+        // decoder's additional warm-offset term belongs to its own span formula
+        // and would mask small changes against our boot-anchored baseline.
         if (air_temp_c > -273.0f) {
-            rh -= air_temp_c / 5.5f;
             if (air_temp_c < -20.0f) rh *= 1.0f + (-20.0f - air_temp_c) / 100.0f;
             if (air_temp_c < -40.0f) rh *= 1.0f + (-40.0f - air_temp_c) / 120.0f;
         }
