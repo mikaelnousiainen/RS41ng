@@ -28,7 +28,8 @@ extern SPI_HandleTypeDef hspi;        // SPI2, initialised by spi_init() (radio 
 
 /* ---- Board pin map ---------------------------------------------------------
  * Net names + the F100 pins are taken from the bazjo/radiosonde_hardware
- * schematic; the RSM4x4 (L412) pins are hardware facts (to verify on hardware).
+ * schematic; the RSM4x4 (L412) pins are hardware facts. Both pin maps have been
+ * verified on hardware (RSM4x4 and RSM4x2, each RS41-SGP incl. RPM411 pressure).
  * Boom oscillator output (MEAS_OUT) is on PA1 = TIM2_CH2 on both boards. */
 
 #define OSC_OUT_PORT      GPIOA
@@ -36,7 +37,7 @@ extern SPI_HandleTypeDef hspi;        // SPI2, initialised by spi_init() (radio 
 
 typedef struct { GPIO_TypeDef *port; uint16_t pin; } boom_pin;
 
-#if defined(RS41_RSM4x4)   // RSM4x4 / RSM4x5, STM32L412 (pins to verify)
+#if defined(RS41_RSM4x4)   // RSM4x4 / RSM4x5, STM32L412 (verified on hardware)
 #define OSC_EN_TEMP_PORT  GPIOB
 #define OSC_EN_TEMP_PIN   GPIO_PIN_12       // PULLUP_TM
 #define OSC_EN_HYG_PORT   GPIOA

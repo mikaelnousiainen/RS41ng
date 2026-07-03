@@ -249,7 +249,7 @@ Notes:
   documentation ([bazjo/radiosonde_hardware](https://github.com/bazjo/radiosonde_hardware))
   and standard physics. Temperature is absolute (ratiometric PT1000); humidity is
   approximate for now (an absolute factory-calibration mode is planned). Tested on
-  RSM4x4; the STM32F1 pin map is included but should be verified on hardware.
+  RSM4x4 (STM32L412) and on RSM4x2 (STM32F100), both RS41-SGP.
 
 ### Planned features
 
