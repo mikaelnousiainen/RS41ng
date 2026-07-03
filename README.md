@@ -230,12 +230,30 @@ RS41ng can also read the radiosonde's **own Vaisala boom sensors** instead of an
 external I²C sensor:
 
 * Air temperature (PT1000)
-* Relative humidity (capacitive sensor) — currently an approximate/relative value
+* Relative humidity (capacitive sensor)
 * Barometric pressure on RS41-**SGP** models (RPM411 board)
 
 Enable with `SENSOR_VAISALA_BOOM_ENABLE` (and `SENSOR_VAISALA_BOOM_PRESSURE_ENABLE`
 for the RPM411). The readings populate the existing temperature / humidity /
 pressure telemetry fields, so no receiver-side changes are needed.
+
+Two calibration modes are available (`SENSOR_VAISALA_BOOM_CAL_MODE`):
+
+* **Mode 1 (default, approximate)**: ratiometric measurement without per-sonde
+  data. Temperature carries a per-sonde offset and humidity is relative to the
+  value at power-on.
+* **Mode 2 (factory, absolute)**: uses the sonde's own factory calibration
+  coefficients from `src/vaisala_boom_cal.h`. If the sonde's original flight was
+  received by SondeHub stations, the coefficients can be fetched automatically
+  from its archived calibration subframe:
+
+  ```sh
+  ./build-firmware.sh --vaisala-cal <SERIAL> ...   # or run
+  python3 tools/fetch_vaisala_boom_cal.py <SERIAL>
+  ```
+
+  The serial is printed on the sonde's sticker. The generated header is specific
+  to that sonde — do not commit it.
 
 Notes:
 
@@ -247,9 +265,9 @@ Notes:
   outputs on MCO1 (PA8).
 * This is a **clean-room implementation** written from public RS41 hardware
   documentation ([bazjo/radiosonde_hardware](https://github.com/bazjo/radiosonde_hardware))
-  and standard physics. Temperature is absolute (ratiometric PT1000); humidity is
-  approximate for now (an absolute factory-calibration mode is planned). Tested on
-  RSM4x4 (STM32L412) and on RSM4x2 (STM32F100), both RS41-SGP.
+  and the publicly documented RS41 calibration layout. Tested on RSM4x4
+  (STM32L412) and on RSM4x2 (STM32F100), both RS41-SGP, in both calibration
+  modes.
 
 ### Planned features
 
