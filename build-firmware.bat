@@ -2,13 +2,19 @@
 REM Build the RS41ng firmware using the Docker build environment.
 REM
 REM Usage:
-REM   build-firmware.bat [config-file.yaml] [extra cmake flags...]
+REM   build-firmware.bat [--vaisala-cal [SERIAL]] [config-file.yaml] [extra cmake flags...]
 REM
 REM Examples:
 REM   build-firmware.bat                     - use config.yaml (default)
 REM   build-firmware.bat my-tracker.yaml     - use a different config file
 REM   build-firmware.bat -DRS41=1            - no config file; pass target flag for the built-in config
 REM   build-firmware.bat my-tracker.yaml -DRS41=1
+REM   build-firmware.bat --vaisala-cal V1221335 -DRS41=1
+REM
+REM --vaisala-cal fetches the sonde's factory PTU calibration from SondeHub (by
+REM the serial printed on the sticker; prompts for it when omitted) and generates
+REM src\vaisala_boom_cal.h before building - see tools\fetch_vaisala_boom_cal.py.
+REM Use together with SENSOR_VAISALA_BOOM_ENABLE and SENSOR_VAISALA_BOOM_CAL_MODE 2.
 REM
 REM The first argument, if it does not start with "-", selects the configuration
 REM YAML file (relative to this script's directory). When that file exists, the
@@ -20,6 +26,22 @@ setlocal enabledelayedexpansion
 
 REM Run from the repository root (where this script lives).
 cd /d "%~dp0"
+
+REM Optional: fetch the sonde's factory calibration from SondeHub before building.
+if /I not "%~1"=="--vaisala-cal" goto skip_vaisala_cal
+shift
+set "CAL_SERIAL=%~1"
+if defined CAL_SERIAL (
+    set "CAL_LEAD=!CAL_SERIAL:~0,1!"
+    if "!CAL_LEAD!"=="-" (
+        set "CAL_SERIAL="
+    ) else (
+        shift
+    )
+)
+python tools\fetch_vaisala_boom_cal.py !CAL_SERIAL!
+if errorlevel 1 exit /b 1
+:skip_vaisala_cal
 
 set "CONFIG_FILE=config.yaml"
 set "CONFIG_EXPLICIT=0"
