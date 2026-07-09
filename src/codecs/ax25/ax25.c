@@ -108,7 +108,7 @@ uint16_t ax25_encode_packet_aprs(char *source, uint8_t source_ssid, char *destin
     header_end->protocol_id = AX25_PROTOCOL_ID_NO_LAYER_3;
 
     uint16_t info_length = strlen(information_field);
-    strcpy(header_end->information_field, information_field);
+    memcpy(header_end->information_field, information_field, info_length);
 
     uint16_t crc_length = 14 + digipeater_addresses_length + 2 + info_length;
     uint16_t crc = ax25_calculate_crc(crc_length, actual_data_start);
