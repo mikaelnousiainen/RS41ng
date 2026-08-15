@@ -24,3 +24,9 @@ void aprs_generate_timestamp(char *timestamp, size_t length, telemetry_data *dat
 {
     snprintf(timestamp, length, "/%02d%02d%02dz", data->gps.hours, data->gps.minutes, data->gps.seconds);
 }
+
+size_t aprs_generate_status(uint8_t *payload, size_t length, char *comment)
+{
+    aprs_packet_counter++;
+    return snprintf((char *) payload, length, ">%s", comment);
+}

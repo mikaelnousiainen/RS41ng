@@ -633,9 +633,8 @@ uint32_t precalculated_pwm_periods[FSK_TONE_COUNT_MAX];
 
 static volatile uint32_t start_tick = 0, end_tick = 0;
 
-#if RADIO_TX_WAIT_FOR_GPS_LOCK
 static bool gps_fix_ever_acquired = false;
-#endif
+static gps_data gps_last_known_fix;
 
 telemetry_data current_telemetry_data;
 
@@ -1146,10 +1145,21 @@ static radio_transmit_entry *radio_find_ready_entry()
         return radio_current_transmit_entry;
     }
 
-    // Tier 2: scan time-synced entries for matching window
     gps_data gps;
     gps_driver_get_current_gps_data(&gps);
 
+    if (GPS_HAS_FIX(gps)) {
+        gps_fix_ever_acquired = true;
+        gps_last_known_fix = gps;
+    }
+
+#if RADIO_TX_WAIT_FOR_GPS_LOCK
+    if (!gps_fix_ever_acquired) {
+        return NULL;
+    }
+#endif
+
+    // Tier 2: scan time-synced entries for matching window
     if (gps.updated) {
         uint32_t time_millis = gps.time_of_week_millis - (gps_time_leap_seconds * 1000);
 
@@ -1187,6 +1197,16 @@ static radio_transmit_entry *radio_find_ready_entry()
     }
 
     return NULL;
+}
+
+// Fills *out with the live or last-known fix; false if no fix has ever been acquired.
+bool radio_gps_get_position(gps_data *out)
+{
+    if (!gps_fix_ever_acquired) {
+        return false;
+    }
+    *out = gps_last_known_fix;
+    return true;
 }
 
 void radio_handle_main_loop()
